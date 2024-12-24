@@ -49,9 +49,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const [profile, setProfile] = useState(initialProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
-  const [testPrompt, setTestPrompt] = useState("");
-  const [aiResponse, setAiResponse] = useState("");
-  const [isTestingAI, setIsTestingAI] = useState(false);
   const [resumeContent, setResumeContent] = useState("");
   const [isProcessingResume, setIsProcessingResume] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -217,22 +214,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     }
   };
 
-  const handleTestAI = async () => {
-    try {
-      setIsTestingAI(true);
-      const messages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-        { role: "user" as const, content: testPrompt }
-      ];
-      const result = await formatProfileWithAI(messages);
-      setAiResponse(result || "No response");
-    } catch (error) {
-      toast.error("AI test failed");
-      console.error(error);
-    } finally {
-      setIsTestingAI(false);
-    }
-  };
-
   const resumeUploadButton = (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <DialogTrigger asChild>
@@ -369,34 +350,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
               </AlertDialogContent>
             </AlertDialog>
           </div>
-        </div>
-
-        <div className="flex flex-col gap-4 bg-red-100/20 backdrop-blur-md rounded-xl border border-red-200/40 p-6 mt-4">
-          <div className="flex items-center gap-2">
-            <h2 className="text-sm font-semibold text-red-600">AI Testing Interface (Temporary)</h2>
-          </div>
-          <div className="flex gap-3">
-            <Input
-              value={testPrompt}
-              onChange={(e) => setTestPrompt(e.target.value)}
-              placeholder="Enter test prompt..."
-              className="flex-1 bg-white/50 border-white/40"
-            />
-            <Button
-              onClick={handleTestAI}
-              disabled={isTestingAI || !testPrompt}
-              className="bg-red-500 hover:bg-red-600 text-white"
-            >
-              {isTestingAI ? "Testing..." : "Test AI"}
-            </Button>
-          </div>
-          {aiResponse && (
-            <div className="bg-white/40 backdrop-blur-md rounded-lg p-4 mt-2">
-              <pre className="whitespace-pre-wrap text-sm">
-                {aiResponse}
-              </pre>
-            </div>
-          )}
         </div>
       </div>
 
