@@ -85,171 +85,288 @@ export function ProfileCard({ profile }: ProfileCardProps) {
         </div>
       </div>
 
-      <div className="p-6 pt-8">
-        {/* Profile Header */}
-        <div className="mb-6">
-          <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-            {fullName || "Add your name"}
-          </h3>
-          {professional_summary ? (
-            <p className="text-muted-foreground">{professional_summary}</p>
-          ) : (
-            <p className="text-muted-foreground italic">
-              Add a professional summary to highlight your expertise
-            </p>
-          )}
-        </div>
-
-        {/* Contact Information */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <ContactItem
-            icon={<Mail className="h-4 w-4" />}
-            label="Email"
-            value={email}
-            href={`mailto:${email}`}
-          />
-          <ContactItem
-            icon={<Phone className="h-4 w-4" />}
-            label="Phone"
-            value={phone_number}
-            href={`tel:${phone_number}`}
-          />
-          <ContactItem
-            icon={<MapPin className="h-4 w-4" />}
-            label="Location"
-            value={location}
-          />
-          <ContactItem
-            icon={<Globe className="h-4 w-4" />}
-            label="Website"
-            value={website}
-            href={website || undefined}
-          />
-          <ContactItem
-            icon={<Linkedin className="h-4 w-4" />}
-            label="LinkedIn"
-            value={linkedin_url}
-            href={linkedin_url || undefined}
-          />
-          <ContactItem
-            icon={<Github className="h-4 w-4" />}
-            label="GitHub"
-            value={github_url}
-            href={github_url || undefined}
-          />
-        </div>
-
-        {/* Profile Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-4 bg-gray-50/50 rounded-lg mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-teal-600">{profile.work_experience.length}</div>
-            <div className="text-sm text-muted-foreground">Work Experiences</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-teal-600">{profile.education.length}</div>
-            <div className="text-sm text-muted-foreground">Education</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-teal-600">{profile.skills.length}</div>
-            <div className="text-sm text-muted-foreground">Skill Categories</div>
-          </div>
-          <div className="text-center">
-            <div className="text-2xl font-bold text-teal-600">{profile.projects.length}</div>
-            <div className="text-sm text-muted-foreground">Projects</div>
-          </div>
-        </div>
-
-        {/* Section List */}
-        <div className="max-h-[200px] overflow-y-auto pr-2 space-y-2 custom-scrollbar">
-          <Link href="/profile/basic-info" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-teal-50 text-teal-600 group-hover:bg-teal-100 transition-colors">
+      <div className="p-6">
+        {/* Profile Content - Scrollable */}
+        <div className="max-h-[600px] overflow-y-auto pr-2 space-y-6 custom-scrollbar">
+          {/* Basic Information Section */}
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-teal-50 text-teal-600">
                   <User className="h-4 w-4" />
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Basic Information</div>
-                  <div className="text-sm text-muted-foreground">Name, contact, and location details</div>
-                </div>
+                <h3 className="font-semibold text-gray-900">Basic Information</h3>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <Link href="/profile/basic-info" className="text-sm text-teal-600 hover:text-teal-700 flex items-center gap-1">
+                <Edit2 className="h-3 w-3" />
+                Edit
+              </Link>
             </div>
-          </Link>
+            <div className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                {fullName || "Add your name"}
+              </h3>
+              {professional_summary ? (
+                <p className="text-muted-foreground mb-4">{professional_summary}</p>
+              ) : (
+                <p className="text-muted-foreground italic mb-4">
+                  Add a professional summary to highlight your expertise
+                </p>
+              )}
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <ContactItem
+                  icon={<Mail className="h-4 w-4" />}
+                  label="Email"
+                  value={email}
+                  href={`mailto:${email}`}
+                />
+                <ContactItem
+                  icon={<Phone className="h-4 w-4" />}
+                  label="Phone"
+                  value={phone_number}
+                  href={`tel:${phone_number}`}
+                />
+                <ContactItem
+                  icon={<MapPin className="h-4 w-4" />}
+                  label="Location"
+                  value={location}
+                />
+                <ContactItem
+                  icon={<Globe className="h-4 w-4" />}
+                  label="Website"
+                  value={website}
+                  href={website || undefined}
+                />
+                <ContactItem
+                  icon={<Linkedin className="h-4 w-4" />}
+                  label="LinkedIn"
+                  value={linkedin_url}
+                  href={linkedin_url || undefined}
+                />
+                <ContactItem
+                  icon={<Github className="h-4 w-4" />}
+                  label="GitHub"
+                  value={github_url}
+                  href={github_url || undefined}
+                />
+              </div>
+            </div>
+          </div>
 
-          <Link href="/profile/work-experience" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-blue-50 text-blue-600 group-hover:bg-blue-100 transition-colors">
-                  <Briefcase className="h-4 w-4" />
+          {/* Work Experience Section */}
+          {profile.work_experience.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-blue-50 text-blue-600">
+                    <Briefcase className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Work Experience</h3>
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Work Experience</div>
-                  <div className="text-sm text-muted-foreground">{profile.work_experience.length} positions listed</div>
-                </div>
+                <Link href="/profile/work-experience" className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1">
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Link>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <div className="space-y-4">
+                {profile.work_experience.map((work, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="font-medium text-gray-900">{work.position}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {work.start_date} - {work.current ? 'Present' : work.end_date}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">{work.company} • {work.location}</div>
+                    <ul className="list-disc list-inside space-y-1">
+                      {work.description.map((desc, i) => (
+                        <li key={i} className="text-sm text-gray-600">{desc}</li>
+                      ))}
+                    </ul>
+                    {work.technologies && (
+                      <div className="mt-2 flex flex-wrap gap-1">
+                        {work.technologies.map((tech, i) => (
+                          <span key={i} className="px-2 py-1 text-xs rounded-full bg-blue-50 text-blue-600">
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
 
-          <Link href="/profile/education" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-purple-50 text-purple-600 group-hover:bg-purple-100 transition-colors">
-                  <GraduationCap className="h-4 w-4" />
+          {/* Education Section */}
+          {profile.education.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-purple-50 text-purple-600">
+                    <GraduationCap className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Education</h3>
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Education</div>
-                  <div className="text-sm text-muted-foreground">{profile.education.length} qualifications listed</div>
-                </div>
+                <Link href="/profile/education" className="text-sm text-purple-600 hover:text-purple-700 flex items-center gap-1">
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Link>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <div className="space-y-4">
+                {profile.education.map((edu, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="font-medium text-gray-900">{edu.degree} in {edu.field}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
+                      </div>
+                    </div>
+                    <div className="text-sm text-muted-foreground mb-2">{edu.school} • {edu.location}</div>
+                    {edu.gpa && <div className="text-sm text-gray-600">GPA: {edu.gpa}</div>}
+                    {edu.achievements && edu.achievements.length > 0 && (
+                      <ul className="list-disc list-inside space-y-1 mt-2">
+                        {edu.achievements.map((achievement, i) => (
+                          <li key={i} className="text-sm text-gray-600">{achievement}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
 
-          <Link href="/profile/skills" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-pink-50 text-pink-600 group-hover:bg-pink-100 transition-colors">
-                  <Wrench className="h-4 w-4" />
+          {/* Skills Section */}
+          {profile.skills.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-pink-50 text-pink-600">
+                    <Wrench className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Skills</h3>
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Skills</div>
-                  <div className="text-sm text-muted-foreground">{profile.skills.length} skill categories</div>
-                </div>
+                <Link href="/profile/skills" className="text-sm text-pink-600 hover:text-pink-700 flex items-center gap-1">
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Link>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <div className="space-y-4">
+                {profile.skills.map((skill, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+                    <div className="font-medium text-gray-900 mb-2">{skill.category}</div>
+                    <div className="flex flex-wrap gap-1">
+                      {skill.items.map((item, i) => (
+                        <span key={i} className="px-2 py-1 text-xs rounded-full bg-pink-50 text-pink-600">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
 
-          <Link href="/profile/projects" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-orange-50 text-orange-600 group-hover:bg-orange-100 transition-colors">
-                  <FolderGit2 className="h-4 w-4" />
+          {/* Projects Section */}
+          {profile.projects.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-orange-50 text-orange-600">
+                    <FolderGit2 className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Projects</h3>
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Projects</div>
-                  <div className="text-sm text-muted-foreground">{profile.projects.length} projects listed</div>
-                </div>
+                <Link href="/profile/projects" className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Link>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <div className="space-y-4">
+                {profile.projects.map((project, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="font-medium text-gray-900">{project.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {project.start_date} - {project.end_date || 'Present'}
+                      </div>
+                    </div>
+                    <div className="text-sm text-gray-600 mb-2">{project.description}</div>
+                    <ul className="list-disc list-inside space-y-1">
+                      {project.highlights.map((highlight, i) => (
+                        <li key={i} className="text-sm text-gray-600">{highlight}</li>
+                      ))}
+                    </ul>
+                    <div className="mt-2 flex flex-wrap gap-2">
+                      {project.technologies.map((tech, i) => (
+                        <span key={i} className="px-2 py-1 text-xs rounded-full bg-orange-50 text-orange-600">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-2 flex gap-3">
+                      {project.url && (
+                        <a href={project.url} target="_blank" rel="noopener noreferrer" 
+                           className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                          <Globe className="h-3 w-3" />
+                          Live Demo
+                        </a>
+                      )}
+                      {project.github_url && (
+                        <a href={project.github_url} target="_blank" rel="noopener noreferrer"
+                           className="text-sm text-orange-600 hover:text-orange-700 flex items-center gap-1">
+                          <Github className="h-3 w-3" />
+                          Source Code
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
 
-          <Link href="/profile/certifications" className="block">
-            <div className="group flex items-center justify-between p-3 rounded-lg hover:bg-gray-50/50 transition-all duration-300">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-md bg-yellow-50 text-yellow-600 group-hover:bg-yellow-100 transition-colors">
-                  <Award className="h-4 w-4" />
+          {/* Certifications Section */}
+          {profile.certifications.length > 0 && (
+            <div>
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="p-1.5 rounded-md bg-yellow-50 text-yellow-600">
+                    <Award className="h-4 w-4" />
+                  </div>
+                  <h3 className="font-semibold text-gray-900">Certifications</h3>
                 </div>
-                <div>
-                  <div className="font-medium text-gray-900">Certifications</div>
-                  <div className="text-sm text-muted-foreground">{profile.certifications.length} certifications listed</div>
-                </div>
+                <Link href="/profile/certifications" className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1">
+                  <Edit2 className="h-3 w-3" />
+                  Edit
+                </Link>
               </div>
-              <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-gray-900 transition-colors" />
+              <div className="space-y-4">
+                {profile.certifications.map((cert, index) => (
+                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
+                    <div className="flex justify-between items-start mb-1">
+                      <div className="font-medium text-gray-900">{cert.name}</div>
+                      <div className="text-sm text-muted-foreground">{cert.date_acquired}</div>
+                    </div>
+                    <div className="text-sm text-muted-foreground">{cert.issuer}</div>
+                    {cert.expiry_date && (
+                      <div className="text-sm text-gray-600 mt-1">Expires: {cert.expiry_date}</div>
+                    )}
+                    {cert.url && (
+                      <a href={cert.url} target="_blank" rel="noopener noreferrer"
+                         className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1 mt-2">
+                        <Globe className="h-3 w-3" />
+                        View Certificate
+                      </a>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </Link>
+          )}
         </div>
       </div>
     </Card>
