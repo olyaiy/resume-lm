@@ -1,36 +1,72 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# AI Resume Builder
 
-## Getting Started
+> 🚧 **This project is currently in active development** 🚧
 
-First, run the development server:
+An intelligent resume builder powered by AI that helps create and tailor resumes for specific job applications. Built with Next.js 15, React 19, TypeScript, and Shadcn UI.
 
+## 🌟 Features (In Development)
+
+- 🤖 AI-powered resume optimization
+- ✨ Dynamic resume tailoring based on job descriptions
+- 📝 Multiple resume versions management
+- 🎯 Job tracking and application management
+- 🎨 Modern, responsive design with a soft gradient minimalist theme
+
+## 🛠️ Tech Stack
+
+- Next.js 15 (App Router)
+- React 19
+- TypeScript
+- Shadcn UI
+- Tailwind CSS
+- Database with Row Level Security
+
+## 🚀 Getting Started
+
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/ai-resume-builder.git
+```
+
+2. Install dependencies:
+```bash
+npm install
+# or
+pnpm install
+```
+
+3. Set up your environment variables:
+```bash
+cp .env.example .env.local
+```
+
+4. Start the development server:
 ```bash
 npm run dev
 # or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) to view the application.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🏗️ Project Status
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project is in active development. Features are being added and refined regularly. Feel free to check back for updates.
 
-## Learn More
+### Current Focus Areas:
+- Profile management system
+- Resume creation and editing interface
+- AI integration for resume optimization
+- Job tracking functionality
 
-To learn more about Next.js, take a look at the following resources:
+## 📝 Contributing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+As this project is in development, we're not accepting contributions at this time. However, feel free to star the repository to follow our progress.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## 📄 License
 
-## Deploy on Vercel
+[MIT License](LICENSE)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Built with ❤️ using [Next.js](https://nextjs.org/)
