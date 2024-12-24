@@ -95,13 +95,21 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
 }
 
 export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
+  console.log('🚀 Starting profile update...');
+  console.log('📝 Update data:', JSON.stringify(data, null, 2));
+  
   const supabase = await createClient();
+  console.log('✅ Supabase client created');
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
   if (userError || !user) {
+    console.error('❌ Authentication error:', userError);
     throw new Error('User not authenticated');
   }
+  
+  console.log('👤 User authenticated:', user.id);
+  console.log('📤 Sending update to database...');
 
   const { data: profile, error } = await supabase
     .from('profiles')
@@ -111,8 +119,12 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
     .single();
 
   if (error) {
-    throw new Error('Failed to update profile');
+    console.error('❌ Database error:', error);
+    throw new Error(`Failed to update profile: ${error.message}`);
   }
+
+  console.log('✅ Profile updated successfully');
+  console.log('📥 Updated profile:', JSON.stringify(profile, null, 2));
 
   return profile;
 }
