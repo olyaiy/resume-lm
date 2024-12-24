@@ -12,7 +12,7 @@ import { EducationForm } from "@/components/resume/education-form";
 import { ProjectsForm } from "@/components/resume/projects-form";
 import { SkillsForm } from "@/components/resume/skills-form";
 import { CertificationsForm } from "@/components/resume/certifications-form";
-import { updateProfile, resetProfile } from "@/utils/actions";
+import { updateProfile, resetProfile, importResume } from "@/utils/actions";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -194,7 +194,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
             : []
         };
         
-        await updateProfile(cleanedProfile);
+        await importResume(cleanedProfile);
         
         setProfile(prev => ({
           ...prev,

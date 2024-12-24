@@ -95,7 +95,7 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
   return resume;
 }
 
-export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
+export async function importResume(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -153,6 +153,35 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   const { data: profile, error } = await supabase
     .from('profiles')
     .update(updateData)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error(`Failed to update profile: ${error.message}`);
+  }
+
+  // Revalidate all routes that might display profile data
+  revalidatePath('/', 'layout');
+  revalidatePath('/profile/edit', 'layout');
+  revalidatePath('/resumes', 'layout');
+  revalidatePath('/profile', 'layout');
+
+  return profile;
+}
+
+export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .update(data)
     .eq('user_id', user.id)
     .select()
     .single();
