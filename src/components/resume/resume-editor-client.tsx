@@ -15,10 +15,11 @@ import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
 import { CertificationsForm } from "./certifications-form";
-import { Loader2, Save, Trash2 } from "lucide-react";
+import { Loader2, Save, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 export function ResumeEditorClient({
   initialResume,
@@ -78,219 +79,230 @@ export function ResumeEditorClient({
   };
 
   return (
-    <main className="p-6 md:p-8 lg:p-10">
-      <div className="max-w-[2000px] mx-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <main className="min-h-screen">
+      {/* Top Bar */}
+      <div className="h-16 border-b bg-white/50 backdrop-blur-lg fixed top-16 left-0 right-0 z-40">
+        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
-            <h1 className="text-3xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Resume Editor
-            </h1>
-            <div className="flex items-center gap-2">
-              <Button 
-                onClick={handleSave} 
-                disabled={isSaving}
-                className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-300"
-              >
-                {isSaving ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save className="mr-2 h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-              <Button 
-                onClick={handleDelete} 
-                disabled={isDeleting}
-                variant="destructive"
-                className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-300"
-              >
-                {isDeleting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Deleting...
-                  </>
-                ) : (
-                  <>
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete Resume
-                  </>
-                )}
-              </Button>
-            </div>
+            <Link 
+              href="/"
+              className="flex items-center text-sm text-muted-foreground hover:text-teal-600 transition-colors"
+            >
+              <ArrowLeft className="h-4 w-4 mr-1" />
+              Back to Dashboard
+            </Link>
+            <span className="text-sm text-muted-foreground">•</span>
+            <h1 className="text-lg font-medium">{resume.name}</h1>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving}
+              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-300"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+            <Button 
+              onClick={handleDelete} 
+              disabled={isDeleting}
+              variant="destructive"
+              className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-300"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete Resume
+                </>
+              )}
+            </Button>
           </div>
         </div>
-        
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8">
-          {/* Editor Column */}
-          <ScrollArea className="h-[calc(100vh-200px)]">
-            <div className="space-y-6 pr-4">
-              {/* Basic Information Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader>
+      </div>
+
+      {/* Main Content */}
+      <div className="pt-32 pb-8 px-6 md:px-8 lg:px-10">
+        <div className="max-w-[2000px] mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-8">
+            {/* Editor Column */}
+            <ScrollArea className="h-[calc(100vh-200px)]">
+              <div className="space-y-6 pr-4">
+                {/* Basic Information Card */}
+                <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                      Basic Information
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="first_name">First Name</Label>
+                        <Input 
+                          id="first_name" 
+                          value={resume.first_name || ''} 
+                          onChange={(e) => updateField('first_name', e.target.value)}
+                          className="bg-white/50 border-white/40 focus:border-teal-500"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="last_name">Last Name</Label>
+                        <Input 
+                          id="last_name" 
+                          value={resume.last_name || ''} 
+                          onChange={(e) => updateField('last_name', e.target.value)}
+                          className="bg-white/50 border-white/40 focus:border-teal-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={resume.email || ''} 
+                        onChange={(e) => updateField('email', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-teal-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="phone">Phone Number</Label>
+                      <Input 
+                        id="phone" 
+                        value={resume.phone_number || ''} 
+                        onChange={(e) => updateField('phone_number', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-teal-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="location">Location</Label>
+                      <Input 
+                        id="location" 
+                        value={resume.location || ''} 
+                        onChange={(e) => updateField('location', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-teal-500"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Online Presence Card */}
+                <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                      Online Presence
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="website">Website</Label>
+                      <Input 
+                        id="website" 
+                        value={resume.website || ''} 
+                        onChange={(e) => updateField('website', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-purple-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="linkedin">LinkedIn URL</Label>
+                      <Input 
+                        id="linkedin" 
+                        value={resume.linkedin_url || ''} 
+                        onChange={(e) => updateField('linkedin_url', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-purple-500"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="github">GitHub URL</Label>
+                      <Input 
+                        id="github" 
+                        value={resume.github_url || ''} 
+                        onChange={(e) => updateField('github_url', e.target.value)}
+                        className="bg-white/50 border-white/40 focus:border-purple-500"
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Professional Summary Card */}
+                <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
+                  <CardHeader>
+                    <CardTitle className="text-xl bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                      Professional Summary
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <Textarea 
+                      className="min-h-[150px] bg-white/50 border-white/40 focus:border-pink-500"
+                      value={resume.professional_summary || ''}
+                      onChange={(e) => updateField('professional_summary', e.target.value)}
+                    />
+                  </CardContent>
+                </Card>
+
+                {/* Work Experience Section */}
+                <WorkExperienceForm
+                  experiences={resume.work_experience}
+                  onChange={(experiences) => updateField('work_experience', experiences)}
+                />
+
+                {/* Education Section */}
+                <EducationForm
+                  education={resume.education}
+                  onChange={(education) => updateField('education', education)}
+                />
+
+                {/* Skills Section */}
+                <SkillsForm
+                  skills={resume.skills}
+                  onChange={(skills) => updateField('skills', skills)}
+                />
+
+                {/* Projects Section */}
+                <ProjectsForm
+                  projects={resume.projects}
+                  onChange={(projects) => updateField('projects', projects)}
+                />
+
+                {/* Certifications Section */}
+                <CertificationsForm
+                  certifications={resume.certifications}
+                  onChange={(certifications) => updateField('certifications', certifications)}
+                />
+              </div>
+            </ScrollArea>
+
+            {/* Preview Column */}
+            <div className="h-[calc(100vh-200px)] overflow-hidden">
+              <Card className="h-full bg-white/40 backdrop-blur-md border-white/40 shadow-lg">
+                <CardHeader className="border-b">
                   <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                    Basic Information
+                    Preview
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="first_name">First Name</Label>
-                      <Input 
-                        id="first_name" 
-                        value={resume.first_name || ''} 
-                        onChange={(e) => updateField('first_name', e.target.value)}
-                        className="bg-white/50 border-white/40 focus:border-teal-500"
-                      />
+                <CardContent className="p-0 h-[calc(100%-4rem)]">
+                  <ScrollArea className="h-full">
+                    <div className="p-6">
+                      <ResumePreview resume={resume} />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="last_name">Last Name</Label>
-                      <Input 
-                        id="last_name" 
-                        value={resume.last_name || ''} 
-                        onChange={(e) => updateField('last_name', e.target.value)}
-                        className="bg-white/50 border-white/40 focus:border-teal-500"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      value={resume.email || ''} 
-                      onChange={(e) => updateField('email', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-teal-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number</Label>
-                    <Input 
-                      id="phone" 
-                      value={resume.phone_number || ''} 
-                      onChange={(e) => updateField('phone_number', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-teal-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="location">Location</Label>
-                    <Input 
-                      id="location" 
-                      value={resume.location || ''} 
-                      onChange={(e) => updateField('location', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-teal-500"
-                    />
-                  </div>
+                  </ScrollArea>
                 </CardContent>
               </Card>
-
-              {/* Online Presence Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-xl bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                    Online Presence
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="website">Website</Label>
-                    <Input 
-                      id="website" 
-                      value={resume.website || ''} 
-                      onChange={(e) => updateField('website', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-purple-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="linkedin">LinkedIn URL</Label>
-                    <Input 
-                      id="linkedin" 
-                      value={resume.linkedin_url || ''} 
-                      onChange={(e) => updateField('linkedin_url', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-purple-500"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="github">GitHub URL</Label>
-                    <Input 
-                      id="github" 
-                      value={resume.github_url || ''} 
-                      onChange={(e) => updateField('github_url', e.target.value)}
-                      className="bg-white/50 border-white/40 focus:border-purple-500"
-                    />
-                  </div>
-                </CardContent>
-              </Card>
-
-              {/* Professional Summary Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-300">
-                <CardHeader>
-                  <CardTitle className="text-xl bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-                    Professional Summary
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea 
-                    className="min-h-[150px] bg-white/50 border-white/40 focus:border-pink-500"
-                    value={resume.professional_summary || ''}
-                    onChange={(e) => updateField('professional_summary', e.target.value)}
-                  />
-                </CardContent>
-              </Card>
-
-              {/* Work Experience Section */}
-              <WorkExperienceForm
-                experiences={resume.work_experience}
-                onChange={(experiences) => updateField('work_experience', experiences)}
-              />
-
-              {/* Education Section */}
-              <EducationForm
-                education={resume.education}
-                onChange={(education) => updateField('education', education)}
-              />
-
-              {/* Skills Section */}
-              <SkillsForm
-                skills={resume.skills}
-                onChange={(skills) => updateField('skills', skills)}
-              />
-
-              {/* Projects Section */}
-              <ProjectsForm
-                projects={resume.projects}
-                onChange={(projects) => updateField('projects', projects)}
-              />
-
-              {/* Certifications Section */}
-              <CertificationsForm
-                certifications={resume.certifications}
-                onChange={(certifications) => updateField('certifications', certifications)}
-              />
             </div>
-          </ScrollArea>
-
-          {/* Preview Column */}
-          <div className="h-[calc(100vh-200px)] overflow-hidden">
-            <Card className="h-full bg-white/40 backdrop-blur-md border-white/40 shadow-lg">
-              <CardHeader className="border-b">
-                <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  Preview
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="p-0 h-[calc(100%-4rem)]">
-                <ScrollArea className="h-full">
-                  <div className="p-6">
-                    <ResumePreview resume={resume} />
-                  </div>
-                </ScrollArea>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
