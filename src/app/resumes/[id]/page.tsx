@@ -1,50 +1,30 @@
 import { redirect } from "next/navigation";
-import { ResumeEditor } from "@/components/resume/resume-editor";
-import { ResumePreview } from "@/components/resume/resume-preview";
-import { getResumeById } from "@/utils/supabase/actions";
+import { getResumeById } from "@/utils/actions";
+import { ResumeEditorClient } from "@/components/resume/resume-editor-client";
 
-export default async function ResumeEditorPage({
+export default async function Page({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { id: string };
 }) {
   try {
-    const { id } = await params;
-    const resume = await getResumeById(id);
-
+    const resume = await getResumeById(params.id);
     return (
-      <main className="min-h-screen p-6 md:p-8 lg:p-10 relative">
+      <div className="min-h-screen relative">
         {/* Gradient Background */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px]" />
+          {/* Animated Gradient Orbs */}
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-br from-teal-200/20 to-cyan-200/20 rounded-full blur-3xl animate-float-slow" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-br from-purple-200/20 to-indigo-200/20 rounded-full blur-3xl animate-float-slower" />
         </div>
 
-        {/* Main Content */}
-        <div className="max-w-[2000px] mx-auto relative z-10">
-          <h1 className="text-3xl font-semibold mb-6 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-            Resume Editor
-          </h1>
-          
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {/* Editor Column */}
-            <div className="space-y-6 overflow-y-auto max-h-[calc(100vh-200px)]">
-              <ResumeEditor 
-                resume={resume}
-                onChange={async (updatedResume) => {
-                  'use server';
-                  // TODO: Implement save functionality
-                }}
-              />
-            </div>
-
-            {/* Preview Column */}
-            <div className="sticky top-8 overflow-y-auto max-h-[calc(100vh-200px)]">
-              <ResumePreview resume={resume} />
-            </div>
-          </div>
+        {/* Content */}
+        <div className="relative z-10">
+          <ResumeEditorClient initialResume={resume} />
         </div>
-      </main>
+      </div>
     );
   } catch (error) {
     if (error instanceof Error && error.message === 'User not authenticated') {

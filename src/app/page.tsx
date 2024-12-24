@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { ProfileView } from "@/components/profile/profile-view";
 import { ResumeList } from "@/components/resume/resume-list";
 import { LogoutButton } from "@/components/auth/logout-button";
-import { getDashboardData } from "../utils/supabase/actions";
+import { getDashboardData } from "../utils/actions";
 
 export default async function Home() {
   let data;
