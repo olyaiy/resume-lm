@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume } from "@/lib/types";
+import { revalidatePath } from 'next/cache';
 
 interface DashboardData {
   profile: Profile | null;
@@ -159,6 +160,12 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   if (error) {
     throw new Error(`Failed to update profile: ${error.message}`);
   }
+
+  // Revalidate all routes that might display profile data
+  revalidatePath('/', 'layout');
+  revalidatePath('/profile/edit', 'layout');
+  revalidatePath('/resumes', 'layout');
+  revalidatePath('/profile', 'layout');
 
   return profile;
 }

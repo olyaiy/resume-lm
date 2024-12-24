@@ -14,7 +14,7 @@ import { SkillsForm } from "@/components/resume/skills-form";
 import { CertificationsForm } from "@/components/resume/certifications-form";
 import { updateProfile, resetProfile } from "@/utils/actions";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -55,6 +55,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
+  // Sync with server state when initialProfile changes
+  useEffect(() => {
+    setProfile(initialProfile);
+  }, [initialProfile]);
+
   const updateField = (field: keyof Profile, value: any) => {
     setProfile(prev => ({ ...prev, [field]: value }));
   };
@@ -64,6 +69,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       setIsSubmitting(true);
       await updateProfile(profile);
       toast.success("Profile updated successfully");
+      // Force a server revalidation
+      router.refresh();
     } catch (error) {
       toast.error("Failed to update profile");
       console.error(error);
@@ -78,6 +85,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       const resetData = await resetProfile();
       setProfile(resetData);
       toast.success("Profile has been reset");
+      // Force a server revalidation
+      router.refresh();
     } catch (error) {
       toast.error("Failed to reset profile");
       console.error(error);
@@ -93,8 +102,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const handleResumeUpload = async () => {
     try {
       setIsProcessingResume(true);
-      console.log('🚀 Starting resume upload process...');
-      console.log('📝 Resume content length:', resumeContent.length);
       
       const messages = [
         { 
@@ -187,26 +194,24 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
             : []
         };
         
-        console.log('📤 Sending cleaned profile to update function:', JSON.stringify(cleanedProfile, null, 2));
         await updateProfile(cleanedProfile);
         
-        console.log('✅ Profile updated successfully');
-        setProfile(cleanedProfile as Profile);
+        setProfile(prev => ({
+          ...prev,
+          ...cleanedProfile
+        }));
         toast.success("Resume uploaded and profile updated successfully");
         setIsDialogOpen(false);
         setResumeContent("");
+        // Force a server revalidation
         router.refresh();
       }
     } catch (error) {
-      console.error("❌ Error in handleResumeUpload:", error);
       if (error instanceof Error) {
-        console.error('Error details:', {
-          name: error.name,
-          message: error.message,
-          stack: error.stack
-        });
+        toast.error(`Failed to process resume: ${error.message}`);
+      } else {
+        toast.error("Failed to process resume: Unknown error");
       }
-      toast.error(`Failed to process resume: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsProcessingResume(false);
     }
@@ -226,8 +231,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-md border-white/40">
         <DialogHeader>
           <DialogTitle>Upload Resume Content</DialogTitle>
-          <DialogDescription>
-            Paste your entire resume content below. Our AI will automatically parse it and update your profile.
+          <DialogDescription asChild>
+            <div className="space-y-2">
+              <span className="block">Paste your resume content below. Our AI will analyze it and add new information to your existing profile.</span>
+              <span className="block text-sm text-muted-foreground">Note: This will append new entries to your profile without overriding existing information. To start fresh, use the "Reset Profile" option before uploading.</span>
+            </div>
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
@@ -396,8 +404,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
                         Upload Resume Content
                       </DialogTitle>
-                      <DialogDescription className="text-base text-muted-foreground/80">
-                        Let our AI analyze your resume and automatically update your profile
+                      <DialogDescription asChild>
+                        <div className="space-y-2 text-base text-muted-foreground/80">
+                          <span className="block">Let our AI analyze your resume and enhance your profile by adding new information.</span>
+                          <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data. Want to start fresh instead? Use the "Reset Profile" option before uploading.</span>
+                        </div>
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
@@ -497,11 +508,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         <div className="relative">
           <div className="absolute inset-x-0 -top-3 h-8 bg-gradient-to-b from-white/60 to-transparent pointer-events-none"></div>
           <div className="relative bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
-            <Tabs defaultValue="basic" className="w-full">
-              <TabsList className="relative bg-white/80 backdrop-blur-xl border border-white/40 p-2 mb-6 rounded-xl overflow-x-auto flex whitespace-nowrap gap-2 shadow-lg">
+            <Tabs defaultValue="basic" className="w-full ">
+              <TabsList className=" h-full relative bg-white/80  backdrop-blur-xl border border-white/40  py-2 mb-6 rounded-xl overflow-x-auto flex whitespace-nowrap gap-2 shadow-lg">
                 <TabsTrigger 
                   value="basic" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
+                  className=" group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
                     data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500/10 data-[state=active]:to-cyan-500/10
                     data-[state=active]:border-teal-500/20 data-[state=active]:shadow-lg hover:bg-white/60
                     data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
