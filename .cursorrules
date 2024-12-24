@@ -85,3 +85,63 @@ Row Level Security (RLS):
 - profiles: User can only access own profile
 - jobs: Public read, user-specific write
 - resumes: User can only access own resumes
+
+Design System: Soft Gradient Minimalism
+
+Core Principles:
+- Layered Depth: Multiple translucent layers create visual hierarchy
+- Organic Motion: Subtle animations suggest liveliness without distraction
+- Purposeful White Space: Generous spacing improves content digestion
+- Consistent Interaction: Predictable hover and active states across components
+
+Visual Hierarchy:
+1. Background Layer
+   - Base: Neutral gradient (rose-50/50 → sky-50/50 → violet-50/50)
+   - Floating Orbs: Translucent gradients with slow animations
+   - Mesh Overlay: Subtle grid pattern (#8882)
+
+2. Content Layer
+   - Glass Cards: bg-white/40 with backdrop-blur-md
+   - Border: border-white/40
+   - Shadow: shadow-xl with backdrop-blur-xl
+
+3. Interactive Elements
+   - Hover State: Duration 500ms
+   - Transform: -translate-y-1
+   - Background Shift: bg-white/50
+
+Color Palette:
+Primary:
+  - Teal: from-teal-600 to-cyan-600
+  - Purple: from-purple-600 to-indigo-600
+  - Pink: from-pink-600 to-rose-600
+
+Background:
+  - Gradients: pink-200/20, violet-200/20, blue-200/20, teal-200/20
+  - Overlays: teal-50/10, cyan-50/10, purple-50/10, indigo-50/10
+
+Typography:
+- Headers: text-3xl, font-semibold with gradient text
+- Body: Base 16px, text-muted-foreground for secondary text
+- Font Stack: 'Inter', system-ui, -apple-system, sans-serif
+
+Animation Timings:
+- Hover Transitions: 500ms
+- Background Orbs: 8s/9s ease-in-out infinite
+- Transform Origin: Center
+
+Component Patterns:
+- Card Structure: rounded-2xl with nested content padding
+- Content Areas: Relative positioning with gradient overlays
+- Interactive Areas: Clear hover states with smooth transitions
+
+Responsive Behavior:
+- Mobile First: Base layout with single column
+- Breakpoints: md:p-8 lg:p-10 lg:grid-cols-12
+- Max Width: 2000px with centered content
+
+Z-Index Layers:
+- Background: z-0
+- Content: z-10
+- Overlays: Relative to parent
+

@@ -3,9 +3,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from "next/link";
 
 interface ResumeListProps {
-  resumes: Resume[];
+  resumes: any[];
   title: string;
-  emptyMessage: string;
+  emptyMessage: string | React.ReactNode;
 }
 
 export function ResumeList({ resumes, title, emptyMessage }: ResumeListProps) {
