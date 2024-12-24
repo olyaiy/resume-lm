@@ -31,9 +31,6 @@ export const openAiResumeSchema = {
       github_url: {
         type: "string"
       },
-      professional_summary: {
-        type: "string"
-      },
       work_experience: {
         type: "array",
         items: {

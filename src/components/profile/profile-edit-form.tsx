@@ -118,7 +118,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           website: parsedProfile.website || null,
           linkedin_url: parsedProfile.linkedin_url || null,
           github_url: parsedProfile.github_url || null,
-          professional_summary: parsedProfile.professional_summary || null,
           work_experience: Array.isArray(parsedProfile.work_experience) 
             ? parsedProfile.work_experience.map((exp: Partial<WorkExperience>) => ({
                 company: exp.company || '',
@@ -284,11 +283,12 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
               <div className="flex items-center gap-4">
                 <Button
-                  variant="ghost"
+                  variant="outline"
                   onClick={() => router.push('/')}
-                  className="group p-2 hover:bg-white/60"
+                  className="group flex items-center gap-2 px-4 py-2 bg-white/80 hover:bg-white border-white/40 hover:border-white/60 shadow-lg hover:shadow-xl transition-all duration-300"
                 >
                   <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <span className="font-medium text-muted-foreground group-hover:text-foreground transition-colors">Back</span>
                 </Button>
                 <div className="space-y-2">
                   <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-violet-600 bg-clip-text text-transparent animate-text-shimmer">

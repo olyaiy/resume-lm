@@ -210,25 +210,6 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                   )}
                 </div>
               </div>
-
-              {/* Key Highlights */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-baseline">
-                  <Label className="text-sm font-medium text-violet-700">Key Highlights</Label>
-                  <span className="text-[10px] text-gray-500">One highlight per line</span>
-                </div>
-                <Textarea
-                  value={project.highlights.join('\n')}
-                  onChange={(e) => updateProject(index, 'highlights', 
-                    e.target.value.split('\n').filter(Boolean)
-                  )}
-                  placeholder="• Enter each highlight on a new line&#10;• Focus on key achievements and features&#10;• Quantify results where possible"
-                  className="min-h-[150px] bg-white/50 border-gray-200 rounded-lg
-                    focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                    hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                    placeholder:text-gray-400"
-                />
-              </div>
             </div>
           </CardContent>
         </Card>

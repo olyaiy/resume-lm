@@ -43,7 +43,6 @@ function calculateProfileCompletion(profile: Profile): number {
     !!profile.email,
     !!profile.phone_number,
     !!profile.location,
-    !!profile.professional_summary,
     profile.work_experience.length > 0,
     profile.education.length > 0,
     profile.skills.length > 0,
@@ -195,13 +194,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
               <h3 className="text-xl font-semibold text-gray-900 mb-2">
                 {fullName || "Add your name"}
               </h3>
-              {profile.professional_summary ? (
-                <p className="text-muted-foreground mb-4">{profile.professional_summary}</p>
-              ) : (
-                <p className="text-muted-foreground italic mb-4">
-                  Add a professional summary to highlight your expertise
-                </p>
-              )}
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <ContactItem

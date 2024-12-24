@@ -117,7 +117,6 @@ export interface Profile {
   website: string | null;
   linkedin_url: string | null;
   github_url: string | null;
-  professional_summary: string | null;
   work_experience: WorkExperience[];
   education: Education[];
   skills: Skill[];
