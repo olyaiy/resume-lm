@@ -10,7 +10,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="h-full">
       <body className="h-full">
-        <Navbar />
+        {/* <Navbar /> */}
         <div className="h-[calc(100vh-4rem)]">
           {children}
         </div>
