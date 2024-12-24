@@ -1,6 +1,6 @@
 'use client';
 
-import { Profile } from "@/lib/types";
+import { Profile, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -99,41 +99,97 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       setIsProcessingResume(true);
       console.log('🚀 Starting resume upload process...');
       console.log('📝 Resume content length:', resumeContent.length);
-      console.log('📝 First 100 chars of content:', resumeContent.substring(0, 100));
       
       const messages = [
         { 
           role: "user" as const, 
-          content: `Please parse this resume content and format it according to the schema: ${resumeContent}` 
+          content: `${resumeContent}` 
         }
       ];
       
-      console.log('📤 Sending to AI with messages:', JSON.stringify(messages, null, 2));
-      
       const result = await formatProfileWithAI(messages);
-      console.log('📥 Received AI response:', result ? result.substring(0, 100) : 'No result');
       
       if (result) {
-        console.log('🔄 Attempting to parse AI response as JSON...');
         const parsedProfile = JSON.parse(result);
-        console.log('✅ Successfully parsed JSON. Profile structure:', Object.keys(parsedProfile));
         
-        // Clean the parsed profile to only include valid fields
+        // Clean and transform the data to match our database schema
         const cleanedProfile: Partial<Profile> = {
-          first_name: parsedProfile.first_name,
-          last_name: parsedProfile.last_name,
-          email: parsedProfile.email,
-          phone_number: parsedProfile.phone_number,
-          location: parsedProfile.location,
-          website: parsedProfile.website,
-          linkedin_url: parsedProfile.linkedin_url,
-          github_url: parsedProfile.github_url,
-          professional_summary: parsedProfile.professional_summary,
-          work_experience: parsedProfile.work_experience,
-          education: parsedProfile.education,
-          skills: parsedProfile.skills,
-          projects: parsedProfile.projects,
-          certifications: parsedProfile.certifications
+          first_name: parsedProfile.first_name || null,
+          last_name: parsedProfile.last_name || null,
+          email: parsedProfile.email || null,
+          phone_number: parsedProfile.phone_number || null,
+          location: parsedProfile.location || null,
+          website: parsedProfile.website || null,
+          linkedin_url: parsedProfile.linkedin_url || null,
+          github_url: parsedProfile.github_url || null,
+          professional_summary: parsedProfile.professional_summary || null,
+          work_experience: Array.isArray(parsedProfile.work_experience) 
+            ? parsedProfile.work_experience.map((exp: Partial<WorkExperience>) => ({
+                company: exp.company || '',
+                position: exp.position || '',
+                location: exp.location || '',
+                start_date: exp.start_date || '',
+                end_date: exp.end_date || null,
+                current: exp.end_date === 'Present',
+                description: Array.isArray(exp.description) 
+                  ? exp.description 
+                  : [exp.description || ''],
+                technologies: Array.isArray(exp.technologies) 
+                  ? exp.technologies 
+                  : []
+              }))
+            : [],
+          education: Array.isArray(parsedProfile.education)
+            ? parsedProfile.education.map((edu: Partial<Education>) => ({
+                school: edu.school || '',
+                degree: edu.degree || '',
+                field: edu.field || '',
+                location: edu.location || '',
+                start_date: edu.start_date || '',
+                end_date: edu.end_date || null,
+                current: edu.end_date === 'Present',
+                gpa: edu.gpa ? parseFloat(edu.gpa.toString()) : undefined,
+                achievements: Array.isArray(edu.achievements) 
+                  ? edu.achievements 
+                  : []
+              }))
+            : [],
+          skills: Array.isArray(parsedProfile.skills)
+            ? parsedProfile.skills.map((skill: any) => ({
+                category: skill.category || '',
+                items: Array.isArray(skill.skills) 
+                  ? skill.skills 
+                  : Array.isArray(skill.items) 
+                    ? skill.items 
+                    : []
+              }))
+            : [],
+          projects: Array.isArray(parsedProfile.projects)
+            ? parsedProfile.projects.map((proj: Partial<Project>) => ({
+                name: proj.name || '',
+                description: proj.description || '',
+                technologies: Array.isArray(proj.technologies) 
+                  ? proj.technologies 
+                  : [],
+                url: proj.url || undefined,
+                github_url: proj.github_url || undefined,
+                start_date: proj.start_date || '',
+                end_date: proj.end_date || null,
+                highlights: Array.isArray(proj.highlights) 
+                  ? proj.highlights 
+                  : []
+              }))
+            : [],
+          certifications: Array.isArray(parsedProfile.certifications)
+            ? parsedProfile.certifications.map((cert: Partial<Certification>) => ({
+                name: cert.name || '',
+                issuer: cert.issuer || '',
+                date_acquired: cert.date_acquired || '',
+                expiry_date: cert.expiry_date || undefined,
+                credential_id: cert.credential_id || undefined,
+                url: cert.url || undefined
+              }))
+            : []
         };
         
         console.log('📤 Sending cleaned profile to update function:', JSON.stringify(cleanedProfile, null, 2));
