@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { SettingsButton } from "@/components/settings/settings-button";
+import { LogoutButton } from "@/components/auth/logout-button";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ResumeManagementCard } from "@/components/resume/resume-management-card";
 
@@ -82,7 +83,7 @@ export default async function Home() {
         <header className="pt-8 pb-6 px-6 md:px-8 lg:px-10 border-b bg-white/50 backdrop-blur-lg">
           <div className="max-w-[2000px] mx-auto">
             {/* Welcome message and settings */}
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <h1 className="text-3xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
                   Welcome back, {profile.first_name}! 👋
@@ -91,99 +92,10 @@ export default async function Home() {
                   Here's what's happening with your resumes
                 </p>
               </div>
-              <SettingsButton />
-            </div>
-            
-            {/* 
-              Quick Stats Grid
-              - Shows key metrics in card format
-              - Each card has consistent styling with unique accent colors
-              - Includes hover animations and interactive elements
-            */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              {/* Profile Score Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-teal-50 text-teal-600">
-                    <User className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Profile Score</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">98%</p>
-                      <span className="text-xs text-teal-600">+2%</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t">
-                  <Link href="/profile" className="text-sm text-teal-600 hover:text-teal-700 flex items-center">
-                    Complete your profile <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </div>
-              </Card>
-
-              {/* Base Resumes Stats Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-purple-50 text-purple-600">
-                    <FileText className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Base Resumes</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">{baseResumes.length}</p>
-                      <span className="text-xs text-purple-600">Active</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t">
-                  <Link href="/profile" className="text-sm text-purple-600 hover:text-purple-700 flex items-center">
-                    Create new resume <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </div>
-              </Card>
-
-              {/* Tailored Resumes Stats Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-pink-50 text-pink-600">
-                    <Sparkles className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Tailored Resumes</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">{tailoredResumes.length}</p>
-                      <span className="text-xs text-pink-600">Active</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t">
-                  <Link href="/profile" className="text-sm text-pink-600 hover:text-pink-700 flex items-center">
-                    Create tailored resume <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </div>
-              </Card>
-
-              {/* Job Postings Stats Card */}
-              <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
-                <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
-                    <Briefcase className="h-6 w-6" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">Job Postings</p>
-                    <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">124</p>
-                      <span className="text-xs text-blue-600">Available</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="mt-3 pt-3 border-t">
-                  <Link href="/jobs" className="text-sm text-blue-600 hover:text-blue-700 flex items-center">
-                    Browse jobs <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
-                </div>
-              </Card>
+              <div className="flex items-center gap-3">
+                <LogoutButton />
+                <SettingsButton />
+              </div>
             </div>
           </div>
         </header>
