@@ -41,7 +41,7 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
   return (
     <div className="space-y-6">
       {experiences.map((exp, index) => (
-        <Card key={index} className="relative group bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5 backdrop-blur-md border-cyan-500/20 hover:shadow-lg transition-all duration-300 hover:border-cyan-500/30">
+        <Card key={index} className="relative group bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5 backdrop-blur-md border-2 border-cyan-500/30 hover:border-cyan-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
           <div className="absolute -left-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <div className="bg-cyan-100/80 rounded-lg p-1 cursor-move">
               <GripVertical className="h-4 w-4 text-cyan-600" />
