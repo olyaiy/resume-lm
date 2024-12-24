@@ -166,17 +166,58 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
               <div className="space-y-2">
                 <div className="flex justify-between items-baseline">
                   <Label className="text-sm font-medium text-gray-600">Key Responsibilities & Achievements</Label>
-                  <span className="text-[10px] text-gray-500">One achievement per line</span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updated = [...experiences];
+                      updated[index].description = [...updated[index].description, ""];
+                      onChange(updated);
+                    }}
+                    className="text-cyan-600 hover:text-cyan-700 transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Point
+                  </Button>
                 </div>
-                <Textarea
-                  value={exp.description.join('\n')}
-                  onChange={(e) => updateExperience(index, 'description', e.target.value.split('\n'))}
-                  placeholder="• Enter each achievement on a new line&#10;• Start with strong action verbs&#10;• Quantify results where possible"
-                  className="min-h-[150px] bg-white/50 border-gray-200 rounded-lg
-                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                    placeholder:text-gray-400"
-                />
+                <div className="space-y-3">
+                  {exp.description.map((desc, descIndex) => (
+                    <div key={descIndex} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={desc}
+                          onChange={(e) => {
+                            const updated = [...experiences];
+                            updated[index].description[descIndex] = e.target.value;
+                            onChange(updated);
+                          }}
+                          placeholder="Start with a strong action verb"
+                          className="bg-white/50 border-gray-200 rounded-lg
+                            focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
+                            hover:border-cyan-500/30 hover:bg-white/60 transition-colors
+                            placeholder:text-gray-400"
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const updated = [...experiences];
+                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
+                          onChange(updated);
+                        }}
+                        className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {exp.description.length === 0 && (
+                    <div className="text-sm text-gray-500 italic">
+                      Add points to describe your responsibilities and achievements
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Technologies */}

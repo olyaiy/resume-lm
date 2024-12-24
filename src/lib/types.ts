@@ -23,7 +23,7 @@ export interface Education {
 
 export interface Project {
   name: string;
-  description: string;
+  description: string[];
   technologies: string[];
   url?: string;
   github_url?: string;

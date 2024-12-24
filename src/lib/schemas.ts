@@ -55,7 +55,10 @@ export const openAiResumeSchema = {
               type: "string"
             },
             description: {
-              type: "string"
+                type: "array",
+                items: {
+                  type: "string"
+                }
             },
             technologies: {
               type: "array",
@@ -81,13 +84,13 @@ export const openAiResumeSchema = {
         items: {
           type: "object",
           properties: {
-            institution: {
+            school: {
               type: "string"
             },
             degree: {
               type: "string"
             },
-            field_of_study: {
+            field: {
               type: "string"
             },
             start_date: {
@@ -110,9 +113,9 @@ export const openAiResumeSchema = {
             }
           },
           required: [
-            "institution",
+            "school",
             "degree",
-            "field_of_study",
+            "field",
             "start_date",
             "end_date",
             "location",
@@ -153,7 +156,10 @@ export const openAiResumeSchema = {
               type: "string"
             },
             description: {
-              type: "string"
+                type: "array",
+                items: {
+                  type: "string"
+                }
             },
             url: {
               type: "string"
@@ -227,7 +233,3 @@ export const openAiResumeSchema = {
   },
   strict: true
 } as const;
-
-// We can add more schemas here as needed, for example:
-// export const anthropicResumeSchema = { ... }
-// export const linkedInParserSchema = { ... } 

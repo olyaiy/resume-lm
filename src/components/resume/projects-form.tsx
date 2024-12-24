@@ -17,7 +17,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
   const addProject = () => {
     onChange([...projects, {
       name: "",
-      description: "",
+      description: [],
       technologies: [],
       url: "",
       github_url: "",
@@ -67,54 +67,6 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
-              </div>
-
-              {/* Dates Row */}
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="relative group">
-                  <Input
-                    type="date"
-                    value={project.start_date}
-                    onChange={(e) => updateProject(index, 'start_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
-                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
-                    START DATE
-                  </div>
-                </div>
-                <span>-</span>
-                <div className="relative group">
-                  <Input
-                    type="date"
-                    value={project.end_date || ''}
-                    onChange={(e) => updateProject(index, 'end_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
-                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
-                    END DATE
-                  </div>
-                </div>
-              </div>
-
-              {/* Description */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-baseline">
-                  <Label className="text-sm font-medium text-violet-700">Description</Label>
-                  <span className="text-[10px] text-gray-500">Be concise and specific</span>
-                </div>
-                <Textarea
-                  value={project.description}
-                  onChange={(e) => updateProject(index, 'description', e.target.value)}
-                  placeholder="Describe the project's purpose, your role, and key features"
-                  className="min-h-[100px] bg-white/50 border-gray-200 rounded-lg
-                    focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                    hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                    placeholder:text-gray-400"
-                />
               </div>
 
               {/* URLs Row */}
@@ -168,6 +120,95 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                     hover:border-violet-500/30 hover:bg-white/60 transition-colors
                     placeholder:text-gray-400"
                 />
+              </div>
+
+              {/* Dates Row */}
+              <div className="flex items-center gap-3 text-gray-600">
+                <div className="relative group">
+                  <Input
+                    type="date"
+                    value={project.start_date}
+                    onChange={(e) => updateProject(index, 'start_date', e.target.value)}
+                    className="w-auto bg-white/50 border-gray-200 rounded-lg
+                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
+                  />
+                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
+                    START DATE
+                  </div>
+                </div>
+                <span>-</span>
+                <div className="relative group">
+                  <Input
+                    type="date"
+                    value={project.end_date || ''}
+                    onChange={(e) => updateProject(index, 'end_date', e.target.value)}
+                    className="w-auto bg-white/50 border-gray-200 rounded-lg
+                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
+                  />
+                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
+                    END DATE
+                  </div>
+                </div>
+              </div>
+
+              {/* Description */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <Label className="text-sm font-medium text-violet-700">Description</Label>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => {
+                      const updated = [...projects];
+                      updated[index].description = [...updated[index].description, ""];
+                      onChange(updated);
+                    }}
+                    className="text-violet-600 hover:text-violet-700 transition-colors"
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    Add Point
+                  </Button>
+                </div>
+                <div className="space-y-3">
+                  {project.description.map((desc, descIndex) => (
+                    <div key={descIndex} className="flex gap-2 items-start">
+                      <div className="flex-1">
+                        <Input
+                          value={desc}
+                          onChange={(e) => {
+                            const updated = [...projects];
+                            updated[index].description[descIndex] = e.target.value;
+                            onChange(updated);
+                          }}
+                          placeholder="Describe a key feature or achievement"
+                          className="bg-white/50 border-gray-200 rounded-lg
+                            focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                            hover:border-violet-500/30 hover:bg-white/60 transition-colors
+                            placeholder:text-gray-400"
+                        />
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => {
+                          const updated = [...projects];
+                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
+                          onChange(updated);
+                        }}
+                        className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                  {project.description.length === 0 && (
+                    <div className="text-sm text-gray-500 italic">
+                      Add points to describe your project's features and achievements
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Key Highlights */}
