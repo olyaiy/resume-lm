@@ -79,7 +79,7 @@ export function ResumeEditorClient({
   };
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-screen ">
       {/* Top Bar */}
       <div className="h-16 border-b bg-white/50 backdrop-blur-lg fixed top-16 left-0 right-0 z-40">
         <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">

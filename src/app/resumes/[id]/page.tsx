@@ -21,7 +21,7 @@ export default async function Page({
         </div>
 
         {/* Content */}
-        <div className="relative z-10">
+        <div className="relative z-10 ">
           <ResumeEditorClient initialResume={resume} />
         </div>
       </div>

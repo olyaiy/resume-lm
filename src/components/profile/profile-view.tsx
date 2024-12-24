@@ -26,7 +26,8 @@ export function ProfileView({ profile }: ProfileViewProps) {
             {[profile.first_name, profile.last_name].filter(Boolean).join(' ') || 'Profile'}
           </h1>
           <div className="text-muted-foreground space-y-1">
-            {profile.email && <p>{profile.email}</p>}
+            {/* {profile.email && <p>{profile.email}</p>} */}
+            {profile.email && <p>alex@gmail.com</p>}
             {profile.phone_number && <p>{profile.phone_number}</p>}
             {profile.location && <p>{profile.location}</p>}
           </div>

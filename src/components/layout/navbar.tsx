@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+
 import { LogoutButton } from "@/components/auth/logout-button";
 
 export function Navbar() {
@@ -14,7 +14,7 @@ export function Navbar() {
   };
 
   return (
-    <nav className="h-16 border-b bg-white/50 backdrop-blur-lg fixed top-0 w-full z-50">
+    <nav className="h-16 border-b bg-white/50 backdrop-blur-lg sticky top-0 w-full z-50">
       <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">
         <div className="flex items-center gap-8">
           {/* Logo/Brand */}
