@@ -40,6 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
+import { BasicInfoForm } from "@/components/resume/basic-info-form";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -549,148 +550,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/10 to-white/20 pointer-events-none rounded-3xl"></div>
           
           <TabsContent value="basic" className="space-y-6 mt-6 relative animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-            <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-              <div className="relative p-8 space-y-8">
-                {/* Personal Information */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">First Name</Label>
-                    <Input
-                      value={profile.first_name || ''}
-                      onChange={(e) => updateField('first_name', e.target.value)}
-                      className="focus:border-teal-500/60 focus:ring-teal-500/10"
-                      placeholder="Enter your first name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700">Last Name</Label>
-                    <Input
-                      value={profile.last_name || ''}
-                      onChange={(e) => updateField('last_name', e.target.value)}
-                      className="focus:border-teal-500/60 focus:ring-teal-500/10"
-                      placeholder="Enter your last name"
-                    />
-                  </div>
-                </div>
-
-                {/* Contact Information with enhanced icons */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <div className="p-1.5 rounded-full bg-teal-100">
-                        <Mail className="h-4 w-4 text-teal-600" />
-                      </div>
-                      Email
-                    </Label>
-                    <Input
-                      type="email"
-                      value={profile.email || ''}
-                      onChange={(e) => updateField('email', e.target.value)}
-                      className="focus:border-teal-500/60 focus:ring-teal-500/10"
-                      placeholder="your.email@example.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <div className="p-1.5 rounded-full bg-cyan-100">
-                        <Phone className="h-4 w-4 text-cyan-600" />
-                      </div>
-                      Phone
-                    </Label>
-                    <Input
-                      type="tel"
-                      value={profile.phone_number || ''}
-                      onChange={(e) => updateField('phone_number', e.target.value)}
-                      className="focus:border-cyan-500/60 focus:ring-cyan-500/10"
-                      placeholder="+1 (555) 000-0000"
-                    />
-                  </div>
-                </div>
-
-                {/* Location */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <div className="p-1.5 rounded-full bg-violet-100">
-                      <MapPin className="h-4 w-4 text-violet-600" />
-                    </div>
-                    Location
-                  </Label>
-                  <Input
-                    value={profile.location || ''}
-                    onChange={(e) => updateField('location', e.target.value)}
-                    className="focus:border-violet-500/60 focus:ring-violet-500/10"
-                    placeholder="City, State, Country"
-                  />
-                </div>
-
-                {/* URLs with enhanced visual feedback */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <div className="p-1.5 rounded-full bg-indigo-100">
-                        <Globe className="h-4 w-4 text-indigo-600" />
-                      </div>
-                      Website
-                    </Label>
-                    <Input
-                      type="url"
-                      value={profile.website || ''}
-                      onChange={(e) => updateField('website', e.target.value)}
-                      className="focus:border-indigo-500/60 focus:ring-indigo-500/10"
-                      placeholder="https://your-website.com"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                      <div className="p-1.5 rounded-full bg-[#0077b5]/20">
-                        <Linkedin className="h-4 w-4 text-[#0077b5]" />
-                      </div>
-                      LinkedIn URL
-                    </Label>
-                    <Input
-                      type="url"
-                      value={profile.linkedin_url || ''}
-                      onChange={(e) => updateField('linkedin_url', e.target.value)}
-                      className="focus:border-[#0077b5]/60 focus:ring-[#0077b5]/10"
-                      placeholder="https://linkedin.com/in/your-profile"
-                    />
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <div className="p-1.5 rounded-full bg-gray-100">
-                      <Github className="h-4 w-4 text-gray-700" />
-                    </div>
-                    GitHub URL
-                  </Label>
-                  <Input
-                    type="url"
-                    value={profile.github_url || ''}
-                    onChange={(e) => updateField('github_url', e.target.value)}
-                    className="focus:border-gray-500/60 focus:ring-gray-500/10"
-                    placeholder="https://github.com/your-username"
-                  />
-                </div>
-
-                {/* Professional Summary with enhanced textarea */}
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                    <div className="p-1.5 rounded-full bg-rose-100">
-                      <FileText className="h-4 w-4 text-rose-600" />
-                    </div>
-                    Professional Summary
-                  </Label>
-                  <Textarea
-                    value={profile.professional_summary || ''}
-                    onChange={(e) => updateField('professional_summary', e.target.value)}
-                    className="min-h-[150px] resize-y rounded-xl border-2 border-gray-200/80 bg-white/80 px-4 py-3 text-base shadow-[0_2px_4px_rgba(0,0,0,0.02)] placeholder:text-gray-500/60 hover:border-gray-300/80 hover:bg-white/90 focus:border-rose-500/60 focus:bg-white focus:ring-4 focus:ring-rose-500/10 focus:ring-offset-0 focus-visible:outline-none"
-                    placeholder="Write a brief summary of your professional background and career objectives..."
-                  />
-                </div>
-              </div>
-            </Card>
+            <BasicInfoForm
+              resume={profile}
+              onChange={(field, value) => {
+                if (field in profile) {
+                  updateField(field as keyof Profile, value);
+                }
+              }}
+            />
           </TabsContent>
 
           <TabsContent value="experience" className="space-y-6 mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
