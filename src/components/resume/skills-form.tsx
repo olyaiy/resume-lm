@@ -2,9 +2,9 @@
 
 import { Skill } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 
 interface SkillsFormProps {
@@ -14,10 +14,13 @@ interface SkillsFormProps {
 
 export function SkillsForm({ skills, onChange }: SkillsFormProps) {
   const addSkillCategory = () => {
-    onChange([...skills, { category: "", items: [] }]);
+    onChange([...skills, {
+      category: "",
+      items: []
+    }]);
   };
 
-  const updateSkill = (index: number, field: keyof Skill, value: any) => {
+  const updateSkillCategory = (index: number, field: keyof Skill, value: any) => {
     const updated = [...skills];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -46,7 +49,7 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
               <Label>Category Name</Label>
               <Input
                 value={skill.category}
-                onChange={(e) => updateSkill(index, 'category', e.target.value)}
+                onChange={(e) => updateSkillCategory(index, 'category', e.target.value)}
                 placeholder="e.g., Programming Languages, Tools, Soft Skills"
               />
             </div>
@@ -54,10 +57,10 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
               <Label>Skills</Label>
               <Input
                 value={skill.items.join(', ')}
-                onChange={(e) => updateSkill(index, 'items', 
+                onChange={(e) => updateSkillCategory(index, 'items', 
                   e.target.value.split(',').map(item => item.trim()).filter(Boolean)
                 )}
-                placeholder="Comma-separated skills"
+                placeholder="Enter skills separated by commas"
               />
             </div>
           </CardContent>
