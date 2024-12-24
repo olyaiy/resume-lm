@@ -151,10 +151,11 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
                 <Switch
                   checked={exp.current}
                   onCheckedChange={(checked) => {
-                    updateExperience(index, 'current', checked);
                     if (checked) {
+                      // If switching to current position, clear end date first
                       updateExperience(index, 'end_date', null);
                     }
+                    updateExperience(index, 'current', checked);
                   }}
                   className="data-[state=checked]:bg-cyan-600"
                 />
