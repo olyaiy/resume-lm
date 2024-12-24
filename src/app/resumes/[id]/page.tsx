@@ -6,10 +6,11 @@ import { getResumeById } from "@/utils/supabase/actions";
 export default async function ResumeEditorPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
-    const resume = await getResumeById(params.id);
+    const { id } = await params;
+    const resume = await getResumeById(id);
 
     return (
       <main className="min-h-screen p-6 md:p-8 lg:p-10 relative">
