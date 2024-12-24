@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { SettingsButton } from "@/components/settings/settings-button";
+import { ProfileCard } from "@/components/profile/profile-card";
 
 export default async function Home() {
   let data;
@@ -94,9 +95,9 @@ export default async function Home() {
                     <FileText className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Resumes</p>
+                    <p className="text-sm font-medium text-gray-600">Base Resumes</p>
                     <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">{baseResumes.length + tailoredResumes.length}</p>
+                      <p className="text-2xl font-bold">{baseResumes.length}</p>
                       <span className="text-xs text-purple-600">Active</span>
                     </div>
                   </div>
@@ -113,39 +114,41 @@ export default async function Home() {
               <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-xl bg-pink-50 text-pink-600">
-                    <Target className="h-6 w-6" />
+                    <Sparkles className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Job Match Rate</p>
+                    <p className="text-sm font-medium text-gray-600">Tailored Resumes</p>
                     <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">85%</p>
-                      <span className="text-xs text-pink-600">Avg.</span>
+                      <p className="text-2xl font-bold">{tailoredResumes.length}</p>
+                      <span className="text-xs text-pink-600">Active</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t">
-                  <Link href="/jobs" className="text-sm text-pink-600 hover:text-pink-700 flex items-center">
-                    View job matches <ChevronRight className="h-4 w-4 ml-1" />
-                  </Link>
+                  <CreateResumeDialog type="tailored" baseResumes={baseResumes}>
+                    <div className="text-sm text-pink-600 hover:text-pink-700 flex items-center cursor-pointer">
+                      Create tailored resume <ChevronRight className="h-4 w-4 ml-1" />
+                    </div>
+                  </CreateResumeDialog>
                 </div>
               </Card>
 
               <Card className="bg-white/40 backdrop-blur-md border-white/40 p-4 hover:shadow-lg transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className="p-3 rounded-xl bg-blue-50 text-blue-600">
-                    <Clock className="h-6 w-6" />
+                    <Briefcase className="h-6 w-6" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Last Updated</p>
+                    <p className="text-sm font-medium text-gray-600">Job Postings</p>
                     <div className="flex items-baseline gap-1">
-                      <p className="text-2xl font-bold">2h</p>
-                      <span className="text-xs text-blue-600">ago</span>
+                      <p className="text-2xl font-bold">124</p>
+                      <span className="text-xs text-blue-600">Available</span>
                     </div>
                   </div>
                 </div>
                 <div className="mt-3 pt-3 border-t">
-                  <Link href="/activity" className="text-sm text-blue-600 hover:text-blue-700 flex items-center">
-                    View activity <ChevronRight className="h-4 w-4 ml-1" />
+                  <Link href="/jobs" className="text-sm text-blue-600 hover:text-blue-700 flex items-center">
+                    Browse jobs <ChevronRight className="h-4 w-4 ml-1" />
                   </Link>
                 </div>
               </Card>
@@ -159,33 +162,7 @@ export default async function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               {/* Left Column - Profile */}
               <div className="lg:col-span-7 space-y-6">
-                {/* Profile Section */}
-                <Card className="overflow-hidden border-white/40 shadow-xl backdrop-blur-xl hover:shadow-2xl transition-all duration-300">
-                  <div className="p-6 border-b bg-gradient-to-r from-teal-500/10 to-cyan-500/10">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-1">
-                        <h2 className="text-xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent flex items-center gap-2">
-                          <User className="h-5 w-5" />
-                          Professional Profile
-                        </h2>
-                        <p className="text-sm text-muted-foreground">
-                          Keep your profile updated to create better resumes
-                        </p>
-                      </div>
-                      <Link href="/profile/edit">
-                        <Button 
-                          variant="outline" 
-                          className="bg-white/50 border-teal-200 hover:border-teal-300 hover:bg-white/60"
-                        >
-                          Edit Profile
-                        </Button>
-                      </Link>
-                    </div>
-                  </div>
-                  <div className="p-6">
-                    <ProfileView profile={profile} />
-                  </div>
-                </Card>
+                <ProfileCard profile={profile} />
               </div>
 
               {/* Right Column - Resumes */}
