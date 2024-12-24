@@ -115,4 +115,44 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   }
 
   return profile;
+}
+
+export async function resetProfile(): Promise<Profile> {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const emptyProfile: Partial<Profile> = {
+    first_name: null,
+    last_name: null,
+    email: null,
+    phone_number: null,
+    location: null,
+    website: null,
+    linkedin_url: null,
+    github_url: null,
+    professional_summary: null,
+    work_experience: [],
+    education: [],
+    skills: [],
+    projects: [],
+    certifications: []
+  };
+
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .update(emptyProfile)
+    .eq('user_id', user.id)
+    .select()
+    .single();
+
+  if (error) {
+    throw new Error('Failed to reset profile');
+  }
+
+  return profile;
 } 

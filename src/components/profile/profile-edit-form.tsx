@@ -12,11 +12,22 @@ import { EducationForm } from "@/components/resume/education-form";
 import { ProjectsForm } from "@/components/resume/projects-form";
 import { SkillsForm } from "@/components/resume/skills-form";
 import { CertificationsForm } from "@/components/resume/certifications-form";
-import { updateProfile } from "@/utils/actions";
+import { updateProfile, resetProfile } from "@/utils/actions";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { User, MapPin, Mail, Phone, Globe, Linkedin, Github, Briefcase, GraduationCap, Wrench, FolderGit2, Award, FileText } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { User, MapPin, Mail, Phone, Globe, Linkedin, Github, Briefcase, GraduationCap, Wrench, FolderGit2, Award, FileText, Trash2, Import } from "lucide-react";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -25,6 +36,7 @@ interface ProfileEditFormProps {
 export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProps) {
   const [profile, setProfile] = useState(initialProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResetting, setIsResetting] = useState(false);
   const router = useRouter();
 
   const updateField = (field: keyof Profile, value: any) => {
@@ -46,33 +58,96 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     }
   };
 
+  const handleReset = async () => {
+    try {
+      setIsResetting(true);
+      const resetData = await resetProfile();
+      setProfile(resetData);
+      toast.success("Profile has been reset");
+    } catch (error) {
+      toast.error("Failed to reset profile");
+      console.error(error);
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
+  const handleLinkedInImport = () => {
+    toast.info("LinkedIn import feature coming soon!");
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-            Edit Profile
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Update your profile information used to generate resumes
-          </p>
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              Edit Profile
+            </h1>
+            <p className="text-muted-foreground mt-1">
+              Update your profile information used to generate resumes
+            </p>
+          </div>
+          <div className="flex gap-3">
+            <Button
+              variant="outline"
+              onClick={() => router.back()}
+              className="bg-white/50 border-white/40"
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white"
+            >
+              {isSubmitting ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
         </div>
+
+        {/* Action Buttons */}
         <div className="flex gap-3">
           <Button
             variant="outline"
-            onClick={() => router.back()}
-            className="bg-white/50 border-white/40"
+            onClick={handleLinkedInImport}
+            className="bg-[#0077b5]/10 hover:bg-[#0077b5]/20 border-[#0077b5]/20 hover:border-[#0077b5]/30 text-[#0077b5]"
           >
-            Cancel
+            <Linkedin className="h-4 w-4 mr-2" />
+            Import from LinkedIn
           </Button>
-          <Button
-            onClick={handleSubmit}
-            disabled={isSubmitting}
-            className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white"
-          >
-            {isSubmitting ? "Saving..." : "Save Changes"}
-          </Button>
+
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                variant="outline"
+                className="bg-red-500/10 hover:bg-red-500/20 border-red-500/20 hover:border-red-500/30 text-red-600"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Reset Profile
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will reset your entire profile to empty state. All your current profile data will be permanently deleted.
+                  This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleReset}
+                  disabled={isResetting}
+                  className="bg-red-500 hover:bg-red-600 text-white"
+                >
+                  {isResetting ? "Resetting..." : "Reset Profile"}
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
