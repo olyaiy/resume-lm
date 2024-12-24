@@ -1,38 +1,31 @@
-import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { ProfileView } from "@/components/profile/profile-view";
 import { ResumeList } from "@/components/resume/resume-list";
 import { LogoutButton } from "@/components/auth/logout-button";
+import { getDashboardData } from "../utils/supabase/actions";
 
 export default async function Home() {
-  const supabase = await createClient();
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
+  let data;
+  try {
+    data = await getDashboardData();
+  } catch (error) {
     redirect("/auth/login");
   }
 
-  // Fetch profile data
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+  const { profile, baseResumes, tailoredResumes } = data;
 
-  // Fetch resumes data
-  const { data: resumes, error: resumesError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('user_id', user.id);
-
-  if (profileError || resumesError) {
-    console.error('Error fetching data:', { profileError, resumesError });
-    return <div>Error loading data</div>;
+  // Early return with a message if no profile exists
+  if (!profile) {
+    return (
+      <main className="min-h-screen p-6 md:p-8 lg:p-10 relative flex items-center justify-center">
+        <div className="rounded-2xl glass-card p-8 border border-white/40 shadow-xl backdrop-blur-xl">
+          <h2 className="text-xl text-muted-foreground">
+            Profile not found. Please contact support.
+          </h2>
+        </div>
+      </main>
+    );
   }
-
-  const baseResumes = resumes?.filter(resume => resume.is_base_resume) ?? [];
-  const tailoredResumes = resumes?.filter(resume => !resume.is_base_resume) ?? [];
 
   return (
     <main className="min-h-screen p-6 md:p-8 lg:p-10 relative">
