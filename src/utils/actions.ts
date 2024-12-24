@@ -103,11 +103,55 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
     throw new Error('User not authenticated');
   }
 
-  console.log('data', data);
+  // First, get the current profile
+  const { data: currentProfile, error: fetchError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError) {
+    throw new Error(`Failed to fetch current profile: ${fetchError.message}`);
+  }
+
+  // Prepare the update data
+  const updateData: Partial<Profile> = {};
+
+  // Handle simple string fields - only update if current value is null/empty
+  const simpleFields = ['first_name', 'last_name', 'email', 'phone_number', 
+    'location', 'website', 'linkedin_url', 'github_url'] as const;
+  
+  simpleFields.forEach((field) => {
+    if (data[field] !== undefined) {
+      // Only update if current value is null or empty string
+      if (!currentProfile[field]) {
+        updateData[field] = data[field];
+      }
+    }
+  });
+
+  // Handle array fields - append to existing arrays
+  const arrayFields = ['work_experience', 'education', 'skills', 
+    'projects', 'certifications'] as const;
+  
+  arrayFields.forEach((field) => {
+    if (data[field]?.length) {
+      // Simply append new items to the existing array
+      updateData[field] = [
+        ...(currentProfile[field] || []),
+        ...data[field]
+      ];
+    }
+  });
+
+  // Only proceed with update if there are changes
+  if (Object.keys(updateData).length === 0) {
+    return currentProfile;
+  }
 
   const { data: profile, error } = await supabase
     .from('profiles')
-    .update(data)
+    .update(updateData)
     .eq('user_id', user.id)
     .select()
     .single();
@@ -137,7 +181,6 @@ export async function resetProfile(): Promise<Profile> {
     website: null,
     linkedin_url: null,
     github_url: null,
-    professional_summary: null,
     work_experience: [],
     education: [],
     skills: [],

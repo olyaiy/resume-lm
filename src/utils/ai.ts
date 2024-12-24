@@ -113,11 +113,17 @@ export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCo
     });
 
     if (!response.choices[0].message.content) {
+      console.error('[AI Format Error] No content in response:', response);
       throw new Error('No content received from OpenAI');
     }
 
     return response.choices[0].message.content;
   } catch (error) {
+    console.error('[AI Format Error] Details:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined,
+      messages: messages.map(m => ({ role: m.role, contentLength: m.content?.length }))
+    });
     throw new Error('Failed to format profile information');
   }
 }

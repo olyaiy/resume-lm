@@ -201,36 +201,6 @@ export function BasicInfoForm({ resume, onChange }: BasicInfoFormProps) {
           </div>
         </CardContent>
       </Card>
-
-      {/* Professional Summary */}
-      <Card className="relative group bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5 backdrop-blur-md border-2 border-teal-500/30 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
-        <CardContent className="p-6">
-          <div className="space-y-4">
-            <div className="relative">
-              <div className="absolute right-3 top-6">
-                <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
-                  <FileText className="h-4 w-4 text-teal-600" />
-                </div>
-              </div>
-              <Textarea
-                value={resume.professional_summary || ''}
-                onChange={(e) => onChange('professional_summary', e.target.value)}
-                className="pr-12 min-h-[150px] bg-white/50 border-gray-200 rounded-lg resize-none
-                  focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
-                  hover:border-teal-500/30 hover:bg-white/60 transition-colors
-                  placeholder:text-gray-400"
-                placeholder="Write a compelling summary of your professional background and career objectives..."
-              />
-              <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-teal-700">
-                PROFESSIONAL SUMMARY
-              </div>
-            </div>
-            <div className="text-[10px] text-gray-500 italic">
-              Pro tip: Keep your summary concise, highlight your key strengths, and tailor it to your target role
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 } 

@@ -219,7 +219,6 @@ export const openAiResumeSchema = {
       "website",
       "linkedin_url",
       "github_url",
-      "professional_summary",
       "work_experience",
       "education",
       "skills",
