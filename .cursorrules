@@ -44,3 +44,44 @@ Key Conventions
 Follow Next.js docs for Data Fetching, Rendering, and Routing.
 
 The Following is a next.js 15 project, react 19, typescript, shadcn ui, tailwind css project. It is an ai resume builder. 
+
+
+Database Structure
+- Tables follow a relational structure with UUID primary keys and timestamps.
+
+Tables:
+1. profiles
+   - Stores user's base information and resume components
+   - Contains JSON fields for complex data (work_experience, education, skills, etc.)
+   - One-to-one relationship with auth.users
+
+2. jobs
+   - Stores job listings with requirements and details
+   - Public read access, user-specific write access
+   - Contains salary_range as JSONB for flexible structure
+   - Tracks application status and requirements
+
+3. resumes
+   - Stores both base and tailored resumes
+   - Links to jobs table for tailored resumes
+   - Contains same fields as profiles for resume content
+   - Uses JSONB for section_order and section_configs
+   - section_configs controls visibility and display of resume sections
+
+Key Relationships:
+- profiles.user_id → auth.users.id
+- resumes.user_id → auth.users.id
+- resumes.job_id → jobs.id (optional, for tailored resumes)
+
+JSON Fields Structure:
+- work_experience: Array of work history with descriptions and technologies
+- education: Array of educational background with achievements
+- skills: Array of skill categories with grouped items
+- projects: Array of projects with highlights and technologies
+- certifications: Array of professional certifications
+- section_configs: Object controlling section display properties
+
+Row Level Security (RLS):
+- profiles: User can only access own profile
+- jobs: Public read, user-specific write
+- resumes: User can only access own resumes
