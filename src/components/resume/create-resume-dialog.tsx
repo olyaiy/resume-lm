@@ -8,10 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createBaseResume, createTailoredResume } from "@/utils/supabase/actions";
-import { Resume } from "@/lib/types";
+import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Sparkles, Brain, Wand2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { importProfileToResume } from "@/utils/ai";
+import { createClient } from "@/utils/supabase/client";
 
 interface CreateResumeDialogProps {
   children: React.ReactNode;
@@ -54,6 +56,24 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       let resume: Resume;
 
       if (type === 'base') {
+        if (importOption === 'ai') {
+          try {
+            // Get the user's profile first
+            const supabase = createClient();
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .single();
+
+            if (profile) {
+              // Call the AI function with the profile
+              await importProfileToResume(profile, targetRole);
+            }
+          } catch (error) {
+            console.error('AI Import error:', error);
+            // Continue with resume creation even if AI fails
+          }
+        }
         resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       } else {
         resume = await createTailoredResume(selectedBaseResume, '', targetRole);

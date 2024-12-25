@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
+import { importProfileToResume } from "@/utils/ai";
 
 interface DashboardData {
   profile: Profile | null;
@@ -239,22 +240,15 @@ export async function resetProfile(): Promise<Profile> {
 }
 
 export async function deleteResume(resumeId: string): Promise<void> {
-  console.log('🚀 Starting deleteResume with ID:', resumeId);
-  
   const supabase = await createClient();
-  console.log('📡 Supabase client created');
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  console.log('👤 Auth check result:', { userId: user?.id, hasError: !!userError });
   
   if (userError || !user) {
-    console.error('❌ Authentication error:', userError);
     throw new Error('User not authenticated');
   }
 
   try {
-    console.log('🔍 Verifying resume ownership for:', { resumeId, userId: user.id });
-    
     // First verify the resume exists and belongs to the user
     const { data: resume, error: fetchError } = await supabase
       .from('resumes')
@@ -263,27 +257,9 @@ export async function deleteResume(resumeId: string): Promise<void> {
       .eq('user_id', user.id)
       .single();
 
-    console.log('📋 Fetch resume result:', {
-      found: !!resume,
-      resumeData: resume,
-      hasError: !!fetchError,
-      errorDetails: fetchError
-    });
-
-    if (fetchError) {
-      console.error('❌ Resume fetch error:', fetchError);
-      throw new Error(fetchError.message || 'Resume not found or access denied');
-    }
-
-    if (!resume) {
-      console.error('❌ Resume not found for:', { resumeId, userId: user.id });
+    if (fetchError || !resume) {
       throw new Error('Resume not found or access denied');
     }
-
-    console.log('🗑️ Attempting to delete resume:', { 
-      resumeId: resume.id, 
-      resumeName: resume.name 
-    });
 
     // Then delete the resume
     const { error: deleteError } = await supabase
@@ -292,35 +268,130 @@ export async function deleteResume(resumeId: string): Promise<void> {
       .eq('id', resumeId)
       .eq('user_id', user.id);
 
-    console.log('🗑️ Delete operation result:', {
-      success: !deleteError,
-      hasError: !!deleteError,
-      errorDetails: deleteError
-    });
-
     if (deleteError) {
-      console.error('❌ Delete error:', deleteError);
-      throw new Error(deleteError.message || 'Failed to delete resume');
+      throw new Error('Failed to delete resume');
     }
 
-    console.log('✅ Resume deleted successfully:', resumeId);
-
     // Revalidate all routes that might display resumes
-    console.log('🔄 Starting route revalidation');
     revalidatePath('/', 'layout');
     revalidatePath('/resumes', 'layout');
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/resumes/base', 'layout');
     revalidatePath('/resumes/tailored', 'layout');
-    console.log('✅ Route revalidation complete');
 
   } catch (error) {
-    console.error('❌ Delete resume error:', {
-      error,
-      message: error instanceof Error ? error.message : 'Unknown error',
-      resumeId,
-      userId: user.id
-    });
     throw error instanceof Error ? error : new Error('Failed to delete resume');
   }
+}
+
+export async function createBaseResume(name: string, importOption: 'import-all' | 'ai' | 'fresh' = 'import-all'): Promise<Resume> {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  console.log('\n=== Creating Base Resume ===');
+  console.log('Target Role:', name);
+  console.log('Import Option:', importOption);
+
+  // Get user's profile for initial data if not starting fresh
+  let profile = null;
+  if (importOption !== 'fresh') {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    profile = data;
+    
+    if (profile) {
+      console.log('Profile found:', {
+        name: `${profile.first_name} ${profile.last_name}`,
+        experiences: profile.work_experience?.length || 0,
+        skills: profile.skills?.length || 0,
+        projects: profile.projects?.length || 0
+      });
+    }
+  }
+
+  // For AI option, get AI recommendations
+  let aiRecommendations = null;
+  if (importOption === 'ai' && profile) {
+    try {
+      console.log('\nRequesting AI Analysis...');
+      aiRecommendations = await importProfileToResume(profile, name);
+      console.log('AI Analysis completed successfully');
+    } catch (error) {
+      console.error('Error getting AI recommendations:', error);
+      console.log('Proceeding with empty resume creation');
+    }
+  }
+
+  const newResume: Partial<Resume> = {
+    user_id: user.id,
+    name,
+    target_role: name,
+    is_base_resume: true,
+    // Pre-fill with profile data if available and not starting fresh
+    first_name: importOption === 'fresh' ? '' : profile?.first_name || '',
+    last_name: importOption === 'fresh' ? '' : profile?.last_name || '',
+    email: importOption === 'fresh' ? '' : profile?.email || '',
+    phone_number: importOption === 'fresh' ? '' : profile?.phone_number || '',
+    location: importOption === 'fresh' ? '' : profile?.location || '',
+    website: importOption === 'fresh' ? '' : profile?.website || '',
+    linkedin_url: importOption === 'fresh' ? '' : profile?.linkedin_url || '',
+    github_url: importOption === 'fresh' ? '' : profile?.github_url || '',
+    professional_summary: '', // Always start with empty professional summary
+    // For array fields, handle differently based on importOption
+    work_experience: importOption === 'import-all' ? [...(profile?.work_experience || [])] : [],
+    education: importOption === 'import-all' ? [...(profile?.education || [])] : [],
+    skills: importOption === 'import-all' ? [...(profile?.skills || [])] : [],
+    projects: importOption === 'import-all' ? [...(profile?.projects || [])] : [],
+    certifications: importOption === 'import-all' ? [...(profile?.certifications || [])] : [],
+    section_order: [
+      'professional_summary',
+      'work_experience',
+      'education',
+      'skills',
+      'projects',
+      'certifications'
+    ],
+    section_configs: {
+      professional_summary: { visible: true },
+      work_experience: { visible: true },
+      education: { visible: true },
+      skills: { visible: true },
+      projects: { visible: true },
+      certifications: { visible: true }
+    }
+  };
+
+  console.log('\nCreating resume with configuration:', {
+    name: newResume.name,
+    targetRole: newResume.target_role,
+    isBaseResume: newResume.is_base_resume,
+    sections: Object.keys(newResume.section_configs || {})
+  });
+
+  const { data: resume, error: createError } = await supabase
+    .from('resumes')
+    .insert([newResume])
+    .select()
+    .single();
+
+  if (createError || !resume) {
+    console.error('Error creating resume:', createError);
+    throw new Error('Failed to create resume');
+  }
+
+  console.log('Resume created successfully:', {
+    id: resume.id,
+    name: resume.name
+  });
+  console.log('=== End Create Base Resume ===\n');
+
+  return resume;
 } 

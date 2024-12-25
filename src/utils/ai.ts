@@ -1,6 +1,7 @@
 'use server';
 import OpenAI from "openai";
-import { openAiResumeSchema } from "@/lib/schemas";
+import { openAiProfileSchema, openAiResumeSchema } from "@/lib/schemas";
+import { Profile } from "@/lib/types";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -94,6 +95,45 @@ Output Requirements:
 Remember: Your primary role is to ensure COMPLETE preservation of ALL content while enhancing presentation. You are a professional formatter who must retain every single detail from the original content.`
 };
 
+
+const IMPORT_PROFILE_SYSTEM_MESSAGE: OpenAI.Chat.ChatCompletionMessageParam = {
+  role: "system",
+  content: `You are ResumeGPT, an expert system specialized in analyzing complete resumes and selecting the most relevant content for targeted applications.
+
+CRITICAL DIRECTIVE:
+You will receive a COMPLETE resume with ALL of the user's experiences, skills, and projects. Your task is to SELECT and INCLUDE only the most relevant items for their target role, copying them EXACTLY as provided without any modifications.
+
+Core Requirements:
+1. SELECT relevant items from the complete resume
+2. COPY selected items VERBATIM - no rewording or modifications
+3. EXCLUDE less relevant items
+4. MAINTAIN exact formatting and content of selected items
+5. PRESERVE all original details within chosen items
+
+Selection Process:
+1. ANALYZE the target role requirements
+2. REVIEW the complete resume content
+3. IDENTIFY the most relevant experiences, skills, and projects
+4. SELECT items that best match the target role
+5. COPY chosen items EXACTLY as they appear in the original
+
+Content Selection Rules:
+- DO NOT modify any selected content
+- DO NOT rewrite or enhance descriptions
+- DO NOT summarize or condense information
+- DO NOT add new information
+- ONLY include complete, unmodified items from the original
+
+Output Requirements:
+- Include ONLY the most relevant items
+- Copy selected content EXACTLY as provided
+- Use empty arrays ([]) for sections with no relevant items
+- Maintain the specified schema structure
+- Preserve all formatting within selected items
+
+Remember: Your role is purely SELECTIVE. You are choosing which complete, unmodified items to include from the original resume. Think of yourself as a curator who can only select and display existing pieces, never modify them.`
+};
+
 export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCompletionMessageParam>) {
   const messages = [SYSTEM_MESSAGE, ...userMessages];
   
@@ -103,7 +143,7 @@ export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCo
       messages,
       response_format: {
         "type": "json_schema",
-        "json_schema": openAiResumeSchema
+        "json_schema": openAiProfileSchema
       },
       temperature: 1,
       max_tokens: 8133, //DO NOT CHANGE
@@ -125,6 +165,63 @@ export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCo
       messages: messages.map(m => ({ role: m.role, contentLength: m.content?.length }))
     });
     throw new Error('Failed to format profile information');
+  }
+}
+
+export async function importProfileToResume(profile: Profile, targetRole: string) {
+  const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+    IMPORT_PROFILE_SYSTEM_MESSAGE,
+    {
+      role: "user",
+      content: `Please analyze my profile and recommend which experiences and skills would be most relevant for a resume targeting the role of "${targetRole}". Here's my complete profile:
+      ${JSON.stringify(profile, null, 2)}`
+    }
+  ];
+
+  // Log the system message and user prompt before sending
+  console.log('\n=== AI IMPORT PROMPT ===');
+  console.log('System Message:');
+  // console.log(IMPORT_PROFILE_SYSTEM_MESSAGE.content);
+  console.log('\nUser Message:');
+  // console.log(messages[1].content);
+  console.log('=== END PROMPT ===\n');
+  
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // DO NOT MODIFY THIS MODEL
+      messages,
+      response_format: {
+        "type": "json_schema",
+        "json_schema": openAiResumeSchema
+      },
+      temperature: 1,
+      max_tokens: 8133, //DO NOT CHANGE
+      top_p: 1,
+      frequency_penalty: 0,
+      presence_penalty: 0
+    });
+
+    if (!response.choices[0].message.content) {
+      console.error('[AI Import Error] No content in response:', response);
+      throw new Error('No content received from OpenAI');
+    }
+
+    // Log the complete analysis
+    console.log('\n=== AI PROFILE IMPORT ANALYSIS ===');
+    console.log('Target Role:', targetRole);
+    console.log('\nAI Recommendations:');
+    console.log(response.choices[0].message.content);
+    console.log('\n=== END ANALYSIS ===\n');
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error('[AI Import Error]:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined,
+      statusCode: (error as any)?.status || (error as any)?.statusCode,
+    });
+    throw new Error('Failed to import profile: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 
