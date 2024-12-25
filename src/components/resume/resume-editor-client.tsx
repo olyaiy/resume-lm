@@ -21,6 +21,7 @@ import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { BasicInfoForm } from "./basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 
 export function ResumeEditorClient({
   initialResume,
@@ -167,62 +168,76 @@ export function ResumeEditorClient({
       {/* Main Content */}
       <div className="relative min-h-screen pt-24 px-6 md:px-8 lg:px-10 pb-10">
         <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">
-          <div className="grid h-full grid-cols-1 lg:grid-cols-[minmax(400px,_1fr)_minmax(600px,_2fr)] gap-8">
-            {/* Editor Column */}
-            <ScrollArea className="h-full">
-              <div className="space-y-6 pr-4 pb-6">
-                <Tabs defaultValue="basic" className="w-full">
-                  <TabsList className="w-full h-12 bg-white/50 backdrop-blur-sm border border-white/40">
-                    <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
-                    <TabsTrigger value="experience" className="flex-1">Experience</TabsTrigger>
-                    <TabsTrigger value="education" className="flex-1">Education</TabsTrigger>
-                    <TabsTrigger value="additional" className="flex-1">Additional</TabsTrigger>
-                  </TabsList>
+          <ResizablePanelGroup
+            direction="horizontal"
+            className="h-full rounded-lg"
+          >
+            {/* Editor Panel */}
+            <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+              <ScrollArea className="h-full">
+                <div className="space-y-6 pr-4 pb-6">
+                  <Tabs defaultValue="basic" className="w-full">
+                    <TabsList className="w-full h-12 bg-white/50 backdrop-blur-sm border border-white/40">
+                      <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
+                      <TabsTrigger value="experience" className="flex-1">Experience</TabsTrigger>
+                      <TabsTrigger value="education" className="flex-1">Education</TabsTrigger>
+                      <TabsTrigger value="additional" className="flex-1">Additional</TabsTrigger>
+                    </TabsList>
 
-                  <TabsContent value="basic" className="space-y-6 mt-6">
-                    <BasicInfoForm
-                      resume={resume}
-                      onChange={updateField}
-                    />
-                  </TabsContent>
+                    <TabsContent value="basic" className="space-y-6 mt-6">
+                      <BasicInfoForm
+                        resume={resume}
+                        onChange={updateField}
+                      />
+                    </TabsContent>
 
-                  <TabsContent value="experience" className="space-y-6 mt-6">
-                    <WorkExperienceForm
-                      experiences={resume.work_experience}
-                      onChange={(experiences) => updateField('work_experience', experiences)}
-                    />
-                    <ProjectsForm
-                      projects={resume.projects}
-                      onChange={(projects) => updateField('projects', projects)}
-                    />
-                  </TabsContent>
+                    <TabsContent value="experience" className="space-y-6 mt-6">
+                      <WorkExperienceForm
+                        experiences={resume.work_experience}
+                        onChange={(experiences) => updateField('work_experience', experiences)}
+                      />
+                      <ProjectsForm
+                        projects={resume.projects}
+                        onChange={(projects) => updateField('projects', projects)}
+                      />
+                    </TabsContent>
 
-                  <TabsContent value="education" className="space-y-6 mt-6">
-                    <EducationForm
-                      education={resume.education}
-                      onChange={(education) => updateField('education', education)}
-                    />
-                    <CertificationsForm
-                      certifications={resume.certifications}
-                      onChange={(certifications) => updateField('certifications', certifications)}
-                    />
-                  </TabsContent>
+                    <TabsContent value="education" className="space-y-6 mt-6">
+                      <EducationForm
+                        education={resume.education}
+                        onChange={(education) => updateField('education', education)}
+                      />
+                      <CertificationsForm
+                        certifications={resume.certifications}
+                        onChange={(certifications) => updateField('certifications', certifications)}
+                      />
+                    </TabsContent>
 
-                  <TabsContent value="additional" className="space-y-6 mt-6">
-                    <SkillsForm
-                      skills={resume.skills}
-                      onChange={(skills) => updateField('skills', skills)}
-                    />
-                  </TabsContent>
-                </Tabs>
-              </div>
-            </ScrollArea>
+                    <TabsContent value="additional" className="space-y-6 mt-6">
+                      <SkillsForm
+                        skills={resume.skills}
+                        onChange={(skills) => updateField('skills', skills)}
+                      />
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </ScrollArea>
+            </ResizablePanel>
 
-            {/* Preview Column */}
-            <div className="h-full">
-              <ResumePreview resume={resume} />
-            </div>
-          </div>
+            {/* Resize Handle */}
+            <ResizableHandle withHandle />
+
+            {/* Preview Panel */}
+            <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+              <ScrollArea className="h-full">
+                <div className="relative pb-[129.4%] w-full">
+                  <div className="absolute inset-0">
+                    <ResumePreview resume={resume} />
+                  </div>
+                </div>
+              </ScrollArea>
+            </ResizablePanel>
+          </ResizablePanelGroup>
         </div>
       </div>
     </main>
