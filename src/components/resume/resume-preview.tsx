@@ -10,7 +10,7 @@
 
 import { Resume } from "@/lib/types";
 import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -59,16 +59,129 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
 
   // Show loading state while PDF is being generated
   if (!url) {
-    return <div>Loading...</div>;
+    return (
+      <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
+        <div className="space-y-8 animate-pulse">
+          {/* Header skeleton */}
+          <div className="space-y-4">
+            <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />
+            <div className="flex justify-center gap-4">
+              <div className="h-3 bg-gray-200 rounded w-24" />
+              <div className="h-3 bg-gray-200 rounded w-24" />
+              <div className="h-3 bg-gray-200 rounded w-24" />
+            </div>
+          </div>
+
+          {/* Summary skeleton */}
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-24" />
+            <div className="space-y-2">
+              <div className="h-3 bg-gray-200 rounded w-full" />
+              <div className="h-3 bg-gray-200 rounded w-5/6" />
+            </div>
+          </div>
+
+          {/* Experience skeleton */}
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-32" />
+            <div className="space-y-4">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-gray-200 rounded w-48" />
+                    <div className="h-3 bg-gray-200 rounded w-24" />
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Education skeleton */}
+          <div className="space-y-2">
+            <div className="h-4 bg-gray-200 rounded w-28" />
+            <div className="space-y-4">
+              {[...Array(2)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <div className="h-3 bg-gray-200 rounded w-40" />
+                    <div className="h-3 bg-gray-200 rounded w-24" />
+                  </div>
+                  <div className="h-3 bg-gray-200 rounded w-3/4" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   // Display the generated PDF using react-pdf
   return (
-    <div className="w-full h-full">
+    <div className="w-full h-full relative">
       <Document
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
-        className="flex flex-col items-center w-full h-full"
+        className="flex flex-col items-center w-full h-full bg-red-500"
+        loading={
+          <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
+            <div className="space-y-8 animate-pulse">
+              {/* Header skeleton */}
+              <div className="space-y-4">
+                <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />
+                <div className="flex justify-center gap-4">
+                  <div className="h-3 bg-gray-200 rounded w-24" />
+                  <div className="h-3 bg-gray-200 rounded w-24" />
+                  <div className="h-3 bg-gray-200 rounded w-24" />
+                </div>
+              </div>
+
+              {/* Summary skeleton */}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-24" />
+                <div className="space-y-2">
+                  <div className="h-3 bg-gray-200 rounded w-full" />
+                  <div className="h-3 bg-gray-200 rounded w-5/6" />
+                </div>
+              </div>
+
+              {/* Experience skeleton */}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-32" />
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div className="h-3 bg-gray-200 rounded w-48" />
+                        <div className="h-3 bg-gray-200 rounded w-24" />
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded w-full" />
+                      <div className="h-3 bg-gray-200 rounded w-5/6" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Education skeleton */}
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 rounded w-28" />
+                <div className="space-y-4">
+                  {[...Array(2)].map((_, i) => (
+                    <div key={i} className="space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div className="h-3 bg-gray-200 rounded w-40" />
+                        <div className="h-3 bg-gray-200 rounded w-24" />
+                      </div>
+                      <div className="h-3 bg-gray-200 rounded w-3/4" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        }
       >
         {Array.from(new Array(numPages), (_, index) => (
           <Page

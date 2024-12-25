@@ -12,7 +12,7 @@ export default async function Page({
     const { id } = await params;
     const resume = await getResumeById(id);
     return (
-      <div className="min-h-screen relative">
+      <div className="min-h-screen max-h-screen overflow-hidden relative">
         {/* Gradient Background */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />

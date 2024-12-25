@@ -22,6 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { BasicInfoForm } from "./basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
+import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
 export function ResumeEditorClient({
   initialResume,
@@ -34,6 +35,8 @@ export function ResumeEditorClient({
   const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);
   const previewPanelRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  const debouncedResume = useDebouncedValue(resume, 500);
 
   useEffect(() => {
     if (previewPanelRef.current) {
@@ -247,7 +250,7 @@ export function ResumeEditorClient({
               <ScrollArea className="h-full">
                 <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
                   <div className="absolute inset-0">
-                    <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
+                    <ResumePreview resume={debouncedResume} containerWidth={previewPanelWidth} />
                   </div>
                 </div>
               </ScrollArea>
