@@ -25,13 +25,16 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
   const [selectedBaseResume, setSelectedBaseResume] = useState<string>('');
   const [isCreating, setIsCreating] = useState(false);
   const [importOption, setImportOption] = useState<'import-all' | 'ai' | 'scratch'>('ai');
+  const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const router = useRouter();
 
   const handleCreate = async () => {
     if (type === 'base' && !targetRole.trim()) {
+      setIsTargetRoleInvalid(true);
+      setTimeout(() => setIsTargetRoleInvalid(false), 820); // Duration of shake animation + small buffer
       toast({
-        title: "Error",
-        description: "Please enter a target role",
+        title: "Required Field Missing",
+        description: "Target role is a required field. Please enter your target role.",
         variant: "destructive",
       });
       return;
@@ -80,6 +83,16 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
         {children}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[800px] p-0 bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-2xl border-white/40 shadow-2xl">
+        <style jsx global>{`
+          @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
+          }
+          .shake {
+            animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
+          }
+        `}</style>
         {/* Header Section with Icon */}
         <div className="relative px-10 pt-10 pb-8 border-b border-gray-100">
           <div className="flex items-center gap-5">
@@ -125,14 +138,18 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                       type === 'base' ? "text-purple-950" : "text-pink-950"
                     )}
                   >
-                    Target Role
+                    Target Role <span className="text-red-500">*</span>
                   </Label>
                   <Input
                     id="target-role"
                     placeholder="e.g., Senior Software Engineer"
                     value={targetRole}
                     onChange={(e) => setTargetRole(e.target.value)}
-                    className="bg-white/80 border-gray-200 h-12 text-base focus:border-purple-500 focus:ring-purple-500/20 placeholder:text-gray-400"
+                    className={cn(
+                      "bg-white/80 border-gray-200 h-12 text-base focus:border-purple-500 focus:ring-purple-500/20 placeholder:text-gray-400",
+                      isTargetRoleInvalid && "border-red-500 shake"
+                    )}
+                    required
                   />
                 </div>
 
