@@ -16,52 +16,56 @@ export function BasicInfoForm({ resume, onChange }: BasicInfoFormProps) {
   return (
     <Card className="relative group bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5 backdrop-blur-md border-2 border-teal-500/30 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
       <CardContent className="p-6">
-        <div className="space-y-6">
-          {/* Name Row */}
-          <div className="flex flex-col md:flex-row md:items-start gap-4">
-            <div className="relative group flex-1">
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
-                  <User className="h-4 w-4 text-teal-600" />
+        <div className="space-y-4">
+          {/* Personal Info Section */}
+          <div className="grid grid-cols-1 gap-4">
+            {/* Name Row - Always 2 columns */}
+            <div className="grid grid-cols-2 gap-4">
+              {/* First Name */}
+              <div className="relative group">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
+                    <User className="h-4 w-4 text-teal-600" />
+                  </div>
+                </div>
+                <Input
+                  value={resume.first_name || ''}
+                  onChange={(e) => onChange('first_name', e.target.value)}
+                  className="pr-12 text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
+                    focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
+                    hover:border-teal-500/30 hover:bg-white/60 transition-colors
+                    placeholder:text-gray-400"
+                  placeholder="First Name"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-teal-700">
+                  FIRST NAME
                 </div>
               </div>
-              <Input
-                value={resume.first_name || ''}
-                onChange={(e) => onChange('first_name', e.target.value)}
-                className="pr-12 text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
-                  focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
-                  hover:border-teal-500/30 hover:bg-white/60 transition-colors
-                  placeholder:text-gray-400"
-                placeholder="First Name"
-              />
-              <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-teal-700">
-                FIRST NAME
-              </div>
-            </div>
-            <div className="relative group flex-1">
-              <div className="absolute right-3 top-1/2 -translate-y-1/2">
-                <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
-                  <User className="h-4 w-4 text-teal-600" />
-                </div>
-              </div>
-              <Input
-                value={resume.last_name || ''}
-                onChange={(e) => onChange('last_name', e.target.value)}
-                className="pr-12 text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
-                  focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
-                  hover:border-teal-500/30 hover:bg-white/60 transition-colors
-                  placeholder:text-gray-400"
-                placeholder="Last Name"
-              />
-              <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-teal-700">
-                LAST NAME
-              </div>
-            </div>
-          </div>
 
-          {/* Contact Info */}
-          <div className="flex flex-col md:flex-row md:items-start gap-4">
-            <div className="relative group flex-1">
+              {/* Last Name */}
+              <div className="relative group">
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
+                    <User className="h-4 w-4 text-teal-600" />
+                  </div>
+                </div>
+                <Input
+                  value={resume.last_name || ''}
+                  onChange={(e) => onChange('last_name', e.target.value)}
+                  className="pr-12 text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
+                    focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
+                    hover:border-teal-500/30 hover:bg-white/60 transition-colors
+                    placeholder:text-gray-400"
+                  placeholder="Last Name"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-teal-700">
+                  LAST NAME
+                </div>
+              </div>
+            </div>
+
+            {/* Email */}
+            <div className="relative group">
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
                   <Mail className="h-4 w-4 text-teal-600" />
@@ -81,7 +85,9 @@ export function BasicInfoForm({ resume, onChange }: BasicInfoFormProps) {
                 EMAIL
               </div>
             </div>
-            <div className="relative group flex-1">
+
+            {/* Phone */}
+            <div className="relative group">
               <div className="absolute right-3 top-1/2 -translate-y-1/2">
                 <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-focus-within:scale-110">
                   <Phone className="h-4 w-4 text-teal-600" />
@@ -124,7 +130,7 @@ export function BasicInfoForm({ resume, onChange }: BasicInfoFormProps) {
             </div>
           </div>
 
-          {/* Online Presence - Single Column */}
+          {/* Online Presence */}
           <div className="space-y-4">
             {/* Website */}
             <div className="relative group">
