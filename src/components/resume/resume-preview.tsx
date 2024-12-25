@@ -1,7 +1,7 @@
 /**
  * Resume Preview Component
  * 
- * This component generates a PDF resume using @react-pdf/renderer and displays it in an iframe.
+ * This component generates a PDF resume using @react-pdf/renderer and displays it using react-pdf.
  * It supports two variants: base and tailored resumes, with consistent styling and layout.
  * The PDF is generated client-side and updates whenever the resume data changes.
  */
@@ -9,8 +9,19 @@
 "use client";
 
 import { Resume } from "@/lib/types";
-import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import { Document, Page, pdfjs } from 'react-pdf';
 import { useState, useEffect } from 'react';
+
+// Import required CSS for react-pdf
+import 'react-pdf/dist/Page/TextLayer.css';
+import 'react-pdf/dist/Page/AnnotationLayer.css';
+
+// Configure PDF.js worker
+pdfjs.GlobalWorkerOptions.workerSrc = new URL(
+  'pdfjs-dist/build/pdf.worker.min.mjs',
+  import.meta.url,
+).toString();
 
 interface ResumePreviewProps {
   resume: Resume;
@@ -159,8 +170,8 @@ const styles = StyleSheet.create({
  */
 function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
   return (
-    <Document>
-      <Page size="LETTER" style={styles.page}>
+    <PDFDocument>
+      <PDFPage size="LETTER" style={styles.page}>
         {/* Header Section - Name and Contact Information */}
         <View style={styles.header}>
           <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
@@ -319,8 +330,8 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
             ))}
           </>
         )}
-      </Page>
-    </Document>
+      </PDFPage>
+    </PDFDocument>
   );
 }
 
@@ -328,40 +339,50 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
  * ResumePreview Component
  * 
  * Main export component that handles the PDF generation and display.
- * Uses react-pdf to generate a PDF blob and displays it in an iframe.
+ * Uses @react-pdf/renderer to generate the PDF and react-pdf to display it.
  * Updates the PDF whenever the resume data changes.
  */
 export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) {
-  // State to store the generated PDF URL
   const [url, setUrl] = useState<string | null>(null);
+  const [numPages, setNumPages] = useState<number>(0);
 
   // Generate PDF when resume data changes
   useEffect(() => {
     async function generatePDF() {
-      // Generate PDF blob from ResumeDocument component
       const blob = await pdf(<ResumeDocument resume={resume} variant={variant} />).toBlob();
-      // Create URL for the blob
       const url = URL.createObjectURL(blob);
       setUrl(url);
-      // Cleanup function to revoke the URL when component unmounts
       return () => URL.revokeObjectURL(url);
     }
     generatePDF();
   }, [resume, variant]);
+
+  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
+    setNumPages(numPages);
+  }
 
   // Show loading state while PDF is being generated
   if (!url) {
     return <div>Loading...</div>;
   }
 
-  // Display the generated PDF in an iframe
+  // Display the generated PDF using react-pdf
   return (
     <div className="w-full h-full min-h-[279.4mm]">
-      <iframe
-        src={url}
-        className="w-full h-full min-h-[279.4mm] rounded-xl"
-        title="Resume Preview"
-      />
+      <Document
+        file={url}
+        onLoadSuccess={onDocumentLoadSuccess}
+        className="w-full h-full"
+      >
+        {Array.from(new Array(numPages), (_, index) => (
+          <Page
+            key={`page_${index + 1}`}
+            pageNumber={index + 1}
+            className="mb-4 rounded-xl shadow-lg"
+            width={window.innerWidth * 0.8}
+          />
+        ))}
+      </Document>
     </div>
   );
 } 
