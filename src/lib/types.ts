@@ -1,9 +1,9 @@
 export interface WorkExperience {
   company: string;
   position: string;
-  location: string;
+  location?: string;
   start_date: string;
-  end_date: string | null;
+  end_date?: string;
   current: boolean;
   description: string[];
   technologies?: string[];
@@ -13,23 +13,21 @@ export interface Education {
   school: string;
   degree: string;
   field: string;
-  location: string;
+  location?: string;
   start_date: string;
-  end_date: string | null;
+  end_date?: string;
   current: boolean;
-  gpa?: number;
+  gpa?: string;
   achievements?: string[];
 }
 
 export interface Project {
   name: string;
-  description: string[];
-  technologies: string[];
-  url?: string;
-  github_url?: string;
-  start_date: string;
-  end_date: string | null;
+  description: string;
+  start_date?: string;
+  end_date?: string;
   highlights: string[];
+  technologies?: string[];
 }
 
 export interface Skill {
@@ -40,10 +38,9 @@ export interface Skill {
 export interface Certification {
   name: string;
   issuer: string;
-  date_acquired: string;
+  date_acquired?: string;
   expiry_date?: string;
   credential_id?: string;
-  url?: string;
 }
 
 export interface Job {
@@ -75,35 +72,35 @@ export interface SectionConfig {
 export interface Resume {
   id: string;
   user_id: string;
-  job_id?: string;
-  is_base_resume: boolean;
-  // Document Metadata
-  resume_title: string;
-  target_role: string;
   name: string;
-  // Basic Information
-  first_name?: string;
-  last_name?: string;
-  email?: string;
+  target_role: string;
+  is_base_resume: boolean;
+  first_name: string;
+  last_name: string;
+  email: string;
   phone_number?: string;
   location?: string;
   website?: string;
   linkedin_url?: string;
   github_url?: string;
   professional_summary?: string;
-  // Complex fields
   work_experience: WorkExperience[];
   education: Education[];
   skills: Skill[];
   projects: Project[];
   certifications: Certification[];
-  // Section ordering and configuration
-  section_order: string[];
-  section_configs: {
-    [key: string]: SectionConfig;
-  };
   created_at: string;
   updated_at: string;
+  document_settings?: DocumentSettings;
+}
+
+export interface DocumentSettings {
+  font_family?: string;
+  base_font_size?: number;
+  header_font_size?: number;
+  margin_tb?: number;
+  margin_lr?: number;
+  line_spacing?: number;
 }
 
 export interface Profile {

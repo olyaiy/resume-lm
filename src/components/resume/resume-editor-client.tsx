@@ -23,6 +23,7 @@ import { BasicInfoForm } from "./basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
+import { DocumentSettingsForm } from "./document-settings-form";
 
 export function ResumeEditorClient({
   initialResume,
@@ -105,36 +106,41 @@ export function ResumeEditorClient({
       </div>
 
       {/* Top Bar */}
-      <div className="h-16 border-b border-white/20 bg-white/80 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-sm">
+      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-white/95 to-white/90 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/5">
         <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <Link 
               href="/"
-              className="group flex items-center text-sm text-muted-foreground hover:text-teal-600 transition-colors duration-300"
+              className="group flex items-center text-sm font-medium text-muted-foreground hover:text-purple-600 transition-colors duration-300"
             >
-              <ArrowLeft className="h-4 w-4 mr-1.5 group-hover:-translate-x-0.5 transition-transform duration-300" />
+              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-0.5 transition-transform duration-300" />
               Back to Dashboard
             </Link>
-            <Separator orientation="vertical" className="h-4 bg-muted/50" />
-            <h1 className="text-lg font-medium bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              {resume.name}
-            </h1>
+            <Separator orientation="vertical" className="h-5 bg-purple-200/30" />
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                {resume.is_base_resume ? `${resume.target_role} Base Resume` : resume.name}
+              </h1>
+              <p className="text-sm text-muted-foreground/80">
+                {resume.is_base_resume ? "Base Template" : "Tailored Resume"}
+              </p>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button 
               onClick={handleSave} 
               disabled={isSaving}
               size="sm"
-              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5"
             >
               {isSaving ? (
                 <>
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Saving changes...
                 </>
               ) : (
                 <>
-                  <Save className="mr-2 h-3.5 w-3.5" />
+                  <Save className="mr-2 h-4 w-4" />
                   Save Changes
                 </>
               )}
@@ -144,17 +150,17 @@ export function ResumeEditorClient({
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10"
                   disabled={isDeleting}
                 >
                   {isDeleting ? (
                     <>
-                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                       Deleting...
                     </>
                   ) : (
                     <>
-                      <Trash2 className="mr-2 h-3.5 w-3.5" />
+                      <Trash2 className="mr-2 h-4 w-4" />
                       Delete Resume
                     </>
                   )}
@@ -195,32 +201,46 @@ export function ResumeEditorClient({
               <ScrollArea className="h-full">
                 <div className="space-y-6 pr-4 pb-6">
                   <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="w-full h-auto min-h-[3.5rem] grid grid-cols-2 sm:grid-cols-4 gap-1 bg-gradient-to-r from-white/40 via-white/50 to-white/40 backdrop-blur-md border border-white/40 rounded-xl p-1.5 shadow-lg shadow-teal-500/5">
-                      <TabsTrigger 
-                        value="basic" 
-                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
-                      >
-                        Basic Info
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="experience" 
-                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
-                      >
-                        Experience
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="education" 
-                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
-                      >
-                        Education
-                      </TabsTrigger>
-                      <TabsTrigger 
-                        value="additional" 
-                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
-                      >
-                        Additional
-                      </TabsTrigger>
-                    </TabsList>
+                    <div className="@container">
+                      <TabsList className="w-full h-auto grid grid-cols-3 @[500px]:grid-cols-6 gap-1.5 bg-gradient-to-r from-white/40 via-white/50 to-white/40 backdrop-blur-md border border-white/40 rounded-xl p-1.5 shadow-lg shadow-teal-500/5">
+                        <TabsTrigger 
+                          value="basic" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Basic Info
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="work" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Work
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="projects" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Projects
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="education" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Education
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="additional" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Additional
+                        </TabsTrigger>
+                        <TabsTrigger 
+                          value="settings" 
+                          className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                        >
+                          Settings
+                        </TabsTrigger>
+                      </TabsList>
+                    </div>
 
                     <TabsContent value="basic" className="space-y-6 mt-6">
                       <BasicInfoForm
@@ -229,11 +249,14 @@ export function ResumeEditorClient({
                       />
                     </TabsContent>
 
-                    <TabsContent value="experience" className="space-y-6 mt-6">
+                    <TabsContent value="work" className="space-y-6 mt-6">
                       <WorkExperienceForm
                         experiences={resume.work_experience}
                         onChange={(experiences) => updateField('work_experience', experiences)}
                       />
+                    </TabsContent>
+
+                    <TabsContent value="projects" className="space-y-6 mt-6">
                       <ProjectsForm
                         projects={resume.projects}
                         onChange={(projects) => updateField('projects', projects)}
@@ -255,6 +278,13 @@ export function ResumeEditorClient({
                       <SkillsForm
                         skills={resume.skills}
                         onChange={(skills) => updateField('skills', skills)}
+                      />
+                    </TabsContent>
+
+                    <TabsContent value="settings" className="space-y-6 mt-6">
+                      <DocumentSettingsForm
+                        resume={resume}
+                        onChange={updateField}
                       />
                     </TabsContent>
                   </Tabs>
