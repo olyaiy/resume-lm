@@ -118,20 +118,31 @@ export async function createBaseResume(name: string, importOption: 'import-all' 
     target_role: name,
     is_base_resume: true,
     // Pre-fill with profile data if available and not starting fresh
-    first_name: importOption === 'fresh' ? '' : (profile?.first_name || ''),
-    last_name: importOption === 'fresh' ? '' : (profile?.last_name || ''),
-    email: importOption === 'fresh' ? '' : (profile?.email || ''),
-    phone_number: importOption === 'fresh' ? '' : (profile?.phone_number || ''),
-    location: importOption === 'fresh' ? '' : (profile?.location || ''),
-    website: importOption === 'fresh' ? '' : (profile?.website || ''),
-    linkedin_url: importOption === 'fresh' ? '' : (profile?.linkedin_url || ''),
-    github_url: importOption === 'fresh' ? '' : (profile?.github_url || ''),
-    professional_summary: importOption === 'fresh' ? '' : (profile?.professional_summary || ''),
-    work_experience: importOption === 'fresh' ? [] : (profile?.work_experience || []),
-    education: importOption === 'fresh' ? [] : (profile?.education || []),
-    skills: importOption === 'fresh' ? [] : (profile?.skills || []),
-    projects: importOption === 'fresh' ? [] : (profile?.projects || []),
-    certifications: importOption === 'fresh' ? [] : (profile?.certifications || []),
+    first_name: importOption === 'fresh' ? '' : profile?.first_name || '',
+    last_name: importOption === 'fresh' ? '' : profile?.last_name || '',
+    email: importOption === 'fresh' ? '' : profile?.email || '',
+    phone_number: importOption === 'fresh' ? '' : profile?.phone_number || '',
+    location: importOption === 'fresh' ? '' : profile?.location || '',
+    website: importOption === 'fresh' ? '' : profile?.website || '',
+    linkedin_url: importOption === 'fresh' ? '' : profile?.linkedin_url || '',
+    github_url: importOption === 'fresh' ? '' : profile?.github_url || '',
+    professional_summary: '', // Always start with empty professional summary
+    // For array fields, handle differently based on importOption
+    work_experience: importOption === 'import-all' ? [...(profile?.work_experience || [])] :
+                    importOption === 'fresh' ? [] :
+                    [], // For 'ai', start empty (AI will fill later)
+    education: importOption === 'import-all' ? [...(profile?.education || [])] :
+              importOption === 'fresh' ? [] :
+              [], // For 'ai', start empty (AI will fill later)
+    skills: importOption === 'import-all' ? [...(profile?.skills || [])] :
+            importOption === 'fresh' ? [] :
+            [], // For 'ai', start empty (AI will fill later)
+    projects: importOption === 'import-all' ? [...(profile?.projects || [])] :
+              importOption === 'fresh' ? [] :
+              [], // For 'ai', start empty (AI will fill later)
+    certifications: importOption === 'import-all' ? [...(profile?.certifications || [])] :
+                   importOption === 'fresh' ? [] :
+                   [], // For 'ai', start empty (AI will fill later)
     section_order: [
       'professional_summary',
       'work_experience',
