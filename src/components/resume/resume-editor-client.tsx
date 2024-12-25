@@ -220,23 +220,7 @@ export function ResumeEditorClient({
 
             {/* Preview Column */}
             <div className="h-full">
-              <Card className="h-full bg-white/40 hover:bg-white/50 backdrop-blur-md border-white/40 shadow-lg hover:shadow-xl transition-all duration-500">
-                <CardHeader className="border-b border-border/50 pb-4">
-                  <CardTitle className="text-xl bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                    Resume Preview
-                  </CardTitle>
-                  <CardDescription>
-                    Live preview of how your resume will look
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0 h-[calc(100%-5rem)]">
-                  <ScrollArea className="h-full rounded-b-lg">
-                    <div className="p-6">
-                      <ResumePreview resume={resume} />
-                    </div>
-                  </ScrollArea>
-                </CardContent>
-              </Card>
+              <ResumePreview resume={resume} />
             </div>
           </div>
         </div>

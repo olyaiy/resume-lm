@@ -40,7 +40,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Loader2 } from "lucide-react";
-import { BasicInfoForm } from "@/components/resume/basic-info-form";
+import { ProfileBasicInfoForm } from "@/components/profile/profile-basic-info-form";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -612,8 +612,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-xl transition-all duration-500 hover:shadow-2xl rounded-xl overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/5 to-cyan-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                       <div className="relative p-6">
-                        <BasicInfoForm
-                          resume={profile}
+                        <ProfileBasicInfoForm
+                          profile={profile}
                           onChange={(field, value) => {
                             if (field in profile) {
                               updateField(field as keyof Profile, value);
