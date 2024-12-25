@@ -1,227 +1,312 @@
+"use client";
+
 import { Resume } from "@/lib/types";
-import { Card } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
+import { Document, Page, Text, View, StyleSheet, pdf } from '@react-pdf/renderer';
+import { useState, useEffect } from 'react';
 
 interface ResumePreviewProps {
   resume: Resume;
+  variant?: 'base' | 'tailored';
 }
 
-export function ResumePreview({ resume }: ResumePreviewProps) {
+// Create styles
+const styles = StyleSheet.create({
+  page: {
+    padding: 48,
+    fontFamily: 'Helvetica',
+    color: '#1f2937',
+  },
+  header: {
+    marginBottom: 20,
+  },
+  name: {
+    fontSize: 24,
+    fontFamily: 'Helvetica-Bold',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  contactInfo: {
+    fontSize: 10,
+    textAlign: 'center',
+    color: '#4b5563',
+    marginBottom: 4,
+  },
+  links: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    fontSize: 10,
+    color: '#2563eb',
+  },
+  sectionTitle: {
+    fontSize: 14,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 8,
+    marginTop: 16,
+    paddingBottom: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: '#e5e7eb',
+  },
+  summary: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    marginBottom: 16,
+  },
+  experienceItem: {
+    marginBottom: 12,
+  },
+  experienceHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  companyName: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+  },
+  jobTitle: {
+    fontSize: 10,
+    color: '#4b5563',
+  },
+  dateRange: {
+    fontSize: 10,
+    color: '#6b7280',
+  },
+  bulletPoint: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    marginLeft: 12,
+    marginBottom: 2,
+  },
+  skillsGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  skillCategory: {
+    width: '48%',
+  },
+  skillCategoryTitle: {
+    fontSize: 11,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 4,
+  },
+  skillItem: {
+    fontSize: 10,
+    color: '#4b5563',
+    backgroundColor: '#f3f4f6',
+    padding: '2 6',
+    borderRadius: 4,
+    marginRight: 4,
+    marginBottom: 4,
+  },
+  projectItem: {
+    marginBottom: 12,
+  },
+  projectHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  projectTitle: {
+    fontSize: 12,
+    fontFamily: 'Helvetica-Bold',
+  },
+  projectDescription: {
+    fontSize: 10,
+    lineHeight: 1.5,
+    marginBottom: 4,
+  },
+  certificationItem: {
+    marginBottom: 8,
+  },
+});
+
+// Resume Document Component
+function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
   return (
-    <Card className="p-12 min-h-[297mm] w-full bg-white shadow-xl max-w-4xl mx-auto">
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-          {resume.first_name} {resume.last_name}
-        </h1>
-        <div className="text-base text-muted-foreground space-y-2 mt-3">
-          <div className="flex items-center justify-center gap-3">
-            {resume.email && <span>{resume.email}</span>}
-            {resume.phone_number && (
-              <>
-                <span className="text-gray-300">•</span>
-                <span>{resume.phone_number}</span>
-              </>
-            )}
-          </div>
-          {resume.location && (
-            <div className="text-muted-foreground">{resume.location}</div>
-          )}
-          <div className="flex items-center justify-center gap-6 mt-2">
-            {resume.website && (
-              <a href={resume.website} target="_blank" rel="noopener noreferrer" 
-                 className="flex items-center hover:text-blue-600 transition-colors">
-                Website <ExternalLink className="h-4 w-4 ml-1" />
-              </a>
-            )}
-            {resume.linkedin_url && (
-              <a href={resume.linkedin_url} target="_blank" rel="noopener noreferrer" 
-                 className="flex items-center hover:text-blue-600 transition-colors">
-                LinkedIn <ExternalLink className="h-4 w-4 ml-1" />
-              </a>
-            )}
-            {resume.github_url && (
-              <a href={resume.github_url} target="_blank" rel="noopener noreferrer" 
-                 className="flex items-center hover:text-blue-600 transition-colors">
-                GitHub <ExternalLink className="h-4 w-4 ml-1" />
-              </a>
-            )}
-          </div>
-        </div>
-      </div>
+    <Document>
+      <Page size="LETTER" style={styles.page}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
+          <Text style={styles.contactInfo}>
+            {[
+              resume.email,
+              resume.phone_number,
+              resume.location
+            ].filter(Boolean).join(' • ')}
+          </Text>
+          <View style={styles.links}>
+            {resume.website && <Text>Portfolio</Text>}
+            {resume.linkedin_url && <Text>LinkedIn</Text>}
+            {resume.github_url && <Text>GitHub</Text>}
+          </View>
+        </View>
 
-      {/* Professional Summary */}
-      {resume.professional_summary && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Professional Summary</h2>
-          <p className="text-base leading-relaxed text-gray-600">{resume.professional_summary}</p>
-        </div>
-      )}
+        {/* Professional Summary */}
+        {resume.professional_summary && (
+          <>
+            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.summary}>{resume.professional_summary}</Text>
+          </>
+        )}
 
-      {/* Work Experience */}
-      {resume.work_experience?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Work Experience</h2>
-          {resume.work_experience.map((exp, index) => (
-            <div key={index} className="mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{exp.position}</h3>
-                  <div className="text-base text-gray-600">{exp.company} • {exp.location}</div>
-                </div>
-                <span className="text-sm text-gray-500 whitespace-nowrap">
-                  {exp.start_date} - {exp.current ? 'Present' : exp.end_date}
-                </span>
-              </div>
-              <ul className="list-disc list-inside text-base mt-3 space-y-2">
+        {/* Work Experience */}
+        {resume.work_experience?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Work Experience</Text>
+            {resume.work_experience.map((exp, index) => (
+              <View key={index} style={styles.experienceItem}>
+                <View style={styles.experienceHeader}>
+                  <View>
+                    <Text style={styles.companyName}>{exp.company}</Text>
+                    <Text style={styles.jobTitle}>{exp.position} • {exp.location}</Text>
+                  </View>
+                  <Text style={styles.dateRange}>
+                    {exp.start_date} - {exp.current ? 'Present' : exp.end_date}
+                  </Text>
+                </View>
                 {exp.description.map((desc, i) => (
-                  <li key={i} className="text-gray-600">{desc}</li>
+                  <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
                 ))}
-              </ul>
-              {exp.technologies && exp.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {exp.technologies.map((tech, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Education */}
-      {resume.education?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Education</h2>
-          {resume.education.map((edu, index) => (
-            <div key={index} className="mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{edu.degree} in {edu.field}</h3>
-                  <div className="text-base text-gray-600">{edu.school} • {edu.location}</div>
-                </div>
-                <span className="text-sm text-gray-500 whitespace-nowrap">
-                  {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
-                </span>
-              </div>
-              {edu.gpa && (
-                <div className="text-base text-gray-600 mt-2">GPA: {edu.gpa}</div>
-              )}
-              {edu.achievements && edu.achievements.length > 0 && (
-                <ul className="list-disc list-inside text-base mt-3 space-y-2">
-                  {edu.achievements.map((achievement, i) => (
-                    <li key={i} className="text-gray-600">{achievement}</li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Skills */}
-      {resume.skills?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Skills</h2>
-          <div className="grid grid-cols-2 gap-6">
-            {resume.skills.map((skill, index) => (
-              <div key={index}>
-                <h3 className="text-base font-medium text-gray-800 mb-2">{skill.category}</h3>
-                <div className="flex flex-wrap gap-2">
-                  {skill.items.map((item, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
-                      {item}
-                    </span>
-                  ))}
-                </div>
-              </div>
+                {exp.technologies && exp.technologies.length > 0 && (
+                  <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
+                    {exp.technologies.map((tech, i) => (
+                      <Text key={i} style={styles.skillItem}>{tech}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
             ))}
-          </div>
-        </div>
-      )}
+          </>
+        )}
 
-      {/* Projects */}
-      {resume.projects?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Projects</h2>
-          {resume.projects.map((project, index) => (
-            <div key={index} className="mb-6">
-              <div className="flex justify-between items-start">
-                <h3 className="text-lg font-semibold text-gray-800">{project.name}</h3>
-                <span className="text-sm text-gray-500 whitespace-nowrap">
-                  {project.start_date} - {project.end_date || 'Present'}
-                </span>
-              </div>
-              <p className="text-base text-gray-600 mt-2">{project.description}</p>
-              {project.technologies && project.technologies.length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {project.technologies.map((tech, i) => (
-                    <span key={i} className="px-2 py-1 bg-gray-100 text-gray-600 rounded-md text-sm">
-                      {tech}
-                    </span>
-                  ))}
-                </div>
-              )}
-              {project.highlights && project.highlights.length > 0 && (
-                <ul className="list-disc list-inside text-base mt-3 space-y-2">
-                  {project.highlights.map((highlight, i) => (
-                    <li key={i} className="text-gray-600">{highlight}</li>
-                  ))}
-                </ul>
-              )}
-              <div className="flex gap-4 mt-3">
-                {project.url && (
-                  <a href={project.url} target="_blank" rel="noopener noreferrer" 
-                     className="flex items-center text-blue-600 hover:text-blue-700 transition-colors">
-                    Live Demo <ExternalLink className="h-4 w-4 ml-1" />
-                  </a>
+        {/* Education */}
+        {resume.education?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Education</Text>
+            {resume.education.map((edu, index) => (
+              <View key={index} style={styles.experienceItem}>
+                <View style={styles.experienceHeader}>
+                  <View>
+                    <Text style={styles.companyName}>{edu.school}</Text>
+                    <Text style={styles.jobTitle}>{edu.degree} in {edu.field} • {edu.location}</Text>
+                  </View>
+                  <Text style={styles.dateRange}>
+                    {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
+                  </Text>
+                </View>
+                {edu.gpa && (
+                  <Text style={styles.bulletPoint}>GPA: {edu.gpa}</Text>
                 )}
-                {project.github_url && (
-                  <a href={project.github_url} target="_blank" rel="noopener noreferrer" 
-                     className="flex items-center text-blue-600 hover:text-blue-700 transition-colors">
-                    GitHub <ExternalLink className="h-4 w-4 ml-1" />
-                  </a>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+                {edu.achievements?.map((achievement, i) => (
+                  <Text key={i} style={styles.bulletPoint}>• {achievement}</Text>
+                ))}
+              </View>
+            ))}
+          </>
+        )}
 
-      {/* Certifications */}
-      {resume.certifications?.length > 0 && (
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold border-b border-gray-200 pb-2 mb-4">Certifications</h2>
-          {resume.certifications.map((cert, index) => (
-            <div key={index} className="mb-6">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800">{cert.name}</h3>
-                  <div className="text-base text-gray-600">{cert.issuer}</div>
-                </div>
-                <span className="text-sm text-gray-500 whitespace-nowrap">
-                  {cert.date_acquired}
-                  {cert.expiry_date && ` - ${cert.expiry_date}`}
-                </span>
-              </div>
-              {cert.credential_id && (
-                <div className="text-base text-gray-500 mt-2">
-                  Credential ID: {cert.credential_id}
-                </div>
-              )}
-              {cert.url && (
-                <a href={cert.url} target="_blank" rel="noopener noreferrer" 
-                   className="flex items-center text-blue-600 hover:text-blue-700 transition-colors mt-2">
-                  View Certificate <ExternalLink className="h-4 w-4 ml-1" />
-                </a>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
-    </Card>
+        {/* Skills */}
+        {resume.skills?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Skills</Text>
+            <View style={styles.skillsGrid}>
+              {resume.skills.map((skill, index) => (
+                <View key={index} style={styles.skillCategory}>
+                  <Text style={styles.skillCategoryTitle}>{skill.category}</Text>
+                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
+                    {skill.items.map((item, i) => (
+                      <Text key={i} style={styles.skillItem}>{item}</Text>
+                    ))}
+                  </View>
+                </View>
+              ))}
+            </View>
+          </>
+        )}
+
+        {/* Projects */}
+        {resume.projects?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Projects</Text>
+            {resume.projects.map((project, index) => (
+              <View key={index} style={styles.projectItem}>
+                <View style={styles.projectHeader}>
+                  <Text style={styles.projectTitle}>{project.name}</Text>
+                  <Text style={styles.dateRange}>
+                    {project.start_date} - {project.end_date || 'Present'}
+                  </Text>
+                </View>
+                <Text style={styles.projectDescription}>{project.description}</Text>
+                {project.highlights?.map((highlight, i) => (
+                  <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
+                ))}
+                {project.technologies && project.technologies.length > 0 && (
+                  <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
+                    {project.technologies.map((tech, i) => (
+                      <Text key={i} style={styles.skillItem}>{tech}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Certifications */}
+        {resume.certifications?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Certifications</Text>
+            {resume.certifications.map((cert, index) => (
+              <View key={index} style={styles.certificationItem}>
+                <View style={styles.experienceHeader}>
+                  <View>
+                    <Text style={styles.companyName}>{cert.name}</Text>
+                    <Text style={styles.jobTitle}>{cert.issuer}</Text>
+                  </View>
+                  <Text style={styles.dateRange}>
+                    {cert.date_acquired}
+                    {cert.expiry_date && ` - ${cert.expiry_date}`}
+                  </Text>
+                </View>
+                {cert.credential_id && (
+                  <Text style={styles.bulletPoint}>Credential ID: {cert.credential_id}</Text>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+      </Page>
+    </Document>
+  );
+}
+
+export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) {
+  const [url, setUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function generatePDF() {
+      const blob = await pdf(<ResumeDocument resume={resume} variant={variant} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      setUrl(url);
+      return () => URL.revokeObjectURL(url);
+    }
+    generatePDF();
+  }, [resume, variant]);
+
+  if (!url) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="w-full h-full min-h-[279.4mm]">
+      <iframe
+        src={url}
+        className="w-full h-full min-h-[279.4mm] rounded-xl"
+        title="Resume Preview"
+      />
+    </div>
   );
 } 
