@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { Resume } from "@/lib/types";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
@@ -31,7 +31,22 @@ export function ResumeEditorClient({
   const [resume, setResume] = useState(initialResume);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);
+  const previewPanelRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  useEffect(() => {
+    if (previewPanelRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setPreviewPanelWidth(entry.contentRect.width);
+        }
+      });
+
+      resizeObserver.observe(previewPanelRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
 
   const updateField = (field: keyof Resume, value: any) => {
     setResume(prev => ({ ...prev, [field]: value }));
@@ -230,9 +245,9 @@ export function ResumeEditorClient({
             {/* Preview Panel */}
             <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
               <ScrollArea className="h-full">
-                <div className="relative pb-[129.4%] w-full">
+                <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
                   <div className="absolute inset-0">
-                    <ResumePreview resume={resume} />
+                    <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
                   </div>
                 </div>
               </ScrollArea>

@@ -10,9 +10,10 @@
 
 import { Resume } from "@/lib/types";
 import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
+import { useDebouncedValue } from '@/hooks/use-debounced-value';
 
 // Import required CSS for react-pdf
 import 'react-pdf/dist/Page/TextLayer.css';
@@ -27,6 +28,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 interface ResumePreviewProps {
   resume: Resume;
   variant?: 'base' | 'tailored';
+  containerWidth?: number;
 }
 
 /**
@@ -35,10 +37,10 @@ interface ResumePreviewProps {
  * Displays a PDF preview of the resume using react-pdf.
  * Handles PDF generation and responsive display.
  */
-export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) {
+export function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const debouncedWidth = useDebouncedValue(containerWidth, 100);
 
   // Generate PDF when resume data changes
   useEffect(() => {
@@ -62,10 +64,7 @@ export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) 
 
   // Display the generated PDF using react-pdf
   return (
-    <div 
-      ref={setContainerRef}
-      className="w-full h-full"
-    >
+    <div className="w-full h-full">
       <Document
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
@@ -76,7 +75,7 @@ export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) 
             key={`page_${index + 1}`}
             pageNumber={index + 1}
             className="mb-4 rounded-xl shadow-lg"
-            width={containerRef?.clientWidth ?? undefined}
+            width={debouncedWidth}
           />
         ))}
       </Document>
