@@ -17,9 +17,8 @@ const styles = StyleSheet.create({
   },
   // Header section with improved spacing
   header: {
-    marginBottom: 16,
-    borderBottom: '1pt solid #e5e7eb',
-    paddingBottom: 12,
+    marginBottom: 0,
+    paddingBottom: 8,
     alignItems: 'center',
   },
   // Modernized name display
@@ -49,10 +48,10 @@ const styles = StyleSheet.create({
   },
   // Enhanced section headers
   sectionTitle: {
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: 6,
+    marginTop: 14,
     color: '#111827',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -192,7 +191,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         {/* Skills Section - Moved up for software engineering focus */}
         {resume.skills?.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Technical Skills</Text>
+            <Text style={styles.sectionTitle}>Skills</Text>
             <View style={styles.skillsGrid}>
               {resume.skills.map((skill, index) => (
                 <View key={index} style={styles.skillCategory}>
@@ -209,7 +208,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         {/* Work Experience Section */}
         {resume.work_experience?.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Professional Experience</Text>
+            <Text style={styles.sectionTitle}>Experience</Text>
             {resume.work_experience.map((exp, index) => (
               <View key={index} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
@@ -222,18 +221,16 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     )}
                   </View>
                   <Text style={styles.dateRange}>
-                    {exp.start_date} - {exp.current ? 'Present' : exp.end_date}
+                    {exp.start_date && `${exp.start_date}${exp.current ? ' - Present' : exp.end_date ? ` - ${exp.end_date}` : ''}`}
                   </Text>
                 </View>
                 {exp.description.map((desc, i) => (
                   <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
                 ))}
                 {exp.technologies && exp.technologies.length > 0 && (
-                  <View style={{ ...styles.skillsGrid, marginTop: 2 }}>
-                    {exp.technologies.map((tech, i) => (
-                      <Text key={i} style={styles.skillItem}>{tech}</Text>
-                    ))}
-                  </View>
+                  <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
+                    Technologies: {exp.technologies.join(', ')}
+                  </Text>
                 )}
               </View>
             ))}
@@ -243,7 +240,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         {/* Projects Section */}
         {resume.projects?.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Technical Projects</Text>
+            <Text style={styles.sectionTitle}>Projects</Text>
             {resume.projects.map((project, index) => (
               <View key={index} style={styles.projectItem}>
                 <View style={styles.projectHeader}>
@@ -251,7 +248,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     <Text style={styles.projectTitle}>{project.name}</Text>
                   </View>
                   <Text style={styles.dateRange}>
-                    {project.start_date} - {project.end_date || 'Present'}
+                    {project.start_date && `${project.start_date}${project.end_date ? ` - ${project.end_date}` : ' - Present'}`}
                   </Text>
                 </View>
                 <Text style={styles.projectDescription}>{project.description}</Text>
@@ -259,11 +256,9 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
                 ))}
                 {project.technologies && project.technologies.length > 0 && (
-                  <View style={{ ...styles.skillsGrid, marginTop: 2 }}>
-                    {project.technologies.map((tech, i) => (
-                      <Text key={i} style={styles.skillItem}>{tech}</Text>
-                    ))}
-                  </View>
+                  <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
+                    Technologies: {project.technologies.join(', ')}
+                  </Text>
                 )}
               </View>
             ))}
@@ -286,7 +281,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     )}
                   </View>
                   <Text style={styles.dateRange}>
-                    {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
+                    {edu.start_date && `${edu.start_date}${edu.current ? ' - Present' : edu.end_date ? ` - ${edu.end_date}` : ''}`}
                   </Text>
                 </View>
                 {edu.gpa && (
@@ -312,8 +307,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     <Text style={styles.jobTitle}>{cert.issuer}</Text>
                   </View>
                   <Text style={styles.dateRange}>
-                    {cert.date_acquired}
-                    {cert.expiry_date && ` - ${cert.expiry_date}`}
+                    {cert.date_acquired && `${cert.date_acquired}${cert.expiry_date ? ` - ${cert.expiry_date}` : ''}`}
                   </Text>
                 </View>
                 {cert.credential_id && (
