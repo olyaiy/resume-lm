@@ -12,12 +12,11 @@
  */
 
 import { redirect } from "next/navigation";
-import { ProfileView } from "@/components/profile/profile-view";
+
 import { getDashboardData } from "../utils/actions";
-import { Plus, User, FileText, Briefcase, ChevronRight, Sparkles, Target, Clock } from "lucide-react";
+import { User, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import Link from "next/link";
 import { SettingsButton } from "@/components/settings/settings-button";
 import { LogoutButton } from "@/components/auth/logout-button";
 import { ProfileCard } from "@/components/profile/profile-card";
@@ -57,6 +56,7 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen relative">
+
       {/* 
         Background Layer
         - Implements the design system's soft gradient minimalism
@@ -75,6 +75,8 @@ export default async function Home() {
 
       {/* Main Content Layer */}
       <div className="relative z-10">
+
+        
         {/* 
           Dashboard Header Section
           - Displays welcome message and quick stats

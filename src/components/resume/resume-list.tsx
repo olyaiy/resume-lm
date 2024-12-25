@@ -9,106 +9,103 @@ interface ResumeListProps {
   resumes: Resume[];
   title: string;
   emptyMessage: React.ReactNode;
+  type?: 'base' | 'tailored';
+  accentColor: { text: string };
 }
 
-function ResumeListItem({ resume }: { resume: Resume }) {
+function ResumeListItem({ resume, type, accentColor }: { resume: Resume; type: 'base' | 'tailored'; accentColor: { text: string } }) {
   const formattedDate = format(new Date(resume.updated_at), 'MMM d, yyyy');
 
   return (
-    <Link 
-      href={`/resumes/${resume.id}`}
-      className="block group"
-    >
-      <Card className={cn(
-        "relative overflow-hidden transition-all duration-300",
-        "border-white/40 hover:border-white/60",
-        "bg-white/40 hover:bg-white/50",
-        "backdrop-blur-sm hover:backdrop-blur-md",
-        "shadow-sm hover:shadow-md",
-        "transform hover:-translate-y-0.5",
-        "aspect-[8.5/11] w-full"
-      )}>
-        {/* Mini Resume Preview */}
-        <div className="absolute inset-0 p-2.5">
-          {/* Resume Header */}
-          <div className="border-b border-gray-200 pb-1.5 mb-1.5">
-            <div className="h-2 w-24 bg-gray-300 rounded-full mb-1" />
-            <div className="h-1.5 w-16 bg-gray-200 rounded-full" />
-          </div>
+    <div className="group">
+      <Link 
+        href={`/resumes/${resume.id}`}
+        className="block mx-auto max-w-[280px]"
+      >
+        <Card className={cn(
+          "relative overflow-hidden transition-all duration-300",
+          "border-gray-200/80 hover:border-gray-300/80",
+          "bg-white/40 hover:bg-white/50",
+          "backdrop-blur-sm hover:backdrop-blur-md",
+          "shadow-sm hover:shadow-md",
+          "transform hover:-translate-y-0.5",
+          "aspect-[8.5/11] w-full",
+          "scale-125"
+        )}>
+          {/* Mini Resume Preview */}
+          <div className="absolute inset-0 p-2.5">
+            {/* Resume Header */}
+            <div className="border-b border-gray-200/70 pb-1.5 mb-1.5">
+              <div className="text-[10px] font-medium text-gray-800 truncate">
+                {type === 'base' ? resume.target_role : resume.name}
+              </div>
+              <div className="text-[8px] text-muted-foreground truncate mb-1 flex items-center gap-1">
+                {type === 'base' ? (
+                  <>
+                    <span className={`text-${accentColor.text}`}>Base Resume</span>
+                  </>
+                ) : (
+                  resume.target_role
+                )}
+              </div>
+              <div className="h-1.5 w-16 bg-gray-200/70 rounded-full" />
+            </div>
 
-          {/* Resume Content */}
-          <div className="space-y-2">
-            {/* Experience Section */}
-            <div>
-              <div className="h-1.5 w-12 bg-gray-300 rounded-full mb-1" />
-              <div className="space-y-1">
-                <div className="h-1 w-full bg-gray-200 rounded-full" />
-                <div className="h-1 w-3/4 bg-gray-200 rounded-full" />
-                <div className="h-1 w-5/6 bg-gray-200 rounded-full" />
+            {/* Resume Content */}
+            <div className="space-y-2">
+              {/* Experience Section */}
+              <div>
+                <div className="h-1.5 w-12 bg-gray-300/70 rounded-full mb-1" />
+                <div className="space-y-1">
+                  <div className="h-1 w-full bg-gray-200/70 rounded-full" />
+                  <div className="h-1 w-3/4 bg-gray-200/70 rounded-full" />
+                  <div className="h-1 w-5/6 bg-gray-200/70 rounded-full" />
+                </div>
+              </div>
+
+              {/* Education Section */}
+              <div>
+                <div className="h-1.5 w-12 bg-gray-300/70 rounded-full mb-1" />
+                <div className="space-y-1">
+                  <div className="h-1 w-full bg-gray-200/70 rounded-full" />
+                  <div className="h-1 w-2/3 bg-gray-200/70 rounded-full" />
+                </div>
+              </div>
+
+              {/* Skills Section */}
+              <div>
+                <div className="h-1.5 w-12 bg-gray-300/70 rounded-full mb-1" />
+                <div className="flex flex-wrap gap-1">
+                  <div className="h-1.5 w-8 bg-gray-200/70 rounded-full" />
+                  <div className="h-1.5 w-10 bg-gray-200/70 rounded-full" />
+                  <div className="h-1.5 w-6 bg-gray-200/70 rounded-full" />
+                  <div className="h-1.5 w-8 bg-gray-200/70 rounded-full" />
+                </div>
               </div>
             </div>
 
-            {/* Education Section */}
-            <div>
-              <div className="h-1.5 w-12 bg-gray-300 rounded-full mb-1" />
-              <div className="space-y-1">
-                <div className="h-1 w-full bg-gray-200 rounded-full" />
-                <div className="h-1 w-2/3 bg-gray-200 rounded-full" />
-              </div>
-            </div>
-
-            {/* Skills Section */}
-            <div>
-              <div className="h-1.5 w-12 bg-gray-300 rounded-full mb-1" />
-              <div className="flex flex-wrap gap-1">
-                <div className="h-1.5 w-8 bg-gray-200 rounded-full" />
-                <div className="h-1.5 w-10 bg-gray-200 rounded-full" />
-                <div className="h-1.5 w-6 bg-gray-200 rounded-full" />
-                <div className="h-1.5 w-8 bg-gray-200 rounded-full" />
-              </div>
-            </div>
-          </div>
-
-          {/* Resume Overlay */}
-          <div className={cn(
-            "absolute inset-0 opacity-0 group-hover:opacity-100 transition-all duration-300",
-            "bg-white/80 backdrop-blur-sm flex items-center justify-center"
-          )}>
-            <div className="text-center">
-              <h3 className="text-sm font-medium text-gray-900 flex items-center justify-center gap-1">
-                {resume.name}
-                <ArrowUpRight className="h-3 w-3" />
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
+            {/* Date at bottom left */}
+            <div className="absolute bottom-0 left-0 p-1">
+              <p className="text-[8px] text-muted-foreground">
                 Updated {formattedDate}
               </p>
             </div>
           </div>
-
-          {/* Resume Type Badge */}
-          <div className={cn(
-            "absolute top-1.5 right-1.5 px-1.5 py-0.5 text-[10px] rounded-full",
-            resume.is_base_resume
-              ? "bg-purple-50 text-purple-600"
-              : "bg-pink-50 text-pink-600"
-          )}>
-            {resume.is_base_resume ? "Base" : "Tailored"}
-          </div>
-        </div>
-      </Card>
-    </Link>
+        </Card>
+      </Link>
+    </div>
   );
 }
 
-export function ResumeList({ resumes, title, emptyMessage }: ResumeListProps) {
+export function ResumeList({ resumes, title, emptyMessage, type = 'base', accentColor }: ResumeListProps) {
   if (resumes.length === 0) {
     return emptyMessage;
   }
 
   return (
-    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-12 p-4">
       {resumes.map((resume) => (
-        <ResumeListItem key={resume.id} resume={resume} />
+        <ResumeListItem key={resume.id} resume={resume} type={type} accentColor={accentColor} />
       ))}
     </div>
   );

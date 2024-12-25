@@ -128,6 +128,8 @@ export function ResumeManagementCard({
         <ResumeList 
           resumes={resumes}
           title={title}
+          type={type}
+          accentColor={accentColor}
           emptyMessage={
             <div className="text-center py-12">
               <div className={cn(
