@@ -48,7 +48,7 @@ export async function getDashboardData(): Promise<DashboardData> {
   };
 }
 
-export async function getResumeById(resumeId: string): Promise<Resume> {
+export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
   const supabase = await createClient();
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -69,7 +69,18 @@ export async function getResumeById(resumeId: string): Promise<Resume> {
     throw new Error('Resume not found');
   }
 
-  return resume;
+  // Fetch the user's profile
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    throw new Error('Profile not found');
+  }
+
+  return { resume, profile };
 }
 
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {

@@ -10,7 +10,7 @@ export default async function Page({
 }) {
   try {
     const { id } = await params;
-    const resume = await getResumeById(id);
+    const { resume, profile } = await getResumeById(id);
     return (
       <div className="min-h-screen max-h-screen overflow-hidden relative">
         {/* Gradient Background */}
@@ -24,7 +24,7 @@ export default async function Page({
 
         {/* Content */}
         <div className="relative z-10 ">
-          <ResumeEditorClient initialResume={resume} />
+          <ResumeEditorClient initialResume={resume} profile={profile} />
         </div>
       </div>
     );

@@ -5,7 +5,7 @@ import { updateResume, deleteResume } from "@/utils/actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WorkExperienceForm } from "@/components/resume/work-experience-form";
-import { Resume } from "@/lib/types";
+import { Resume, Profile } from "@/lib/types";
 import { useState, useRef, useEffect } from "react";
 import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
@@ -25,11 +25,15 @@ import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/componen
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "./document-settings-form";
 
+interface ResumeEditorClientProps {
+  initialResume: Resume;
+  profile: Profile;
+}
+
 export function ResumeEditorClient({
   initialResume,
-}: {
-  initialResume: Resume;
-}) {
+  profile,
+}: ResumeEditorClientProps) {
   const [resume, setResume] = useState(initialResume);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -245,6 +249,7 @@ export function ResumeEditorClient({
                     <TabsContent value="basic" className="space-y-6 mt-6">
                       <BasicInfoForm
                         resume={resume}
+                        profile={profile}
                         onChange={updateField}
                       />
                     </TabsContent>

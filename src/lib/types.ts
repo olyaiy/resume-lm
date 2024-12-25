@@ -92,6 +92,10 @@ export interface Resume {
   created_at: string;
   updated_at: string;
   document_settings?: DocumentSettings;
+  section_order?: string[];
+  section_configs?: {
+    [key: string]: { visible: boolean };
+  };
 }
 
 export interface DocumentSettings {

@@ -5,17 +5,53 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Globe, Linkedin, Github, FileText, User } from "lucide-react";
+import { Mail, Phone, MapPin, Globe, Linkedin, Github, FileText, User, UserCircle2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 interface BasicInfoFormProps {
   resume: Resume | Profile;
+  profile?: Profile;
   onChange: (field: keyof (Resume | Profile), value: string) => void;
 }
 
-export function BasicInfoForm({ resume, onChange }: BasicInfoFormProps) {
+export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps) {
+  const handleFillFromProfile = () => {
+    if (!profile) return;
+    
+    // List of fields to copy from profile
+    const fieldsToFill: (keyof Profile)[] = [
+      'first_name',
+      'last_name',
+      'email',
+      'phone_number',
+      'location',
+      'website',
+      'linkedin_url',
+      'github_url'
+    ];
+
+    // Copy each field if it exists in the profile
+    fieldsToFill.forEach((field) => {
+      if (profile[field]) {
+        onChange(field, profile[field] as string);
+      }
+    });
+  };
+
   return (
     <Card className="relative group bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5 backdrop-blur-md border-2 border-teal-500/30 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
       <CardContent className="p-6">
+        {profile && (
+          <div className="mb-6">
+            <Button
+              onClick={handleFillFromProfile}
+              className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5"
+            >
+              <UserCircle2 className="mr-2 h-4 w-4" />
+              Fill from Profile
+            </Button>
+          </div>
+        )}
         <div className="space-y-4">
           {/* Personal Info Section */}
           <div className="grid grid-cols-1 gap-4">
