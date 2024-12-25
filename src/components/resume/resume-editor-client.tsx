@@ -43,6 +43,10 @@ export function ResumeEditorClient({
 
   const debouncedResume = useDebouncedValue(resume, 500);
 
+  const capitalizeWords = (str: string) => {
+    return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+  };
+
   useEffect(() => {
     if (previewPanelRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
@@ -110,23 +114,36 @@ export function ResumeEditorClient({
       </div>
 
       {/* Top Bar */}
-      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-white/95 to-white/90 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/5">
-        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between">
+      <div className="h-20 border-b border-purple-200/40 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff20_0%,#f0f7ff40_50%,#f3e8ff20_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
           <div className="flex items-center gap-6">
             <Link 
               href="/"
-              className="group flex items-center text-sm font-medium text-muted-foreground hover:text-purple-600 transition-colors duration-300"
+              className="group flex items-center text-sm font-medium text-muted-foreground/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50/50"
             >
-              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-0.5 transition-transform duration-300" />
+              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
               Back to Dashboard
             </Link>
-            <Separator orientation="vertical" className="h-5 bg-purple-200/30" />
-            <div className="flex flex-col gap-0.5">
-              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                {resume.is_base_resume ? `${resume.target_role} Base Resume` : resume.name}
+            <Separator orientation="vertical" className="h-8 bg-gradient-to-b from-purple-200/20 via-purple-200/40 to-purple-200/20" />
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+                {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
               </h1>
-              <p className="text-sm text-muted-foreground/80">
-                {resume.is_base_resume ? "Base Template" : "Tailored Resume"}
+              <p className="text-sm text-muted-foreground/60 flex items-center gap-2">
+                {resume.is_base_resume ? (
+                  <>
+                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" />
+                    Base Resume
+                  </>
+                ) : (
+                  <>
+                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500" />
+                    Tailored Resume
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -135,8 +152,9 @@ export function ResumeEditorClient({
               onClick={handleSave} 
               disabled={isSaving}
               size="sm"
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group"
             >
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -154,9 +172,10 @@ export function ResumeEditorClient({
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group"
                   disabled={isDeleting}
                 >
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                   {isDeleting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
