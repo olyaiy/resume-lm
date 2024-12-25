@@ -7,13 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { createBaseResume, createTailoredResume } from "@/utils/supabase/actions";
+
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Sparkles, Brain, Wand2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { importProfileToResume } from "@/utils/ai";
 import { createClient } from "@/utils/supabase/client";
+import { createBaseResume } from "@/utils/actions";
 
 interface CreateResumeDialogProps {
   children: React.ReactNode;
@@ -66,17 +67,24 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
               .single();
 
             if (profile) {
-              // Call the AI function with the profile
-              await importProfileToResume(profile, targetRole);
+              // Get AI recommendations first
+              const aiResponse = await importProfileToResume(profile, targetRole);
+              const aiRecommendations = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
+              // Then create the resume with the recommendations
+              resume = await createBaseResume(targetRole, 'ai', aiRecommendations);
+            } else {
+              resume = await createBaseResume(targetRole, 'fresh');
             }
           } catch (error) {
             console.error('AI Import error:', error);
             // Continue with resume creation even if AI fails
+            resume = await createBaseResume(targetRole, 'fresh');
           }
+        } else {
+          resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
         }
-        resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       } else {
-        resume = await createTailoredResume(selectedBaseResume, '', targetRole);
+        resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       }
 
       toast({
