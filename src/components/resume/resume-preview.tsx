@@ -124,7 +124,7 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
       <Document
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
-        className="flex flex-col items-center w-full h-full bg-red-500"
+        className="relative w-full h-full "
         loading={
           <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
             <div className="space-y-8 animate-pulse">
