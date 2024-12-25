@@ -45,10 +45,11 @@ export function ResumeManagementCard({
   return (
     <Card className="group relative overflow-hidden border-white/40 shadow-xl backdrop-blur-xl hover:shadow-2xl transition-all duration-500">
       {/* Animated gradient background */}
-      <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+      <div className="absolute inset-0">
         <div className={cn(
-          "absolute inset-0 blur-3xl opacity-20",
-          `bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`
+          "absolute inset-0 blur-3xl opacity-10 transition-opacity duration-500",
+          `bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`,
+          "group-hover:opacity-20"
         )} />
       </div>
 
@@ -57,7 +58,7 @@ export function ResumeManagementCard({
         {/* Background Pattern */}
         <div className={cn(
           "absolute inset-0",
-          `bg-gradient-to-r from-${gradientFrom}/5 to-${gradientTo}/5`
+          `bg-gradient-to-r from-${gradientFrom}/10 to-${gradientTo}/10`
         )}>
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-20" />
         </div>

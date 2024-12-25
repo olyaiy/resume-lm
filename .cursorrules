@@ -113,12 +113,39 @@ Visual Hierarchy:
 Color Palette:
 Primary:
   - Teal: from-teal-600 to-cyan-600
-  - Purple: from-purple-600 to-indigo-600
-  - Pink: from-pink-600 to-rose-600
+  - Purple: from-purple-600 to-indigo-600 (Base Resumes)
+    - Accent: {
+      bg: "purple-50",
+      border: "purple-200",
+      hover: "purple-300",
+      text: "purple-600"
+    }
+  - Pink: from-pink-600 to-rose-600 (Tailored Resumes)
+    - Accent: {
+      bg: "pink-50",
+      border: "pink-200",
+      hover: "pink-300",
+      text: "pink-600"
+    }
 
 Background:
   - Gradients: pink-200/20, violet-200/20, blue-200/20, teal-200/20
   - Overlays: teal-50/10, cyan-50/10, purple-50/10, indigo-50/10
+
+Specific Resume Type Colors:
+- Base Resumes:
+  - Gradient: from-purple-600 to-indigo-600
+  - Icon Background: from-purple-600/10 to-indigo-600/10
+  - Border: border-purple-600/10
+  - Text: text-purple-600
+  - Hover States: purple-700
+
+- Tailored Resumes:
+  - Gradient: from-pink-600 to-rose-600
+  - Icon Background: from-pink-600/10 to-rose-600/10
+  - Border: border-pink-600/10
+  - Text: text-pink-600
+  - Hover States: pink-700
 
 Typography:
 - Headers: text-3xl, font-semibold with gradient text
