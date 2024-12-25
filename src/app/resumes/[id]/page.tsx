@@ -1,14 +1,16 @@
 import { redirect } from "next/navigation";
 import { getResumeById } from "@/utils/actions";
 import { ResumeEditorClient } from "@/components/resume/resume-editor-client";
+import { use } from "react";
 
 export default async function Page({
   params,
 }: {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }) {
   try {
-    const resume = await getResumeById(params.id);
+    const { id } = await params;
+    const resume = await getResumeById(id);
     return (
       <div className="min-h-screen relative">
         {/* Gradient Background */}

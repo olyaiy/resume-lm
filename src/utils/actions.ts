@@ -236,4 +236,91 @@ export async function resetProfile(): Promise<Profile> {
   }
 
   return profile;
+}
+
+export async function deleteResume(resumeId: string): Promise<void> {
+  console.log('🚀 Starting deleteResume with ID:', resumeId);
+  
+  const supabase = await createClient();
+  console.log('📡 Supabase client created');
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  console.log('👤 Auth check result:', { userId: user?.id, hasError: !!userError });
+  
+  if (userError || !user) {
+    console.error('❌ Authentication error:', userError);
+    throw new Error('User not authenticated');
+  }
+
+  try {
+    console.log('🔍 Verifying resume ownership for:', { resumeId, userId: user.id });
+    
+    // First verify the resume exists and belongs to the user
+    const { data: resume, error: fetchError } = await supabase
+      .from('resumes')
+      .select('id, name')
+      .eq('id', resumeId)
+      .eq('user_id', user.id)
+      .single();
+
+    console.log('📋 Fetch resume result:', {
+      found: !!resume,
+      resumeData: resume,
+      hasError: !!fetchError,
+      errorDetails: fetchError
+    });
+
+    if (fetchError) {
+      console.error('❌ Resume fetch error:', fetchError);
+      throw new Error(fetchError.message || 'Resume not found or access denied');
+    }
+
+    if (!resume) {
+      console.error('❌ Resume not found for:', { resumeId, userId: user.id });
+      throw new Error('Resume not found or access denied');
+    }
+
+    console.log('🗑️ Attempting to delete resume:', { 
+      resumeId: resume.id, 
+      resumeName: resume.name 
+    });
+
+    // Then delete the resume
+    const { error: deleteError } = await supabase
+      .from('resumes')
+      .delete()
+      .eq('id', resumeId)
+      .eq('user_id', user.id);
+
+    console.log('🗑️ Delete operation result:', {
+      success: !deleteError,
+      hasError: !!deleteError,
+      errorDetails: deleteError
+    });
+
+    if (deleteError) {
+      console.error('❌ Delete error:', deleteError);
+      throw new Error(deleteError.message || 'Failed to delete resume');
+    }
+
+    console.log('✅ Resume deleted successfully:', resumeId);
+
+    // Revalidate all routes that might display resumes
+    console.log('🔄 Starting route revalidation');
+    revalidatePath('/', 'layout');
+    revalidatePath('/resumes', 'layout');
+    revalidatePath('/dashboard', 'layout');
+    revalidatePath('/resumes/base', 'layout');
+    revalidatePath('/resumes/tailored', 'layout');
+    console.log('✅ Route revalidation complete');
+
+  } catch (error) {
+    console.error('❌ Delete resume error:', {
+      error,
+      message: error instanceof Error ? error.message : 'Unknown error',
+      resumeId,
+      userId: user.id
+    });
+    throw error instanceof Error ? error : new Error('Failed to delete resume');
+  }
 } 

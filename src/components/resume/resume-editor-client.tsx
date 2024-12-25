@@ -1,12 +1,8 @@
 'use client';
 
 import { ResumePreview } from "@/components/resume/resume-preview";
-import { updateResume } from "@/utils/actions";
-import { deleteResume } from "@/utils/supabase/actions";
+import { updateResume, deleteResume } from "@/utils/actions";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { Resume } from "@/lib/types";
@@ -15,7 +11,7 @@ import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
 import { CertificationsForm } from "./certifications-form";
-import { Loader2, Save, Trash2, ArrowLeft, Globe, Linkedin, Github, User, Mail, Phone, MapPin } from "lucide-react";
+import { Loader2, Save, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
@@ -24,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { BasicInfoForm } from "./basic-info-form";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 export function ResumeEditorClient({
   initialResume,
@@ -59,10 +56,6 @@ export function ResumeEditorClient({
   };
 
   const handleDelete = async () => {
-    if (!window.confirm('Are you sure you want to delete this resume? This action cannot be undone.')) {
-      return;
-    }
-
     try {
       setIsDeleting(true);
       await deleteResume(resume.id);
@@ -72,9 +65,10 @@ export function ResumeEditorClient({
       });
       router.push('/');
     } catch (error) {
+      console.error('Delete error:', error);
       toast({
         title: "Delete failed",
-        description: "Unable to delete your resume. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -126,25 +120,46 @@ export function ResumeEditorClient({
                 </>
               )}
             </Button>
-            <Button 
-              onClick={handleDelete} 
-              disabled={isDeleting}
-              size="sm"
-              variant="destructive"
-              className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5"
-            >
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-2 h-3.5 w-3.5" />
-                  Delete Resume
-                </>
-              )}
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>
+                      <Loader2 className="mr-2 h-3.5 w-3.5 animate-spin" />
+                      Deleting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-3.5 w-3.5" />
+                      Delete Resume
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete "{resume.name}"? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isDeleting ? "Deleting..." : "Delete"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           </div>
         </div>
       </div>
