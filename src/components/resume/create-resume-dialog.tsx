@@ -54,7 +54,7 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       let resume: Resume;
 
       if (type === 'base') {
-        resume = await createBaseResume(targetRole);
+        resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       } else {
         resume = await createTailoredResume(selectedBaseResume, '', targetRole);
       }

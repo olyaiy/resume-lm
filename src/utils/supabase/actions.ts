@@ -92,7 +92,7 @@ export async function deleteResume(resumeId: string): Promise<void> {
   }
 }
 
-export async function createBaseResume(name: string): Promise<Resume> {
+export async function createBaseResume(name: string, importOption: 'import-all' | 'ai' | 'fresh' = 'import-all'): Promise<Resume> {
   const supabase = await createClient();
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -101,32 +101,37 @@ export async function createBaseResume(name: string): Promise<Resume> {
     throw new Error('User not authenticated');
   }
 
-  // Get user's profile for initial data
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
+  // Get user's profile for initial data if not starting fresh
+  let profile = null;
+  if (importOption !== 'fresh') {
+    const { data } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('user_id', user.id)
+      .single();
+    profile = data;
+  }
 
   const newResume: Partial<Resume> = {
     user_id: user.id,
     name,
+    target_role: name,
     is_base_resume: true,
-    // Pre-fill with profile data if available
-    first_name: profile?.first_name || '',
-    last_name: profile?.last_name || '',
-    email: profile?.email || '',
-    phone_number: profile?.phone_number || '',
-    location: profile?.location || '',
-    website: profile?.website || '',
-    linkedin_url: profile?.linkedin_url || '',
-    github_url: profile?.github_url || '',
-    professional_summary: profile?.professional_summary || '',
-    work_experience: profile?.work_experience || [],
-    education: profile?.education || [],
-    skills: profile?.skills || [],
-    projects: profile?.projects || [],
-    certifications: profile?.certifications || [],
+    // Pre-fill with profile data if available and not starting fresh
+    first_name: importOption === 'fresh' ? '' : (profile?.first_name || ''),
+    last_name: importOption === 'fresh' ? '' : (profile?.last_name || ''),
+    email: importOption === 'fresh' ? '' : (profile?.email || ''),
+    phone_number: importOption === 'fresh' ? '' : (profile?.phone_number || ''),
+    location: importOption === 'fresh' ? '' : (profile?.location || ''),
+    website: importOption === 'fresh' ? '' : (profile?.website || ''),
+    linkedin_url: importOption === 'fresh' ? '' : (profile?.linkedin_url || ''),
+    github_url: importOption === 'fresh' ? '' : (profile?.github_url || ''),
+    professional_summary: importOption === 'fresh' ? '' : (profile?.professional_summary || ''),
+    work_experience: importOption === 'fresh' ? [] : (profile?.work_experience || []),
+    education: importOption === 'fresh' ? [] : (profile?.education || []),
+    skills: importOption === 'fresh' ? [] : (profile?.skills || []),
+    projects: importOption === 'fresh' ? [] : (profile?.projects || []),
+    certifications: importOption === 'fresh' ? [] : (profile?.certifications || []),
     section_order: [
       'professional_summary',
       'work_experience',
