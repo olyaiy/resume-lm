@@ -1,3 +1,11 @@
+/**
+ * Resume Preview Component
+ * 
+ * This component generates a PDF resume using @react-pdf/renderer and displays it in an iframe.
+ * It supports two variants: base and tailored resumes, with consistent styling and layout.
+ * The PDF is generated client-side and updates whenever the resume data changes.
+ */
+
 "use client";
 
 import { Resume } from "@/lib/types";
@@ -9,28 +17,34 @@ interface ResumePreviewProps {
   variant?: 'base' | 'tailored';
 }
 
-// Create styles
+// PDF Styles Configuration
+// Defines all the styling rules for the PDF document using react-pdf's StyleSheet
 const styles = StyleSheet.create({
+  // Base page configuration
   page: {
     padding: 48,
     fontFamily: 'Helvetica',
     color: '#1f2937',
   },
+  // Header section containing name and contact info
   header: {
     marginBottom: 20,
   },
+  // Large, bold name display at the top
   name: {
     fontSize: 24,
     fontFamily: 'Helvetica-Bold',
     textAlign: 'center',
     marginBottom: 8,
   },
+  // Contact information styling (email, phone, location)
   contactInfo: {
     fontSize: 10,
     textAlign: 'center',
     color: '#4b5563',
     marginBottom: 4,
   },
+  // Professional links section (Portfolio, LinkedIn, GitHub)
   links: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -38,6 +52,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     color: '#2563eb',
   },
+  // Section headers (Experience, Education, etc.)
   sectionTitle: {
     fontSize: 14,
     fontFamily: 'Helvetica-Bold',
@@ -47,50 +62,61 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: '#e5e7eb',
   },
+  // Professional summary text block
   summary: {
     fontSize: 10,
     lineHeight: 1.5,
     marginBottom: 16,
   },
+  // Individual experience entries (work, education)
   experienceItem: {
     marginBottom: 12,
   },
+  // Header row for experience items with company/title and dates
   experienceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginBottom: 4,
   },
+  // Company/Organization name styling
   companyName: {
     fontSize: 12,
     fontFamily: 'Helvetica-Bold',
   },
+  // Job title and location text
   jobTitle: {
     fontSize: 10,
     color: '#4b5563',
   },
+  // Date range display
   dateRange: {
     fontSize: 10,
     color: '#6b7280',
   },
+  // Individual bullet points in descriptions
   bulletPoint: {
     fontSize: 10,
     lineHeight: 1.5,
     marginLeft: 12,
     marginBottom: 2,
   },
+  // Skills section grid layout
   skillsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
+  // Individual skill category container
   skillCategory: {
     width: '48%',
   },
+  // Skill category title
   skillCategoryTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 4,
   },
+  // Individual skill tag/pill
   skillItem: {
     fontSize: 10,
     color: '#4b5563',
@@ -100,6 +126,7 @@ const styles = StyleSheet.create({
     marginRight: 4,
     marginBottom: 4,
   },
+  // Project section styling
   projectItem: {
     marginBottom: 12,
   },
@@ -117,17 +144,24 @@ const styles = StyleSheet.create({
     lineHeight: 1.5,
     marginBottom: 4,
   },
+  // Certification section styling
   certificationItem: {
     marginBottom: 8,
   },
 });
 
-// Resume Document Component
+/**
+ * ResumeDocument Component
+ * 
+ * Internal component that defines the PDF structure and content.
+ * Renders different sections of the resume (header, experience, education, etc.)
+ * based on the provided resume data.
+ */
 function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
-        {/* Header */}
+        {/* Header Section - Name and Contact Information */}
         <View style={styles.header}>
           <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
           <Text style={styles.contactInfo}>
@@ -144,7 +178,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </View>
         </View>
 
-        {/* Professional Summary */}
+        {/* Professional Summary Section */}
         {resume.professional_summary && (
           <>
             <Text style={styles.sectionTitle}>Professional Summary</Text>
@@ -152,7 +186,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </>
         )}
 
-        {/* Work Experience */}
+        {/* Work Experience Section */}
         {resume.work_experience?.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Work Experience</Text>
@@ -167,9 +201,11 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
                     {exp.start_date} - {exp.current ? 'Present' : exp.end_date}
                   </Text>
                 </View>
+                {/* Bullet points for job responsibilities */}
                 {exp.description.map((desc, i) => (
                   <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
                 ))}
+                {/* Technologies used section */}
                 {exp.technologies && exp.technologies.length > 0 && (
                   <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
                     {exp.technologies.map((tech, i) => (
@@ -182,7 +218,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </>
         )}
 
-        {/* Education */}
+        {/* Education Section */}
         {resume.education?.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Education</Text>
@@ -197,9 +233,11 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
                     {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
                   </Text>
                 </View>
+                {/* GPA if available */}
                 {edu.gpa && (
                   <Text style={styles.bulletPoint}>GPA: {edu.gpa}</Text>
                 )}
+                {/* Academic achievements */}
                 {edu.achievements?.map((achievement, i) => (
                   <Text key={i} style={styles.bulletPoint}>• {achievement}</Text>
                 ))}
@@ -208,7 +246,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </>
         )}
 
-        {/* Skills */}
+        {/* Skills Section - Grouped by categories */}
         {resume.skills?.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Skills</Text>
@@ -227,7 +265,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </>
         )}
 
-        {/* Projects */}
+        {/* Projects Section */}
         {resume.projects?.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Projects</Text>
@@ -240,9 +278,11 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
                   </Text>
                 </View>
                 <Text style={styles.projectDescription}>{project.description}</Text>
+                {/* Project highlights/achievements */}
                 {project.highlights?.map((highlight, i) => (
                   <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
                 ))}
+                {/* Technologies used in project */}
                 {project.technologies && project.technologies.length > 0 && (
                   <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
                     {project.technologies.map((tech, i) => (
@@ -255,7 +295,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
           </>
         )}
 
-        {/* Certifications */}
+        {/* Certifications Section */}
         {resume.certifications?.length > 0 && (
           <>
             <Text style={styles.sectionTitle}>Certifications</Text>
@@ -271,6 +311,7 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
                     {cert.expiry_date && ` - ${cert.expiry_date}`}
                   </Text>
                 </View>
+                {/* Certification ID if available */}
                 {cert.credential_id && (
                   <Text style={styles.bulletPoint}>Credential ID: {cert.credential_id}</Text>
                 )}
@@ -283,23 +324,37 @@ function ResumeDocument({ resume, variant = 'base' }: ResumePreviewProps) {
   );
 }
 
+/**
+ * ResumePreview Component
+ * 
+ * Main export component that handles the PDF generation and display.
+ * Uses react-pdf to generate a PDF blob and displays it in an iframe.
+ * Updates the PDF whenever the resume data changes.
+ */
 export function ResumePreview({ resume, variant = 'base' }: ResumePreviewProps) {
+  // State to store the generated PDF URL
   const [url, setUrl] = useState<string | null>(null);
 
+  // Generate PDF when resume data changes
   useEffect(() => {
     async function generatePDF() {
+      // Generate PDF blob from ResumeDocument component
       const blob = await pdf(<ResumeDocument resume={resume} variant={variant} />).toBlob();
+      // Create URL for the blob
       const url = URL.createObjectURL(blob);
       setUrl(url);
+      // Cleanup function to revoke the URL when component unmounts
       return () => URL.revokeObjectURL(url);
     }
     generatePDF();
   }, [resume, variant]);
 
+  // Show loading state while PDF is being generated
   if (!url) {
     return <div>Loading...</div>;
   }
 
+  // Display the generated PDF in an iframe
   return (
     <div className="w-full h-full min-h-[279.4mm]">
       <iframe
