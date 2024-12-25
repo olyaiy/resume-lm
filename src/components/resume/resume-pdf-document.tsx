@@ -10,131 +10,157 @@ interface ResumePDFDocumentProps {
 const styles = StyleSheet.create({
   // Base page configuration
   page: {
-    padding: 48,
+    padding: 40,
     fontFamily: 'Helvetica',
     color: '#1f2937',
-  },
-  // Header section containing name and contact info
-  header: {
-    marginBottom: 20,
-  },
-  // Large, bold name display at the top
-  name: {
-    fontSize: 24,
-    fontFamily: 'Helvetica-Bold',
-    textAlign: 'center',
-    marginBottom: 8,
-  },
-  // Contact information styling (email, phone, location)
-  contactInfo: {
     fontSize: 10,
-    textAlign: 'center',
-    color: '#4b5563',
-    marginBottom: 4,
   },
-  // Professional links section (Portfolio, LinkedIn, GitHub)
-  links: {
+  // Header section with improved spacing
+  header: {
+    marginBottom: 16,
+    borderBottom: '1pt solid #e5e7eb',
+    paddingBottom: 12,
+    alignItems: 'center',
+  },
+  // Modernized name display
+  name: {
+    fontSize: 20,
+    fontFamily: 'Helvetica-Bold',
+    marginBottom: 6,
+    color: '#111827',
+    textAlign: 'center',
+  },
+  // Improved contact information layout
+  contactInfo: {
+    fontSize: 9,
+    color: '#4b5563',
     flexDirection: 'row',
     justifyContent: 'center',
-    gap: 16,
-    fontSize: 10,
-    color: '#2563eb',
+    flexWrap: 'wrap',
+    gap: 12,
   },
-  // Section headers (Experience, Education, etc.)
+  // Professional links with improved visibility
+  links: {
+    flexDirection: 'row',
+    gap: 12,
+    fontSize: 9,
+    color: '#2563eb',
+    marginTop: 4,
+  },
+  // Enhanced section headers
   sectionTitle: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 8,
     marginTop: 16,
-    paddingBottom: 4,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e5e7eb',
+    color: '#111827',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+    borderBottom: '0.5pt solid #e5e7eb',
+    paddingBottom: 2,
   },
-  // Professional summary text block
+  // Refined summary section
   summary: {
-    fontSize: 10,
-    lineHeight: 1.5,
+    fontSize: 9,
+    lineHeight: 1.6,
     marginBottom: 16,
+    color: '#374151',
   },
-  // Individual experience entries (work, education)
+  // Experience items with better spacing
   experienceItem: {
-    marginBottom: 12,
+    marginBottom: 10,
+    paddingBottom: 8,
   },
-  // Header row for experience items with company/title and dates
+  // Improved experience header layout
   experienceHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'flex-start',
     marginBottom: 4,
   },
-  // Company/Organization name styling
+  // Enhanced company name styling
   companyName: {
-    fontSize: 12,
-    fontFamily: 'Helvetica-Bold',
-  },
-  // Job title and location text
-  jobTitle: {
-    fontSize: 10,
-    color: '#4b5563',
-  },
-  // Date range display
-  dateRange: {
-    fontSize: 10,
-    color: '#6b7280',
-  },
-  // Individual bullet points in descriptions
-  bulletPoint: {
-    fontSize: 10,
-    lineHeight: 1.5,
-    marginLeft: 12,
-    marginBottom: 2,
-  },
-  // Skills section grid layout
-  skillsGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  // Individual skill category container
-  skillCategory: {
-    width: '48%',
-  },
-  // Skill category title
-  skillCategoryTitle: {
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 4,
+    color: '#111827',
   },
-  // Individual skill tag/pill
-  skillItem: {
-    fontSize: 10,
+  // Refined job title display
+  jobTitle: {
+    fontSize: 9,
     color: '#4b5563',
-    backgroundColor: '#f3f4f6',
-    padding: '2 6',
-    borderRadius: 4,
-    marginRight: 4,
+    marginTop: 1,
+  },
+  // Improved date range styling
+  dateRange: {
+    fontSize: 9,
+    color: '#6b7280',
+    textAlign: 'right',
+    minWidth: 120,
+  },
+  // Enhanced bullet points
+  bulletPoint: {
+    fontSize: 9,
+    lineHeight: 1.5,
+    marginLeft: 8,
+    marginBottom: 2,
+    color: '#374151',
+    textIndent: -8,
+    paddingLeft: 8,
+  },
+  // Modernized skills section
+  skillsGrid: {
+    flexDirection: 'column',
+    gap: 4,
+  },
+  // Improved skill category layout
+  skillCategory: {
     marginBottom: 4,
   },
-  // Project section styling
-  projectItem: {
-    marginBottom: 12,
+  // Enhanced skill category title
+  skillCategoryTitle: {
+    fontSize: 9,
+    fontFamily: 'Helvetica-Bold',
+    color: '#111827',
   },
+  // Modern skill item styling
+  skillItem: {
+    fontSize: 9,
+    color: '#4b5563',
+  },
+  // Project section improvements
+  projectItem: {
+    marginBottom: 10,
+    paddingBottom: 6,
+  },
+  // Enhanced project header
   projectHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 4,
+    alignItems: 'flex-start',
+    marginBottom: 3,
   },
+  // Refined project title
   projectTitle: {
-    fontSize: 12,
+    fontSize: 11,
     fontFamily: 'Helvetica-Bold',
+    color: '#111827',
   },
+  // Improved project description
   projectDescription: {
-    fontSize: 10,
+    fontSize: 9,
     lineHeight: 1.5,
-    marginBottom: 4,
+    marginBottom: 3,
+    color: '#374151',
   },
-  // Certification section styling
+  // Enhanced certification styling
   certificationItem: {
-    marginBottom: 8,
+    marginBottom: 6,
+    paddingBottom: 4,
+  },
+  // Link text styling
+  link: {
+    color: '#2563eb',
+    textDecoration: 'none',
   },
 });
 
@@ -145,38 +171,55 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         {/* Header Section - Name and Contact Information */}
         <View style={styles.header}>
           <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
-          <Text style={styles.contactInfo}>
-            {[
-              resume.email,
-              resume.phone_number,
-              resume.location
-            ].filter(Boolean).join(' • ')}
-          </Text>
-          <View style={styles.links}>
-            {resume.website && <Text>Portfolio</Text>}
-            {resume.linkedin_url && <Text>LinkedIn</Text>}
-            {resume.github_url && <Text>GitHub</Text>}
+          <View style={styles.contactInfo}>
+            {resume.email && <Text>{resume.email}</Text>}
+            {resume.phone_number && <Text>{resume.phone_number}</Text>}
+            {resume.location && <Text>{resume.location}</Text>}
+            {resume.website && <Text style={styles.link}>{resume.website}</Text>}
+            {resume.linkedin_url && <Text style={styles.link}>{resume.linkedin_url}</Text>}
+            {resume.github_url && <Text style={styles.link}>{resume.github_url}</Text>}
           </View>
         </View>
 
         {/* Professional Summary Section */}
         {resume.professional_summary && (
           <>
-            <Text style={styles.sectionTitle}>Professional Summary</Text>
+            <Text style={styles.sectionTitle}>Summary</Text>
             <Text style={styles.summary}>{resume.professional_summary}</Text>
+          </>
+        )}
+
+        {/* Skills Section - Moved up for software engineering focus */}
+        {resume.skills?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Technical Skills</Text>
+            <View style={styles.skillsGrid}>
+              {resume.skills.map((skill, index) => (
+                <View key={index} style={styles.skillCategory}>
+                  <Text>
+                    <Text style={styles.skillCategoryTitle}>{skill.category}: </Text>
+                    <Text style={styles.skillItem}>{skill.items.join(', ')}</Text>
+                  </Text>
+                </View>
+              ))}
+            </View>
           </>
         )}
 
         {/* Work Experience Section */}
         {resume.work_experience?.length > 0 && (
           <>
-            <Text style={styles.sectionTitle}>Work Experience</Text>
+            <Text style={styles.sectionTitle}>Professional Experience</Text>
             {resume.work_experience.map((exp, index) => (
               <View key={index} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
-                  <View>
-                    <Text style={styles.companyName}>{exp.company}</Text>
-                    <Text style={styles.jobTitle}>{exp.position} • {exp.location}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.companyName}>
+                      {exp.company} • {exp.position}
+                    </Text>
+                    {exp.location && (
+                      <Text style={styles.jobTitle}>{exp.location}</Text>
+                    )}
                   </View>
                   <Text style={styles.dateRange}>
                     {exp.start_date} - {exp.current ? 'Present' : exp.end_date}
@@ -186,8 +229,38 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
                 ))}
                 {exp.technologies && exp.technologies.length > 0 && (
-                  <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
+                  <View style={{ ...styles.skillsGrid, marginTop: 2 }}>
                     {exp.technologies.map((tech, i) => (
+                      <Text key={i} style={styles.skillItem}>{tech}</Text>
+                    ))}
+                  </View>
+                )}
+              </View>
+            ))}
+          </>
+        )}
+
+        {/* Projects Section */}
+        {resume.projects?.length > 0 && (
+          <>
+            <Text style={styles.sectionTitle}>Technical Projects</Text>
+            {resume.projects.map((project, index) => (
+              <View key={index} style={styles.projectItem}>
+                <View style={styles.projectHeader}>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.projectTitle}>{project.name}</Text>
+                  </View>
+                  <Text style={styles.dateRange}>
+                    {project.start_date} - {project.end_date || 'Present'}
+                  </Text>
+                </View>
+                <Text style={styles.projectDescription}>{project.description}</Text>
+                {project.highlights?.map((highlight, i) => (
+                  <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
+                ))}
+                {project.technologies && project.technologies.length > 0 && (
+                  <View style={{ ...styles.skillsGrid, marginTop: 2 }}>
+                    {project.technologies.map((tech, i) => (
                       <Text key={i} style={styles.skillItem}>{tech}</Text>
                     ))}
                   </View>
@@ -204,9 +277,13 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             {resume.education.map((edu, index) => (
               <View key={index} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
-                  <View>
-                    <Text style={styles.companyName}>{edu.school}</Text>
-                    <Text style={styles.jobTitle}>{edu.degree} in {edu.field} • {edu.location}</Text>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.companyName}>
+                      {edu.school} • {edu.degree} in {edu.field}
+                    </Text>
+                    {edu.location && (
+                      <Text style={styles.jobTitle}>{edu.location}</Text>
+                    )}
                   </View>
                   <Text style={styles.dateRange}>
                     {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
@@ -223,53 +300,6 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
           </>
         )}
 
-        {/* Skills Section */}
-        {resume.skills?.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>Skills</Text>
-            <View style={styles.skillsGrid}>
-              {resume.skills.map((skill, index) => (
-                <View key={index} style={styles.skillCategory}>
-                  <Text style={styles.skillCategoryTitle}>{skill.category}</Text>
-                  <View style={{ flexDirection: 'row', flexWrap: 'wrap' }}>
-                    {skill.items.map((item, i) => (
-                      <Text key={i} style={styles.skillItem}>{item}</Text>
-                    ))}
-                  </View>
-                </View>
-              ))}
-            </View>
-          </>
-        )}
-
-        {/* Projects Section */}
-        {resume.projects?.length > 0 && (
-          <>
-            <Text style={styles.sectionTitle}>Projects</Text>
-            {resume.projects.map((project, index) => (
-              <View key={index} style={styles.projectItem}>
-                <View style={styles.projectHeader}>
-                  <Text style={styles.projectTitle}>{project.name}</Text>
-                  <Text style={styles.dateRange}>
-                    {project.start_date} - {project.end_date || 'Present'}
-                  </Text>
-                </View>
-                <Text style={styles.projectDescription}>{project.description}</Text>
-                {project.highlights?.map((highlight, i) => (
-                  <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
-                ))}
-                {project.technologies && project.technologies.length > 0 && (
-                  <View style={{ ...styles.skillsGrid, marginTop: 4 }}>
-                    {project.technologies.map((tech, i) => (
-                      <Text key={i} style={styles.skillItem}>{tech}</Text>
-                    ))}
-                  </View>
-                )}
-              </View>
-            ))}
-          </>
-        )}
-
         {/* Certifications Section */}
         {resume.certifications?.length > 0 && (
           <>
@@ -277,7 +307,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             {resume.certifications.map((cert, index) => (
               <View key={index} style={styles.certificationItem}>
                 <View style={styles.experienceHeader}>
-                  <View>
+                  <View style={{ flex: 1 }}>
                     <Text style={styles.companyName}>{cert.name}</Text>
                     <Text style={styles.jobTitle}>{cert.issuer}</Text>
                   </View>
