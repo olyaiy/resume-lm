@@ -62,8 +62,8 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
 
             <div className="space-y-6">
               {/* Position and Dates Row */}
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
-                <div className="flex-1 relative group">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div className="relative group min-w-0">
                   <Input
                     value={exp.position}
                     onChange={(e) => updateExperience(index, 'position', e.target.value)}
@@ -77,46 +77,45 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
                     POSITION
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3 text-gray-600">
+                <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-2">
+                  <div className="relative group">
+                    <Input
+                      type="date"
+                      value={exp.start_date}
+                      onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
+                      className="w-full bg-white/50 border-gray-200 rounded-lg
+                        focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
+                        hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                    />
+                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
+                      START DATE
+                    </div>
+                  </div>
+                  {!exp.current ? (
                     <div className="relative group">
                       <Input
                         type="date"
-                        value={exp.start_date}
-                        onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                        className="w-auto bg-white/50 border-gray-200 rounded-lg
+                        value={exp.end_date || ''}
+                        onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
+                        className="w-full bg-white/50 border-gray-200 rounded-lg
                           focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
                           hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
                       />
                       <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                        START DATE
+                        END DATE
                       </div>
                     </div>
-                    <span>-</span>
-                    {!exp.current ? (
-                      <div className="relative group">
-                        <Input
-                          type="date"
-                          value={exp.end_date || ''}
-                          onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                          className="w-auto bg-white/50 border-gray-200 rounded-lg
-                            focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                            hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
-                        />
-                        <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                          END DATE
-                        </div>
-                      </div>
-                    ) : (
+                  ) : (
+                    <div className="flex items-center justify-center">
                       <span className="text-teal-600 font-medium">Present</span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               </div>
 
               {/* Company and Location Row */}
-              <div className="flex flex-col md:flex-row md:items-start gap-4 text-gray-600">
-                <div className="relative group flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-600">
+                <div className="relative group">
                   <Input
                     value={exp.company}
                     onChange={(e) => updateExperience(index, 'company', e.target.value)}
@@ -130,7 +129,7 @@ export function WorkExperienceForm({ experiences, onChange }: WorkExperienceForm
                     COMPANY
                   </div>
                 </div>
-                <div className="relative group flex-1">
+                <div className="relative group">
                   <Input
                     value={exp.location}
                     onChange={(e) => updateExperience(index, 'location', e.target.value)}

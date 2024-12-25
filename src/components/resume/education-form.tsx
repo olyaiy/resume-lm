@@ -46,8 +46,8 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
           <CardContent className="p-6">
             <div className="space-y-6">
               {/* School Name and Delete Button Row */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="relative group flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="relative group flex-1 min-w-0">
                   <Input
                     value={edu.school}
                     onChange={(e) => updateEducation(index, 'school', e.target.value)}
@@ -65,7 +65,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeEducation(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -88,8 +88,8 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
               </div>
 
               {/* Degree and Field Row */}
-              <div className="flex flex-col md:flex-row md:items-start gap-4">
-                <div className="relative group flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="relative group">
                   <Input
                     value={edu.degree}
                     onChange={(e) => updateEducation(index, 'degree', e.target.value)}
@@ -103,7 +103,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
                     DEGREE
                   </div>
                 </div>
-                <div className="relative group flex-1">
+                <div className="relative group">
                   <Input
                     value={edu.field}
                     onChange={(e) => updateEducation(index, 'field', e.target.value)}
@@ -120,36 +120,36 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
               </div>
 
               {/* Dates and Current Status Row */}
-              <div className="flex flex-col md:flex-row items-end gap-4">
-                <div className="relative group flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 items-end gap-4">
+                <div className="relative group">
                   <Input
                     type="date"
                     value={edu.start_date}
                     onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
                     className="bg-white/50 border-gray-200 rounded-lg
                       focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
-                      hover:border-indigo-500/30 hover:bg-white/60 transition-colors"
+                      hover:border-indigo-500/30 hover:bg-white/60 transition-colors w-full"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                     START DATE
                   </div>
                 </div>
                 {!edu.current && (
-                  <div className="relative group flex-1">
+                  <div className="relative group">
                     <Input
                       type="date"
                       value={edu.end_date || ''}
                       onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
                       className="bg-white/50 border-gray-200 rounded-lg
                         focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
-                        hover:border-indigo-500/30 hover:bg-white/60 transition-colors"
+                        hover:border-indigo-500/30 hover:bg-white/60 transition-colors w-full"
                     />
                     <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                       END DATE
                     </div>
                   </div>
                 )}
-                <div className="flex items-center space-x-2 min-w-[200px]">
+                <div className="flex items-center space-x-2">
                   <Switch
                     checked={edu.current}
                     onCheckedChange={(checked) => {
@@ -165,7 +165,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
               </div>
 
               {/* GPA */}
-              <div className="relative group w-full md:w-1/3">
+              <div className="relative group w-full sm:w-1/2 lg:w-1/3">
                 <Input
                   type="number"
                   step="0.01"

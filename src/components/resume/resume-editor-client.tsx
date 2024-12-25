@@ -195,11 +195,31 @@ export function ResumeEditorClient({
               <ScrollArea className="h-full">
                 <div className="space-y-6 pr-4 pb-6">
                   <Tabs defaultValue="basic" className="w-full">
-                    <TabsList className="w-full h-12 bg-white/50 backdrop-blur-sm border border-white/40">
-                      <TabsTrigger value="basic" className="flex-1">Basic Info</TabsTrigger>
-                      <TabsTrigger value="experience" className="flex-1">Experience</TabsTrigger>
-                      <TabsTrigger value="education" className="flex-1">Education</TabsTrigger>
-                      <TabsTrigger value="additional" className="flex-1">Additional</TabsTrigger>
+                    <TabsList className="w-full h-auto min-h-[3.5rem] grid grid-cols-2 sm:grid-cols-4 gap-1 bg-gradient-to-r from-white/40 via-white/50 to-white/40 backdrop-blur-md border border-white/40 rounded-xl p-1.5 shadow-lg shadow-teal-500/5">
+                      <TabsTrigger 
+                        value="basic" 
+                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                      >
+                        Basic Info
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="experience" 
+                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                      >
+                        Experience
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="education" 
+                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                      >
+                        Education
+                      </TabsTrigger>
+                      <TabsTrigger 
+                        value="additional" 
+                        className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
+                      >
+                        Additional
+                      </TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="basic" className="space-y-6 mt-6">

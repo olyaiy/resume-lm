@@ -44,8 +44,8 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
           <CardContent className="p-6">
             <div className="space-y-6">
               {/* Project Name and Delete Button Row */}
-              <div className="flex items-center justify-between gap-4">
-                <div className="relative group flex-1">
+              <div className="flex items-center justify-between gap-2">
+                <div className="relative group flex-1 min-w-0">
                   <Input
                     value={project.name}
                     onChange={(e) => updateProject(index, 'name', e.target.value)}
@@ -63,15 +63,15 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeProject(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
 
               {/* URLs Row */}
-              <div className="flex flex-col md:flex-row md:items-start gap-4 text-gray-600">
-                <div className="relative group flex-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-gray-600">
+                <div className="relative group">
                   <Input
                     type="url"
                     value={project.url || ''}
@@ -79,14 +79,14 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                     className="bg-white/50 border-gray-200 rounded-lg
                       focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                       hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400"
+                      placeholder:text-gray-400 w-full"
                     placeholder="https://your-project.com"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
                     LIVE URL
                   </div>
                 </div>
-                <div className="relative group flex-1">
+                <div className="relative group">
                   <Input
                     type="url"
                     value={project.github_url || ''}
@@ -94,7 +94,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                     className="bg-white/50 border-gray-200 rounded-lg
                       focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                       hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400"
+                      placeholder:text-gray-400 w-full"
                     placeholder="https://github.com/username/project"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
@@ -118,18 +118,18 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                   className="bg-white/50 border-gray-200 rounded-lg
                     focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                     hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                    placeholder:text-gray-400"
+                    placeholder:text-gray-400 w-full"
                 />
               </div>
 
               {/* Dates Row */}
-              <div className="flex items-center gap-3 text-gray-600">
+              <div className="grid grid-cols-1 sm:grid-cols-2 items-center gap-4">
                 <div className="relative group">
                   <Input
                     type="date"
                     value={project.start_date}
                     onChange={(e) => updateProject(index, 'start_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
+                    className="w-full bg-white/50 border-gray-200 rounded-lg
                       focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                       hover:border-violet-500/30 hover:bg-white/60 transition-colors"
                   />
@@ -137,13 +137,12 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                     START DATE
                   </div>
                 </div>
-                <span>-</span>
                 <div className="relative group">
                   <Input
                     type="date"
                     value={project.end_date || ''}
                     onChange={(e) => updateProject(index, 'end_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
+                    className="w-full bg-white/50 border-gray-200 rounded-lg
                       focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                       hover:border-violet-500/30 hover:bg-white/60 transition-colors"
                   />
@@ -165,7 +164,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                       updated[index].description = [...updated[index].description, ""];
                       onChange(updated);
                     }}
-                    className="text-violet-600 hover:text-violet-700 transition-colors"
+                    className="text-violet-600 hover:text-violet-700 transition-colors shrink-0"
                   >
                     <Plus className="h-4 w-4 mr-1" />
                     Add Point
@@ -174,7 +173,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                 <div className="space-y-3">
                   {project.description.map((desc, descIndex) => (
                     <div key={descIndex} className="flex gap-2 items-start">
-                      <div className="flex-1">
+                      <div className="flex-1 min-w-0">
                         <Input
                           value={desc}
                           onChange={(e) => {
@@ -186,7 +185,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                           className="bg-white/50 border-gray-200 rounded-lg
                             focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
                             hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                            placeholder:text-gray-400"
+                            placeholder:text-gray-400 w-full"
                         />
                       </div>
                       <Button
@@ -197,7 +196,7 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                           updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
                           onChange(updated);
                         }}
-                        className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                        className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
