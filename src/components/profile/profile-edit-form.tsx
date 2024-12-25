@@ -11,7 +11,7 @@ import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { EducationForm } from "@/components/resume/education-form";
 import { ProjectsForm } from "@/components/resume/projects-form";
 import { SkillsForm } from "@/components/resume/skills-form";
-import { CertificationsForm } from "@/components/resume/certifications-form";
+import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
 import { updateProfile, resetProfile, importResume } from "@/utils/actions";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -680,7 +680,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
                       <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
                       <div className="relative p-8">
-                        <CertificationsForm
+                        <ProfileCertificationsForm
                           certifications={profile.certifications}
                           onChange={(certifications) => updateField('certifications', certifications)}
                         />
