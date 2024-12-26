@@ -277,6 +277,7 @@ export function ResumeEditorClient({
                       <WorkExperienceForm
                         experiences={resume.work_experience}
                         onChange={(experiences) => updateField('work_experience', experiences)}
+                        profile={profile}
                       />
                     </TabsContent>
 
