@@ -114,10 +114,10 @@ export function ResumeEditorClient({
       </div>
 
       {/* Top Bar */}
-      <div className="h-20 border-b border-purple-200/40 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff20_0%,#f0f7ff40_50%,#f3e8ff20_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-100/95 via-purple-50/95 to-purple-100/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff40_0%,#f0f7ff50_50%,#f3e8ff40_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff40_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
         <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
           <div className="flex items-center gap-6">
             <Link 

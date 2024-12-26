@@ -1,3 +1,5 @@
+'use client';
+
 import { Resume } from "@/lib/types";
 import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet } from '@react-pdf/renderer';
 
@@ -25,7 +27,7 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 20,
     fontFamily: 'Helvetica-Bold',
-    marginBottom: 6,
+    marginBottom: 4,
     color: '#111827',
     textAlign: 'center',
   },
@@ -36,7 +38,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: 12,
+    gap: 8,
   },
   // Professional links with improved visibility
   links: {
@@ -51,7 +53,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontFamily: 'Helvetica-Bold',
     marginBottom: 6,
-    marginTop: 14,
+    marginTop: 8,
     color: '#111827',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -62,12 +64,12 @@ const styles = StyleSheet.create({
   summary: {
     fontSize: 9,
     lineHeight: 1.6,
-    marginBottom: 16,
+    marginBottom: 0,
     color: '#374151',
   },
   // Experience items with better spacing
   experienceItem: {
-    marginBottom: 10,
+    marginBottom: 0,
     paddingBottom: 8,
   },
   // Improved experience header layout
@@ -79,13 +81,14 @@ const styles = StyleSheet.create({
   },
   // Enhanced company name styling
   companyName: {
+    marginTop: 2,
     fontSize: 11,
     fontFamily: 'Helvetica-Bold',
     color: '#111827',
   },
   // Refined job title display
   jobTitle: {
-    fontSize: 9,
+    fontSize: 11,
     color: '#4b5563',
     marginTop: 1,
   },
@@ -94,7 +97,6 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: '#6b7280',
     textAlign: 'right',
-    minWidth: 120,
   },
   // Enhanced bullet points
   bulletPoint: {
@@ -109,11 +111,12 @@ const styles = StyleSheet.create({
   // Modernized skills section
   skillsGrid: {
     flexDirection: 'column',
-    gap: 4,
+    gap: 5,
+    marginBottom: 2,
   },
   // Improved skill category layout
   skillCategory: {
-    marginBottom: 4,
+    marginBottom: 0,
   },
   // Enhanced skill category title
   skillCategoryTitle: {
@@ -128,8 +131,9 @@ const styles = StyleSheet.create({
   },
   // Project section improvements
   projectItem: {
-    marginBottom: 10,
-    paddingBottom: 6,
+    marginBottom: 4,
+    paddingBottom: 4,
+    
   },
   // Enhanced project header
   projectHeader: {
@@ -251,9 +255,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     {project.start_date && `${project.start_date}${project.end_date ? ` - ${project.end_date}` : ' - Present'}`}
                   </Text>
                 </View>
-                <Text style={styles.projectDescription}>{project.description}</Text>
-                {project.highlights?.map((highlight, i) => (
-                  <Text key={i} style={styles.bulletPoint}>• {highlight}</Text>
+                {[...(project.description || []), ...project.highlights].map((item, i) => (
+                  <Text key={i} style={styles.bulletPoint}>• {item}</Text>
                 ))}
                 {project.technologies && project.technologies.length > 0 && (
                   <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
