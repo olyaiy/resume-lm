@@ -2,7 +2,7 @@
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
 import { Profile } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE } from "@/lib/prompts";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -194,6 +194,52 @@ export async function improveWorkExperience(point: string, customPrompt?: string
       statusCode: (error as any)?.status || (error as any)?.statusCode,
     });
     throw new Error('Failed to improve work experience point: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
+
+export async function improveProject(point: string, customPrompt?: string) {
+  const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+    PROJECT_IMPROVER_MESSAGE,
+    {
+      role: "user",
+      content: `Please improve this project bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`
+    }
+  ];
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // DO NOT MODIFY THIS MODEL
+      messages,
+      temperature: 0.7,
+      max_tokens: 8133, //DO NOT CHANGE
+      top_p: 1,
+      frequency_penalty: 0.3,
+      presence_penalty: 0.2
+    });
+
+    if (!response.choices[0].message.content) {
+      console.error('[AI Project Improver Error] No content in response:', response);
+      throw new Error('No content received from OpenAI');
+    }
+
+    // Remove any quotation marks from the response
+    const improvedPoint = response.choices[0].message.content.replace(/^"(.*)"$|^'(.*)'$/, '$1$2');
+
+    // Log the improved point for debugging
+    console.log('\n=== AI PROJECT IMPROVEMENT ===');
+    console.log('Original:', point);
+    console.log('Improved:', improvedPoint);
+    console.log('\n=== END IMPROVEMENT ===\n');
+
+    return improvedPoint;
+  } catch (error) {
+    console.error('[AI Project Improver Error]:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined,
+      statusCode: (error as any)?.status || (error as any)?.statusCode,
+    });
+    throw new Error('Failed to improve project point: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 

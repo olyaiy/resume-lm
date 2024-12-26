@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "./import-from-profile-dialog";
-import { generateProjectPoints } from "@/utils/ai";
+import { generateProjectPoints, improveProject } from "@/utils/ai";
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -23,6 +23,15 @@ interface AISuggestion {
   point: string;
 }
 
+interface ImprovedPoint {
+  original: string;
+  improved: string;
+}
+
+interface ImprovementConfig {
+  [key: number]: { [key: number]: string }; // projectIndex -> pointIndex -> prompt
+}
+
 interface ProjectsFormProps {
   projects: Project[];
   onChange: (projects: Project[]) => void;
@@ -33,8 +42,11 @@ interface ProjectsFormProps {
 export function ProjectsForm({ projects, onChange, profile, targetRole = "Software Engineer" }: ProjectsFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
+  const [loadingPointAI, setLoadingPointAI] = useState<{ [key: number]: { [key: number]: boolean } }>({});
   const [aiConfig, setAiConfig] = useState<{ [key: number]: { numPoints: number; customPrompt: string } }>({});
   const [popoverOpen, setPopoverOpen] = useState<{ [key: number]: boolean }>({});
+  const [improvedPoints, setImprovedPoints] = useState<{ [key: number]: { [key: number]: ImprovedPoint } }>({});
+  const [improvementConfig, setImprovementConfig] = useState<ImprovementConfig>({});
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
 
   // Effect to focus textarea when popover opens
@@ -122,6 +134,66 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
       ...prev,
       [projectIndex]: prev[projectIndex].filter(s => s.id !== suggestionId)
     }));
+  };
+
+  const rewritePoint = async (projectIndex: number, pointIndex: number) => {
+    const project = projects[projectIndex];
+    const point = project.description[pointIndex];
+    const customPrompt = improvementConfig[projectIndex]?.[pointIndex];
+    
+    setLoadingPointAI(prev => ({
+      ...prev,
+      [projectIndex]: { ...(prev[projectIndex] || {}), [pointIndex]: true }
+    }));
+    
+    try {
+      const improvedPoint = await improveProject(point, customPrompt);
+      
+      // Store both original and improved versions
+      setImprovedPoints(prev => ({
+        ...prev,
+        [projectIndex]: {
+          ...(prev[projectIndex] || {}),
+          [pointIndex]: {
+            original: point,
+            improved: improvedPoint
+          }
+        }
+      }));
+
+      // Update the project with the improved version
+      const updated = [...projects];
+      updated[projectIndex].description[pointIndex] = improvedPoint;
+      onChange(updated);
+    } catch (error) {
+      console.error('Failed to improve point:', error);
+    } finally {
+      setLoadingPointAI(prev => ({
+        ...prev,
+        [projectIndex]: { ...(prev[projectIndex] || {}), [pointIndex]: false }
+      }));
+    }
+  };
+
+  const undoImprovement = (projectIndex: number, pointIndex: number) => {
+    const improvedPoint = improvedPoints[projectIndex]?.[pointIndex];
+    if (improvedPoint) {
+      const updated = [...projects];
+      updated[projectIndex].description[pointIndex] = improvedPoint.original;
+      onChange(updated);
+      
+      // Remove the improvement from state
+      setImprovedPoints(prev => {
+        const newState = { ...prev };
+        if (newState[projectIndex]) {
+          delete newState[projectIndex][pointIndex];
+          if (Object.keys(newState[projectIndex]).length === 0) {
+            delete newState[projectIndex];
+          }
+        }
+        return newState;
+      });
+    }
   };
 
   return (
@@ -268,28 +340,180 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                             const updated = [...projects];
                             updated[index].description[descIndex] = e.target.value;
                             onChange(updated);
+                            
+                            // Clear improvement state when manually edited
+                            if (improvedPoints[index]?.[descIndex]) {
+                              setImprovedPoints(prev => {
+                                const newState = { ...prev };
+                                if (newState[index]) {
+                                  delete newState[index][descIndex];
+                                  if (Object.keys(newState[index]).length === 0) {
+                                    delete newState[index];
+                                  }
+                                }
+                                return newState;
+                              });
+                            }
                           }}
                           placeholder="Start with a strong technical action verb"
                           className={cn(
                             "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
                             "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                             "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
-                            "placeholder:text-gray-400"
+                            "placeholder:text-gray-400",
+                            improvedPoints[index]?.[descIndex] && [
+                              "border-purple-400",
+                              "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
+                              "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
+                              "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
+                            ]
                           )}
                         />
+                        {improvedPoints[index]?.[descIndex] && (
+                          <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
+                            <span className="text-[10px] font-medium text-purple-600 flex items-center gap-1">
+                              <Sparkles className="h-3 w-3" />
+                              AI Suggestion
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const updated = [...projects];
-                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
-                          onChange(updated);
-                        }}
-                        className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        {improvedPoints[index]?.[descIndex] ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                // Remove the improvement state after accepting
+                                setImprovedPoints(prev => {
+                                  const newState = { ...prev };
+                                  if (newState[index]) {
+                                    delete newState[index][descIndex];
+                                    if (Object.keys(newState[index]).length === 0) {
+                                      delete newState[index];
+                                    }
+                                  }
+                                  return newState;
+                                });
+                              }}
+                              className={cn(
+                                "p-0 group-hover/item:opacity-100",
+                                "h-8 w-8 rounded-lg",
+                                "bg-green-50/80 hover:bg-green-100/80",
+                                "text-green-600 hover:text-green-700",
+                                "border border-green-200/60",
+                                "shadow-sm",
+                                "transition-all duration-300",
+                                "hover:scale-105 hover:shadow-md",
+                                "hover:-translate-y-0.5"
+                              )}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => undoImprovement(index, descIndex)}
+                              className={cn(
+                                "p-0 group-hover/item:opacity-100",
+                                "h-8 w-8 rounded-lg",
+                                "bg-rose-50/80 hover:bg-rose-100/80",
+                                "text-rose-600 hover:text-rose-700",
+                                "border border-rose-200/60",
+                                "shadow-sm",
+                                "transition-all duration-300",
+                                "hover:scale-105 hover:shadow-md",
+                                "hover:-translate-y-0.5"
+                              )}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const updated = [...projects];
+                                updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
+                                onChange(updated);
+                              }}
+                              className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => rewritePoint(index, descIndex)}
+                                    disabled={loadingPointAI[index]?.[descIndex]}
+                                    className={cn(
+                                      "p-0 group-hover/item:opacity-100",
+                                      "h-8 w-8 rounded-lg",
+                                      "bg-purple-50/80 hover:bg-purple-100/80",
+                                      "text-purple-600 hover:text-purple-700",
+                                      "border border-purple-200/60",
+                                      "shadow-sm",
+                                      "transition-all duration-300",
+                                      "hover:scale-105 hover:shadow-md",
+                                      "hover:-translate-y-0.5"
+                                    )}
+                                  >
+                                    {loadingPointAI[index]?.[descIndex] ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Sparkles className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent 
+                                  side="bottom" 
+                                  align="start"
+                                  sideOffset={2}
+                                  className={cn(
+                                    "w-72 p-3.5",
+                                    "bg-purple-50",
+                                    "border-2 border-purple-300",
+                                    "shadow-lg shadow-purple-100/50",
+                                    "rounded-lg"
+                                  )}
+                                >
+                                  <div className="space-y-2">
+                                    <div>
+                                      <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
+                                      <Textarea
+                                        value={improvementConfig[index]?.[descIndex] || ''}
+                                        onChange={(e) => setImprovementConfig(prev => ({
+                                          ...prev,
+                                          [index]: {
+                                            ...(prev[index] || {}),
+                                            [descIndex]: e.target.value
+                                          }
+                                        }))}
+                                        placeholder="e.g., Focus on technical implementation details and performance metrics"
+                                        className={cn(
+                                          "h-14 mt-0.5 text-xs",
+                                          "bg-white",
+                                          "border-purple-200",
+                                          "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
+                                          "hover:bg-white",
+                                          "resize-none",
+                                          "text-purple-900 placeholder:text-purple-400"
+                                        )}
+                                      />
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ))}
                   
