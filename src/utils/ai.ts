@@ -176,13 +176,16 @@ export async function improveWorkExperience(point: string, customPrompt?: string
       throw new Error('No content received from OpenAI');
     }
 
+    // Remove any quotation marks from the response
+    const improvedPoint = response.choices[0].message.content.replace(/^"(.*)"$|^'(.*)'$/, '$1$2');
+
     // Log the improved point for debugging
     console.log('\n=== AI WORK EXPERIENCE IMPROVEMENT ===');
     console.log('Original:', point);
-    console.log('Improved:', response.choices[0].message.content);
+    console.log('Improved:', improvedPoint);
     console.log('\n=== END IMPROVEMENT ===\n');
 
-    return response.choices[0].message.content;
+    return improvedPoint;
   } catch (error) {
     console.error('[AI Work Experience Improver Error]:', {
       message: error instanceof Error ? error.message : 'Unknown error',
