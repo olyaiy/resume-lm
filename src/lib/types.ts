@@ -102,6 +102,27 @@ export interface DocumentSettings {
   margin_tb?: number;
   margin_lr?: number;
   line_spacing?: number;
+  // Section Title Styling
+  section_title_size?: number;
+  section_title_spacing?: number;
+  section_title_border?: number;
+  section_title_padding?: number;
+  // Text Styling
+  secondary_text_size?: number;
+  link_color?: string;
+  // Layout Spacing
+  section_spacing?: number;
+  item_spacing?: number;
+  bullet_indent?: number;
+  header_spacing?: number;
+  // Header Styling
+  header_name_size?: number;
+  header_name_color?: string;
+  header_name_spacing?: number;
+  header_name_bottom_spacing?: number;
+  header_info_size?: number;
+  header_info_color?: string;
+  header_info_spacing?: number;
 }
 
 export interface Profile {

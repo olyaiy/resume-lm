@@ -8,179 +8,180 @@ interface ResumePDFDocumentProps {
   variant?: 'base' | 'tailored';
 }
 
-// PDF Styles Configuration
-const styles = StyleSheet.create({
-  // Base page configuration
-  page: {
-    padding: 40,
-    fontFamily: 'Helvetica',
-    color: '#1f2937',
-    fontSize: 10,
-  },
-  // Header section with improved spacing
-  header: {
-    marginBottom: 0,
-    paddingBottom: 8,
-    alignItems: 'center',
-  },
-  // Modernized name display
-  name: {
-    fontSize: 20,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 4,
-    color: '#111827',
-    textAlign: 'center',
-  },
-  // Improved contact information layout
-  contactInfo: {
-    fontSize: 9,
-    color: '#4b5563',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
-  // Professional links with improved visibility
-  links: {
-    flexDirection: 'row',
-    gap: 12,
-    fontSize: 9,
-    color: '#2563eb',
-    marginTop: 4,
-  },
-  // Enhanced section headers
-  sectionTitle: {
-    fontSize: 10,
-    fontFamily: 'Helvetica-Bold',
-    marginBottom: 6,
-    marginTop: 8,
-    color: '#111827',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    borderBottom: '0.5pt solid #e5e7eb',
-    paddingBottom: 2,
-  },
-  // Refined summary section
-  summary: {
-    fontSize: 9,
-    lineHeight: 1.6,
-    marginBottom: 0,
-    color: '#374151',
-  },
-  // Experience items with better spacing
-  experienceItem: {
-    marginBottom: 0,
-    paddingBottom: 8,
-  },
-  // Improved experience header layout
-  experienceHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 4,
-  },
-  // Enhanced company name styling
-  companyName: {
-    marginTop: 2,
-    fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
-    color: '#111827',
-  },
-  // Refined job title display
-  jobTitle: {
-    fontSize: 11,
-    color: '#4b5563',
-    marginTop: 1,
-  },
-  // Improved date range styling
-  dateRange: {
-    fontSize: 9,
-    color: '#6b7280',
-    textAlign: 'right',
-  },
-  // Enhanced bullet points
-  bulletPoint: {
-    fontSize: 9,
-    lineHeight: 1.5,
-    marginLeft: 8,
-    marginBottom: 2,
-    color: '#374151',
-    textIndent: -8,
-    paddingLeft: 8,
-  },
-  // Modernized skills section
-  skillsGrid: {
-    flexDirection: 'column',
-    gap: 5,
-    marginBottom: 2,
-  },
-  // Improved skill category layout
-  skillCategory: {
-    marginBottom: 0,
-  },
-  // Enhanced skill category title
-  skillCategoryTitle: {
-    fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
-    color: '#111827',
-  },
-  // Modern skill item styling
-  skillItem: {
-    fontSize: 9,
-    color: '#4b5563',
-  },
-  // Project section improvements
-  projectItem: {
-    marginBottom: 4,
-    paddingBottom: 4,
-    
-  },
-  // Enhanced project header
-  projectHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'flex-start',
-    marginBottom: 3,
-  },
-  // Refined project title
-  projectTitle: {
-    fontSize: 11,
-    fontFamily: 'Helvetica-Bold',
-    color: '#111827',
-  },
-  // Improved project description
-  projectDescription: {
-    fontSize: 9,
-    lineHeight: 1.5,
-    marginBottom: 3,
-    color: '#374151',
-  },
-  // Enhanced certification styling
-  certificationItem: {
-    marginBottom: 6,
-    paddingBottom: 4,
-  },
-  // Link text styling
-  link: {
-    color: '#2563eb',
-    textDecoration: 'none',
-  },
-  projectLinks: {
-    fontSize: 8,
-    color: '#4b5563',
-    marginBottom: 4,
-    marginLeft: 8,
-  },
-  projectTechnologies: {
-    fontSize: 9,
-    color: '#4b5563',
-    marginLeft: 8,
-    marginBottom: 2,
-    fontFamily: 'Helvetica-Bold',
-  },
-});
-
 export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
+  // PDF Styles Configuration
+  const styles = StyleSheet.create({
+    // Base page configuration
+    page: {
+      padding: resume.document_settings?.margin_tb ? resume.document_settings.margin_tb * 72 : 40,
+      fontFamily: resume.document_settings?.font_family || 'Helvetica',
+      color: '#1f2937',
+      fontSize: resume.document_settings?.base_font_size || 10,
+      lineHeight: resume.document_settings?.line_spacing || 1.15,
+    },
+    // Header section with improved spacing
+    header: {
+      marginBottom: resume.document_settings?.header_spacing || 8,
+      paddingBottom: resume.document_settings?.header_spacing || 8,
+      alignItems: resume.document_settings?.header_layout === 'split' ? 'flex-start' : 'center',
+    },
+    // Modernized name display
+    name: {
+      fontSize: resume.document_settings?.header_name_size || 24,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+      marginBottom: resume.document_settings?.header_name_bottom_spacing || 20,
+      color: resume.document_settings?.header_name_color || '#111827',
+      textAlign: resume.document_settings?.header_layout === 'split' ? 'left' : 'center',
+      letterSpacing: resume.document_settings?.header_name_spacing || 0.5,
+    },
+    // Improved contact information layout
+    contactInfo: {
+      fontSize: resume.document_settings?.header_info_size || 10,
+      color: resume.document_settings?.header_info_color || '#4b5563',
+      flexDirection: 'row',
+      justifyContent: resume.document_settings?.header_layout === 'split' ? 'flex-start' : 'center',
+      flexWrap: 'wrap',
+      gap: resume.document_settings?.header_info_spacing || 4,
+    },
+    // Professional links with improved visibility
+    links: {
+      flexDirection: 'row',
+      gap: resume.document_settings?.header_info_spacing || 4,
+      fontSize: resume.document_settings?.header_info_size || 10,
+      color: resume.document_settings?.link_color || '#2563eb',
+      marginTop: resume.document_settings?.header_info_spacing || 4,
+    },
+    // Enhanced section headers
+    sectionTitle: {
+      fontSize: resume.document_settings?.section_title_size || 10,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+      marginBottom: resume.document_settings?.section_title_padding || 2,
+      marginTop: resume.document_settings?.section_spacing || 8,
+      color: '#111827',
+      textTransform: 'uppercase',
+      letterSpacing: resume.document_settings?.section_title_spacing || 0.5,
+      borderBottom: `${resume.document_settings?.section_title_border || 0.5}pt solid #e5e7eb`,
+      paddingBottom: resume.document_settings?.section_title_padding || 2,
+    },
+    // Refined summary section
+    summary: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      lineHeight: resume.document_settings?.line_spacing || 1.15,
+      marginBottom: resume.document_settings?.section_spacing || 8,
+      color: '#374151',
+    },
+    // Experience items with better spacing
+    experienceItem: {
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      paddingBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Improved experience header layout
+    experienceHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Enhanced company name styling
+    companyName: {
+      marginTop: resume.document_settings?.item_spacing || 2,
+      fontSize: (resume.document_settings?.base_font_size || 10) + 1,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+      color: '#111827',
+    },
+    // Refined job title display
+    jobTitle: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      color: '#4b5563',
+      marginTop: resume.document_settings?.item_spacing || 1,
+    },
+    // Improved date range styling
+    dateRange: {
+      fontSize: resume.document_settings?.secondary_text_size || 9,
+      color: '#6b7280',
+      textAlign: 'right',
+    },
+    // Enhanced bullet points
+    bulletPoint: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      lineHeight: resume.document_settings?.line_spacing || 1.15,
+      marginLeft: resume.document_settings?.bullet_indent || 8,
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      color: '#374151',
+      textIndent: -(resume.document_settings?.bullet_indent || 8),
+      paddingLeft: resume.document_settings?.bullet_indent || 8,
+    },
+    // Modernized skills section
+    skillsGrid: {
+      flexDirection: 'column',
+      gap: resume.document_settings?.item_spacing || 4,
+      marginBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Improved skill category layout
+    skillCategory: {
+      marginBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Enhanced skill category title
+    skillCategoryTitle: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+      color: '#111827',
+    },
+    // Modern skill item styling
+    skillItem: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      color: '#4b5563',
+    },
+    // Project section improvements
+    projectItem: {
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      paddingBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Enhanced project header
+    projectHeader: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+      marginBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Refined project title
+    projectTitle: {
+      fontSize: (resume.document_settings?.base_font_size || 10) + 1,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+      color: '#111827',
+    },
+    // Improved project description
+    projectDescription: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      lineHeight: resume.document_settings?.line_spacing || 1.15,
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      color: '#374151',
+    },
+    // Enhanced certification styling
+    certificationItem: {
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      paddingBottom: resume.document_settings?.item_spacing || 4,
+    },
+    // Link text styling
+    link: {
+      color: resume.document_settings?.link_color || '#2563eb',
+      textDecoration: 'none',
+    },
+    projectLinks: {
+      fontSize: resume.document_settings?.secondary_text_size || 9,
+      color: '#4b5563',
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      marginLeft: resume.document_settings?.bullet_indent || 8,
+    },
+    projectTechnologies: {
+      fontSize: resume.document_settings?.base_font_size || 10,
+      color: '#4b5563',
+      marginLeft: resume.document_settings?.bullet_indent || 8,
+      marginBottom: resume.document_settings?.item_spacing || 4,
+      fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
+    },
+  });
+
   return (
     <PDFDocument>
       <PDFPage size="LETTER" style={styles.page}>

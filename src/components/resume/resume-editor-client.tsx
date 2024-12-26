@@ -2,7 +2,6 @@
 
 import { ResumePreview } from "@/components/resume/resume-preview";
 import { updateResume, deleteResume } from "@/utils/actions";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { Resume, Profile } from "@/lib/types";
