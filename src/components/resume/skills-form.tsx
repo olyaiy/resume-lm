@@ -1,6 +1,6 @@
 'use client';
 
-import { Skill } from "@/lib/types";
+import { Skill, Profile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,13 +8,15 @@ import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 
 interface SkillsFormProps {
   skills: Skill[];
   onChange: (skills: Skill[]) => void;
+  profile: Profile;
 }
 
-export function SkillsForm({ skills, onChange }: SkillsFormProps) {
+export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
   const addSkillCategory = () => {
     onChange([...skills, {
       category: "",
@@ -43,8 +45,19 @@ export function SkillsForm({ skills, onChange }: SkillsFormProps) {
     onChange(updated);
   };
 
+  const handleImportFromProfile = (importedSkills: Skill[]) => {
+    onChange([...skills, ...importedSkills]);
+  };
+
   return (
     <div className="space-y-4">
+      <ImportFromProfileDialog<Skill>
+        profile={profile}
+        onImport={handleImportFromProfile}
+        type="skills"
+        buttonClassName="bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800"
+      />
+
       {skills.map((skill, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 backdrop-blur-md border-2 border-rose-500/30 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
           <CardContent className="p-6">

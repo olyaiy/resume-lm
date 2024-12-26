@@ -251,10 +251,10 @@ export function ResumeEditorClient({
                           Education
                         </TabsTrigger>
                         <TabsTrigger 
-                          value="additional" 
+                          value="skills" 
                           className="h-11 data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-600 data-[state=active]:to-cyan-600 data-[state=active]:text-white data-[state=active]:shadow-md data-[state=active]:shadow-teal-500/20 data-[state=inactive]:text-muted-foreground data-[state=inactive]:hover:text-teal-600 data-[state=inactive]:hover:bg-white/50 transition-all duration-500 rounded-lg font-medium text-sm"
                         >
-                          Additional
+                          Skills
                         </TabsTrigger>
                         <TabsTrigger 
                           value="settings" 
@@ -301,10 +301,11 @@ export function ResumeEditorClient({
                       />
                     </TabsContent>
 
-                    <TabsContent value="additional" className="space-y-6 mt-6">
+                    <TabsContent value="skills" className="space-y-6 mt-6">
                       <SkillsForm
                         skills={resume.skills}
                         onChange={(skills) => updateField('skills', skills)}
+                        profile={profile}
                       />
                     </TabsContent>
 

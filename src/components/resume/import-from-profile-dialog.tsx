@@ -1,6 +1,6 @@
 'use client';
 
-import { WorkExperience, Project, Profile, Education } from "@/lib/types";
+import { WorkExperience, Project, Profile, Education, Skill } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -8,13 +8,14 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Import } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
+import { Badge } from "@/components/ui/badge";
 
-type ImportItem = WorkExperience | Project | Education;
+type ImportItem = WorkExperience | Project | Education | Skill;
 
 interface ImportFromProfileDialogProps<T extends ImportItem> {
   profile: Profile;
   onImport: (items: T[]) => void;
-  type: 'work_experience' | 'projects' | 'education';
+  type: 'work_experience' | 'projects' | 'education' | 'skills';
   buttonClassName?: string;
 }
 
@@ -31,13 +32,17 @@ export function ImportFromProfileDialog<T extends ImportItem>({
     ? profile.work_experience 
     : type === 'projects'
     ? profile.projects
-    : profile.education;
+    : type === 'education'
+    ? profile.education
+    : profile.skills;
 
   const title = type === 'work_experience' 
     ? 'Work Experience' 
     : type === 'projects'
     ? 'Projects'
-    : 'Education';
+    : type === 'education'
+    ? 'Education'
+    : 'Skills';
 
   const handleImport = () => {
     const itemsToImport = items.filter((item) => {
@@ -55,9 +60,11 @@ export function ImportFromProfileDialog<T extends ImportItem>({
       return (item as WorkExperience).company + (item as WorkExperience).position;
     } else if (type === 'projects') {
       return (item as Project).name;
-    } else {
+    } else if (type === 'education') {
       const edu = item as Education;
       return `${edu.school}-${edu.degree}-${edu.field}`;
+    } else {
+      return (item as Skill).category;
     }
   };
 
@@ -66,19 +73,23 @@ export function ImportFromProfileDialog<T extends ImportItem>({
       return (item as WorkExperience).position;
     } else if (type === 'projects') {
       return (item as Project).name;
-    } else {
+    } else if (type === 'education') {
       const edu = item as Education;
       return `${edu.degree} in ${edu.field}`;
+    } else {
+      return (item as Skill).category;
     }
   };
 
-  const getItemSubtitle = (item: ImportItem): string => {
+  const getItemSubtitle = (item: ImportItem): string | null => {
     if (type === 'work_experience') {
       return (item as WorkExperience).company;
     } else if (type === 'projects') {
       return ((item as Project).technologies || []).join(', ');
-    } else {
+    } else if (type === 'education') {
       return (item as Education).school;
+    } else {
+      return null;
     }
   };
 
@@ -89,10 +100,11 @@ export function ImportFromProfileDialog<T extends ImportItem>({
     } else if (type === 'projects') {
       const proj = item as Project;
       return proj.start_date ? `${proj.start_date}${proj.end_date ? ` - ${proj.end_date}` : ''}` : '';
-    } else {
+    } else if (type === 'education') {
       const edu = item as Education;
       return `${edu.start_date} - ${edu.current ? 'Present' : edu.end_date}`;
     }
+    return '';
   };
 
   return (
@@ -149,10 +161,25 @@ export function ImportFromProfileDialog<T extends ImportItem>({
                       className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                     >
                       <div className="font-semibold text-base mb-1">{getItemTitle(item)}</div>
-                      <div className="text-sm text-muted-foreground">{getItemSubtitle(item)}</div>
+                      {getItemSubtitle(item) && (
+                        <div className="text-sm text-muted-foreground">{getItemSubtitle(item)}</div>
+                      )}
                       {getItemDate(item) && (
                         <div className="text-xs text-muted-foreground mt-1">
                           {getItemDate(item)}
+                        </div>
+                      )}
+                      {type === 'skills' && (
+                        <div className="flex flex-wrap gap-2 mt-2">
+                          {(item as Skill).items.map((skill, index) => (
+                            <Badge
+                              key={index}
+                              variant="secondary"
+                              className="bg-white/60 text-rose-700 border border-rose-200"
+                            >
+                              {skill}
+                            </Badge>
+                          ))}
                         </div>
                       )}
                     </label>
