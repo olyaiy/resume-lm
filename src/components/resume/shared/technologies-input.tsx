@@ -8,12 +8,14 @@ interface TechnologiesInputProps {
   value: string[];
   onChange: (technologies: string[]) => void;
   label?: string;
+  placeholder?: string;
 }
 
 export function TechnologiesInput({
   value,
   onChange,
-  label = "Technologies & Tools Used"
+  label = "Technologies & Tools Used",
+  placeholder = "React, TypeScript, Node.js, etc."
 }: TechnologiesInputProps) {
   return (
     <div className="space-y-3 pt-2">
@@ -26,7 +28,7 @@ export function TechnologiesInput({
         onChange={(e) => onChange(
           e.target.value.split(',').map(t => t.trim()).filter(Boolean)
         )}
-        placeholder="React, TypeScript, Node.js, etc."
+        placeholder={placeholder}
         className={cn(
           "bg-white/50 border-gray-200 rounded-lg",
           "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
