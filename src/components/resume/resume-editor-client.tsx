@@ -285,6 +285,7 @@ export function ResumeEditorClient({
                       <ProjectsForm
                         projects={resume.projects}
                         onChange={(projects) => updateField('projects', projects)}
+                        profile={profile}
                       />
                     </TabsContent>
 

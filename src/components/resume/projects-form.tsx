@@ -1,28 +1,30 @@
 'use client';
 
-import { Project } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Project, Profile } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
+import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 
 interface ProjectsFormProps {
   projects: Project[];
   onChange: (projects: Project[]) => void;
+  profile: Profile;
 }
 
-export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
+export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps) {
   const addProject = () => {
     onChange([...projects, {
       name: "",
-      description: [],
+      description: "",
       technologies: [],
       url: "",
       github_url: "",
       start_date: "",
-      end_date: null,
+      end_date: "",
       highlights: []
     }]);
   };
@@ -37,8 +39,19 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
     onChange(projects.filter((_, i) => i !== index));
   };
 
+  const handleImportFromProfile = (importedProjects: Project[]) => {
+    onChange([...projects, ...importedProjects]);
+  };
+
   return (
     <div className="space-y-4">
+      <ImportFromProfileDialog<Project>
+        profile={profile}
+        onImport={handleImportFromProfile}
+        type="projects"
+        buttonClassName="bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10 border-violet-500/30 hover:border-violet-500/40 text-violet-700 hover:text-violet-800"
+      />
+
       {projects.map((project, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 backdrop-blur-md border-2 border-violet-500/30 hover:border-violet-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
           <CardContent className="p-6">
@@ -161,7 +174,11 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                     size="sm"
                     onClick={() => {
                       const updated = [...projects];
-                      updated[index].description = [...updated[index].description, ""];
+                      if (typeof updated[index].description === 'string') {
+                        updated[index].description = [updated[index].description];
+                      } else {
+                        updated[index].description = [...(updated[index].description as string[]), ""];
+                      }
                       onChange(updated);
                     }}
                     className="text-violet-600 hover:text-violet-700 transition-colors shrink-0"
@@ -171,38 +188,50 @@ export function ProjectsForm({ projects, onChange }: ProjectsFormProps) {
                   </Button>
                 </div>
                 <div className="space-y-3">
-                  {project.description.map((desc, descIndex) => (
-                    <div key={descIndex} className="flex gap-2 items-start">
-                      <div className="flex-1 min-w-0">
-                        <Input
-                          value={desc}
-                          onChange={(e) => {
+                  {Array.isArray(project.description) ? (
+                    project.description.map((desc: string, descIndex: number) => (
+                      <div key={descIndex} className="flex gap-2 items-start">
+                        <div className="flex-1 min-w-0">
+                          <Input
+                            value={desc}
+                            onChange={(e) => {
+                              const updated = [...projects];
+                              (updated[index].description as string[])[descIndex] = e.target.value;
+                              onChange(updated);
+                            }}
+                            placeholder="Describe a key feature or achievement"
+                            className="bg-white/50 border-gray-200 rounded-lg
+                              focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                              hover:border-violet-500/30 hover:bg-white/60 transition-colors
+                              placeholder:text-gray-400 w-full"
+                          />
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
                             const updated = [...projects];
-                            updated[index].description[descIndex] = e.target.value;
+                            (updated[index].description as string[]) = (updated[index].description as string[]).filter((_, i) => i !== descIndex);
                             onChange(updated);
                           }}
-                          placeholder="Describe a key feature or achievement"
-                          className="bg-white/50 border-gray-200 rounded-lg
-                            focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                            hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                            placeholder:text-gray-400 w-full"
-                        />
+                          className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const updated = [...projects];
-                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
-                          onChange(updated);
-                        }}
-                        className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  ))}
-                  {project.description.length === 0 && (
+                    ))
+                  ) : (
+                    <Textarea
+                      value={project.description}
+                      onChange={(e) => updateProject(index, 'description', e.target.value)}
+                      placeholder="Describe your project's features and achievements"
+                      className="bg-white/50 border-gray-200 rounded-lg
+                        focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                        hover:border-violet-500/30 hover:bg-white/60 transition-colors
+                        placeholder:text-gray-400 w-full"
+                    />
+                  )}
+                  {(!project.description || (Array.isArray(project.description) && project.description.length === 0)) && (
                     <div className="text-sm text-gray-500 italic">
                       Add points to describe your project's features and achievements
                     </div>
