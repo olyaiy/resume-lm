@@ -28,6 +28,8 @@ export interface Project {
   end_date?: string;
   highlights: string[];
   technologies?: string[];
+  url?: string;
+  github_url?: string;
 }
 
 export interface Skill {
@@ -41,6 +43,7 @@ export interface Certification {
   date_acquired?: string;
   expiry_date?: string;
   credential_id?: string;
+  url?: string;
 }
 
 export interface Job {

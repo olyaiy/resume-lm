@@ -3,14 +3,8 @@
 import { Profile, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { WorkExperienceForm } from "@/components/resume/work-experience-form";
-import { EducationForm } from "@/components/resume/education-form";
-import { ProjectsForm } from "@/components/resume/projects-form";
-import { SkillsForm } from "@/components/resume/skills-form";
 import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
 import { updateProfile, resetProfile, importResume } from "@/utils/actions";
 import { useRouter } from "next/navigation";
@@ -27,9 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, MapPin, Mail, Phone, Globe, Linkedin, Github, Briefcase, GraduationCap, Wrench, FolderGit2, Award, FileText, Trash2, Import, Upload, ArrowLeft } from "lucide-react";
+import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Trash2, Upload, ArrowLeft } from "lucide-react";
 import { formatProfileWithAI } from "@/utils/ai";
-import type OpenAI from "openai";
 import {
   Dialog,
   DialogContent,
