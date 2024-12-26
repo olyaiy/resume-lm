@@ -293,6 +293,7 @@ export function ResumeEditorClient({
                       <EducationForm
                         education={resume.education}
                         onChange={(education) => updateField('education', education)}
+                        profile={profile}
                       />
                       <CertificationsForm
                         certifications={resume.certifications}

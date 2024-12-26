@@ -1,6 +1,6 @@
 'use client';
 
-import { WorkExperience, Project, Profile } from "@/lib/types";
+import { WorkExperience, Project, Profile, Education } from "@/lib/types";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -9,12 +9,12 @@ import { Import } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
-type ImportItem = WorkExperience | Project;
+type ImportItem = WorkExperience | Project | Education;
 
 interface ImportFromProfileDialogProps<T extends ImportItem> {
   profile: Profile;
   onImport: (items: T[]) => void;
-  type: 'work_experience' | 'projects';
+  type: 'work_experience' | 'projects' | 'education';
   buttonClassName?: string;
 }
 
@@ -27,14 +27,21 @@ export function ImportFromProfileDialog<T extends ImportItem>({
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
 
-  const items = type === 'work_experience' ? profile.work_experience : profile.projects;
-  const title = type === 'work_experience' ? 'Work Experience' : 'Projects';
+  const items = type === 'work_experience' 
+    ? profile.work_experience 
+    : type === 'projects'
+    ? profile.projects
+    : profile.education;
+
+  const title = type === 'work_experience' 
+    ? 'Work Experience' 
+    : type === 'projects'
+    ? 'Projects'
+    : 'Education';
 
   const handleImport = () => {
     const itemsToImport = items.filter((item) => {
-      const id = type === 'work_experience' 
-        ? (item as WorkExperience).company + (item as WorkExperience).position
-        : (item as Project).name;
+      const id = getItemId(item);
       return selectedItems.includes(id);
     }) as T[];
     
@@ -44,30 +51,47 @@ export function ImportFromProfileDialog<T extends ImportItem>({
   };
 
   const getItemId = (item: ImportItem): string => {
-    return type === 'work_experience'
-      ? (item as WorkExperience).company + (item as WorkExperience).position
-      : (item as Project).name;
+    if (type === 'work_experience') {
+      return (item as WorkExperience).company + (item as WorkExperience).position;
+    } else if (type === 'projects') {
+      return (item as Project).name;
+    } else {
+      const edu = item as Education;
+      return `${edu.school}-${edu.degree}-${edu.field}`;
+    }
   };
 
   const getItemTitle = (item: ImportItem): string => {
-    return type === 'work_experience'
-      ? (item as WorkExperience).position
-      : (item as Project).name;
+    if (type === 'work_experience') {
+      return (item as WorkExperience).position;
+    } else if (type === 'projects') {
+      return (item as Project).name;
+    } else {
+      const edu = item as Education;
+      return `${edu.degree} in ${edu.field}`;
+    }
   };
 
   const getItemSubtitle = (item: ImportItem): string => {
-    return type === 'work_experience'
-      ? (item as WorkExperience).company
-      : ((item as Project).technologies || []).join(', ');
+    if (type === 'work_experience') {
+      return (item as WorkExperience).company;
+    } else if (type === 'projects') {
+      return ((item as Project).technologies || []).join(', ');
+    } else {
+      return (item as Education).school;
+    }
   };
 
   const getItemDate = (item: ImportItem): string => {
     if (type === 'work_experience') {
       const exp = item as WorkExperience;
       return `${exp.start_date} - ${exp.current ? 'Present' : exp.end_date}`;
-    } else {
+    } else if (type === 'projects') {
       const proj = item as Project;
       return proj.start_date ? `${proj.start_date}${proj.end_date ? ` - ${proj.end_date}` : ''}` : '';
+    } else {
+      const edu = item as Education;
+      return `${edu.start_date} - ${edu.current ? 'Present' : edu.end_date}`;
     }
   };
 

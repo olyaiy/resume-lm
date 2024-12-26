@@ -1,6 +1,6 @@
 'use client';
 
-import { Education } from "@/lib/types";
+import { Education, Profile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,13 +8,15 @@ import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
+import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 
 interface EducationFormProps {
   education: Education[];
   onChange: (education: Education[]) => void;
+  profile: Profile;
 }
 
-export function EducationForm({ education, onChange }: EducationFormProps) {
+export function EducationForm({ education, onChange, profile }: EducationFormProps) {
   const addEducation = () => {
     onChange([...education, {
       school: "",
@@ -22,7 +24,7 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
       field: "",
       location: "",
       start_date: "",
-      end_date: null,
+      end_date: "",
       current: false,
       gpa: undefined,
       achievements: []
@@ -39,8 +41,19 @@ export function EducationForm({ education, onChange }: EducationFormProps) {
     onChange(education.filter((_, i) => i !== index));
   };
 
+  const handleImportFromProfile = (importedEducation: Education[]) => {
+    onChange([...education, ...importedEducation]);
+  };
+
   return (
     <div className="space-y-4">
+      <ImportFromProfileDialog<Education>
+        profile={profile}
+        onImport={handleImportFromProfile}
+        type="education"
+        buttonClassName="bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800"
+      />
+
       {education.map((edu, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 backdrop-blur-md border-2 border-indigo-500/30 hover:border-indigo-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
           <CardContent className="p-6">
