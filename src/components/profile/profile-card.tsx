@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User, MapPin, Mail, Phone, Globe, Linkedin, Github, Edit2, ChevronRight, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Sparkles } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
 
 interface ProfileCardProps {
   profile: Profile;
@@ -44,12 +45,26 @@ function calculateProfileCompletion(profile: Profile): number {
     profile.work_experience.length > 0,
     profile.education.length > 0,
     profile.skills.length > 0,
-    profile.projects.length > 0,
-    profile.certifications.length > 0
+    profile.projects.length > 0
   ];
 
   const completedSections = sections.filter(Boolean).length;
   return Math.round((completedSections / sections.length) * 100);
+}
+
+function getMissingSections(profile: Profile): string[] {
+  const missing: string[] = [];
+  
+  if (!profile.first_name || !profile.last_name) missing.push('Basic Info');
+  if (!profile.email) missing.push('Email');
+  if (!profile.phone_number) missing.push('Phone Number');
+  if (!profile.location) missing.push('Location');
+  if (profile.work_experience.length === 0) missing.push('Work Experience');
+  if (profile.education.length === 0) missing.push('Education');
+  if (profile.skills.length === 0) missing.push('Skills');
+  if (profile.projects.length === 0) missing.push('Projects');
+  
+  return missing;
 }
 
 function getProfileStatus(completion: number): {
@@ -98,13 +113,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
   const completion = calculateProfileCompletion(profile);
   const status = getProfileStatus(completion);
   const fullName = [profile.first_name, profile.last_name].filter(Boolean).join(" ");
-
-  const getProgressColor = () => {
-    if (completion >= 90) return 'bg-gradient-to-r from-green-500 to-emerald-500';
-    if (completion >= 70) return 'bg-gradient-to-r from-blue-500 to-cyan-500';
-    if (completion >= 40) return 'bg-gradient-to-r from-yellow-500 to-orange-500';
-    return 'bg-gradient-to-r from-gray-500 to-slate-500';
-  };
 
   return (
     <Card className="overflow-hidden border-white/40 shadow-xl backdrop-blur-xl hover:shadow-2xl transition-all duration-300">
@@ -160,12 +168,24 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                 <span className="text-muted-foreground">Profile Completion</span>
                 <span className={`font-medium ${status.color.text}`}>{completion}%</span>
               </div>
-              <div className="h-2 w-full bg-white/40 rounded-full overflow-hidden">
-                <div 
-                  className={`h-full ${getProgressColor()} transition-all duration-500 ease-out`}
-                  style={{ width: `${completion}%` }}
-                />
-              </div>
+              <Progress value={completion} />
+              {/* Missing Sections */}
+              {completion < 100 && (
+                <div className="mt-3 text-sm">
+                  <p className="text-muted-foreground mb-1.5">Missing sections:</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {getMissingSections(profile).map((section, index) => (
+                      <Badge
+                        key={index}
+                        variant="outline"
+                        className="bg-rose-500/10 text-rose-600 border-rose-500/20 hover:bg-rose-500/20 transition-colors"
+                      >
+                        {section}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -402,45 +422,6 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                         </a>
                       )}
                     </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Certifications Section */}
-          {profile.certifications.length > 0 && (
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-md bg-yellow-50 text-yellow-600">
-                    <Award className="h-4 w-4" />
-                  </div>
-                  <h3 className="font-semibold text-gray-900">Certifications</h3>
-                </div>
-                <Link href="/profile/certifications" className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1">
-                  <Edit2 className="h-3 w-3" />
-                  Edit
-                </Link>
-              </div>
-              <div className="space-y-4">
-                {profile.certifications.map((cert, index) => (
-                  <div key={index} className="p-3 rounded-lg bg-white/40 hover:bg-white/60 transition-colors">
-                    <div className="flex justify-between items-start mb-1">
-                      <div className="font-medium text-gray-900">{cert.name}</div>
-                      <div className="text-sm text-muted-foreground">{cert.date_acquired}</div>
-                    </div>
-                    <div className="text-sm text-muted-foreground">{cert.issuer}</div>
-                    {cert.expiry_date && (
-                      <div className="text-sm text-gray-600 mt-1">Expires: {cert.expiry_date}</div>
-                    )}
-                    {cert.url && (
-                      <a href={cert.url} target="_blank" rel="noopener noreferrer"
-                         className="text-sm text-yellow-600 hover:text-yellow-700 flex items-center gap-1 mt-2">
-                        <Globe className="h-3 w-3" />
-                        View Certificate
-                      </a>
-                    )}
                   </div>
                 ))}
               </div>
