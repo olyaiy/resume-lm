@@ -1,8 +1,8 @@
 'use server';
 import OpenAI from "openai";
-import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
+import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
 import { Profile } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE } from "@/lib/prompts";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -194,6 +194,63 @@ export async function improveWorkExperience(point: string, customPrompt?: string
       statusCode: (error as any)?.status || (error as any)?.statusCode,
     });
     throw new Error('Failed to improve work experience point: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
+
+export async function generateProjectPoints(
+  projectName: string,
+  technologies: string[],
+  targetRole: string,
+  numPoints: number = 3,
+  customPrompt: string = ''
+) {
+  const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+    PROJECT_GENERATOR_MESSAGE,
+    {
+      role: "user",
+      content: `Project Name: ${projectName}
+Technologies: ${technologies.join(', ')}
+Target Role: ${targetRole}
+Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`
+    }
+  ];
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // DO NOT MODIFY THIS MODEL
+      messages,
+      response_format: {
+        "type": "json_schema",
+        "json_schema": openAiProjectSchema
+      },
+      temperature: 0.7,
+      max_tokens: 8133, //DO NOT CHANGE
+      top_p: 1,
+      frequency_penalty: 0.3,
+      presence_penalty: 0.2
+    });
+
+    if (!response.choices[0].message.content) {
+      console.error('[AI Project Error] No content in response:', response);
+      throw new Error('No content received from OpenAI');
+    }
+
+    // Log the generated points for debugging
+    console.log('\n=== AI PROJECT POINTS ===');
+    console.log('Project:', projectName);
+    console.log('\nGenerated Points:');
+    console.log(response.choices[0].message.content);
+    console.log('\n=== END POINTS ===\n');
+
+    return JSON.parse(response.choices[0].message.content);
+  } catch (error) {
+    console.error('[AI Project Error]:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined,
+      statusCode: (error as any)?.status || (error as any)?.statusCode,
+    });
+    throw new Error('Failed to generate project points: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 

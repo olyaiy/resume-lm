@@ -165,6 +165,19 @@ const styles = StyleSheet.create({
     color: '#2563eb',
     textDecoration: 'none',
   },
+  projectLinks: {
+    fontSize: 8,
+    color: '#4b5563',
+    marginBottom: 4,
+    marginLeft: 8,
+  },
+  projectTechnologies: {
+    fontSize: 9,
+    color: '#4b5563',
+    marginLeft: 8,
+    marginBottom: 2,
+    fontFamily: 'Helvetica-Bold',
+  },
 });
 
 export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
@@ -251,19 +264,26 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                 <View style={styles.projectHeader}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.projectTitle}>{project.name}</Text>
+                    {(project.url || project.github_url) && (
+                      <Text style={styles.projectLinks}>
+                        {project.url && `${project.url}`}
+                        {project.url && project.github_url && ' • '}
+                        {project.github_url && `${project.github_url}`}
+                      </Text>
+                    )}
                   </View>
                   <Text style={styles.dateRange}>
                     {project.date}
                   </Text>
                 </View>
-                {[...(project.description || []), ...project.description].map((item, i) => (
-                  <Text key={i} style={styles.bulletPoint}>• {item}</Text>
-                ))}
                 {project.technologies && project.technologies.length > 0 && (
-                  <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
-                    Technologies: {project.technologies.join(', ')}
+                  <Text style={styles.projectTechnologies}>
+                    {project.technologies.join(' • ')}
                   </Text>
                 )}
+                {[...(project.description || [])].map((item, i) => (
+                  <Text key={i} style={styles.bulletPoint}>• {item}</Text>
+                ))}
               </View>
             ))}
           </>
