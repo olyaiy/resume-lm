@@ -123,6 +123,10 @@ export interface DocumentSettings {
   header_info_size?: number;
   header_info_color?: string;
   header_info_spacing?: number;
+  // Bullet Point Styling
+  bullet_point_spacing?: number;
+  bullet_point_line_height?: number;
+  bullet_point_font_size?: number;
 }
 
 export interface Profile {

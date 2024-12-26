@@ -46,7 +46,31 @@ export function ResumeEditorClient({
     projects: initialResume.projects?.map(project => ({
       ...project,
       date: project.date || ''
-    }))
+    })),
+    document_settings: initialResume.document_settings || {
+      font_family: "Helvetica",
+      base_font_size: 10,
+      margin_tb: 0.5,
+      margin_lr: 0.75,
+      line_spacing: 1.15,
+      section_title_size: 10,
+      section_title_spacing: 0.5,
+      section_title_border: 0.5,
+      section_title_padding: 2,
+      secondary_text_size: 9,
+      link_color: "#2563eb",
+      section_spacing: 8,
+      item_spacing: 4,
+      bullet_indent: 8,
+      header_spacing: 8,
+      header_name_size: 24,
+      header_name_color: "#111827",
+      header_name_spacing: 0.5,
+      header_name_bottom_spacing: 20,
+      header_info_size: 10,
+      header_info_color: "#4b5563",
+      header_info_spacing: 4
+    }
   };
 
   const [resume, setResume] = useState(convertedInitialResume);

@@ -23,7 +23,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     header: {
       marginBottom: resume.document_settings?.header_spacing || 8,
       paddingBottom: resume.document_settings?.header_spacing || 8,
-      alignItems: resume.document_settings?.header_layout === 'split' ? 'flex-start' : 'center',
+      alignItems: 'center',
     },
     // Modernized name display
     name: {
@@ -31,7 +31,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       fontFamily: resume.document_settings?.font_family ? `${resume.document_settings.font_family}-Bold` : 'Helvetica-Bold',
       marginBottom: resume.document_settings?.header_name_bottom_spacing || 20,
       color: resume.document_settings?.header_name_color || '#111827',
-      textAlign: resume.document_settings?.header_layout === 'split' ? 'left' : 'center',
+      textAlign: 'center',
       letterSpacing: resume.document_settings?.header_name_spacing || 0.5,
     },
     // Improved contact information layout
@@ -39,7 +39,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       fontSize: resume.document_settings?.header_info_size || 10,
       color: resume.document_settings?.header_info_color || '#4b5563',
       flexDirection: 'row',
-      justifyContent: resume.document_settings?.header_layout === 'split' ? 'flex-start' : 'center',
+      justifyContent: 'center',
       flexWrap: 'wrap',
       gap: resume.document_settings?.header_info_spacing || 4,
     },
@@ -103,13 +103,14 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Enhanced bullet points
     bulletPoint: {
-      fontSize: resume.document_settings?.base_font_size || 10,
+      fontSize: resume.document_settings?.bullet_size || 10,
       lineHeight: resume.document_settings?.line_spacing || 1.15,
       marginLeft: resume.document_settings?.bullet_indent || 8,
       marginBottom: resume.document_settings?.item_spacing || 4,
-      color: '#374151',
+      color: resume.document_settings?.bullet_color || '#374151',
       textIndent: -(resume.document_settings?.bullet_indent || 8),
       paddingLeft: resume.document_settings?.bullet_indent || 8,
+      marginTop: resume.document_settings?.bullet_spacing || 4,
     },
     // Modernized skills section
     skillsGrid: {
@@ -244,7 +245,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   </Text>
                 </View>
                 {exp.description.map((desc, i) => (
-                  <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
+                  <Text key={i} style={styles.bulletPoint}>{resume.document_settings?.bullet_symbol || '•'} {desc}</Text>
                 ))}
                 {exp.technologies && exp.technologies.length > 0 && (
                   <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
@@ -283,7 +284,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   </Text>
                 )}
                 {[...(project.description || [])].map((item, i) => (
-                  <Text key={i} style={styles.bulletPoint}>• {item}</Text>
+                  <Text key={i} style={styles.bulletPoint}>{resume.document_settings?.bullet_symbol || '•'} {item}</Text>
                 ))}
               </View>
             ))}

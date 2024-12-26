@@ -14,7 +14,6 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
   const defaultSettings = {
     font_family: "Helvetica",
     base_font_size: 10,
-    header_font_size: 20,
     margin_tb: 0.5,
     margin_lr: 0.75,
     line_spacing: 1.15,
@@ -28,7 +27,6 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     item_spacing: 4,
     bullet_indent: 8,
     header_spacing: 8,
-    // Header defaults
     header_name_size: 24,
     header_name_color: "#111827",
     header_name_spacing: 0.5,
@@ -36,8 +34,19 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     header_info_size: 10,
     header_info_color: "#4b5563",
     header_info_spacing: 4,
-    header_layout: "centered" as const,
+    bullet_size: 10,
+    bullet_color: "#374151",
+    bullet_spacing: 4,
+    bullet_symbol: "•",
+    bullet_point_spacing: 4,
+    bullet_point_line_height: 1.5,
+    bullet_point_font_size: 10,
   };
+
+  // Initialize document_settings if it doesn't exist
+  if (!resume.document_settings) {
+    onChange('document_settings', defaultSettings);
+  }
 
   const handleRestoreDefaults = () => {
     onChange('document_settings', defaultSettings);
@@ -68,26 +77,26 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
             </div>
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-muted-foreground">Base Font Size</Label>
                   <span className="text-xs text-muted-foreground/60">{resume.document_settings?.base_font_size || 10}pt</span>
                 </div>
-                <Slider
-                  value={[resume.document_settings?.base_font_size || 10]}
-                  min={8}
-                  max={12}
-                  step={0.5}
-                  onValueChange={([value]) => 
-                    onChange('document_settings', {
-                      ...resume.document_settings,
-                      base_font_size: value
-                    })
-                  }
-                />
-              </div>
+              <Slider
+                value={[resume.document_settings?.base_font_size || 10]}
+                min={8}
+                max={12}
+                step={0.5}
+                onValueChange={([value]) => 
+                  onChange('document_settings', {
+                    ...resume.document_settings,
+                    base_font_size: value
+                  })
+                }
+              />
+            </div>
 
-              <div className="space-y-2">
+            <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-muted-foreground">Secondary Text Size</Label>
                   <span className="text-xs text-muted-foreground/60">{resume.document_settings?.secondary_text_size || 9}pt</span>
@@ -117,27 +126,6 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
               <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label className="text-sm font-medium text-muted-foreground">Layout Style</Label>
-                  <Select
-                    value={resume.document_settings?.header_layout || "centered"}
-                    onValueChange={(value: 'centered' | 'split') => 
-                      onChange('document_settings', { 
-                        ...resume.document_settings, 
-                        header_layout: value 
-                      })
-                    }
-                  >
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Select layout style" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="centered">Centered</SelectItem>
-                      <SelectItem value="split">Split</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium text-muted-foreground">Name Size</Label>
@@ -359,14 +347,14 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                     <Label className="text-sm font-medium text-muted-foreground">Item Spacing</Label>
                     <span className="text-xs text-muted-foreground/60">{resume.document_settings?.item_spacing || 4}pt</span>
                   </div>
-                  <Slider
+              <Slider
                     value={[resume.document_settings?.item_spacing || 4]}
                     min={2}
                     max={8}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
+                step={0.5}
+                onValueChange={([value]) => 
+                  onChange('document_settings', {
+                    ...resume.document_settings,
                         item_spacing: value
                       })
                     }
@@ -406,9 +394,9 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                       onChange('document_settings', {
                         ...resume.document_settings,
                         header_spacing: value
-                      })
-                    }
-                  />
+                  })
+                }
+              />
                 </div>
               </div>
             </div>
@@ -423,38 +411,107 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
               <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
+              <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium text-muted-foreground">Top & Bottom</Label>
                     <span className="text-xs text-muted-foreground/60">{resume.document_settings?.margin_tb || 0.5}in</span>
                   </div>
-                  <Slider
-                    value={[resume.document_settings?.margin_tb || 0.5]}
-                    min={0.25}
-                    max={1.5}
-                    step={0.125}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        margin_tb: value
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
+                <Slider
+                  value={[resume.document_settings?.margin_tb || 0.5]}
+                  min={0.25}
+                  max={1.5}
+                  step={0.125}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      margin_tb: value
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <Label className="text-sm font-medium text-muted-foreground">Left & Right</Label>
                     <span className="text-xs text-muted-foreground/60">{resume.document_settings?.margin_lr || 0.75}in</span>
                   </div>
+                <Slider
+                  value={[resume.document_settings?.margin_lr || 0.75]}
+                  min={0.25}
+                  max={1.5}
+                  step={0.125}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      margin_lr: value
+                    })
+                  }
+                />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Bullet Points */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Bullet Points</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+
+            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-muted-foreground">Space Between Items</Label>
+                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_spacing || 4}pt</span>
+                  </div>
                   <Slider
-                    value={[resume.document_settings?.margin_lr || 0.75]}
-                    min={0.25}
-                    max={1.5}
-                    step={0.125}
+                    value={[resume.document_settings?.bullet_point_spacing || 4]}
+                    min={2}
+                    max={8}
+                    step={0.5}
                     onValueChange={([value]) => 
                       onChange('document_settings', {
                         ...resume.document_settings,
-                        margin_lr: value
+                        bullet_point_spacing: value
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
+                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_line_height || 1.5}</span>
+                  </div>
+                  <Slider
+                    value={[resume.document_settings?.bullet_point_line_height || 1.5]}
+                    min={1}
+                    max={2}
+                    step={0.1}
+                    onValueChange={([value]) => 
+                      onChange('document_settings', {
+                        ...resume.document_settings,
+                        bullet_point_line_height: value
+                      })
+                    }
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-muted-foreground">Font Size</Label>
+                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_font_size || 10}pt</span>
+                  </div>
+                  <Slider
+                    value={[resume.document_settings?.bullet_point_font_size || 10]}
+                    min={8}
+                    max={12}
+                    step={0.5}
+                    onValueChange={([value]) => 
+                      onChange('document_settings', {
+                        ...resume.document_settings,
+                        bullet_point_font_size: value
                       })
                     }
                   />
@@ -471,23 +528,23 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
             </div>
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="space-y-2">
+          <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
                   <span className="text-xs text-muted-foreground/60">{resume.document_settings?.line_spacing || 1.15}</span>
                 </div>
-                <Slider
-                  value={[resume.document_settings?.line_spacing || 1.15]}
-                  min={1}
-                  max={2}
-                  step={0.05}
-                  onValueChange={([value]) => 
-                    onChange('document_settings', {
-                      ...resume.document_settings,
-                      line_spacing: value
-                    })
-                  }
-                />
+            <Slider
+              value={[resume.document_settings?.line_spacing || 1.15]}
+              min={1}
+              max={2}
+              step={0.05}
+              onValueChange={([value]) => 
+                onChange('document_settings', {
+                  ...resume.document_settings,
+                  line_spacing: value
+                })
+              }
+            />
               </div>
             </div>
           </div>
