@@ -217,9 +217,10 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
               <View key={index} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
                   <View style={{ flex: 1 }}>
-                    <Text style={styles.companyName}>
-                      {exp.company} • {exp.position}
-                    </Text>
+                    <View style={{ flexDirection: 'row' }}>
+                      <Text style={styles.companyName}>{exp.position}</Text>
+                      <Text style={{ ...styles.companyName, fontFamily: 'Helvetica', fontSize: 10 }}>{' '}•{' '}{exp.company}</Text>
+                    </View>
                     {exp.location && (
                       <Text style={styles.jobTitle}>{exp.location}</Text>
                     )}
