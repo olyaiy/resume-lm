@@ -12,10 +12,11 @@ import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/ai"
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface AISuggestion {
   id: string;
@@ -591,125 +592,96 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     <Plus className="h-4 w-4 mr-1" />
                     Add Point
                   </Button>
-                  <Popover 
-                    open={popoverOpen[index]} 
-                    onOpenChange={(open) => setPopoverOpen(prev => ({ ...prev, [index]: open }))}
-                  >
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        disabled={loadingAI[index]}
-                        className={cn(
-                          "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
-                          "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
-                        )}
-                      >
-                        {loadingAI[index] ? (
-                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                        ) : (
-                          <Sparkles className="h-4 w-4 mr-1" />
-                        )}
-                        {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent 
-                      className={cn(
-                        "w-80 p-6",
-                        "bg-gradient-to-br from-white/80 to-purple-50/80",
-                        "backdrop-blur-xl",
-                        "border border-purple-200/60",
-                        "shadow-xl shadow-purple-500/10",
-                        "animate-in fade-in-0 zoom-in-95 duration-200"
-                      )}
-                      align="start"
-                      side="top"
-                      sideOffset={8}
-                    >
-                      {/* Animated Background Pattern */}
-                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_14px] [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] opacity-[0.15] rounded-lg" />
-                      
-                      {/* Floating Gradient Orbs */}
-                      <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70" />
-                      <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70" />
-
-                      <div className="relative space-y-4">
-                        {/* Header */}
-                        <div className="flex items-center gap-2 pb-2">
-                          <div className="p-2 rounded-lg bg-purple-100/80 text-purple-600">
-                            <Sparkles className="h-4 w-4" />
-                          </div>
-                          <span className="font-semibold text-sm text-purple-600">AI Point Generator</span>
-                        </div>
-
-                        {/* Number of Suggestions */}
-                        <div className="space-y-2">
-                          <Label className="text-xs font-medium text-purple-700">Number of Suggestions</Label>
-                          <Input
-                            type="number"
-                            min={1}
-                            max={8}
-                            value={aiConfig[index]?.numPoints || 3}
-                            onChange={(e) => setAiConfig(prev => ({
-                              ...prev,
-                              [index]: { ...prev[index], numPoints: parseInt(e.target.value) || 3 }
-                            }))}
-                            className={cn(
-                              "h-9",
-                              "bg-white/60",
-                              "border-purple-200/60",
-                              "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
-                              "hover:bg-white/80 transition-colors"
-                            )}
-                          />
-                          <p className="text-[10px] text-purple-600/60">Choose between 1-8 points</p>
-                        </div>
-
-                        {/* Custom Focus */}
-                        <div className="space-y-2">
-                          <Label className="text-xs font-medium text-purple-700">Custom Focus (Optional)</Label>
-                          <Textarea
-                            ref={(el) => {
-                              if (el) textareaRefs.current[index] = el;
-                            }}
-                            value={aiConfig[index]?.customPrompt || ''}
-                            onChange={(e) => setAiConfig(prev => ({
-                              ...prev,
-                              [index]: { ...prev[index], customPrompt: e.target.value }
-                            }))}
-                            placeholder="e.g., Focus on my experience with Docker and Kubernetes, highlighting scalability achievements"
-                            className={cn(
-                              "h-24 text-xs",
-                              "bg-white/60",
-                              "border-purple-200/60",
-                              "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
-                              "hover:bg-white/80 transition-colors",
-                              "resize-none"
-                            )}
-                          />
-                          <p className="text-[10px] text-purple-600/60">Add specific focus areas or requirements</p>
-                        </div>
-
-                        {/* Generate Button */}
-                        <Button 
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
                           onClick={() => generateAIPoints(index)}
+                          disabled={loadingAI[index]}
                           className={cn(
-                            "w-full mt-2",
-                            "bg-gradient-to-r from-purple-500 to-indigo-500",
-                            "text-white font-medium",
-                            "border-0",
-                            "shadow-lg shadow-purple-500/20",
-                            "hover:shadow-xl hover:shadow-purple-500/30",
-                            "transition-all duration-300",
-                            "hover:-translate-y-0.5"
+                            "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
+                            "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
                           )}
                         >
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Generate Points
+                          {loadingAI[index] ? (
+                            <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                          ) : (
+                            <Sparkles className="h-4 w-4 mr-1" />
+                          )}
+                          {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
                         </Button>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                      </TooltipTrigger>
+                      <TooltipContent 
+                        side="top" 
+                        align="start"
+                        className={cn(
+                          "w-80 p-6",
+                          "bg-gradient-to-br from-white/95 to-purple-50/95",
+                          "backdrop-blur-xl",
+                          "border border-purple-200/60",
+                          "shadow-xl shadow-purple-500/10",
+                          "rounded-lg"
+                        )}
+                      >
+                        <div className="relative space-y-4">
+                          {/* Header */}
+                          <div className="flex items-center gap-2 pb-2">
+                            <div className="p-2 rounded-lg bg-purple-100/80 text-purple-600">
+                              <Sparkles className="h-4 w-4" />
+                            </div>
+                            <span className="font-semibold text-sm text-purple-600">AI Settings</span>
+                          </div>
+
+                          {/* Number of Suggestions */}
+                          <div className="space-y-2">
+                            <Label className="text-xs font-medium text-purple-700">Number of Points</Label>
+                            <Input
+                              type="number"
+                              min={1}
+                              max={8}
+                              value={aiConfig[index]?.numPoints || 3}
+                              onChange={(e) => setAiConfig(prev => ({
+                                ...prev,
+                                [index]: { ...prev[index], numPoints: parseInt(e.target.value) || 3 }
+                              }))}
+                              className={cn(
+                                "h-8",
+                                "bg-white/60",
+                                "border-purple-200/60",
+                                "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
+                                "hover:bg-white/80 transition-colors",
+                                "text-black"
+                              )}
+                            />
+                          </div>
+
+                          {/* Custom Focus */}
+                          <div className="space-y-2">
+                            <Label className="text-xs font-medium text-purple-700">Custom Focus</Label>
+                            <Textarea
+                              value={aiConfig[index]?.customPrompt || ''}
+                              onChange={(e) => setAiConfig(prev => ({
+                                ...prev,
+                                [index]: { ...prev[index], customPrompt: e.target.value }
+                              }))}
+                              placeholder="Optional: Add specific focus areas"
+                              className={cn(
+                                "h-20 text-xs",
+                                "bg-white/60",
+                                "border-purple-200/60",
+                                "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
+                                "hover:bg-white/80 transition-colors",
+                                "resize-none",
+                                "text-black placeholder:text-gray-400"
+                              )}
+                            />
+                          </div>
+                        </div>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </div>
 
