@@ -9,7 +9,7 @@ import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 import { generateWorkExperiencePoints } from "@/utils/ai";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Popover,
@@ -34,6 +34,19 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
   const [aiConfig, setAiConfig] = useState<{ [key: number]: { numPoints: number; customPrompt: string } }>({});
   const [popoverOpen, setPopoverOpen] = useState<{ [key: number]: boolean }>({});
+  const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
+
+  // Effect to focus textarea when popover opens
+  useEffect(() => {
+    Object.entries(popoverOpen).forEach(([index, isOpen]) => {
+      if (isOpen && textareaRefs.current[Number(index)]) {
+        // Small delay to ensure the popover is fully rendered
+        setTimeout(() => {
+          textareaRefs.current[Number(index)]?.focus();
+        }, 100);
+      }
+    });
+  }, [popoverOpen]);
 
   const addExperience = () => {
     onChange([{
@@ -421,19 +434,43 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                         {loadingAI[index] ? (
                           <Loader2 className="h-4 w-4 mr-1 animate-spin" />
                         ) : (
-                          <span className="h-4 w-4 mr-1">✨</span>
+                          <Sparkles className="h-4 w-4 mr-1" />
                         )}
                         {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent 
-                      className="w-80"
+                      className={cn(
+                        "w-80 p-6",
+                        "bg-gradient-to-br from-white/80 to-purple-50/80",
+                        "backdrop-blur-xl",
+                        "border border-purple-200/60",
+                        "shadow-xl shadow-purple-500/10",
+                        "animate-in fade-in-0 zoom-in-95 duration-200"
+                      )}
                       align="start"
                       side="top"
+                      sideOffset={8}
                     >
-                      <div className="space-y-4">
+                      {/* Animated Background Pattern */}
+                      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_14px] [mask-image:radial-gradient(ellipse_at_center,black_70%,transparent_100%)] opacity-[0.15] rounded-lg" />
+                      
+                      {/* Floating Gradient Orbs */}
+                      <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70" />
+                      <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70" />
+
+                      <div className="relative space-y-4">
+                        {/* Header */}
+                        <div className="flex items-center gap-2 pb-2">
+                          <div className="p-2 rounded-lg bg-purple-100/80 text-purple-600">
+                            <Sparkles className="h-4 w-4" />
+                          </div>
+                          <span className="font-semibold text-sm text-purple-600">AI Point Generator</span>
+                        </div>
+
+                        {/* Number of Suggestions */}
                         <div className="space-y-2">
-                          <Label className="text-xs">Number of Suggestions</Label>
+                          <Label className="text-xs font-medium text-purple-700">Number of Suggestions</Label>
                           <Input
                             type="number"
                             min={1}
@@ -443,25 +480,57 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                               ...prev,
                               [index]: { ...prev[index], numPoints: parseInt(e.target.value) || 3 }
                             }))}
-                            className="h-8"
+                            className={cn(
+                              "h-9",
+                              "bg-white/60",
+                              "border-purple-200/60",
+                              "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
+                              "hover:bg-white/80 transition-colors"
+                            )}
                           />
+                          <p className="text-[10px] text-purple-600/60">Choose between 1-8 points</p>
                         </div>
+
+                        {/* Custom Focus */}
                         <div className="space-y-2">
-                          <Label className="text-xs">Custom Focus (Optional)</Label>
+                          <Label className="text-xs font-medium text-purple-700">Custom Focus (Optional)</Label>
                           <Textarea
+                            ref={(el) => {
+                              if (el) textareaRefs.current[index] = el;
+                            }}
                             value={aiConfig[index]?.customPrompt || ''}
                             onChange={(e) => setAiConfig(prev => ({
                               ...prev,
                               [index]: { ...prev[index], customPrompt: e.target.value }
                             }))}
                             placeholder="e.g., Focus on my experience with Docker and Kubernetes, highlighting scalability achievements"
-                            className="h-24 text-xs"
+                            className={cn(
+                              "h-24 text-xs",
+                              "bg-white/60",
+                              "border-purple-200/60",
+                              "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
+                              "hover:bg-white/80 transition-colors",
+                              "resize-none"
+                            )}
                           />
+                          <p className="text-[10px] text-purple-600/60">Add specific focus areas or requirements</p>
                         </div>
+
+                        {/* Generate Button */}
                         <Button 
-                          className="w-full"
                           onClick={() => generateAIPoints(index)}
+                          className={cn(
+                            "w-full mt-2",
+                            "bg-gradient-to-r from-purple-500 to-indigo-500",
+                            "text-white font-medium",
+                            "border-0",
+                            "shadow-lg shadow-purple-500/20",
+                            "hover:shadow-xl hover:shadow-purple-500/30",
+                            "transition-all duration-300",
+                            "hover:-translate-y-0.5"
+                          )}
                         >
+                          <Sparkles className="h-4 w-4 mr-2" />
                           Generate Points
                         </Button>
                       </div>
