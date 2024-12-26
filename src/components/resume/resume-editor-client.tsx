@@ -17,7 +17,6 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
 import { Separator } from "@/components/ui/separator";
 import { BasicInfoForm } from "./basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
@@ -34,7 +33,24 @@ export function ResumeEditorClient({
   initialResume,
   profile,
 }: ResumeEditorClientProps) {
-  const [resume, setResume] = useState(initialResume);
+  // Convert initial resume data to use single date string format
+  const convertedInitialResume = {
+    ...initialResume,
+    work_experience: initialResume.work_experience?.map(exp => ({
+      ...exp,
+      date: exp.date || ''
+    })),
+    education: initialResume.education?.map(edu => ({
+      ...edu,
+      date: edu.date || ''
+    })),
+    projects: initialResume.projects?.map(project => ({
+      ...project,
+      date: project.date || ''
+    }))
+  };
+
+  const [resume, setResume] = useState(convertedInitialResume);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);

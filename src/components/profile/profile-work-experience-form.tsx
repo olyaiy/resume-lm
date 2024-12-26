@@ -4,8 +4,6 @@ import { WorkExperience } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 
@@ -20,9 +18,7 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
       company: "",
       position: "",
       location: "",
-      start_date: "",
-      end_date: null,
-      current: false,
+      date: "",
       description: [],
       technologies: []
     }]);
@@ -49,20 +45,9 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
           </div>
           
           <CardContent className="p-6">
-            <div className="flex justify-end mb-4">
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={() => removeExperience(index)}
-                className="text-gray-400 hover:text-red-500 transition-colors duration-300"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </div>
-
             <div className="space-y-6">
-              {/* Position and Dates Row */}
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-4">
+              {/* Position Row with Delete Button */}
+              <div className="flex items-start gap-4">
                 <div className="flex-1 relative group">
                   <Input
                     value={exp.position}
@@ -77,57 +62,46 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                     POSITION
                   </div>
                 </div>
-                <div className="space-y-1">
-                  <div className="flex items-center gap-3 text-gray-600">
-                    <div className="relative group">
-                      <Input
-                        type="date"
-                        value={exp.start_date}
-                        onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                        className="w-auto bg-white/50 border-gray-200 rounded-lg
-                          focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                          hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
-                      />
-                      <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                        START DATE
-                      </div>
-                    </div>
-                    <span>-</span>
-                    {!exp.current ? (
-                      <div className="relative group">
-                        <Input
-                          type="date"
-                          value={exp.end_date || ''}
-                          onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                          className="w-auto bg-white/50 border-gray-200 rounded-lg
-                            focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                            hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
-                        />
-                        <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                          END DATE
-                        </div>
-                      </div>
-                    ) : (
-                      <span className="text-teal-600 font-medium">Present</span>
-                    )}
-                  </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  onClick={() => removeExperience(index)}
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 mt-1 flex-shrink-0"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </div>
+
+              {/* Company Row */}
+              <div className="relative group">
+                <Input
+                  value={exp.company}
+                  onChange={(e) => updateExperience(index, 'company', e.target.value)}
+                  className="font-medium bg-white/50 border-gray-200 rounded-lg
+                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
+                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors
+                    placeholder:text-gray-400"
+                  placeholder="Company Name"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
+                  COMPANY
                 </div>
               </div>
 
-              {/* Company and Location Row */}
+              {/* Date and Location Row */}
               <div className="flex flex-col md:flex-row md:items-start gap-4 text-gray-600">
-                <div className="relative group flex-1">
+                <div className="relative group md:w-1/3">
                   <Input
-                    value={exp.company}
-                    onChange={(e) => updateExperience(index, 'company', e.target.value)}
-                    className="font-medium bg-white/50 border-gray-200 rounded-lg
+                    type="text"
+                    value={exp.date}
+                    onChange={(e) => updateExperience(index, 'date', e.target.value)}
+                    className="bg-white/50 border-gray-200 rounded-lg
                       focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                      hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400"
-                    placeholder="Company Name"
+                      hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                    placeholder="e.g., Jan 2023 - Present"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                    COMPANY
+                    DATE
                   </div>
                 </div>
                 <div className="relative group flex-1">
@@ -138,7 +112,7 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                       focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
                       hover:border-cyan-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
-                    placeholder="Location"
+                    placeholder="e.g., Vancouver, BC"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
                     LOCATION
@@ -146,20 +120,23 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                 </div>
               </div>
 
-              {/* Current Position Switch */}
-              <div className="flex items-center space-x-2 text-sm text-cyan-700 pt-2">
-                <Switch
-                  checked={exp.current}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      // If switching to current position, clear end date first
-                      updateExperience(index, 'end_date', null);
-                    }
-                    updateExperience(index, 'current', checked);
-                  }}
-                  className="data-[state=checked]:bg-cyan-600"
+              {/* Technologies */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-baseline">
+                  <Label className="text-sm font-medium text-gray-600">Technologies & Skills Used</Label>
+                  <span className="text-[10px] text-gray-500">Separate with commas</span>
+                </div>
+                <Input
+                  value={exp.technologies?.join(', ')}
+                  onChange={(e) => updateExperience(index, 'technologies', 
+                    e.target.value.split(',').map(t => t.trim()).filter(Boolean)
+                  )}
+                  placeholder="React, TypeScript, Node.js, etc."
+                  className="bg-white/50 border-gray-200 rounded-lg
+                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
+                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors
+                    placeholder:text-gray-400"
                 />
-                <Label>I currently work here</Label>
               </div>
 
               {/* Description */}
@@ -218,25 +195,6 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
                     </div>
                   )}
                 </div>
-              </div>
-
-              {/* Technologies */}
-              <div className="space-y-2">
-                <div className="flex justify-between items-baseline">
-                  <Label className="text-sm font-medium text-gray-600">Technologies & Skills Used</Label>
-                  <span className="text-[10px] text-gray-500">Separate with commas</span>
-                </div>
-                <Input
-                  value={exp.technologies?.join(', ')}
-                  onChange={(e) => updateExperience(index, 'technologies', 
-                    e.target.value.split(',').map(t => t.trim()).filter(Boolean)
-                  )}
-                  placeholder="React, TypeScript, Node.js, etc."
-                  className="bg-white/50 border-gray-200 rounded-lg
-                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors
-                    placeholder:text-gray-400"
-                />
               </div>
             </div>
           </CardContent>

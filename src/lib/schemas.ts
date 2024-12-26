@@ -42,10 +42,7 @@ export const openAiProfileSchema = {
             position: {
               type: "string"
             },
-            start_date: {
-              type: "string"
-            },
-            end_date: {
+            date: {
               type: "string"
             },
             location: {
@@ -67,8 +64,7 @@ export const openAiProfileSchema = {
           required: [
             "company",
             "position",
-            "start_date",
-            "end_date",
+            "date",
             "location",
             "description",
             "technologies"
@@ -90,10 +86,7 @@ export const openAiProfileSchema = {
             field: {
               type: "string"
             },
-            start_date: {
-              type: "string"
-            },
-            end_date: {
+            date: {
               type: "string"
             },
             location: {
@@ -113,8 +106,7 @@ export const openAiProfileSchema = {
             "school",
             "degree",
             "field",
-            "start_date",
-            "end_date",
+            "date",
             "location",
             "gpa",
             "achievements"
@@ -158,6 +150,9 @@ export const openAiProfileSchema = {
                   type: "string"
                 }
             },
+            date: {
+              type: "string"
+            },
             url: {
               type: "string"
             },
@@ -171,6 +166,7 @@ export const openAiProfileSchema = {
           required: [
             "name",
             "description",
+            "date",
             "url",
             "technologies"
           ],
@@ -188,7 +184,7 @@ export const openAiProfileSchema = {
             issuer: {
               type: "string"
             },
-            issue_date: {
+            date: {
               type: "string"
             },
             expiry_date: {
@@ -201,7 +197,7 @@ export const openAiProfileSchema = {
           required: [
             "name",
             "issuer",
-            "issue_date",
+            "date",
             "expiry_date",
             "credential_id"
           ],
@@ -259,10 +255,8 @@ export const openAiResumeSchema = {
           properties: {
             company: { type: "string" },
             position: { type: "string" },
+            date: { type: "string" },
             location: { type: "string" },
-            start_date: { type: "string" },
-            end_date: { type: ["string", "null"] },
-            current: { type: "boolean" },
             description: {
               type: "array",
               items: { type: "string" }
@@ -275,10 +269,8 @@ export const openAiResumeSchema = {
           required: [
             "company",
             "position",
+            "date",
             "location",
-            "start_date",
-            "end_date",
-            "current",
             "description",
             "technologies"
           ],
@@ -293,10 +285,8 @@ export const openAiResumeSchema = {
             school: { type: "string" },
             degree: { type: "string" },
             field: { type: "string" },
+            date: { type: "string" },
             location: { type: "string" },
-            start_date: { type: "string" },
-            end_date: { type: ["string", "null"] },
-            current: { type: "boolean" },
             gpa: { type: ["number", "null"] },
             achievements: {
               type: "array",
@@ -307,10 +297,8 @@ export const openAiResumeSchema = {
             "school",
             "degree",
             "field",
+            "date",
             "location",
-            "start_date",
-            "end_date",
-            "current",
             "gpa",
             "achievements"
           ],
@@ -327,15 +315,10 @@ export const openAiResumeSchema = {
               type: "array",
               items: { type: "string" }
             },
-            technologies: {
-              type: "array",
-              items: { type: "string" }
-            },
+            date: { type: "string" },
             url: { type: ["string", "null"] },
             github_url: { type: ["string", "null"] },
-            start_date: { type: "string" },
-            end_date: { type: ["string", "null"] },
-            highlights: {
+            technologies: {
               type: "array",
               items: { type: "string" }
             }
@@ -343,12 +326,9 @@ export const openAiResumeSchema = {
           required: [
             "name",
             "description",
-            "url",
+            "date",
             "github_url",
-            "start_date",
-            "end_date",
-            "technologies",
-            "highlights"
+            "technologies"
           ],
           additionalProperties: false
         }
@@ -375,7 +355,7 @@ export const openAiResumeSchema = {
           properties: {
             name: { type: "string" },
             issuer: { type: "string" },
-            date_acquired: { type: "string" },
+            date: { type: "string" },
             expiry_date: { type: ["string", "null"] },
             credential_id: { type: ["string", "null"] },
             url: { type: ["string", "null"] }
@@ -383,7 +363,7 @@ export const openAiResumeSchema = {
           required: [
             "name",
             "issuer",
-            "date_acquired",
+            "date",
             "expiry_date",
             "credential_id",
             "url"

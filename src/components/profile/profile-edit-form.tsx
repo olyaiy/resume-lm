@@ -127,9 +127,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 company: exp.company || '',
                 position: exp.position || '',
                 location: exp.location || '',
-                start_date: exp.start_date || '',
-                end_date: exp.end_date || null,
-                current: exp.end_date === 'Present',
+                date: exp.date || '',
                 description: Array.isArray(exp.description) 
                   ? exp.description 
                   : [exp.description || ''],
@@ -144,9 +142,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 degree: edu.degree || '',
                 field: edu.field || '',
                 location: edu.location || '',
-                start_date: edu.start_date || '',
-                end_date: edu.end_date || null,
-                current: edu.end_date === 'Present',
+                date: edu.date || '',
                 gpa: edu.gpa ? parseFloat(edu.gpa.toString()) : undefined,
                 achievements: Array.isArray(edu.achievements) 
                   ? edu.achievements 
@@ -172,8 +168,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   : [],
                 url: proj.url || undefined,
                 github_url: proj.github_url || undefined,
-                start_date: proj.start_date || '',
-                end_date: proj.end_date || null,
+                date: proj.date || ''
               }))
             : [],
           certifications: Array.isArray(parsedProfile.certifications)

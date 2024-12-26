@@ -22,9 +22,7 @@ export function WorkExperienceForm({ experiences, onChange, profile }: WorkExper
       company: "",
       position: "",
       location: "",
-      start_date: "",
-      end_date: "",
-      current: false,
+      date: "",
       description: [],
       technologies: []
     }, ...experiences]);
@@ -158,58 +156,24 @@ export function WorkExperienceForm({ experiences, onChange, profile }: WorkExper
               </div>
 
               {/* Dates Row */}
-              <div className="grid grid-cols-1 md:grid-cols-2 items-center gap-6">
-                <div className="relative">
-                  <Input
-                    type="date"
-                    value={exp.start_date}
-                    onChange={(e) => updateExperience(index, 'start_date', e.target.value)}
-                    className={cn(
-                      "w-full bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                      "hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
-                    )}
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                    START DATE
-                  </div>
+              <div className="relative group">
+                <Input
+                  type="text"
+                  value={exp.date}
+                  onChange={(e) => updateExperience(index, 'date', e.target.value)}
+                  className="w-full bg-white/50 border-gray-200 rounded-lg
+                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
+                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                  placeholder="e.g., 'Jan 2023 - Present' or '2020 - 2022'"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
+                  DATE
                 </div>
-                {!exp.current ? (
-                  <div className="relative">
-                    <Input
-                      type="date"
-                      value={exp.end_date || ''}
-                      onChange={(e) => updateExperience(index, 'end_date', e.target.value)}
-                      className={cn(
-                        "w-full bg-white/50 border-gray-200 rounded-lg",
-                        "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                        "hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
-                      )}
-                    />
-                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-gray-500">
-                      END DATE
-                    </div>
-                  </div>
-                ) : (
-                  <div className="flex items-center justify-center">
-                    <span className="text-teal-600 font-medium">Present</span>
-                  </div>
-                )}
               </div>
 
               {/* Current Position Switch */}
               <div className="flex items-center space-x-2 text-sm text-cyan-700">
-                <Switch
-                  checked={exp.current}
-                  onCheckedChange={(checked) => {
-                    if (checked) {
-                      updateExperience(index, 'end_date', null);
-                    }
-                    updateExperience(index, 'current', checked);
-                  }}
-                  className="data-[state=checked]:bg-cyan-600"
-                />
-                <Label>I currently work here</Label>
+                <span className="text-xs text-gray-500">Use 'Present' in the date field for current positions</span>
               </div>
 
               {/* Description Section */}

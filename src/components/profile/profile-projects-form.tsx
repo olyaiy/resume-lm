@@ -21,8 +21,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
       technologies: [],
       url: "",
       github_url: "",
-      start_date: "",
-      end_date: "",
+      date: ""
     }]);
   };
 
@@ -122,33 +121,18 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
               </div>
 
               {/* Dates Row */}
-              <div className="flex items-center gap-3 text-gray-600">
-                <div className="relative group">
-                  <Input
-                    type="date"
-                    value={project.start_date}
-                    onChange={(e) => updateProject(index, 'start_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
-                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
-                    START DATE
-                  </div>
-                </div>
-                <span>-</span>
-                <div className="relative group">
-                  <Input
-                    type="date"
-                    value={project.end_date || ''}
-                    onChange={(e) => updateProject(index, 'end_date', e.target.value)}
-                    className="w-auto bg-white/50 border-gray-200 rounded-lg
-                      focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
-                    END DATE
-                  </div>
+              <div className="relative group">
+                <Input
+                  type="text"
+                  value={project.date || ''}
+                  onChange={(e) => updateProject(index, 'date', e.target.value)}
+                  className="w-full bg-white/50 border-gray-200 rounded-lg
+                    focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                    hover:border-violet-500/30 hover:bg-white/60 transition-colors"
+                  placeholder="e.g., 'Jan 2023 - Present' or 'Summer 2023'"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-violet-700">
+                  DATE
                 </div>
               </div>
 

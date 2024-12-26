@@ -21,9 +21,7 @@ export function ProfileEducationForm({ education, onChange }: ProfileEducationFo
       degree: "",
       field: "",
       location: "",
-      start_date: "",
-      end_date: "",
-      current: false,
+      date: "",
       gpa: undefined,
       achievements: []
     }]);
@@ -119,49 +117,25 @@ export function ProfileEducationForm({ education, onChange }: ProfileEducationFo
                 </div>
               </div>
 
-              {/* Dates and Current Status Row */}
-              <div className="flex flex-col md:flex-row items-end gap-4">
-                <div className="relative group flex-1">
-                  <Input
-                    type="date"
-                    value={edu.start_date}
-                    onChange={(e) => updateEducation(index, 'start_date', e.target.value)}
-                    className="bg-white/50 border-gray-200 rounded-lg
-                      focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
-                      hover:border-indigo-500/30 hover:bg-white/60 transition-colors"
-                  />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
-                    START DATE
-                  </div>
+              {/* Dates Row */}
+              <div className="relative group">
+                <Input
+                  type="text"
+                  value={edu.date}
+                  onChange={(e) => updateEducation(index, 'date', e.target.value)}
+                  className="bg-white/50 border-gray-200 rounded-lg
+                    focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
+                    hover:border-indigo-500/30 hover:bg-white/60 transition-colors w-full"
+                  placeholder="e.g., '2019 - 2023' or '2020 - Present'"
+                />
+                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                  DATE
                 </div>
-                {!edu.current && (
-                  <div className="relative group flex-1">
-                    <Input
-                      type="date"
-                      value={edu.end_date || ''}
-                      onChange={(e) => updateEducation(index, 'end_date', e.target.value)}
-                      className="bg-white/50 border-gray-200 rounded-lg
-                        focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
-                        hover:border-indigo-500/30 hover:bg-white/60 transition-colors"
-                    />
-                    <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
-                      END DATE
-                    </div>
-                  </div>
-                )}
-                <div className="flex items-center space-x-2 min-w-[200px]">
-                  <Switch
-                    checked={edu.current}
-                    onCheckedChange={(checked) => {
-                      updateEducation(index, 'current', checked);
-                      if (checked) {
-                        updateEducation(index, 'end_date', null);
-                      }
-                    }}
-                    className="data-[state=checked]:bg-indigo-500"
-                  />
-                  <Label className="text-sm text-gray-600">Currently Studying</Label>
-                </div>
+              </div>
+
+              {/* Current Status Note */}
+              <div className="flex items-center space-x-2">
+                <span className="text-xs text-gray-500">Use 'Present' in the date field for current education</span>
               </div>
 
               {/* GPA */}

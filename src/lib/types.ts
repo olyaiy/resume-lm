@@ -2,9 +2,7 @@ export interface WorkExperience {
   company: string;
   position: string;
   location?: string;
-  start_date: string;
-  end_date?: string;
-  current: boolean;
+  date: string;
   description: string[];
   technologies?: string[];
 }
@@ -14,9 +12,7 @@ export interface Education {
   degree: string;
   field: string;
   location?: string;
-  start_date: string;
-  end_date?: string;
-  current: boolean;
+  date: string;
   gpa?: string;
   achievements?: string[];
 }
@@ -24,8 +20,7 @@ export interface Education {
 export interface Project {
   name: string;
   description: string[];
-  start_date?: string;
-  end_date?: string;
+  date?: string;
   technologies?: string[];
   url?: string;
   github_url?: string;

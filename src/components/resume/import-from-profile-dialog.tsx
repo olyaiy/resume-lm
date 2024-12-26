@@ -96,13 +96,13 @@ export function ImportFromProfileDialog<T extends ImportItem>({
   const getItemDate = (item: ImportItem): string => {
     if (type === 'work_experience') {
       const exp = item as WorkExperience;
-      return `${exp.start_date} - ${exp.current ? 'Present' : exp.end_date}`;
+      return exp.date;
     } else if (type === 'projects') {
       const proj = item as Project;
-      return proj.start_date ? `${proj.start_date}${proj.end_date ? ` - ${proj.end_date}` : ''}` : '';
+      return proj.date || '';
     } else if (type === 'education') {
       const edu = item as Education;
-      return `${edu.start_date} - ${edu.current ? 'Present' : edu.end_date}`;
+      return edu.date;
     }
     return '';
   };

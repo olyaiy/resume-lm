@@ -225,7 +225,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     )}
                   </View>
                   <Text style={styles.dateRange}>
-                    {exp.start_date && `${exp.start_date}${exp.current ? ' - Present' : exp.end_date ? ` - ${exp.end_date}` : ''}`}
+                    {exp.date}
                   </Text>
                 </View>
                 {exp.description.map((desc, i) => (
@@ -252,7 +252,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     <Text style={styles.projectTitle}>{project.name}</Text>
                   </View>
                   <Text style={styles.dateRange}>
-                    {project.start_date && `${project.start_date}${project.end_date ? ` - ${project.end_date}` : ' - Present'}`}
+                    {project.date}
                   </Text>
                 </View>
                 {[...(project.description || []), ...project.description].map((item, i) => (
@@ -284,7 +284,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     )}
                   </View>
                   <Text style={styles.dateRange}>
-                    {edu.start_date && `${edu.start_date}${edu.current ? ' - Present' : edu.end_date ? ` - ${edu.end_date}` : ''}`}
+                    {edu.date}
                   </Text>
                 </View>
                 {edu.gpa && (
