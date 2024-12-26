@@ -592,7 +592,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     <Plus className="h-4 w-4 mr-1" />
                     Add Point
                   </Button>
-                  <TooltipProvider>
+                  <TooltipProvider delayDuration={0}>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -614,29 +614,29 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent 
-                        side="top" 
+                        side="bottom" 
                         align="start"
+                        sideOffset={2}
                         className={cn(
-                          "w-80 p-6",
-                          "bg-gradient-to-br from-white/95 to-purple-50/95",
-                          "backdrop-blur-xl",
-                          "border border-purple-200/60",
-                          "shadow-xl shadow-purple-500/10",
+                          "w-72 p-3.5",
+                          "bg-purple-50",
+                          "border-2 border-purple-300",
+                          "shadow-lg shadow-purple-100/50",
                           "rounded-lg"
                         )}
                       >
-                        <div className="relative space-y-4">
+                        <div className="space-y-2.5">
                           {/* Header */}
-                          <div className="flex items-center gap-2 pb-2">
-                            <div className="p-2 rounded-lg bg-purple-100/80 text-purple-600">
-                              <Sparkles className="h-4 w-4" />
+                          <div className="flex items-center gap-2 pb-0.5">
+                            <div className="p-1 rounded-md bg-purple-100 text-purple-600">
+                              <Sparkles className="h-3 w-3" />
                             </div>
-                            <span className="font-semibold text-sm text-purple-600">AI Settings</span>
+                            <span className="text-xs font-medium text-purple-700">AI Generation Settings</span>
                           </div>
 
                           {/* Number of Suggestions */}
-                          <div className="space-y-2">
-                            <Label className="text-xs font-medium text-purple-700">Number of Points</Label>
+                          <div>
+                            <Label className="text-[11px] font-medium text-purple-700">Points to Generate</Label>
                             <Input
                               type="number"
                               min={1}
@@ -647,34 +647,34 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                                 [index]: { ...prev[index], numPoints: parseInt(e.target.value) || 3 }
                               }))}
                               className={cn(
-                                "h-8",
-                                "bg-white/60",
-                                "border-purple-200/60",
-                                "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
-                                "hover:bg-white/80 transition-colors",
-                                "text-black"
+                                "h-7 mt-0.5",
+                                "bg-white",
+                                "border-purple-200",
+                                "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
+                                "hover:bg-white",
+                                "text-purple-900 text-xs"
                               )}
                             />
                           </div>
 
                           {/* Custom Focus */}
-                          <div className="space-y-2">
-                            <Label className="text-xs font-medium text-purple-700">Custom Focus</Label>
+                          <div>
+                            <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
                             <Textarea
                               value={aiConfig[index]?.customPrompt || ''}
                               onChange={(e) => setAiConfig(prev => ({
                                 ...prev,
                                 [index]: { ...prev[index], customPrompt: e.target.value }
                               }))}
-                              placeholder="Optional: Add specific focus areas"
+                              placeholder="e.g., Focus on leadership and team management achievements"
                               className={cn(
-                                "h-20 text-xs",
-                                "bg-white/60",
-                                "border-purple-200/60",
-                                "focus:border-purple-300/60 focus:ring-2 focus:ring-purple-500/20",
-                                "hover:bg-white/80 transition-colors",
+                                "h-14 mt-0.5 text-xs",
+                                "bg-white",
+                                "border-purple-200",
+                                "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
+                                "hover:bg-white",
                                 "resize-none",
-                                "text-black placeholder:text-gray-400"
+                                "text-purple-900 placeholder:text-purple-400"
                               )}
                             />
                           </div>
