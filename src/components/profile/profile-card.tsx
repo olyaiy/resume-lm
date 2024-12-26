@@ -3,8 +3,6 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { User, MapPin, Mail, Phone, Globe, Linkedin, Github, Edit2, ChevronRight, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Sparkles } from "lucide-react";
-import { ProfileView } from "./profile-view";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 
 interface ProfileCardProps {
@@ -256,7 +254,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-medium text-gray-900">{work.position}</div>
                       <div className="text-sm text-muted-foreground">
-                        {work.start_date} - {work.current ? 'Present' : work.end_date}
+                        {work.date}
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground mb-2">{work.company} • {work.location}</div>
@@ -301,7 +299,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-medium text-gray-900">{edu.degree} in {edu.field}</div>
                       <div className="text-sm text-muted-foreground">
-                        {edu.start_date} - {edu.current ? 'Present' : edu.end_date}
+                        {edu.date} 
                       </div>
                     </div>
                     <div className="text-sm text-muted-foreground mb-2">{edu.school} • {edu.location}</div>
@@ -372,17 +370,17 @@ export function ProfileCard({ profile }: ProfileCardProps) {
                     <div className="flex justify-between items-start mb-1">
                       <div className="font-medium text-gray-900">{project.name}</div>
                       <div className="text-sm text-muted-foreground">
-                        {project.start_date} - {project.end_date || 'Present'}
+                        {project.date}
                       </div>
                     </div>
                     <div className="text-sm text-gray-600 mb-2">{project.description}</div>
                     <ul className="list-disc list-inside space-y-1">
-                      {project.highlights.map((highlight, i) => (
-                        <li key={i} className="text-sm text-gray-600">{highlight}</li>
+                      {project.description.map((description, i) => (
+                        <li key={i} className="text-sm text-gray-600">{description}</li>
                       ))}
                     </ul>
                     <div className="mt-2 flex flex-wrap gap-2">
-                      {project.technologies.map((tech, i) => (
+                      {project.technologies?.map((tech, i) => (
                         <span key={i} className="px-2 py-1 text-xs rounded-full bg-orange-50 text-orange-600">
                           {tech}
                         </span>
