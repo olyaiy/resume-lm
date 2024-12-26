@@ -18,7 +18,7 @@ interface WorkExperienceFormProps {
 
 export function WorkExperienceForm({ experiences, onChange, profile }: WorkExperienceFormProps) {
   const addExperience = () => {
-    onChange([...experiences, {
+    onChange([{
       company: "",
       position: "",
       location: "",
@@ -27,7 +27,7 @@ export function WorkExperienceForm({ experiences, onChange, profile }: WorkExper
       current: false,
       description: [],
       technologies: []
-    }]);
+    }, ...experiences]);
   };
 
   const updateExperience = (index: number, field: keyof WorkExperience, value: any) => {
@@ -41,17 +41,37 @@ export function WorkExperienceForm({ experiences, onChange, profile }: WorkExper
   };
 
   const handleImportFromProfile = (importedExperiences: WorkExperience[]) => {
-    onChange([...experiences, ...importedExperiences]);
+    onChange([...importedExperiences, ...experiences]);
   };
 
   return (
     <div className="space-y-8">
-      <ImportFromProfileDialog<WorkExperience>
-        profile={profile}
-        onImport={handleImportFromProfile}
-        type="work_experience"
-      />
-      
+      <div className="flex gap-4">
+        <Button 
+          variant="outline" 
+          onClick={addExperience}
+          className={cn(
+            "flex-1 h-16",
+            "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
+            "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
+            "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
+            "text-cyan-700 hover:text-cyan-800",
+            "transition-all duration-300",
+            "rounded-xl"
+          )}
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Work Experience
+        </Button>
+
+        <ImportFromProfileDialog<WorkExperience>
+          profile={profile}
+          onImport={handleImportFromProfile}
+          type="work_experience"
+          buttonClassName="flex-1 mb-0"
+        />
+      </div>
+
       {experiences.map((exp, index) => (
         <Card 
           key={index} 
@@ -276,23 +296,6 @@ export function WorkExperienceForm({ experiences, onChange, profile }: WorkExper
           </CardContent>
         </Card>
       ))}
-
-      <Button 
-        variant="outline" 
-        onClick={addExperience}
-        className={cn(
-          "w-full h-16",
-          "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
-          "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
-          "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
-          "text-cyan-700 hover:text-cyan-800",
-          "transition-all duration-300",
-          "rounded-xl"
-        )}
-      >
-        <Plus className="h-5 w-5 mr-2" />
-        Add Work Experience
-      </Button>
     </div>
   );
 } 

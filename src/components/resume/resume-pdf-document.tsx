@@ -255,7 +255,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                     {project.start_date && `${project.start_date}${project.end_date ? ` - ${project.end_date}` : ' - Present'}`}
                   </Text>
                 </View>
-                {[...(project.description || []), ...project.highlights].map((item, i) => (
+                {[...(project.description || []), ...project.description].map((item, i) => (
                   <Text key={i} style={styles.bulletPoint}>• {item}</Text>
                 ))}
                 {project.technologies && project.technologies.length > 0 && (

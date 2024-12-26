@@ -22,8 +22,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
       url: "",
       github_url: "",
       start_date: "",
-      end_date: null,
-      highlights: []
+      end_date: "",
     }]);
   };
 

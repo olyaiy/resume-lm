@@ -17,7 +17,7 @@ interface ProjectsFormProps {
 
 export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps) {
   const addProject = () => {
-    onChange([...projects, {
+    onChange([{
       name: "",
       description: [],
       technologies: [],
@@ -25,7 +25,7 @@ export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps)
       github_url: "",
       start_date: "",
       end_date: "",
-    }]);
+    }, ...projects]);
   };
 
   const updateProject = (index: number, field: keyof Project, value: any) => {
@@ -39,17 +39,28 @@ export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps)
   };
 
   const handleImportFromProfile = (importedProjects: Project[]) => {
-    onChange([...projects, ...importedProjects]);
+    onChange([...importedProjects, ...projects]);
   };
 
   return (
     <div className="space-y-4">
-      <ImportFromProfileDialog<Project>
-        profile={profile}
-        onImport={handleImportFromProfile}
-        type="projects"
-        buttonClassName="bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10 border-violet-500/30 hover:border-violet-500/40 text-violet-700 hover:text-violet-800"
-      />
+      <div className="flex gap-4">
+        <Button 
+          variant="outline" 
+          className="flex-1 h-16 bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10 border-2 border-dashed border-violet-500/30 hover:border-violet-500/40 text-violet-700 hover:text-violet-800 transition-all duration-300 rounded-xl"
+          onClick={addProject}
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Project
+        </Button>
+
+        <ImportFromProfileDialog<Project>
+          profile={profile}
+          onImport={handleImportFromProfile}
+          type="projects"
+          buttonClassName="flex-1 mb-0 h-16 bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10 border-2 border-dashed border-violet-500/30 hover:border-violet-500/40 text-violet-700 hover:text-violet-800"
+        />
+      </div>
 
       {projects.map((project, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 backdrop-blur-md border-2 border-violet-500/30 hover:border-violet-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
@@ -241,14 +252,6 @@ export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps)
           </CardContent>
         </Card>
       ))}
-      <Button 
-        variant="outline" 
-        className="w-full bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5 hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10 border-dashed border-violet-500/30 hover:border-violet-500/40 text-violet-700 hover:text-violet-800 transition-all duration-300"
-        onClick={addProject}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Project
-      </Button>
     </div>
   );
 } 
