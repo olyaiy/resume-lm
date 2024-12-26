@@ -19,13 +19,12 @@ export function ProjectsForm({ projects, onChange, profile }: ProjectsFormProps)
   const addProject = () => {
     onChange([...projects, {
       name: "",
-      description: "",
+      description: [],
       technologies: [],
       url: "",
       github_url: "",
       start_date: "",
       end_date: "",
-      highlights: []
     }]);
   };
 

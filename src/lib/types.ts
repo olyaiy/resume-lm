@@ -23,10 +23,9 @@ export interface Education {
 
 export interface Project {
   name: string;
-  description: string;
+  description: string[];
   start_date?: string;
   end_date?: string;
-  highlights: string[];
   technologies?: string[];
   url?: string;
   github_url?: string;

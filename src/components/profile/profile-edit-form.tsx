@@ -174,9 +174,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 github_url: proj.github_url || undefined,
                 start_date: proj.start_date || '',
                 end_date: proj.end_date || null,
-                highlights: Array.isArray(proj.highlights) 
-                  ? proj.highlights 
-                  : []
               }))
             : [],
           certifications: Array.isArray(parsedProfile.certifications)
