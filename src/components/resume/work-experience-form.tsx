@@ -35,6 +35,10 @@ interface ImprovedPoint {
   improved: string;
 }
 
+interface ImprovementConfig {
+  [key: number]: { [key: number]: string }; // expIndex -> pointIndex -> prompt
+}
+
 export function WorkExperienceForm({ experiences, onChange, profile, targetRole = "Software Engineer" }: WorkExperienceFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
@@ -43,6 +47,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
   const [popoverOpen, setPopoverOpen] = useState<{ [key: number]: boolean }>({});
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
   const [improvedPoints, setImprovedPoints] = useState<{ [key: number]: { [key: number]: ImprovedPoint } }>({});
+  const [improvementConfig, setImprovementConfig] = useState<ImprovementConfig>({});
 
   // Effect to focus textarea when popover opens
   useEffect(() => {
@@ -135,6 +140,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
   const rewritePoint = async (expIndex: number, pointIndex: number) => {
     const exp = experiences[expIndex];
     const point = exp.description[pointIndex];
+    const customPrompt = improvementConfig[expIndex]?.[pointIndex];
     
     setLoadingPointAI(prev => ({
       ...prev,
@@ -142,7 +148,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
     }));
     
     try {
-      const improvedPoint = await improveWorkExperience(point);
+      const improvedPoint = await improveWorkExperience(point, customPrompt);
       
       // Store both original and improved versions
       setImprovedPoints(prev => ({
@@ -440,29 +446,73 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                             >
                               <Trash2 className="h-4 w-4" />
                             </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => rewritePoint(index, descIndex)}
-                              disabled={loadingPointAI[index]?.[descIndex]}
-                              className={cn(
-                                "p-0 group-hover/item:opacity-100",
-                                "h-8 w-8 rounded-lg",
-                                "bg-purple-50/80 hover:bg-purple-100/80",
-                                "text-purple-600 hover:text-purple-700",
-                                "border border-purple-200/60",
-                                "shadow-sm",
-                                "transition-all duration-300",
-                                "hover:scale-105 hover:shadow-md",
-                                "hover:-translate-y-0.5"
-                              )}
-                            >
-                              {loadingPointAI[index]?.[descIndex] ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <Sparkles className="h-4 w-4" />
-                              )}
-                            </Button>
+                            <TooltipProvider delayDuration={0}>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => rewritePoint(index, descIndex)}
+                                    disabled={loadingPointAI[index]?.[descIndex]}
+                                    className={cn(
+                                      "p-0 group-hover/item:opacity-100",
+                                      "h-8 w-8 rounded-lg",
+                                      "bg-purple-50/80 hover:bg-purple-100/80",
+                                      "text-purple-600 hover:text-purple-700",
+                                      "border border-purple-200/60",
+                                      "shadow-sm",
+                                      "transition-all duration-300",
+                                      "hover:scale-105 hover:shadow-md",
+                                      "hover:-translate-y-0.5"
+                                    )}
+                                  >
+                                    {loadingPointAI[index]?.[descIndex] ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                      <Sparkles className="h-4 w-4" />
+                                    )}
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent 
+                                  side="bottom" 
+                                  align="start"
+                                  sideOffset={2}
+                                  className={cn(
+                                    "w-72 p-3.5",
+                                    "bg-purple-50",
+                                    "border-2 border-purple-300",
+                                    "shadow-lg shadow-purple-100/50",
+                                    "rounded-lg"
+                                  )}
+                                >
+                                  <div className="space-y-2">
+                                    <div>
+                                      <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
+                                      <Textarea
+                                        value={improvementConfig[index]?.[descIndex] || ''}
+                                        onChange={(e) => setImprovementConfig(prev => ({
+                                          ...prev,
+                                          [index]: {
+                                            ...(prev[index] || {}),
+                                            [descIndex]: e.target.value
+                                          }
+                                        }))}
+                                        placeholder="e.g., Make it more impactful and quantifiable"
+                                        className={cn(
+                                          "h-14 mt-0.5 text-xs",
+                                          "bg-white",
+                                          "border-purple-200",
+                                          "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
+                                          "hover:bg-white",
+                                          "resize-none",
+                                          "text-purple-900 placeholder:text-purple-400"
+                                        )}
+                                      />
+                                    </div>
+                                  </div>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
                           </>
                         )}
                       </div>

@@ -151,12 +151,12 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
   }
 }
 
-export async function improveWorkExperience(point: string) {
+export async function improveWorkExperience(point: string, customPrompt?: string) {
   const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
     WORK_EXPERIENCE_IMPROVER_MESSAGE,
     {
       role: "user",
-      content: `Please improve this work experience bullet point while maintaining its core message and truthfulness:\n\n"${point}"`
+      content: `Please improve this work experience bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`
     }
   ];
 
