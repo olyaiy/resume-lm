@@ -4,7 +4,6 @@ import { Skill, Profile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -18,10 +17,10 @@ interface SkillsFormProps {
 
 export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
   const addSkillCategory = () => {
-    onChange([...skills, {
+    onChange([{
       category: "",
       items: []
-    }]);
+    }, ...skills]);
   };
 
   const updateSkillCategory = (index: number, field: keyof Skill, value: any) => {
@@ -46,17 +45,28 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
   };
 
   const handleImportFromProfile = (importedSkills: Skill[]) => {
-    onChange([...skills, ...importedSkills]);
+    onChange([...importedSkills, ...skills]);
   };
 
   return (
     <div className="space-y-4">
-      <ImportFromProfileDialog<Skill>
-        profile={profile}
-        onImport={handleImportFromProfile}
-        type="skills"
-        buttonClassName="bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800"
-      />
+      <div className="flex gap-4">
+        <Button 
+          variant="outline" 
+          className="flex-1 h-16 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800 transition-all duration-300 rounded-xl"
+          onClick={addSkillCategory}
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Skill Category
+        </Button>
+
+        <ImportFromProfileDialog<Skill>
+          profile={profile}
+          onImport={handleImportFromProfile}
+          type="skills"
+          buttonClassName="flex-1 mb-0 h-16 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800"
+        />
+      </div>
 
       {skills.map((skill, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 backdrop-blur-md border-2 border-rose-500/30 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
@@ -136,14 +146,6 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
           </CardContent>
         </Card>
       ))}
-      <Button 
-        variant="outline" 
-        className="w-full bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800 transition-all duration-300"
-        onClick={addSkillCategory}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Skill Category
-      </Button>
     </div>
   );
 } 

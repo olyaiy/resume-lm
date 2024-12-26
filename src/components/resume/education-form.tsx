@@ -18,7 +18,7 @@ interface EducationFormProps {
 
 export function EducationForm({ education, onChange, profile }: EducationFormProps) {
   const addEducation = () => {
-    onChange([...education, {
+    onChange([{
       school: "",
       degree: "",
       field: "",
@@ -28,7 +28,7 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
       current: false,
       gpa: undefined,
       achievements: []
-    }]);
+    }, ...education]);
   };
 
   const updateEducation = (index: number, field: keyof Education, value: any) => {
@@ -42,17 +42,28 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
   };
 
   const handleImportFromProfile = (importedEducation: Education[]) => {
-    onChange([...education, ...importedEducation]);
+    onChange([...importedEducation, ...education]);
   };
 
   return (
     <div className="space-y-4">
-      <ImportFromProfileDialog<Education>
-        profile={profile}
-        onImport={handleImportFromProfile}
-        type="education"
-        buttonClassName="bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800"
-      />
+      <div className="flex gap-4">
+        <Button 
+          variant="outline" 
+          className="flex-1 h-16 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800 transition-all duration-300 rounded-xl"
+          onClick={addEducation}
+        >
+          <Plus className="h-5 w-5 mr-2" />
+          Add Education
+        </Button>
+
+        <ImportFromProfileDialog<Education>
+          profile={profile}
+          onImport={handleImportFromProfile}
+          type="education"
+          buttonClassName="flex-1 mb-0 h-16 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800"
+        />
+      </div>
 
       {education.map((edu, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 backdrop-blur-md border-2 border-indigo-500/30 hover:border-indigo-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
@@ -219,14 +230,6 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
           </CardContent>
         </Card>
       ))}
-      <Button 
-        variant="outline" 
-        className="w-full bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800 transition-all duration-300"
-        onClick={addEducation}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Add Education
-      </Button>
     </div>
   );
 } 

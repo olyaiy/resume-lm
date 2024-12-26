@@ -22,7 +22,7 @@ export function ProfileEducationForm({ education, onChange }: ProfileEducationFo
       field: "",
       location: "",
       start_date: "",
-      end_date: null,
+      end_date: "",
       current: false,
       gpa: undefined,
       achievements: []
