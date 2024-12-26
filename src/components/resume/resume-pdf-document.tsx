@@ -103,14 +103,13 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Enhanced bullet points
     bulletPoint: {
-      fontSize: resume.document_settings?.bullet_size || 10,
-      lineHeight: resume.document_settings?.line_spacing || 1.15,
+      fontSize: resume.document_settings?.bullet_point_font_size || 10,
+      lineHeight: resume.document_settings?.bullet_point_line_height || 1.5,
+      marginBottom: resume.document_settings?.bullet_point_spacing || 4,
+      color: '#374151',
       marginLeft: resume.document_settings?.bullet_indent || 8,
-      marginBottom: resume.document_settings?.item_spacing || 4,
-      color: resume.document_settings?.bullet_color || '#374151',
       textIndent: -(resume.document_settings?.bullet_indent || 8),
       paddingLeft: resume.document_settings?.bullet_indent || 8,
-      marginTop: resume.document_settings?.bullet_spacing || 4,
     },
     // Modernized skills section
     skillsGrid: {
@@ -245,7 +244,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   </Text>
                 </View>
                 {exp.description.map((desc, i) => (
-                  <Text key={i} style={styles.bulletPoint}>{resume.document_settings?.bullet_symbol || '•'} {desc}</Text>
+                  <Text key={i} style={styles.bulletPoint}>• {desc}</Text>
                 ))}
                 {exp.technologies && exp.technologies.length > 0 && (
                   <Text style={{ ...styles.skillItem, marginLeft: 8, marginTop: 2 }}>
@@ -284,7 +283,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   </Text>
                 )}
                 {[...(project.description || [])].map((item, i) => (
-                  <Text key={i} style={styles.bulletPoint}>{resume.document_settings?.bullet_symbol || '•'} {item}</Text>
+                  <Text key={i} style={styles.bulletPoint}>• {item}</Text>
                 ))}
               </View>
             ))}

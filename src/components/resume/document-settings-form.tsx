@@ -462,12 +462,12 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Space Between Items</Label>
+                    <Label className="text-sm font-medium text-muted-foreground">Space Between Each Bullet Point</Label>
                     <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_spacing || 4}pt</span>
                   </div>
                   <Slider
                     value={[resume.document_settings?.bullet_point_spacing || 4]}
-                    min={2}
+                    min={0}
                     max={8}
                     step={0.5}
                     onValueChange={([value]) => 
