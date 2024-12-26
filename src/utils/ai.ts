@@ -96,28 +96,18 @@ export async function generateWorkExperiencePoints(
   company: string,
   technologies: string[],
   targetRole: string,
-  isCurrentRole: boolean = false
+  numPoints: number = 3,
+  customPrompt: string = ''
 ) {
   const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
     WORK_EXPERIENCE_GENERATOR_MESSAGE,
     {
       role: "user",
-      content: `Please generate impactful bullet points for the following work experience:
-
-Position: ${position}
+      content: `Position: ${position}
 Company: ${company}
-Technologies Used: ${technologies.join(', ')}
+Technologies: ${technologies.join(', ')}
 Target Role: ${targetRole}
-Current Role: ${isCurrentRole ? 'Yes' : 'No'}
-
-Generate bullet points that:
-1. Highlight achievements and impact
-2. Incorporate the listed technologies appropriately
-3. Align with the target role of "${targetRole}"
-4. Use ${isCurrentRole ? 'present' : 'past'} tense
-5. Follow ATS-optimization best practices
-
-Please provide 3-8 bullet points that would make this experience stand out to both ATS systems and human recruiters.`
+Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`
     }
   ];
 

@@ -294,6 +294,7 @@ export function ResumeEditorClient({
                         experiences={resume.work_experience}
                         onChange={(experiences) => updateField('work_experience', experiences)}
                         profile={profile}
+                        targetRole={resume.target_role}
                       />
                     </TabsContent>
 

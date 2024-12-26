@@ -11,6 +11,11 @@ import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 import { generateWorkExperiencePoints } from "@/utils/ai";
 import { useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 interface AISuggestion {
   id: string;
@@ -27,6 +32,8 @@ interface WorkExperienceFormProps {
 export function WorkExperienceForm({ experiences, onChange, profile, targetRole = "Software Engineer" }: WorkExperienceFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
+  const [aiConfig, setAiConfig] = useState<{ [key: number]: { numPoints: number; customPrompt: string } }>({});
+  const [popoverOpen, setPopoverOpen] = useState<{ [key: number]: boolean }>({});
 
   const addExperience = () => {
     onChange([{
@@ -55,7 +62,9 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
 
   const generateAIPoints = async (index: number) => {
     const exp = experiences[index];
+    const config = aiConfig[index] || { numPoints: 3, customPrompt: '' };
     setLoadingAI(prev => ({ ...prev, [index]: true }));
+    setPopoverOpen(prev => ({ ...prev, [index]: false }));
     
     try {
       const result = await generateWorkExperiencePoints(
@@ -63,7 +72,8 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
         exp.company,
         exp.technologies || [],
         targetRole,
-        exp.date.toLowerCase().includes('present')
+        config.numPoints,
+        config.customPrompt
       );
       
       const suggestions = result.points.map((point: string) => ({
@@ -394,23 +404,69 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     <Plus className="h-4 w-4 mr-1" />
                     Add Point
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => generateAIPoints(index)}
-                    disabled={loadingAI[index]}
-                    className={cn(
-                      "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
-                      "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
-                    )}
+                  <Popover 
+                    open={popoverOpen[index]} 
+                    onOpenChange={(open) => setPopoverOpen(prev => ({ ...prev, [index]: open }))}
                   >
-                    {loadingAI[index] ? (
-                      <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                    ) : (
-                      <span className="h-4 w-4 mr-1">✨</span>
-                    )}
-                    {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
-                  </Button>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={loadingAI[index]}
+                        className={cn(
+                          "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
+                          "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
+                        )}
+                      >
+                        {loadingAI[index] ? (
+                          <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                        ) : (
+                          <span className="h-4 w-4 mr-1">✨</span>
+                        )}
+                        {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent 
+                      className="w-80"
+                      align="start"
+                      side="top"
+                    >
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-xs">Number of Suggestions</Label>
+                          <Input
+                            type="number"
+                            min={1}
+                            max={8}
+                            value={aiConfig[index]?.numPoints || 3}
+                            onChange={(e) => setAiConfig(prev => ({
+                              ...prev,
+                              [index]: { ...prev[index], numPoints: parseInt(e.target.value) || 3 }
+                            }))}
+                            className="h-8"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <Label className="text-xs">Custom Focus (Optional)</Label>
+                          <Textarea
+                            value={aiConfig[index]?.customPrompt || ''}
+                            onChange={(e) => setAiConfig(prev => ({
+                              ...prev,
+                              [index]: { ...prev[index], customPrompt: e.target.value }
+                            }))}
+                            placeholder="e.g., Focus on my experience with Docker and Kubernetes, highlighting scalability achievements"
+                            className="h-24 text-xs"
+                          />
+                        </div>
+                        <Button 
+                          className="w-full"
+                          onClick={() => generateAIPoints(index)}
+                        >
+                          Generate Points
+                        </Button>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
