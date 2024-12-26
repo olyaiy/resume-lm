@@ -2,7 +2,7 @@
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
 import { Profile } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -148,6 +148,49 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
       statusCode: (error as any)?.status || (error as any)?.statusCode,
     });
     throw new Error('Failed to generate work experience points: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+}
+
+export async function improveWorkExperience(point: string) {
+  const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+    WORK_EXPERIENCE_IMPROVER_MESSAGE,
+    {
+      role: "user",
+      content: `Please improve this work experience bullet point while maintaining its core message and truthfulness:\n\n"${point}"`
+    }
+  ];
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini", // DO NOT MODIFY THIS MODEL
+      messages,
+      temperature: 0.7,
+      max_tokens: 8133, //DO NOT CHANGE
+      top_p: 1,
+      frequency_penalty: 0.3,
+      presence_penalty: 0.2
+    });
+
+    if (!response.choices[0].message.content) {
+      console.error('[AI Work Experience Improver Error] No content in response:', response);
+      throw new Error('No content received from OpenAI');
+    }
+
+    // Log the improved point for debugging
+    console.log('\n=== AI WORK EXPERIENCE IMPROVEMENT ===');
+    console.log('Original:', point);
+    console.log('Improved:', response.choices[0].message.content);
+    console.log('\n=== END IMPROVEMENT ===\n');
+
+    return response.choices[0].message.content;
+  } catch (error) {
+    console.error('[AI Work Experience Improver Error]:', {
+      message: error instanceof Error ? error.message : 'Unknown error',
+      name: error instanceof Error ? error.name : 'Unknown',
+      cause: error instanceof Error ? error.cause : undefined,
+      statusCode: (error as any)?.status || (error as any)?.statusCode,
+    });
+    throw new Error('Failed to improve work experience point: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 

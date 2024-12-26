@@ -5,10 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
+import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles, Wand2, RotateCcw, ThumbsUp, ThumbsDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "./import-from-profile-dialog";
-import { generateWorkExperiencePoints } from "@/utils/ai";
+import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/ai";
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -29,12 +29,19 @@ interface WorkExperienceFormProps {
   targetRole?: string;
 }
 
+interface ImprovedPoint {
+  original: string;
+  improved: string;
+}
+
 export function WorkExperienceForm({ experiences, onChange, profile, targetRole = "Software Engineer" }: WorkExperienceFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
+  const [loadingPointAI, setLoadingPointAI] = useState<{ [key: number]: { [key: number]: boolean } }>({});
   const [aiConfig, setAiConfig] = useState<{ [key: number]: { numPoints: number; customPrompt: string } }>({});
   const [popoverOpen, setPopoverOpen] = useState<{ [key: number]: boolean }>({});
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
+  const [improvedPoints, setImprovedPoints] = useState<{ [key: number]: { [key: number]: ImprovedPoint } }>({});
 
   // Effect to focus textarea when popover opens
   useEffect(() => {
@@ -122,6 +129,65 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
       ...prev,
       [expIndex]: prev[expIndex].filter(s => s.id !== suggestionId)
     }));
+  };
+
+  const rewritePoint = async (expIndex: number, pointIndex: number) => {
+    const exp = experiences[expIndex];
+    const point = exp.description[pointIndex];
+    
+    setLoadingPointAI(prev => ({
+      ...prev,
+      [expIndex]: { ...(prev[expIndex] || {}), [pointIndex]: true }
+    }));
+    
+    try {
+      const improvedPoint = await improveWorkExperience(point);
+      
+      // Store both original and improved versions
+      setImprovedPoints(prev => ({
+        ...prev,
+        [expIndex]: {
+          ...(prev[expIndex] || {}),
+          [pointIndex]: {
+            original: point,
+            improved: improvedPoint
+          }
+        }
+      }));
+
+      // Update the experience with the improved version
+      const updated = [...experiences];
+      updated[expIndex].description[pointIndex] = improvedPoint;
+      onChange(updated);
+    } catch (error) {
+      console.error('Failed to improve point:', error);
+    } finally {
+      setLoadingPointAI(prev => ({
+        ...prev,
+        [expIndex]: { ...(prev[expIndex] || {}), [pointIndex]: false }
+      }));
+    }
+  };
+
+  const undoImprovement = (expIndex: number, pointIndex: number) => {
+    const improvedPoint = improvedPoints[expIndex]?.[pointIndex];
+    if (improvedPoint) {
+      const updated = [...experiences];
+      updated[expIndex].description[pointIndex] = improvedPoint.original;
+      onChange(updated);
+      
+      // Remove the improvement from state
+      setImprovedPoints(prev => {
+        const newState = { ...prev };
+        if (newState[expIndex]) {
+          delete newState[expIndex][pointIndex];
+          if (Object.keys(newState[expIndex]).length === 0) {
+            delete newState[expIndex];
+          }
+        }
+        return newState;
+      });
+    }
   };
 
   return (
@@ -269,28 +335,136 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                             const updated = [...experiences];
                             updated[index].description[descIndex] = e.target.value;
                             onChange(updated);
+                            
+                            // Clear improvement state when manually edited
+                            if (improvedPoints[index]?.[descIndex]) {
+                              setImprovedPoints(prev => {
+                                const newState = { ...prev };
+                                if (newState[index]) {
+                                  delete newState[index][descIndex];
+                                  if (Object.keys(newState[index]).length === 0) {
+                                    delete newState[index];
+                                  }
+                                }
+                                return newState;
+                              });
+                            }
                           }}
                           placeholder="Start with a strong action verb"
                           className={cn(
                             "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
                             "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                             "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
-                            "placeholder:text-gray-400"
+                            "placeholder:text-gray-400",
+                            improvedPoints[index]?.[descIndex] && [
+                              "border-purple-400",
+                              "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
+                              "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
+                              "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
+                            ]
                           )}
                         />
+                        {improvedPoints[index]?.[descIndex] && (
+                          <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
+                            <span className="text-[10px] font-medium text-purple-600 flex items-center gap-1">
+                              <Sparkles className="h-3 w-3" />
+                              AI Suggestion
+                            </span>
+                          </div>
+                        )}
                       </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const updated = [...experiences];
-                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
-                          onChange(updated);
-                        }}
-                        className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        {improvedPoints[index]?.[descIndex] ? (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                // Remove the improvement state after accepting
+                                setImprovedPoints(prev => {
+                                  const newState = { ...prev };
+                                  if (newState[index]) {
+                                    delete newState[index][descIndex];
+                                    if (Object.keys(newState[index]).length === 0) {
+                                      delete newState[index];
+                                    }
+                                  }
+                                  return newState;
+                                });
+                              }}
+                              className={cn(
+                                "p-0 group-hover/item:opacity-100",
+                                "h-8 w-8 rounded-lg",
+                                "bg-green-50/80 hover:bg-green-100/80",
+                                "text-green-600 hover:text-green-700",
+                                "border border-green-200/60",
+                                "shadow-sm",
+                                "transition-all duration-300",
+                                "hover:scale-105 hover:shadow-md",
+                                "hover:-translate-y-0.5"
+                              )}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => undoImprovement(index, descIndex)}
+                              className={cn(
+                                "p-0 group-hover/item:opacity-100",
+                                "h-8 w-8 rounded-lg",
+                                "bg-rose-50/80 hover:bg-rose-100/80",
+                                "text-rose-600 hover:text-rose-700",
+                                "border border-rose-200/60",
+                                "shadow-sm",
+                                "transition-all duration-300",
+                                "hover:scale-105 hover:shadow-md",
+                                "hover:-translate-y-0.5"
+                              )}
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </>
+                        ) : (
+                          <>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => {
+                                const updated = [...experiences];
+                                updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
+                                onChange(updated);
+                              }}
+                              className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => rewritePoint(index, descIndex)}
+                              disabled={loadingPointAI[index]?.[descIndex]}
+                              className={cn(
+                                "p-0 group-hover/item:opacity-100",
+                                "h-8 w-8 rounded-lg",
+                                "bg-purple-50/80 hover:bg-purple-100/80",
+                                "text-purple-600 hover:text-purple-700",
+                                "border border-purple-200/60",
+                                "shadow-sm",
+                                "transition-all duration-300",
+                                "hover:scale-105 hover:shadow-md",
+                                "hover:-translate-y-0.5"
+                              )}
+                            >
+                              {loadingPointAI[index]?.[descIndex] ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                              ) : (
+                                <Sparkles className="h-4 w-4" />
+                              )}
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   ))}
                   
