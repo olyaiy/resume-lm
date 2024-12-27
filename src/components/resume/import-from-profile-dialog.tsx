@@ -57,7 +57,8 @@ export function ImportFromProfileDialog<T extends ImportItem>({
 
   const getItemId = (item: ImportItem): string => {
     if (type === 'work_experience') {
-      return (item as WorkExperience).company + (item as WorkExperience).position;
+      const exp = item as WorkExperience;
+      return `${exp.company}-${exp.position}-${exp.date}`;
     } else if (type === 'projects') {
       return (item as Project).name;
     } else if (type === 'education') {
