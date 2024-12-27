@@ -1,19 +1,20 @@
 import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useRef } from "react";
+import { useRef, useState, memo } from "react";
 
 interface ChatInputProps {
-  message: string;
-  setMessage: (message: string) => void;
-  onSubmit: () => void;
+  onSubmit: (message: string) => void;
   isLoading: boolean;
 }
 
-export function ChatInput({ message, setMessage, onSubmit, isLoading }: ChatInputProps) {
+export const ChatInput = memo(function ChatInput({ onSubmit, isLoading }: ChatInputProps) {
+  const [message, setMessage] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = () => {
-    onSubmit();
+    if (!message.trim() || isLoading) return;
+    onSubmit(message);
+    setMessage('');
     // Refocus input after sending
     requestAnimationFrame(() => {
       inputRef.current?.focus();
@@ -55,4 +56,4 @@ export function ChatInput({ message, setMessage, onSubmit, isLoading }: ChatInpu
       </div>
     </div>
   );
-} 
+}); 

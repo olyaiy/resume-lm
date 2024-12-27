@@ -46,7 +46,6 @@ interface AIAssistantProps {
 
 export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -87,11 +86,9 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
 
   
-  async function handleAIResponse() {
-
+  async function handleAIResponse(message: string) {
     // Prevent empty messages or duplicate submissions while loading
     if (!message.trim() || isLoading) return;
-
 
     // Create the user message OBJECT
     const userMessage = { 
@@ -101,21 +98,18 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     };
 
     /* UI UPDATES */
-
-      // Add users message to chat UI
+    // Add users message to chat UI
     setMessages(prev => [...prev, userMessage]);
-      // Add an assistant message with loading state To chat UI
-    setMessage('');
-      // Set loading state
+    // Add an assistant message with loading state To chat UI
+    // Set loading state
     setIsLoading(true);
-        // provides immediate feedback that the system is processing
+    // provides immediate feedback that the system is processing
     setMessages(prev => [...prev, { 
       role: 'assistant',
       content: '',
       timestamp: new Date(),
       isLoading: true
     }]);
-
 
     /* AI CALL AND RESPONSE */
     try {
@@ -240,16 +234,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               setMessages(prev => {
                 const newMessages = [...prev];
 
-                // 1. We get the last message (which is the loading message)
+                // We get the second to last message 
                 const loadingMessage = newMessages[newMessages.length - 2];
                 
-                console.log("WE SHOULD GET HERE TO DISABLE LOADING STATE : ", loadingMessage);
+                // If its a loading message..
                 if (loadingMessage && loadingMessage.isLoading && loadingMessage.role === 'assistant') {  
-                  
-                  
-                  // 2. We disable the loading state
+
+                  // Disable the loading state
                   loadingMessage.isLoading = false;
-                  console.log("DISABLED LOADING STATE : ", loadingMessage.isLoading);
+                  
 
                   // Format the function name to be more readable, with special case for update_name and read operations
                   let displayMessage = 'Operation Complete ✅';
@@ -273,8 +266,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                   loadingMessage.isSystemMessage = true;
                 }
 
-                
-
+              
                  // Reset function call tracking
                 functionCallName = undefined;
                 functionCallArgs = '';
@@ -493,8 +485,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
         {/* Input Bar - Always Visible */}
         <ChatInput 
-          message={message} 
-          setMessage={setMessage} 
           onSubmit={handleAIResponse} 
           isLoading={isLoading} 
         />
