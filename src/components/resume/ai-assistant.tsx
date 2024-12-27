@@ -489,7 +489,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           {isExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 380, opacity: 1 }}
+              animate={{ height: "70vh", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="relative"
@@ -500,7 +500,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               >
                 <div className="space-y-4">
                   {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-[280px] text-purple-700/60 space-y-3">
+                    <div className="flex flex-col items-center justify-center h-[60vh] text-purple-700/60 space-y-3">
                       <Bot className="w-10 h-10" />
                       <p className="text-sm text-center max-w-[80%]">
                         Hi! I'm your AI Resume Assistant. Ask me anything about crafting or improving your resume.
