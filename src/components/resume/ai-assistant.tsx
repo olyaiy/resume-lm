@@ -9,7 +9,7 @@ import { streamChatResponse } from "@/utils/ai";
 import { useRef, useEffect } from "react";
 import type { OpenAI } from "openai";
 import { motion, AnimatePresence } from "framer-motion";
-import { Resume } from "@/lib/types";
+import { Resume, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { submitAiMessage } from "@/utils/ai";
@@ -331,6 +331,83 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                     last_name: args.last_name
                   }
                 });
+              } else if (functionCallName === 'modify_resume') {
+                const { section, action, index, data } = args;
+
+                switch (section) {
+                  case 'basic_info':
+                    // Update basic info fields
+                    Object.entries(data).forEach(([key, value]) => {
+                      const typedKey = key as keyof Resume;
+                      if (typedKey in resume && typeof value === typeof resume[typedKey]) {
+                        (resume[typedKey] as any) = value;
+                        onUpdateResume(typedKey, value);
+                      }
+                    });
+                    break;
+
+                  case 'work_experience':
+                  case 'education':
+                  case 'skills':
+                  case 'projects':
+                  case 'certifications': {
+                    let sectionArray: Array<WorkExperience | Education | Skill | Project | Certification>;
+                    
+                    // Initialize with the correct type
+                    switch (section) {
+                      case 'work_experience':
+                        sectionArray = [...resume.work_experience];
+                        break;
+                      case 'education':
+                        sectionArray = [...resume.education];
+                        break;
+                      case 'skills':
+                        sectionArray = [...resume.skills];
+                        break;
+                      case 'projects':
+                        sectionArray = [...resume.projects];
+                        break;
+                      case 'certifications':
+                        sectionArray = [...resume.certifications];
+                        break;
+                      default:
+                        throw new Error('Invalid section');
+                    }
+                    
+                    switch (action) {
+                      case 'add':
+                        sectionArray.push(data);
+                        onUpdateResume(section, sectionArray);
+                        break;
+                      case 'update':
+                        if (index === undefined || !sectionArray[index]) {
+                          throw new Error(`Invalid index for ${section} update`);
+                        }
+                        sectionArray[index] = { ...sectionArray[index], ...data };
+                        onUpdateResume(section, sectionArray);
+                        break;
+                      case 'delete':
+                        if (index === undefined || !sectionArray[index]) {
+                          throw new Error(`Invalid index for ${section} deletion`);
+                        }
+                        sectionArray.splice(index, 1);
+                        onUpdateResume(section, sectionArray);
+                        break;
+                    }
+                    break;
+                  }
+
+                  default:
+                    throw new Error('Invalid section specified');
+                }
+
+                functionResult = JSON.stringify({
+                  success: true,
+                  message: `Successfully ${action}ed ${section}`,
+                  section,
+                  action,
+                  index
+                });
               }
 
               // Add the function result to the messages
@@ -339,8 +416,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 name: functionCallName,
                 content: functionResult
               });
-
-             
 
               // Add a system message confirming the function call
               setMessages(prev => {
@@ -358,10 +433,16 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                     const sectionName = args.section === 'all' ? 'Full Resume' : 
                       args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                     displayMessage = `Read ${sectionName} ✅`;
+                  } else if (functionCallName === 'modify_resume') {
+                    const sectionName = args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    const actionName = args.action.charAt(0).toUpperCase() + args.action.slice(1);
+                    displayMessage = `${actionName}d ${sectionName} ✅`;
                   }
                   loadingMessage.content = displayMessage;
                   loadingMessage.isSystemMessage = true;
                 }
+
+                
 
                  // Reset function call tracking
                 functionCallName = undefined;
@@ -473,6 +554,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
   return (
     <div className={cn("group", className)}>
+
+      {/* MAIN CHAT CONTAINER */}
       <motion.div 
         layout
         className="bg-gradient-to-br from-purple-100/95 via-fuchsia-100/95 to-purple-100/95 relative rounded-3xl backdrop-blur-xl border border-purple-200/60 shadow-2xl shadow-purple-500/20 overflow-hidden transition-all duration-500 ease-in-out
@@ -480,10 +563,10 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           after:absolute after:bottom-0 after:left-[10%] after:right-[10%] after:h-1/2 after:bg-gradient-to-t after:from-purple-500/30 after:via-fuchsia-500/20 after:to-transparent after:blur-2xl after:-z-10 after:transition-all after:duration-500 group-hover:after:opacity-80
           before:absolute before:bottom-0 before:left-[20%] before:right-[20%] before:h-1/2 before:bg-gradient-to-t before:from-purple-400/40 before:via-fuchsia-400/10 before:to-transparent before:blur-xl before:-z-10 before:transition-all before:duration-500 group-hover:before:opacity-80"
       >
-        {/* Enhanced inner glow overlay */}
+        {/* Inner glow overlay */}
         <div className="absolute -bottom-6 left-[30%] right-[30%] h-12 bg-purple-500/30 blur-2xl transition-all duration-500 group-hover:bg-purple-500/40" />
         
-        {/* Enhanced gradient overlays */}
+        {/* Gradient overlays */}
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_0%_0%,rgba(168,85,247,0.15),transparent_50%)] pointer-events-none animate-pulse" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(217,70,219,0.15),transparent_50%)] pointer-events-none animate-pulse" />
         
@@ -524,6 +607,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         {/* Chat Area - Expandable */}
         <AnimatePresence>
           {isExpanded && (
+
             <motion.div
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "70vh", opacity: 1 }}
@@ -536,6 +620,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 ref={scrollAreaRef}
               >
                 <div className="space-y-4">
+
+                  {/* Welcome Message */}
                   {messages.length === 0 && !isLoading && (
                     <div className="flex flex-col items-center justify-center h-[60vh] text-purple-700/60 space-y-3">
                       <Bot className="w-10 h-10" />
@@ -544,6 +630,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                       </p>
                     </div>
                   )}
+
+                  {/* MESSAGES */}
                   {messages.map((msg, index) => (
                     <MessageBubble 
                       key={index} 

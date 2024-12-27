@@ -11,10 +11,11 @@ interface FunctionParameters {
     first_name: string;
     last_name: string;
   };
-  // To be implemented in future
   modify_resume: {
-    section: string;
-    updates: Record<string, any>;
+    section: "basic_info" | "work_experience" | "education" | "skills" | "projects" | "certifications";
+    action: "add" | "update" | "delete";
+    index?: number;
+    data: any;
   };
 }
 
@@ -59,6 +60,34 @@ export const functionSchemas = {
       },
       required: ["first_name", "last_name"]
     }
+  },
+  modify_resume: {
+    name: "modify_resume",
+    description: "Modify a specific section of the resume (add, update, or delete entries)",
+    parameters: {
+      type: "object",
+      properties: {
+        section: {
+          type: "string",
+          enum: ["basic_info", "work_experience", "education", "skills", "projects", "certifications"],
+          description: "The section of the resume to modify"
+        },
+        action: {
+          type: "string",
+          enum: ["add", "update", "delete"],
+          description: "The type of modification to perform"
+        },
+        index: {
+          type: "number",
+          description: "The index of the item to update or delete (required for update and delete actions)"
+        },
+        data: {
+          type: "object",
+          description: "The data to add or update (required for add and update actions)"
+        }
+      },
+      required: ["section", "action"]
+    }
   }
 } as const;
 
@@ -86,7 +115,7 @@ export class FunctionHandler {
       case "update_name":
         return this.updateName(args.first_name, args.last_name);
       case "modify_resume":
-        throw new Error("Modify resume function not yet implemented");
+        return this.modifyResume(args.section, args.action, args.index, args.data);
       default:
         throw new Error(`Unknown function: ${name}`);
     }
@@ -147,6 +176,62 @@ export class FunctionHandler {
     });
   }
 
-  // TODO: Implement modify_resume function in the future
-  // This will handle resume modifications based on AI suggestions
+  /**
+   * Modifies a specific section of the resume
+   * @param section - Section to modify
+   * @param action - Type of modification (add/update/delete)
+   * @param index - Index for update/delete operations
+   * @param data - New data to add or update
+   * @returns JSON string confirming the modification
+   */
+  private modifyResume(
+    section: FunctionParameters["modify_resume"]["section"],
+    action: FunctionParameters["modify_resume"]["action"],
+    index?: number,
+    data?: any
+  ): string {
+    switch (section) {
+      case "basic_info":
+        // Update basic info fields
+        Object.assign(this.resume, data);
+        break;
+
+      case "work_experience":
+      case "education":
+      case "skills":
+      case "projects":
+      case "certifications":
+        const sectionArray = this.resume[section];
+        
+        switch (action) {
+          case "add":
+            sectionArray.push(data);
+            break;
+          case "update":
+            if (index === undefined || !sectionArray[index]) {
+              throw new Error(`Invalid index for ${section} update`);
+            }
+            sectionArray[index] = { ...sectionArray[index], ...data };
+            break;
+          case "delete":
+            if (index === undefined || !sectionArray[index]) {
+              throw new Error(`Invalid index for ${section} deletion`);
+            }
+            sectionArray.splice(index, 1);
+            break;
+        }
+        break;
+
+      default:
+        throw new Error("Invalid section specified");
+    }
+
+    return JSON.stringify({
+      success: true,
+      message: `Successfully ${action}ed ${section}`,
+      section,
+      action,
+      index
+    });
+  }
 } 
