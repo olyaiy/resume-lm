@@ -40,23 +40,23 @@ interface AIAssistantProps {
 
 function TypingIndicator({ text }: { text?: string }) {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-1.5">
       {text && (
-        <span className="text-xs text-purple-600/70 font-medium">{text}</span>
+        <span className="text-[11px] text-purple-600/70 font-medium">{text}</span>
       )}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-0.5">
         <motion.div
-          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          className="w-1 h-1 bg-purple-500 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.2 }}
         />
         <motion.div
-          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          className="w-1 h-1 bg-purple-500 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.3 }}
         />
         <motion.div
-          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          className="w-1 h-1 bg-purple-500 rounded-full"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.4 }}
         />
@@ -70,22 +70,22 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
   
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20, scale: 0.95 }}
+      initial={{ opacity: 0, y: 10, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.2 }}
+      transition={{ duration: 0.2, ease: "easeOut" }}
       className={cn(
-        "group flex gap-3 items-start",
+        "group flex gap-2",
         isUser ? "flex-row-reverse" : "flex-row"
       )}
     >
       <div className={cn(
-        "flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center",
+        "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center",
         isUser ? "bg-gradient-to-br from-purple-500 to-fuchsia-500" : "bg-gradient-to-br from-purple-400 to-fuchsia-400"
       )}>
         {isUser ? (
-          <User className="w-4 h-4 text-white" />
+          <User className="w-3.5 h-3.5 text-white" />
         ) : (
-          <Bot className="w-4 h-4 text-white" />
+          <Bot className="w-3.5 h-3.5 text-white" />
         )}
       </div>
       
@@ -94,7 +94,7 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
         isUser ? "items-end" : "items-start"
       )}>
         <div className={cn(
-          "px-4 py-2.5 rounded-2xl text-sm shadow-sm",
+          "px-3.5 py-2 rounded-2xl text-sm shadow-sm",
           isUser 
             ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm" 
             : message.isSystemMessage
@@ -104,15 +104,15 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
           {message.isLoading ? (
             <TypingIndicator text={message.loadingText} />
           ) : message.isSystemMessage ? (
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-purple-500" />
-              <p className="whitespace-pre-wrap font-medium">{message.content}</p>
+            <div className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />
+              <p className="whitespace-pre-wrap font-medium text-xs">{message.content}</p>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap">{message.content}</p>
+            <p className="whitespace-pre-wrap text-[13px] leading-relaxed">{message.content}</p>
           )}
         </div>
-        <span className="text-xs text-gray-500 px-2 opacity-0 transition-opacity group-hover:opacity-100">
+        <span className="text-[10px] text-gray-500 px-1.5 opacity-0 transition-opacity group-hover:opacity-100">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>
@@ -401,17 +401,17 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setIsExpanded(prev => !prev)}
-          className="relative w-full flex items-center gap-3 p-5 hover:bg-purple-200/30 transition-all duration-300 group/button"
+          className="relative w-full flex items-center gap-2.5 px-4 py-3.5 hover:bg-purple-200/30 transition-all duration-300 group/button"
         >
-          <div className="p-2.5 rounded-xl bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-lg shadow-purple-500/20 transition-all duration-300 group-hover/button:shadow-purple-500/40 group-hover/button:scale-105">
-            <Sparkles className="h-5 w-5 text-white animate-pulse" />
+          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-md shadow-purple-500/20 transition-all duration-300 group-hover/button:shadow-purple-500/40 group-hover/button:scale-105">
+            <Sparkles className="h-4 w-4 text-white animate-pulse" />
           </div>
           <div className="flex-1 text-left transition-all duration-300">
-            <div className="text-base font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-700 bg-clip-text text-transparent">AI Resume Assistant</div>
-            <p className="text-sm text-purple-700/90">Let AI help you craft the perfect resume</p>
+            <div className="text-sm font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-700 bg-clip-text text-transparent">AI Resume Assistant</div>
+            <p className="text-xs text-purple-700/90">Let AI help you craft the perfect resume</p>
           </div>
           <ChevronUp className={cn(
-            "h-5 w-5 text-purple-600 transition-all duration-300",
+            "h-4 w-4 text-purple-600 transition-all duration-300",
             isExpanded ? "rotate-0" : "rotate-180",
             "group-hover/button:text-purple-700 group-hover/button:scale-110"
           )} />
@@ -422,19 +422,19 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           {isExpanded && (
             <motion.div
               initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 400, opacity: 1 }}
+              animate={{ height: 380, opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeInOut" }}
               className="relative"
             >
               <ScrollArea 
-                className="h-full px-5 py-4 overflow-y-auto" 
+                className="h-full px-4 py-3 overflow-y-auto" 
                 ref={scrollAreaRef}
               >
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-[300px] text-purple-700/60 space-y-4">
-                      <Bot className="w-12 h-12" />
+                    <div className="flex flex-col items-center justify-center h-[280px] text-purple-700/60 space-y-3">
+                      <Bot className="w-10 h-10" />
                       <p className="text-sm text-center max-w-[80%]">
                         Hi! I'm your AI Resume Assistant. Ask me anything about crafting or improving your resume.
                       </p>
@@ -457,19 +457,18 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
         </AnimatePresence>
 
         {/* Input Bar - Always Visible */}
-        <div className="relative p-5 border-t border-purple-300/40">
-          <form className="flex gap-3" onSubmit={handleSubmit}>
+        <div className="relative px-4 py-3 border-t border-purple-300/40">
+          <form className="flex gap-2" onSubmit={handleSubmit}>
             <input
               ref={inputRef}
               type="text"
               placeholder="Ask AI for help with your resume..."
-              className="flex-1 bg-white/90 backdrop-blur-sm text-sm rounded-xl px-4 py-3 border border-purple-300/50 
+              className="flex-1 bg-white/90 backdrop-blur-sm text-sm rounded-lg px-3.5 py-2.5 border border-purple-300/50 
                 focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-400/60 
                 transition-all duration-300 placeholder:text-purple-600/50
                 shadow-inner shadow-purple-500/10"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-
             />
             <Button 
               type="submit"
@@ -477,11 +476,11 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
               disabled={isLoading || !message.trim()}
               className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white 
                 hover:from-purple-700 hover:to-fuchsia-700 transition-all duration-300 
-                shadow-lg shadow-purple-500/20 hover:shadow-purple-500/40 
-                hover:-translate-y-0.5 rounded-xl px-5 py-3
+                shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 
+                hover:-translate-y-0.5 rounded-lg px-4 py-2.5
                 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
             >
-              <Send className="h-4 w-4" />
+              <Send className="h-3.5 w-3.5" />
             </Button>
           </form>
         </div>
