@@ -13,7 +13,7 @@ import { CertificationsForm } from "./certifications-form";
 import { Loader2, Save, Trash2, ArrowLeft, Bold, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
@@ -87,6 +87,10 @@ export function ResumeEditorClient({
   const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);
   const previewPanelRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const pathname = usePathname();
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showExitDialog, setShowExitDialog] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
   const debouncedResume = useDebouncedValue(resume, 500);
 
@@ -151,8 +155,71 @@ export function ResumeEditorClient({
     }
   };
 
+  // Track changes by comparing current resume with initial
+  useEffect(() => {
+    const hasChanges = JSON.stringify(resume) !== JSON.stringify(convertedInitialResume);
+    setHasUnsavedChanges(hasChanges);
+  }, [resume, convertedInitialResume]);
+
+  // Handle beforeunload event
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  // Handle back navigation
+  const handleBackClick = () => {
+    if (hasUnsavedChanges) {
+      setPendingNavigation('/');
+      setShowExitDialog(true);
+    } else {
+      router.push('/');
+    }
+  };
+
+  const handleConfirmNavigation = async () => {
+    if (pendingNavigation) {
+      router.push(pendingNavigation);
+    }
+    setShowExitDialog(false);
+    setPendingNavigation(null);
+  };
+
+  const handleCancelNavigation = () => {
+    setShowExitDialog(false);
+    setPendingNavigation(null);
+  };
+
   return (
     <main className="relative min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
+      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={handleCancelNavigation}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmNavigation}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Leave Without Saving
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* Animated Background Elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl animate-blob opacity-70" />
@@ -167,13 +234,13 @@ export function ResumeEditorClient({
         <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
         <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
           <div className="flex items-center gap-6">
-            <Link 
-              href="/"
+            <button 
+              onClick={handleBackClick}
               className="group flex items-center text-sm font-medium text-muted-foreground/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50/50"
             >
               <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
               Back to Dashboard
-            </Link>
+            </button>
             <Separator orientation="vertical" className="h-8 bg-gradient-to-b from-purple-200/20 via-purple-200/40 to-purple-200/20" />
             <div className="flex flex-col gap-1">
               <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
