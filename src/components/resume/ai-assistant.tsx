@@ -447,20 +447,7 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
                       isLast={index === messages.length - 1} 
                     />
                   ))}
-                  {isLoading && (
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      className="flex items-start gap-3"
-                    >
-                      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-fuchsia-400 flex items-center justify-center">
-                        <Bot className="w-4 h-4 text-white" />
-                      </div>
-                      <div className="px-4 py-2.5 rounded-2xl rounded-bl-sm bg-white/90 backdrop-blur-sm border border-purple-200/60">
-                        <TypingIndicator />
-                      </div>
-                    </motion.div>
-                  )}
+                 
                   {/* Invisible div for scroll anchoring */}
                   <div ref={messagesEndRef} className="h-0 w-full" />
                 </div>
