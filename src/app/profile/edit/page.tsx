@@ -34,12 +34,10 @@ export default async function EditProfilePage() {
       </div>
 
       {/* Main Content Layer */}
-      <div className="relative z-10 p-6 md:p-8 lg:p-10">
-        <div className="max-w-[2000px] mx-auto">
-          <Suspense fallback={<div>Loading...</div>}>
-            <ProfileEditForm profile={profile} />
-          </Suspense>
-        </div>
+      <div className="relative z-10">
+        <Suspense fallback={<div>Loading...</div>}>
+          <ProfileEditForm profile={profile} />
+        </Suspense>
       </div>
     </main>
   );

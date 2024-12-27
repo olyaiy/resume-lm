@@ -228,40 +228,58 @@ export function ResumeEditorClient({
       </div>
 
       {/* Top Bar */}
-      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-100/95 via-purple-50/95 to-purple-100/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff40_0%,#f0f7ff50_50%,#f3e8ff40_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff40_0%,transparent_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
+      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff30_0%,#ffffff40_50%,#f3e8ff30_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+        
+        {/* Content Container */}
         <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
+          {/* Left Section */}
           <div className="flex items-center gap-6">
+            {/* Back Button */}
             <button 
               onClick={handleBackClick}
-              className="group flex items-center text-sm font-medium text-muted-foreground/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-50/50"
+              className="group flex items-center text-sm font-medium text-purple-600/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-100/30 hover:shadow-sm hover:shadow-purple-500/5 active:bg-purple-100/40"
             >
               <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
               Back to Dashboard
             </button>
-            <Separator orientation="vertical" className="h-8 bg-gradient-to-b from-purple-200/20 via-purple-200/40 to-purple-200/20" />
+
+            {/* Separator */}
+            <div className="h-8 w-px bg-gradient-to-b from-transparent via-purple-200/40 to-transparent" />
+
+            {/* Resume Title Section */}
             <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-semibold bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-                {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
+              <h1 className="text-xl font-semibold">
+                <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+                  {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
+                </span>
               </h1>
-              <p className="text-sm text-muted-foreground/60 flex items-center gap-2">
+              <div className="flex items-center gap-2 text-sm text-purple-600/60">
                 {resume.is_base_resume ? (
                   <>
-                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500" />
-                    Base Resume
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
+                      <span className="font-medium">Base Resume</span>
+                    </div>
                   </>
                 ) : (
                   <>
-                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500" />
-                    Tailored Resume
+                    <div className="flex items-center gap-2">
+                      <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-sm shadow-pink-500/20" />
+                      <span className="font-medium">Tailored Resume</span>
+                    </div>
                   </>
                 )}
-              </p>
+              </div>
             </div>
           </div>
+
+          {/* Right Section - Action Buttons */}
           <div className="flex items-center gap-3">
+            {/* Download Button */}
             <Button 
               onClick={async () => {
                 try {
@@ -289,17 +307,19 @@ export function ResumeEditorClient({
               size="sm"
               className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-teal-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group"
             >
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               <Download className="mr-2 h-4 w-4" />
               Download PDF
             </Button>
+
+            {/* Save Button */}
             <Button 
               onClick={handleSave} 
               disabled={isSaving}
               size="sm"
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
             >
-              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -312,15 +332,17 @@ export function ResumeEditorClient({
                 </>
               )}
             </Button>
+
+            {/* Delete Button */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                   disabled={isDeleting}
                 >
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
                   {isDeleting ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />

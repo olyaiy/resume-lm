@@ -21,8 +21,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Trash2, Upload, ArrowLeft } from "lucide-react";
-import { formatProfileWithAI } from "@/utils/ai";
+import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Trash2, Upload, ArrowLeft, Save } from "lucide-react";
+import { formatProfileWithAI, processTextImport } from "@/utils/ai";
 import {
   Dialog,
   DialogContent,
@@ -65,12 +65,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsSubmitting(true);
       await updateProfile(profile);
-      toast.success("Profile updated successfully");
+      toast("Changes saved successfully");
       // Force a server revalidation
       router.refresh();
     } catch (error) {
-      toast.error("Failed to update profile");
-      console.error(error);
+      toast("Unable to save your changes. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -79,13 +78,30 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const handleReset = async () => {
     try {
       setIsResetting(true);
-      const resetData = await resetProfile();
-      setProfile(resetData);
-      toast.success("Profile has been reset");
-      // Force a server revalidation
-      router.refresh();
+      // Reset to empty profile locally
+      setProfile({
+        id: profile.id,
+        user_id: profile.user_id,
+        first_name: '',
+        last_name: '',
+        email: '',
+        phone_number: '',
+        location: '',
+        website: '',
+        linkedin_url: '',
+        github_url: '',
+        work_experience: [],
+        education: [],
+        skills: [],
+        projects: [],
+        certifications: [],
+        created_at: profile.created_at,
+        updated_at: profile.updated_at
+      });
+      toast("Profile reset - Don't forget to save your changes to make this permanent");
+      // Remove server revalidation since we're only updating local state
     } catch (error) {
-      toast.error("Failed to reset profile");
+      toast("Failed to reset profile. Please try again.");
       console.error(error);
     } finally {
       setIsResetting(false);
@@ -100,14 +116,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsProcessingResume(true);
       
-      const messages = [
-        { 
-          role: "user" as const, 
-          content: `${resumeContent}` 
-        }
-      ];
-      
-      const result = await formatProfileWithAI(messages);
+      const result = await processTextImport(resumeContent);
       
       if (result) {
         const parsedProfile = JSON.parse(result);
@@ -189,17 +198,15 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           ...prev,
           ...cleanedProfile
         }));
-        toast.success("Resume uploaded and profile updated successfully");
+        toast("Content imported successfully - Don't forget to save your changes");
         setIsDialogOpen(false);
         setResumeContent("");
-        // Force a server revalidation
-        router.refresh();
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast.error(`Failed to process resume: ${error.message}`);
+        toast("Failed to process content: " + error.message);
       } else {
-        toast.error("Failed to process resume: Unknown error");
+        toast("Failed to process content: Unknown error");
       }
     } finally {
       setIsProcessingResume(false);
@@ -266,98 +273,139 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   );
 
   return (
-    <div className="relative space-y-6 max-w-[1400px] mx-auto">
-      {/* Unified background with subtle animation */}
-      <div className="absolute inset-0 bg-gradient-to-br from-rose-50/30 via-sky-50/30 to-violet-50/30 animate-gradient-xy pointer-events-none"></div>
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-50/40 via-transparent to-transparent pointer-events-none"></div>
+    <div className="relative mx-auto">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl animate-blob opacity-70" />
+        <div className="absolute top-[20%] -right-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-blob animation-delay-2000 opacity-70" />
+        <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
+      </div>
 
-      {/* Main content container with consistent styling */}
-      <div className="relative space-y-6 p-6">
-        {/* Header with enhanced visual hierarchy and gradient animation */}
-        <div className="relative overflow-hidden bg-gradient-to-br from-white/60 via-white/40 to-white/60 backdrop-blur-xl rounded-2xl border border-white/40 shadow-xl">
-          {/* Animated gradient background */}
-          <div className="absolute inset-0">
-            <div className="absolute inset-0 bg-gradient-to-r from-teal-500/10 via-cyan-500/10 to-violet-500/10 animate-gradient-xy"></div>
-            <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100/20 via-transparent to-transparent"></div>
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-violet-200/20 to-transparent rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
-            <div className="absolute bottom-0 left-0 w-96 h-96 bg-gradient-to-tr from-teal-200/20 to-transparent rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
-          </div>
+      {/* Top Bar */}
+      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+        {/* Gradient Overlays */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff30_0%,#ffffff40_50%,#f3e8ff30_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+        
+        {/* Content Container */}
+        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
+          {/* Left Section */}
+          <div className="flex items-center gap-6">
+            {/* Back Button */}
+            <button 
+              onClick={() => router.push('/')}
+              className="group flex items-center text-sm font-medium text-purple-600/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-100/30 hover:shadow-sm hover:shadow-purple-500/5 active:bg-purple-100/40"
+            >
+              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+              Back to Dashboard
+            </button>
 
-          {/* Content container */}
-          <div className="relative z-10 px-8 py-10">
-            <div className="max-w-7xl mx-auto">
-              {/* Top navigation and title section */}
-              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-8">
-                <div className="flex items-center gap-6">
-                  {/* Back button with enhanced hover effects */}
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/')}
-                    className="group relative px-4 py-2 bg-white/80 hover:bg-white/90 border-white/40 hover:border-white/60 shadow-lg hover:shadow-xl transition-all duration-500"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-teal-50 to-sky-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-md"></div>
-                    <div className="relative flex items-center gap-2">
-                      <ArrowLeft className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-all duration-500 group-hover:-translate-x-0.5" />
-                      <span className="font-medium text-muted-foreground group-hover:text-foreground transition-colors">Back</span>
-                    </div>
-                  </Button>
+            {/* Separator */}
+            <div className="h-8 w-px bg-gradient-to-b from-transparent via-purple-200/40 to-transparent" />
 
-                  {/* Title and subtitle with enhanced typography */}
-                  <div className="space-y-2.5">
-                    <div className="relative">
-                      <h1 className="text-4xl font-bold bg-gradient-to-r from-teal-600 via-cyan-600 to-violet-600 bg-clip-text text-transparent animate-text-shimmer pb-1">
-                        Edit Profile
-                      </h1>
-                      <div className="absolute -bottom-0.5 left-0 w-12 h-1 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full"></div>
-                    </div>
-                    <p className="text-base text-muted-foreground/80 max-w-md">
-                      Craft your professional story with our intelligent resume builder
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action buttons with enhanced styling */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => router.push('/')}
-                    className="group relative bg-white/50 border-white/40 hover:bg-white/60 transition-all duration-500"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-rose-50 to-pink-50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-md"></div>
-                    <span className="relative bg-gradient-to-r from-rose-600 to-pink-600 bg-clip-text text-transparent group-hover:scale-105 transition-transform duration-500">
-                      Cancel
-                    </span>
-                  </Button>
-                  <Button
-                    onClick={handleSubmit}
-                    disabled={isSubmitting}
-                    className="relative overflow-hidden bg-gradient-to-r from-teal-600 via-cyan-600 to-violet-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100 shadow-lg hover:shadow-xl group"
-                  >
-                    <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/10 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-                    <div className="relative">
-                      {isSubmitting ? (
-                        <div className="flex items-center gap-2">
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                          <span>Saving Changes...</span>
-                        </div>
-                      ) : (
-                        <span>Save Changes</span>
-                      )}
-                    </div>
-                  </Button>
+            {/* Profile Title Section */}
+            <div className="flex flex-col gap-1">
+              <h1 className="text-xl font-semibold">
+                <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+                  Edit Profile
+                </span>
+              </h1>
+              <div className="flex items-center gap-2 text-sm text-purple-600/60">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
+                  <span className="font-medium">Professional Profile</span>
                 </div>
               </div>
+            </div>
+          </div>
 
-              {/* Action buttons grid with enhanced styling */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
+          {/* Right Section - Action Buttons */}
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={handleSubmit}
+              disabled={isSubmitting}
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <span>Saving Changes...</span>
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  <span>Save Changes</span>
+                </>
+              )}
+            </Button>
+
+            {/* Reset Profile Button */}
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  variant="destructive"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+                  disabled={isResetting}
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  {isResetting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      <span>Resetting...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      <span>Reset Profile</span>
+                    </>
+                  )}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="sm:max-w-[425px]">
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Reset Profile</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to reset your profile? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleReset}
+                    disabled={isResetting}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    {isResetting ? "Resetting..." : "Reset"}
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      </div>
+
+      {/* Main content container with consistent styling */}
+      <div className="relative pt-24 px-6 md:px-8 lg:px-10 pb-10">
+        {/* Import Actions Row */}
+        <div className="relative mb-6">
+          <div className="bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-2 text-sm text-purple-600/60">
+                <div className="flex items-center gap-2">
+                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
+                  <span className="font-medium">Import Options</span>
+                </div>
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* LinkedIn Import Button */}
                 <Button
                   variant="outline"
                   onClick={handleLinkedInImport}
                   className="group relative bg-[#0077b5]/5 hover:bg-[#0077b5]/10 border-[#0077b5]/20 hover:border-[#0077b5]/30 text-[#0077b5] transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                 >
-                  <div className="absolute inset-0 bg-gradient-to-r from-[#0077b5]/0 via-[#0077b5]/5 to-[#0077b5]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                  <div className="absolute inset-0 bg-gradient-to-r from-[#0077b5]/0 via-[#0077b5]/5 to-[#0077b5]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                   <div className="relative flex items-center gap-4">
                     <div className="flex items-center justify-center w-12 h-12 rounded-full bg-[#0077b5]/10 group-hover:scale-110 transition-transform duration-500">
                       <Linkedin className="h-6 w-6" />
@@ -376,7 +424,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       variant="outline"
                       className="group relative bg-violet-500/5 hover:bg-violet-500/10 border-violet-500/20 hover:border-violet-500/30 text-violet-600 transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="relative flex items-center gap-4">
                         <div className="flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/10 group-hover:scale-110 transition-transform duration-500">
                           <Upload className="h-6 w-6" />
@@ -437,64 +485,80 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </DialogContent>
                 </Dialog>
 
-                {/* Reset Profile Button */}
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
+                {/* Import From Text Button */}
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                  <DialogTrigger asChild>
                     <Button
                       variant="outline"
-                      className="group relative bg-red-50 hover:bg-red-100/80 border-red-200 hover:border-red-300 text-red-600 transition-all duration-500 hover:scale-[1.02] h-auto py-4"
+                      className="group relative bg-violet-500/5 hover:bg-violet-500/10 border-violet-500/20 hover:border-violet-500/30 text-violet-600 transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                     >
-                      <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/5 to-red-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                      <div className="absolute inset-0 bg-gradient-to-r from-violet-500/0 via-violet-500/5 to-violet-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
                       <div className="relative flex items-center gap-4">
-                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 group-hover:bg-red-200 group-hover:scale-110 transition-all duration-500">
-                          <Trash2 className="h-6 w-6" />
+                        <div className="flex items-center justify-center w-12 h-12 rounded-full bg-violet-500/10 group-hover:scale-110 transition-transform duration-500">
+                          <Upload className="h-6 w-6" />
                         </div>
                         <div className="text-left">
-                          <div className="font-semibold text-red-600">Reset Profile</div>
-                          <div className="text-sm text-red-600/70">Clear all profile data</div>
+                          <div className="font-semibold text-violet-600">Import From Text</div>
+                          <div className="text-sm text-violet-600/70">Import from any text content</div>
                         </div>
                       </div>
                     </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
-                    <AlertDialogHeader>
-                      <AlertDialogTitle className="text-2xl font-semibold text-red-600">Are you absolutely sure?</AlertDialogTitle>
-                      <AlertDialogDescription className="text-base text-gray-600">
-                        This action will reset your entire profile to empty state. All your current profile data will be permanently deleted.
-                        This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter className="gap-3">
-                      <AlertDialogCancel className="bg-gray-50 hover:bg-gray-100 border-gray-200 hover:border-gray-300 text-gray-700 transition-all duration-300">
-                        Cancel
-                      </AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={handleReset}
-                        disabled={isResetting}
-                        className="bg-red-600 hover:bg-red-700 text-white border-red-600 hover:border-red-700 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100 shadow-lg hover:shadow-xl disabled:bg-red-600/50 disabled:border-red-600/50"
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
+                    <DialogHeader>
+                      <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+                        Import From Text
+                      </DialogTitle>
+                      <DialogDescription asChild>
+                        <div className="space-y-2 text-base text-muted-foreground/80">
+                          <span className="block">Paste any text content below (resume, job description, achievements, etc.). Our AI will analyze it and enhance your profile by adding relevant information.</span>
+                          <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data.</span>
+                        </div>
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="grid gap-4 py-4">
+                      <Textarea
+                        value={resumeContent}
+                        onChange={(e) => setResumeContent(e.target.value)}
+                        placeholder="Paste your text content here..."
+                        className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
+                      />
+                    </div>
+                    <DialogFooter className="gap-3">
+                      <Button
+                        variant="outline"
+                        onClick={() => setIsDialogOpen(false)}
+                        className="bg-white/50 hover:bg-white/60 transition-all duration-300"
                       >
-                        {isResetting ? (
+                        Cancel
+                      </Button>
+                      <Button
+                        onClick={handleResumeUpload}
+                        disabled={isProcessingResume || !resumeContent.trim()}
+                        className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
+                      >
+                        {isProcessingResume ? (
                           <div className="flex items-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Resetting...</span>
+                            <span>Processing...</span>
                           </div>
                         ) : (
                           <div className="flex items-center gap-2">
-                            <Trash2 className="h-4 w-4" />
-                            <span>Reset Profile</span>
+                            <Upload className="h-4 w-4" />
+                            <span>Process with AI</span>
                           </div>
                         )}
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
+                      </Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
             </div>
           </div>
         </div>
 
         {/* Enhanced Tabs with smooth transitions and connected design */}
-        <div className="relative">
+        <div className="relative p-6">
           <div className="absolute inset-x-0 -top-3 h-8 bg-gradient-to-b from-white/60 to-transparent pointer-events-none"></div>
           <div className="relative bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
             <Tabs defaultValue="basic" className="w-full ">
