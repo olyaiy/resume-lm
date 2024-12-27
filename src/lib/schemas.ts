@@ -328,6 +328,7 @@ export const openAiResumeSchema = {
             "description",
             "date",
             "github_url",
+            "url",
             "technologies"
           ],
           additionalProperties: false
