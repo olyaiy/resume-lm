@@ -1,17 +1,14 @@
 'use client';
 
-import { useState } from "react";
-import { Sparkles, ChevronUp, Send, Bot, User, CheckCircle2 } from "lucide-react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { useState, useCallback, useEffect, useRef, useReducer } from "react";
+import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { streamChatResponse } from "@/utils/ai";
-import { useRef, useEffect } from "react";
 import type { OpenAI } from "openai";
-import { motion, AnimatePresence } from "framer-motion";
-import { Resume, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
-import { MessageBubble } from "./ui/message-bubble";
+import type { Resume } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionHandler } from '@/utils/function-handler';
+import { ChatArea } from "./ui/message-bubble";
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -43,77 +40,148 @@ interface AIAssistantProps {
   onUpdateResume: (field: keyof Resume, value: any) => void;
 }
 
+// Add these types at the top with other interfaces
+type MessageAction = 
+  | { type: 'ADD_MESSAGE'; message: Message }
+  | { type: 'UPDATE_LAST_MESSAGE'; content: string; isLoading?: boolean; loadingText?: string }
+  | { type: 'ADD_FUNCTION_RESULT'; message: Message }
+  | { type: 'SET_SYSTEM_MESSAGE'; content: string };
+
+// Add this reducer function before the AIAssistant component
+function messageReducer(state: Message[], action: MessageAction): Message[] {
+  switch (action.type) {
+    case 'ADD_MESSAGE':
+      return [...state, action.message];
+      
+    case 'UPDATE_LAST_MESSAGE': {
+      const lastMessage = state[state.length - 1];
+      if (!lastMessage || lastMessage.role !== 'assistant') {
+        return state;
+      }
+      // Only create a new array if we're actually updating the message
+      if (
+        lastMessage.content === action.content &&
+        lastMessage.isLoading === action.isLoading &&
+        lastMessage.loadingText === action.loadingText
+      ) {
+        return state;
+      }
+      return [
+        ...state.slice(0, -1),
+        {
+          ...lastMessage,
+          content: action.content,
+          isLoading: action.isLoading,
+          loadingText: action.loadingText
+        }
+      ];
+    }
+      
+    case 'ADD_FUNCTION_RESULT':
+      return [...state, action.message];
+      
+    case 'SET_SYSTEM_MESSAGE': {
+      const lastMessage = state[state.length - 1];
+      if (!lastMessage || !lastMessage.isLoading) {
+        return state;
+      }
+      return [
+        ...state.slice(0, -1),
+        {
+          ...lastMessage,
+          content: action.content,
+          isLoading: false,
+          loadingText: undefined,
+          isSystemMessage: true
+        }
+      ];
+    }
+    
+    default:
+      return state;
+  }
+}
+
+// First, add this interface near the top with other types
+interface FunctionArgs {
+  section?: string;
+  action?: string;
+}
 
 export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, dispatch] = useReducer(messageReducer, []);
   const [isLoading, setIsLoading] = useState(false);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const functionHandler = new FunctionHandler(resume, onUpdateResume);
+  const rafIdRef = useRef<number | undefined>(undefined);
+  const contentBufferRef = useRef<string>('');
 
-  // Scroll to bottom of chat
-  const scrollToBottom = () => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ 
-        behavior: "smooth",
-        block: "end"
-      });
+  // Replace debouncedUpdateMessage with updateMessageContent
+  const updateMessageContent = useCallback((content: string, isLoading: boolean, loadingText?: string) => {
+    if (rafIdRef.current) {
+      cancelAnimationFrame(rafIdRef.current);
     }
-  };
 
-  // Scroll on new messages or content updates
+    rafIdRef.current = requestAnimationFrame(() => {
+      dispatch({
+        type: 'UPDATE_LAST_MESSAGE',
+        content,
+        isLoading,
+        loadingText
+      });
+    });
+  }, []);
+
+  // Clean up RAF on unmount
   useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+    return () => {
+      if (rafIdRef.current) {
+        cancelAnimationFrame(rafIdRef.current);
+      }
+    };
+  }, []);
 
   // Focus input when chat expands
   useEffect(() => {
     if (isExpanded) {
       inputRef.current?.focus();
-      scrollToBottom();
     }
   }, [isExpanded]);
-
-  // Handle streaming updates
-  useEffect(() => {
-    if (isLoading) {
-      const scrollInterval = setInterval(scrollToBottom, 100);
-      return () => clearInterval(scrollInterval);
-    }
-  }, [isLoading]);
+  
 
 
   
   async function handleAIResponse(message: string) {
-    // Prevent empty messages or duplicate submissions while loading
     if (!message.trim() || isLoading) return;
 
-    // Create the user message OBJECT
-    const userMessage = { 
-      role: 'user' as const, 
+    const userMessage = {
+      role: 'user' as const,
       content: message,
       timestamp: new Date()
     };
 
-    /* UI UPDATES */
-    // Add users message to chat UI
-    setMessages(prev => [...prev, userMessage]);
-    // Add an assistant message with loading state To chat UI
-    // Set loading state
-    setIsLoading(true);
-    // show that the system is processing
-    setMessages(prev => [...prev, { 
-      role: 'assistant',
-      content: '',
-      timestamp: new Date(),
-      isLoading: true
-    }]);
+    // Add user message
+    dispatch({
+      type: 'ADD_MESSAGE',
+      message: userMessage
+    });
 
-    /* AI CALL AND RESPONSE */
+    // Add initial assistant message
+    dispatch({
+      type: 'ADD_MESSAGE',
+      message: {
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        isLoading: true
+      }
+    });
+
+    setIsLoading(true);
+    contentBufferRef.current = '';
+
     try {
-      // Include all previous messages plus the new user message
       const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
         ...messages.map(msg => {
           if (msg.role === 'function') {
@@ -134,254 +202,162 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         }
       ];
 
-      // Start streaming response from OpenAI
       const response = await streamChatResponse(chatMessages);
-
-      console.log("FULL MESSAGE SENT TO AI: ");
-      console.log(chatMessages);
-      console.log("+++++++++++");
       
-      // Initialize variables for function call handling
-      let fullResponse = '';
       let functionCallName: string | undefined;
       let functionCallArgs = '';
 
-      // Process each chunk from the stream
       for await (const chunk of response) {
         const delta = (chunk as ChatCompletionChunk).choices[0]?.delta;
         
-        // IF THE MESSAGE CALLS A FUNCTION, store it
         if (delta.function_call) {
-          const functionCall = delta.function_call; 
-          // UPDATE UI to show tool usage
-          if (functionCall.name) {
+          const functionCall = delta.function_call;
+          
+          if (functionCall.name && !functionCallName) {
             functionCallName = functionCall.name;
-            // Update messages to complete any existing streaming text
-            setMessages(prev => {
-              const newMessages = [...prev];
-              const lastMessage = newMessages[newMessages.length - 1];
-              if (lastMessage?.role === 'assistant') {
-                // Complete the existing text message if it has content
-                if (lastMessage.content) {
-                  lastMessage.isLoading = false;
-                  lastMessage.loadingText = undefined;
-                  // Add a new message for the function call
-                  newMessages.push({
-                    role: 'assistant',
-                    content: '',
-                    timestamp: new Date(),
-                    isLoading: true,
-                    loadingText: functionCallName === 'read_resume' 
-                      ? 'Reading your resume...'
-                      : 'Calling tool...'
-                  });
-                } else {
-                  // If no content, use this message for the function call
-                  lastMessage.isLoading = true;
-                  lastMessage.loadingText = functionCallName === 'read_resume' 
-                    ? 'Reading your resume...'
-                    : 'Calling tool...';
-                }
-              }
-              return newMessages;
+            dispatch({
+              type: 'UPDATE_LAST_MESSAGE',
+              content: '',
+              isLoading: true,
+              loadingText: functionCallName === 'read_resume' 
+                ? 'Reading your resume...'
+                : 'Calling tool...'
             });
           }
-          // Accumulate function arguments as they stream in
+
           if (functionCall.arguments) {
             functionCallArgs += functionCall.arguments;
           }
-          // IF we have complete arguments
+
           if (functionCallName && functionCallArgs && !delta.content) {
-            try {
-              // Check for complete JSON
-              if (!functionCallArgs.trim().endsWith('}')) {
-                continue; // Keep accumulating if JSON is incomplete
-              }
+            if (!functionCallArgs.trim().endsWith('}')) {
+              continue;
+            }
 
-              // Log the function call
-              console.log(`FULL FUNCTION CALL NAME FROM AI:\n${functionCallName}(${functionCallArgs})\n---------`);
+            const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
+            const args = JSON.parse(functionCallArgs);
 
-              // Execute function call and get result
-              const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
-              const args = JSON.parse(functionCallArgs); // Keep args for display messages
-
-              // Add the function call result to both chat history and messages ui (hidden)
-              setMessages(prev => [...prev, {
+            dispatch({
+              type: 'ADD_MESSAGE',
+              message: {
                 role: 'function',
                 name: functionCallName,
                 content: functionResult,
                 timestamp: new Date(),
                 isHidden: true
-              }]);
-
-              // Add the function result to chat history
-              chatMessages.push({
-                role: 'function',
-                name: functionCallName,
-                content: functionResult
-              });
-
-              // Add a system message confirming the function call
-              setMessages(prev => {
-                const newMessages = [...prev];
-                
-                // Find the most recent loading message by searching backwards
-                const loadingMessageIndex = newMessages.findLastIndex(
-                  msg => msg.isLoading && msg.role === 'assistant'
-                );
-                
-                if (loadingMessageIndex !== -1) {
-                  const loadingMessage = newMessages[loadingMessageIndex];
-                  // Disable the loading state
-                  loadingMessage.isLoading = false;
-                  
-                  // Format the function name to be more readable, with special case for update_name and read operations
-                  let displayMessage = 'Operation Complete ✅';
-                  
-                  // UI NAMES for each function call
-                  if (functionCallName === 'update_name') {
-                    displayMessage = 'Changed name ✅';
-                  } else if (functionCallName === 'read_resume') {
-                    const sectionName = args.section === 'all' ? 'Full Resume' : 
-                      args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    displayMessage = `Read ${sectionName} ✅`;
-                  } else if (functionCallName === 'modify_resume') {
-                    const sectionName = args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
-                    const actionName = args.action.charAt(0).toUpperCase() + args.action.slice(1);
-                    displayMessage = `${actionName}d ${sectionName} ✅`;
-                  }
-
-                  // Update the loading message to show completion
-                  loadingMessage.content = displayMessage;
-                  loadingMessage.isSystemMessage = true;
-                }
-
-                // Reset function call tracking
-                functionCallName = undefined;
-                functionCallArgs = '';
-
-                // Add new assistant message for the upcoming response
-                return [...newMessages, {
-                  role: 'assistant',
-                  content: '',
-                  timestamp: new Date(),
-                  isLoading: true
-                }];
-              });
-
-              // Get AI's response to the function result
-              const newResponse = await streamChatResponse(chatMessages);
-              fullResponse = ''; // Reset fullResponse for new stream
-              let isFirstChunk = true;
-
-
-              // Process AI's response (Streaming)
-              for await (const newChunk of newResponse) {
-                if (newChunk.choices[0]?.delta?.content === '[DONE]') {
-                  continue;
-                }
-                const content = newChunk.choices[0]?.delta?.content || '';
-                fullResponse += content;
-                setMessages(prev => {
-                  const newMessages = [...prev];
-                  const lastMessage = newMessages[newMessages.length - 1];
-                  
-                  if (lastMessage?.role === 'assistant') {
-                    lastMessage.content = fullResponse;
-                    // Only show loading on first empty chunk
-                    if (isFirstChunk) {
-                      lastMessage.isLoading = content.length === 0;
-                      lastMessage.loadingText = content.length === 0 ? 'Thinking...' : undefined;
-                      isFirstChunk = false;
-                    } else {
-                      lastMessage.isLoading = false;
-                      lastMessage.loadingText = undefined;
-                    }
-                  }
-                  return newMessages;
-                });
               }
-              continue;
-            } catch (error) {
-              console.error('Error executing function:', error);
-              if (error instanceof SyntaxError) {
-                continue; // Continue accumulating JSON if incomplete
-              }
-            }
-          }
-          continue;
-        }
-
-        // IF THE MESSAGE IS A REGULAR CHAT RESPONSE
-        const content = delta.content || '';
-
-
-        if (content === '[DONE]') {
-          continue;
-        }
-        fullResponse += content;
-        setMessages(prev => {
-          // Update messages with new content
-          const newMessages = [...prev];
-          const lastMessage = newMessages[newMessages.length - 1];
-          
-          if (lastMessage?.role === 'assistant') {
-            lastMessage.content = fullResponse;
-            // Once we start getting content, remove loading state
-            if (content.length > 0) {
-              lastMessage.isLoading = false;
-              lastMessage.loadingText = undefined;
-            }
-          } else {
-            newMessages.push({ 
-              role: 'assistant', 
-              content: fullResponse,
-              timestamp: new Date(),
-              isLoading: content.length === 0,
-              loadingText: content.length === 0 ? 'Thinking...' : undefined
             });
-          }
-          
-          return newMessages;
-        });
-      }
-      console.log("FULL TEXT RESPONSE FROM AI: ", );
-      console.log(fullResponse);
-      console.log("********************************************************");
 
+            chatMessages.push({
+              role: 'function',
+              name: functionCallName,
+              content: functionResult
+            });
+
+            // Set system message for function completion
+            const displayMessage = getFunctionDisplayMessage(functionCallName, args);
+            dispatch({
+              type: 'SET_SYSTEM_MESSAGE',
+              content: displayMessage
+            });
+
+            // Add new assistant message for continued conversation
+            dispatch({
+              type: 'ADD_MESSAGE',
+              message: {
+                role: 'assistant',
+                content: '',
+                timestamp: new Date(),
+                isLoading: true
+              }
+            });
+
+            const newResponse = await streamChatResponse(chatMessages);
+            contentBufferRef.current = '';
+            let isFirstChunk = true;
+
+            for await (const newChunk of newResponse) {
+              if (newChunk.choices[0]?.delta?.content === '[DONE]') continue;
+              
+              const content = newChunk.choices[0]?.delta?.content || '';
+              contentBufferRef.current += content;
+
+              updateMessageContent(
+                contentBufferRef.current,
+                isFirstChunk && content.length === 0,
+                isFirstChunk && content.length === 0 ? 'Thinking...' : undefined
+              );
+
+              if (isFirstChunk) isFirstChunk = false;
+            }
+            continue;
+          }
+          continue;
+        }
+
+        if (delta.content) {
+          const content = delta.content;
+          if (content === '[DONE]') continue;
+
+          contentBufferRef.current += content;
+          
+          // Only update every few characters to reduce render frequency
+          if (contentBufferRef.current.length % 3 === 0 || content.includes('\n')) {
+            updateMessageContent(
+              contentBufferRef.current,
+              false,
+              undefined
+            );
+          }
+        }
+      }
+
+      // Ensure final content is always updated
+      if (contentBufferRef.current) {
+        updateMessageContent(
+          contentBufferRef.current,
+          false,
+          undefined
+        );
+      }
 
     } catch (error) {
-      // Handle errors gracefully with user-friendly messages
       console.error('Error in chat:', error);
-      setMessages(prev => {
-        const newMessages = [...prev];
-        const lastMessage = newMessages[newMessages.length - 1];
-        if (lastMessage?.role === 'assistant' && lastMessage.isLoading) {
-          lastMessage.content = 'Sorry, I encountered an error. Please try again.';
-          lastMessage.isLoading = false;
-          lastMessage.loadingText = undefined;
-          return newMessages;
-        }
-        return [...prev, { 
-          role: 'assistant', 
-          content: 'Sorry, I encountered an error. Please try again.',
-          timestamp: new Date()
-        }];
+      dispatch({
+        type: 'UPDATE_LAST_MESSAGE',
+        content: 'Sorry, I encountered an error. Please try again.',
+        isLoading: false
       });
     } finally {
-      // Reset loading state
       setIsLoading(false);
     }
   }
 
+  // Update the helper function with proper typing
+  function getFunctionDisplayMessage(functionName: string, args: FunctionArgs): string {
+    const formatSectionName = (section?: string) => 
+      section === 'all' ? 'Full Resume' : 
+      section?.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 
+    switch (functionName) {
+      case 'update_name':
+        return 'Changed name ✅';
+      case 'read_resume':
+        return `Read ${formatSectionName(args.section)} ✅`;
+      case 'modify_resume':
+        const actionName = args.action ? 
+          `${args.action.charAt(0).toUpperCase()}${args.action.slice(1)}d` : 
+          'Modified';
+        return `${actionName} ${formatSectionName(args.section)} ✅`;
+      default:
+        return 'Operation Complete ✅';
+    }
+  }
 
   return (
-
     <div className={cn("group", className)}>
       {/* MAIN CHAT CONTAINER */}
-      <motion.div 
-        layout
+      <div 
         className="bg-gradient-to-br from-purple-100/95 via-fuchsia-100/95 to-purple-100/95 relative rounded-3xl backdrop-blur-xl border border-purple-200/60 shadow-2xl shadow-purple-500/20 overflow-hidden transition-all duration-500 ease-in-out
           hover:shadow-purple-500/30 hover:border-purple-300/70
           after:absolute after:bottom-0 after:left-[10%] after:right-[10%] after:h-1/2 after:bg-gradient-to-t after:from-purple-500/30 after:via-fuchsia-500/20 after:to-transparent after:blur-2xl after:-z-10 after:transition-all after:duration-500 group-hover:after:opacity-80
@@ -395,14 +371,12 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_100%,rgba(217,70,219,0.15),transparent_50%)] pointer-events-none animate-pulse" />
         
         {/* Header - Always Visible */}
-        <motion.button 
-          whileHover={{ scale: 1.01 }}
-          whileTap={{ scale: 0.99 }}
+        <button 
           onClick={() => setIsExpanded(prev => !prev)}
           className={cn(
             "relative w-full flex items-center gap-2.5 px-3.5 py-2 rounded-t-3xl",
             isExpanded ? "border border-purple-500/60" : "hover:bg-purple-200/30",
-            "transition-all duration-300 group/button",
+            "transition-all duration-300 group/button active:scale-[0.99] hover:scale-[1.01]",
             "after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gradient-to-r",
             "after:from-transparent after:via-purple-400/40 after:to-transparent"
           )}
@@ -426,59 +400,22 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
             isExpanded ? "rotate-0" : "rotate-180",
             "group-hover/button:text-purple-700 group-hover/button:scale-110"
           )} />
-        </motion.button>
+        </button>
 
         {/* Chat Area - Expandable */}
-        <AnimatePresence>
-          {isExpanded && (
+        {isExpanded && (
+          <ChatArea 
+            messages={messages}
+            isLoading={isLoading}
+          />
+        )}
 
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "70vh", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="relative"
-            >
-              <ScrollArea 
-                className="h-full px-4 py-0 overflow-y-auto" 
-                ref={scrollAreaRef}
-              >
-                <div className="space-y-4">
-
-                  {/* Welcome Message */}
-                  {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-[60vh] text-purple-700/60 space-y-3">
-                      <Bot className="w-10 h-10" />
-                      <p className="text-sm text-center max-w-[80%]">
-                        Hi! I'm your AI Resume Assistant. Ask me anything about crafting or improving your resume.
-                      </p>
-                    </div>
-                  )}
-
-                  {/* MESSAGES */}
-                  {messages.map((msg, index) => (
-                    <MessageBubble 
-                      key={index} 
-                      message={msg} 
-                      isLast={index === messages.length - 1} 
-                    />
-                  ))}
-                 
-                  {/* Invisible div for scroll anchoring */}
-                  <div ref={messagesEndRef} className="h-0 w-full" />
-                </div>
-              </ScrollArea>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Input Bar - Always Visible */}
+        {/* Input Bar */}
         <ChatInput 
           onSubmit={handleAIResponse} 
           isLoading={isLoading} 
         />
-      </motion.div>
+      </div>
     </div>
-    
   );
 } 

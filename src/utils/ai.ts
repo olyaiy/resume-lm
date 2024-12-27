@@ -325,7 +325,7 @@ export async function streamChatResponse(
 ) {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         AI_ASSISTANT_SYSTEM_MESSAGE,
         ...messages

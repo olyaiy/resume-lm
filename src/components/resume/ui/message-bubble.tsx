@@ -1,80 +1,66 @@
-// Import necessary dependencies for animations, icons, and markdown rendering
-import { motion } from "framer-motion";
+'use client';
+
 import { Bot, User, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { TypingIndicator } from "./typing-indicator";
 import { Message } from "../ai-assistant";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useRef, useEffect, memo, useCallback } from "react";
 
-// Define the props interface for the MessageBubble component
 interface MessageBubbleProps {
-  message: Message;  // The message object containing content, role, and metadata
-  isLast: boolean;  // Flag to indicate if this is the last message in the chat
+  message: Message;
+  isLast: boolean;
 }
 
-export function MessageBubble({ message, isLast }: MessageBubbleProps) {
-  // If message is hidden, don't render anything
+// Memoize MessageBubble component
+const MessageBubble = memo(function MessageBubble({ message, isLast }: MessageBubbleProps) {
   if (message.isHidden) {
     return null;
   }
 
-  const isUser = message.role === 'user';  // Determine if the message is from the user
+  const isUser = message.role === 'user';
   
   return (
-    // Wrapper with animation properties for smooth entry
-    <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+    <div
       className={cn(
-        "group flex gap-2",
-        isUser ? "items-end " : "items-start "  // Align user messages to end, AI messages to start
+        "group flex gap-2 transition-opacity duration-200",
+        isUser ? "items-end" : "items-start"
       )}
     >
       <div className={cn(
         "flex flex-col gap-2 w-full max-w-full",
-        // Reverse column for user messages to place avatar at bottom
-        isUser ? "flex-col  items-end" : "flex-col  items-start"
+        isUser ? "flex-col items-end" : "flex-col items-start"
       )}>
-        {/* Message content container */}
         <div className={cn(
           "flex flex-col gap-1 w-full max-w-full",
-          isUser ? "items-end " : "items-start "
+          isUser ? "items-end" : "items-start"
         )}>
-          {/* Message bubble with conditional styling based on message type */}
           <div className={cn(
             "px-3.5 py-2 rounded-2xl text-sm shadow-sm max-w-full overflow-hidden",
             isUser 
-              ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm"  // User message styling
+              ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm"
               : message.isSystemMessage
-                ? "bg-purple-50/80 backdrop-blur-sm border-l-2 border-l-purple-400 border-y border-r border-purple-100/60 text-purple-900 rounded-bl-sm"  // System message styling
-                : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"  // AI message styling
+                ? "bg-purple-50/80 backdrop-blur-sm border-l-2 border-l-purple-400 border-y border-r border-purple-100/60 text-purple-900 rounded-bl-sm"
+                : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"
           )}>
-            
-            {/* Conditional rendering based on message state */}
             {message.isLoading ? (
               <TypingIndicator text={message.loadingText} />
             ) : message.isSystemMessage ? (
-              // System message with checkmark icon
               <div className="flex items-center gap-1.5">
                 <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
                 <p className="whitespace-pre-wrap text-[13px] font-medium tracking-tight">{message.content}</p>
               </div>
             ) : (
-
-              // Regular message with markdown support
               <div className={cn(
                 "prose-sm max-w-none overflow-x-auto",
                 isUser ? "prose-invert" : "prose-purple",
                 "markdown-content"
               )}>
-                {/* ReactMarkdown component with custom element styling */}
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    // Custom components for markdown elements with responsive styling
-                    // Each component is styled differently based on user/AI context
                     p: ({ children }) => <p className="whitespace-pre-wrap text-[13px] leading-relaxed m-0">{children}</p>,
                     a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className={cn(
                       "underline underline-offset-4",
@@ -123,20 +109,17 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
           </div>
         </div>
 
-        {/* Bottom row with avatar and timestamp */}
         <div className={cn(
           "flex items-center gap-2 w-full",
           isUser ? "flex-row-reverse" : "flex-row"
         )}>
-          {/* Avatar container with gradient background */}
           {!message.isSystemMessage && (
             <div className={cn(
               "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center",
               isUser 
-                ? "bg-gradient-to-br from-purple-500 to-fuchsia-500"  // User avatar gradient
-                : "bg-gradient-to-br from-purple-400 to-fuchsia-400"  // AI avatar gradient
+                ? "bg-gradient-to-br from-purple-500 to-fuchsia-500"
+                : "bg-gradient-to-br from-purple-400 to-fuchsia-400"
             )}>
-              {/* Conditional icon rendering based on message sender */}
               {isUser ? (
                 <User className="w-3.5 h-3.5 text-white" />
               ) : (
@@ -145,7 +128,6 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
             </div>
           )}
           
-          {/* Timestamp - visible on hover */}
           {!message.isSystemMessage && (
             <span className="text-[10px] text-gray-400">
               {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -153,6 +135,93 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
           )}
         </div>
       </div>
-    </motion.div>
+    </div>
   );
+});
+
+interface ChatAreaProps {
+  messages: Message[];
+  isLoading: boolean;
 }
+
+// Memoize ChatArea component
+export const ChatArea = memo(function ChatArea({ messages, isLoading }: ChatAreaProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isAutoScrollingRef = useRef(true);
+
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = 'smooth') => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ 
+        behavior, 
+        block: "end" 
+      });
+    }
+  }, []);
+
+  // Handle initial scroll and new messages
+  useEffect(() => {
+    scrollToBottom('auto');
+  }, [messages.length, scrollToBottom]);
+
+  // Handle streaming updates
+  useEffect(() => {
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage?.isLoading || lastMessage?.content) {
+      // Only auto-scroll if we're near the bottom
+      const scrollArea = scrollAreaRef.current;
+      if (scrollArea) {
+        const { scrollHeight, scrollTop, clientHeight } = scrollArea;
+        const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+        
+        if (isNearBottom && isAutoScrollingRef.current) {
+          scrollToBottom();
+        }
+      }
+    }
+  }, [messages, scrollToBottom]);
+
+  // Handle scroll events to detect manual scrolling
+  const handleScroll = useCallback(() => {
+    const scrollArea = scrollAreaRef.current;
+    if (scrollArea) {
+      const { scrollHeight, scrollTop, clientHeight } = scrollArea;
+      const isNearBottom = scrollHeight - scrollTop - clientHeight < 100;
+      isAutoScrollingRef.current = isNearBottom;
+    }
+  }, []);
+
+  return (
+    <div className="relative h-[30vh] opacity-100 transition-opacity duration-200">
+      <ScrollArea 
+        className="h-full px-4 py-0 overflow-y-auto" 
+        ref={scrollAreaRef}
+        onScroll={handleScroll}
+      >
+        <div className="space-y-4 flex flex-col">
+          {messages.length === 0 && !isLoading && (
+            <div className="flex flex-col items-center justify-center h-[60vh] text-purple-700/60 space-y-3">
+              <Bot className="w-10 h-10" />
+              <p className="text-sm text-center max-w-[80%]">
+                Hi! I'm your AI Resume Assistant. Ask me anything about crafting or improving your resume.
+              </p>
+            </div>
+          )}
+
+          {messages.map((msg, index) => (
+            <MessageBubble 
+              key={index} 
+              message={msg} 
+              isLast={index === messages.length - 1} 
+            />
+          ))}
+         
+          <div ref={messagesEndRef} className="h-0 w-full" />
+        </div>
+      </ScrollArea>
+    </div>
+  );
+});
+
+// Export memoized MessageBubble for potential reuse
+export { MessageBubble };
