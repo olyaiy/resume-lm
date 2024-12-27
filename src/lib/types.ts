@@ -96,37 +96,37 @@ export interface Resume {
 }
 
 export interface DocumentSettings {
-  font_family?: string;
-  base_font_size?: number;
-  header_font_size?: number;
-  margin_tb?: number;
-  margin_lr?: number;
-  line_spacing?: number;
-  // Section Title Styling
-  section_title_size?: number;
-  section_title_spacing?: number;
-  section_title_border?: number;
-  section_title_padding?: number;
-  // Text Styling
-  secondary_text_size?: number;
-  link_color?: string;
-  // Layout Spacing
-  section_spacing?: number;
-  item_spacing?: number;
-  bullet_indent?: number;
-  header_spacing?: number;
-  // Header Styling
+  // Header Settings
   header_name_size?: number;
-  header_name_color?: string;
-  header_name_spacing?: number;
   header_name_bottom_spacing?: number;
-  header_info_size?: number;
-  header_info_color?: string;
-  header_info_spacing?: number;
-  // Bullet Point Styling
-  bullet_point_spacing?: number;
-  bullet_point_line_height?: number;
-  bullet_point_font_size?: number;
+
+  // Skills Section
+  skills_font_size?: number;
+  skills_margin_top?: number;
+  skills_margin_bottom?: number;
+  skills_line_height?: number;
+  skills_item_spacing?: number;
+
+  // Experience Section
+  experience_font_size?: number;
+  experience_margin_top?: number;
+  experience_margin_bottom?: number;
+  experience_line_height?: number;
+  experience_item_spacing?: number;
+
+  // Projects Section
+  projects_font_size?: number;
+  projects_margin_top?: number;
+  projects_margin_bottom?: number;
+  projects_line_height?: number;
+  projects_item_spacing?: number;
+
+  // Education Section
+  education_font_size?: number;
+  education_margin_top?: number;
+  education_margin_bottom?: number;
+  education_line_height?: number;
+  education_item_spacing?: number;
 }
 
 export interface Profile {

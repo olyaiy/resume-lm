@@ -12,35 +12,37 @@ interface DocumentSettingsFormProps {
 
 export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormProps) {
   const defaultSettings = {
-    font_family: "Helvetica",
-    base_font_size: 10,
-    margin_tb: 0.5,
-    margin_lr: 0.75,
-    line_spacing: 1.15,
-    section_title_size: 10,
-    section_title_spacing: 0.5,
-    section_title_border: 0.5,
-    section_title_padding: 2,
-    secondary_text_size: 9,
-    link_color: "#2563eb",
-    section_spacing: 8,
-    item_spacing: 4,
-    bullet_indent: 8,
-    header_spacing: 8,
+    // Header Settings
     header_name_size: 24,
-    header_name_color: "#111827",
-    header_name_spacing: 0.5,
-    header_name_bottom_spacing: 20,
-    header_info_size: 10,
-    header_info_color: "#4b5563",
-    header_info_spacing: 4,
-    bullet_size: 10,
-    bullet_color: "#374151",
-    bullet_spacing: 4,
-    bullet_symbol: "•",
-    bullet_point_spacing: 4,
-    bullet_point_line_height: 1.5,
-    bullet_point_font_size: 10,
+    header_name_bottom_spacing: 4,
+
+    // Skills Section
+    skills_font_size: 10,
+    skills_margin_top: 8,
+    skills_margin_bottom: 8,
+    skills_line_height: 1.5,
+    skills_item_spacing: 4,
+
+    // Experience Section
+    experience_font_size: 10,
+    experience_margin_top: 8,
+    experience_margin_bottom: 8,
+    experience_line_height: 1.5,
+    experience_item_spacing: 4,
+
+    // Projects Section
+    projects_font_size: 10,
+    projects_margin_top: 8,
+    projects_margin_bottom: 8,
+    projects_line_height: 1.5,
+    projects_item_spacing: 4,
+
+    // Education Section
+    education_font_size: 10,
+    education_margin_top: 8,
+    education_margin_bottom: 8,
+    education_line_height: 1.5,
+    education_item_spacing: 4,
   };
 
   // Initialize document_settings if it doesn't exist
@@ -51,6 +53,105 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
   const handleRestoreDefaults = () => {
     onChange('document_settings', defaultSettings);
   };
+
+  const SectionSettings = ({ title, section }: { title: string; section: 'skills' | 'experience' | 'projects' | 'education' }) => (
+    <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Font Size</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_font_size`] || 10}pt</span>
+        </div>
+        <Slider
+          value={[resume.document_settings?.[`${section}_font_size`] || 10]}
+          min={8}
+          max={12}
+          step={0.5}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_font_size`]: value
+            })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Space Above</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_top`] || 8}pt</span>
+        </div>
+        <Slider
+          value={[resume.document_settings?.[`${section}_margin_top`] || 8]}
+          min={0}
+          max={16}
+          step={1}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_margin_top`]: value
+            })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Space Below</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_bottom`] || 8}pt</span>
+        </div>
+        <Slider
+          value={[resume.document_settings?.[`${section}_margin_bottom`] || 8]}
+          min={0}
+          max={16}
+          step={1}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_margin_bottom`]: value
+            })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_line_height`] || 1.5}</span>
+        </div>
+        <Slider
+          value={[resume.document_settings?.[`${section}_line_height`] || 1.5]}
+          min={1}
+          max={2}
+          step={0.1}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_line_height`]: value
+            })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Space Between Items</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_item_spacing`] || 4}pt</span>
+        </div>
+        <Slider
+          value={[resume.document_settings?.[`${section}_item_spacing`] || 4]}
+          min={0}
+          max={8}
+          step={0.5}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_item_spacing`]: value
+            })
+          }
+        />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -69,484 +170,92 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           </Button>
         </CardHeader>
         <CardContent className="space-y-8">
-          {/* Font Settings */}
+          {/* Header Settings */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Font Settings</Label>
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Header</Label>
               <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
             </div>
 
             <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-            <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-muted-foreground">Base Font Size</Label>
-                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.base_font_size || 10}pt</span>
-                </div>
-              <Slider
-                value={[resume.document_settings?.base_font_size || 10]}
-                min={8}
-                max={12}
-                step={0.5}
-                onValueChange={([value]) => 
-                  onChange('document_settings', {
-                    ...resume.document_settings,
-                    base_font_size: value
-                  })
-                }
-              />
-            </div>
-
-            <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-muted-foreground">Secondary Text Size</Label>
-                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.secondary_text_size || 9}pt</span>
-                </div>
-                <Slider
-                  value={[resume.document_settings?.secondary_text_size || 9]}
-                  min={7}
-                  max={11}
-                  step={0.5}
-                  onValueChange={([value]) => 
-                    onChange('document_settings', {
-                      ...resume.document_settings,
-                      secondary_text_size: value
-                    })
-                  }
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Header Styling - Moved here */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Header Styling</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Name Size</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_size || 24}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.header_name_size || 24]}
-                    min={18}
-                    max={32}
-                    step={1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_name_size: value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Name Letter Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_spacing || 0.5}</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.header_name_spacing || 0.5]}
-                    min={0}
-                    max={2}
-                    step={0.1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_name_spacing: value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Space Below Name</Label>
-                    <span className="text-xs text-muted-foreground/60">Level {((resume.document_settings?.header_name_bottom_spacing || 20) - 16) / 4 + 1}</span>
-                  </div>
-                  <Slider
-                    value={[((resume.document_settings?.header_name_bottom_spacing || 20) - 16) / 4 + 1]}
-                    min={1}
-                    max={4}
-                    step={1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_name_bottom_spacing: (value - 1) * 4 + 16
-                      })
-                    }
-                  />
-                  <div className="flex justify-between mt-1">
-                    <span className="text-[10px] text-muted-foreground/40">Compact</span>
-                    <span className="text-[10px] text-muted-foreground/40">Spacious</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Contact Info Size</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_info_size || 10}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.header_info_size || 10]}
-                    min={8}
-                    max={14}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_info_size: value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Contact Info Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_info_spacing || 4}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.header_info_spacing || 4]}
-                    min={2}
-                    max={8}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_info_spacing: value
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Section Title Settings */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Section Title Styling</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Title Size</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.section_title_size || 10}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.section_title_size || 10]}
-                    min={9}
-                    max={14}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        section_title_size: value
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Letter Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.section_title_spacing || 0.5}</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.section_title_spacing || 0.5]}
-                    min={0}
-                    max={2}
-                    step={0.1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        section_title_spacing: value
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Border Width</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.section_title_border || 0.5}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.section_title_border || 0.5]}
-                    min={0}
-                    max={2}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        section_title_border: value
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Bottom Padding</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.section_title_padding || 2}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.section_title_padding || 2]}
-                    min={0}
-                    max={6}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        section_title_padding: value
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Spacing Settings */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Layout Spacing</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Section Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.section_spacing || 8}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.section_spacing || 8]}
-                    min={4}
-                    max={16}
-                    step={1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        section_spacing: value
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Item Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.item_spacing || 4}pt</span>
-                  </div>
-              <Slider
-                    value={[resume.document_settings?.item_spacing || 4]}
-                    min={2}
-                    max={8}
-                step={0.5}
-                onValueChange={([value]) => 
-                  onChange('document_settings', {
-                    ...resume.document_settings,
-                        item_spacing: value
-                      })
-                    }
-                  />
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Bullet Indent</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_indent || 8}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.bullet_indent || 8]}
-                    min={4}
-                    max={16}
-                    step={1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        bullet_indent: value
-                      })
-                    }
-                  />
-                </div>
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Header Spacing</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_spacing || 8}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.header_spacing || 8]}
-                    min={4}
-                    max={16}
-                    step={1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        header_spacing: value
-                  })
-                }
-              />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Margin Settings */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Page Margins</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="grid grid-cols-2 gap-6">
               <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Top & Bottom</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.margin_tb || 0.5}in</span>
-                  </div>
-                <Slider
-                  value={[resume.document_settings?.margin_tb || 0.5]}
-                  min={0.25}
-                  max={1.5}
-                  step={0.125}
-                  onValueChange={([value]) => 
-                    onChange('document_settings', {
-                      ...resume.document_settings,
-                      margin_tb: value
-                    })
-                  }
-                />
-              </div>
-              <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Left & Right</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.margin_lr || 0.75}in</span>
-                  </div>
-                <Slider
-                  value={[resume.document_settings?.margin_lr || 0.75]}
-                  min={0.25}
-                  max={1.5}
-                  step={0.125}
-                  onValueChange={([value]) => 
-                    onChange('document_settings', {
-                      ...resume.document_settings,
-                      margin_lr: value
-                    })
-                  }
-                />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Bullet Points */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Bullet Points</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Space Between Each Bullet Point</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_spacing || 4}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.bullet_point_spacing || 4]}
-                    min={0}
-                    max={8}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        bullet_point_spacing: value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_line_height || 1.5}</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.bullet_point_line_height || 1.5]}
-                    min={1}
-                    max={2}
-                    step={0.1}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        bullet_point_line_height: value
-                      })
-                    }
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium text-muted-foreground">Font Size</Label>
-                    <span className="text-xs text-muted-foreground/60">{resume.document_settings?.bullet_point_font_size || 10}pt</span>
-                  </div>
-                  <Slider
-                    value={[resume.document_settings?.bullet_point_font_size || 10]}
-                    min={8}
-                    max={12}
-                    step={0.5}
-                    onValueChange={([value]) => 
-                      onChange('document_settings', {
-                        ...resume.document_settings,
-                        bullet_point_font_size: value
-                      })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Line Spacing */}
-          <div className="space-y-6">
-            <div className="flex items-center justify-between">
-              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Line Spacing</Label>
-              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
-            </div>
-
-            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
-          <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
-                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.line_spacing || 1.15}</span>
+                  <Label className="text-sm font-medium text-muted-foreground">Name Size</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_size !== undefined ? resume.document_settings.header_name_size : 24}pt</span>
                 </div>
-            <Slider
-              value={[resume.document_settings?.line_spacing || 1.15]}
-              min={1}
-              max={2}
-              step={0.05}
-              onValueChange={([value]) => 
-                onChange('document_settings', {
-                  ...resume.document_settings,
-                  line_spacing: value
-                })
-              }
-            />
+                <Slider
+                  value={[resume.document_settings?.header_name_size !== undefined ? resume.document_settings.header_name_size : 24]}
+                  min={0}
+                  max={40}
+                  step={1}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      header_name_size: value
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground">Space Below Name</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 4}pt</span>
+                </div>
+                <Slider
+                  value={[resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 4]}
+                  min={0}
+                  max={18}
+                  step={1}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      header_name_bottom_spacing: value
+                    })
+                  }
+                />
+                <div className="flex justify-between mt-1">
+                  <span className="text-[10px] text-muted-foreground/40">Compact</span>
+                  <span className="text-[10px] text-muted-foreground/40">Spacious</span>
+                </div>
               </div>
             </div>
+          </div>
+
+          {/* Skills Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Skills</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+            <SectionSettings title="Skills" section="skills" />
+          </div>
+
+          {/* Experience Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Experience</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+            <SectionSettings title="Experience" section="experience" />
+          </div>
+
+          {/* Projects Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Projects</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+            <SectionSettings title="Projects" section="projects" />
+          </div>
+
+          {/* Education Section */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Education</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+            <SectionSettings title="Education" section="education" />
           </div>
         </CardContent>
       </Card>
