@@ -263,8 +263,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
               <View key={index} style={styles.experienceItem}>
                 <View style={styles.experienceHeader}>
                   <View>
-                    <Text style={styles.companyName}>{experience.company}</Text>
-                    <Text style={styles.jobTitle}>{experience.position}</Text>
+                    <Text style={styles.companyName}>{experience.position}</Text>
+                    <Text style={styles.jobTitle}>{experience.company}</Text>
                   </View>
                   <Text style={styles.dateRange}>{experience.date}</Text>
                 </View>
