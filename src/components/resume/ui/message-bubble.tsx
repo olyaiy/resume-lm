@@ -33,22 +33,22 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
       )}
     >
       <div className={cn(
-        "flex flex-col gap-2 w-full",
+        "flex flex-col gap-2 w-full max-w-full",
         // Reverse column for user messages to place avatar at bottom
         isUser ? "flex-col  items-end" : "flex-col  items-start"
       )}>
         {/* Message content container */}
         <div className={cn(
-          "flex flex-col gap-1 w-full",
+          "flex flex-col gap-1 w-full max-w-full",
           isUser ? "items-end " : "items-start "
         )}>
           {/* Message bubble with conditional styling based on message type */}
           <div className={cn(
-            "px-3.5 py-2 rounded-2xl text-sm shadow-sm",
+            "px-3.5 py-2 rounded-2xl text-sm shadow-sm max-w-full overflow-hidden",
             isUser 
               ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm"  // User message styling
               : message.isSystemMessage
-                ? "bg-purple-50/80 backdrop-blur-sm border border-purple-200/60 text-purple-600 rounded-bl-sm"  // System message styling
+                ? "bg-purple-50/80 backdrop-blur-sm border-l-2 border-l-purple-400 border-y border-r border-purple-100/60 text-purple-900 rounded-bl-sm"  // System message styling
                 : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"  // AI message styling
           )}>
             
@@ -56,18 +56,16 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
             {message.isLoading ? (
               <TypingIndicator text={message.loadingText} />
             ) : message.isSystemMessage ? (
-
-
               // System message with checkmark icon
               <div className="flex items-center gap-1.5">
-                <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />
-                <p className="whitespace-pre-wrap font-medium text-xs">{message.content}</p>
+                <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" />
+                <p className="whitespace-pre-wrap text-[13px] font-medium tracking-tight">{message.content}</p>
               </div>
             ) : (
 
               // Regular message with markdown support
               <div className={cn(
-                "prose-sm max-w-none",
+                "prose-sm max-w-none overflow-x-auto",
                 isUser ? "prose-invert" : "prose-purple",
                 "markdown-content"
               )}>
@@ -123,25 +121,35 @@ export function MessageBubble({ message, isLast }: MessageBubbleProps) {
               </div>
             )}
           </div>
-          
-          {/* Timestamp - visible on hover */}
-          <span className="text-[10px] text-gray-500 px-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-          </span>
         </div>
 
-        {/* Avatar container with gradient background */}
+        {/* Bottom row with avatar and timestamp */}
         <div className={cn(
-          "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center",
-          isUser 
-            ? "bg-gradient-to-br from-purple-500 to-fuchsia-500"  // User avatar gradient
-            : "bg-gradient-to-br from-purple-400 to-fuchsia-400"  // AI avatar gradient
+          "flex items-center gap-2 w-full",
+          isUser ? "flex-row-reverse" : "flex-row"
         )}>
-          {/* Conditional icon rendering based on message sender */}
-          {isUser ? (
-            <User className="w-3.5 h-3.5 text-white" />
-          ) : (
-            <Bot className="w-3.5 h-3.5 text-white" />
+          {/* Avatar container with gradient background */}
+          {!message.isSystemMessage && (
+            <div className={cn(
+              "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center",
+              isUser 
+                ? "bg-gradient-to-br from-purple-500 to-fuchsia-500"  // User avatar gradient
+                : "bg-gradient-to-br from-purple-400 to-fuchsia-400"  // AI avatar gradient
+            )}>
+              {/* Conditional icon rendering based on message sender */}
+              {isUser ? (
+                <User className="w-3.5 h-3.5 text-white" />
+              ) : (
+                <Bot className="w-3.5 h-3.5 text-white" />
+              )}
+            </div>
+          )}
+          
+          {/* Timestamp - visible on hover */}
+          {!message.isSystemMessage && (
+            <span className="text-[10px] text-gray-400">
+              {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
           )}
         </div>
       </div>

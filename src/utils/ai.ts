@@ -340,6 +340,7 @@ export async function streamChatResponse(
       function_call: "auto"
     });
 
+
     return response;
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
