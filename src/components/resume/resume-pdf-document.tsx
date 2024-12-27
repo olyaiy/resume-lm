@@ -55,8 +55,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Skills section
     skillsSection: {
-      marginTop: resume.document_settings?.skills_margin_top || 8,
-      marginBottom: resume.document_settings?.skills_margin_bottom || 8,
+      marginTop: resume.document_settings?.skills_margin_top !== undefined ? resume.document_settings.skills_margin_top : 2,
+      marginBottom: resume.document_settings?.skills_margin_bottom !== undefined ? resume.document_settings.skills_margin_bottom : 2,
     },
     skillsGrid: {
       flexDirection: 'column',
@@ -66,22 +66,21 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
     },
     skillCategoryTitle: {
-      fontSize: resume.document_settings?.skills_font_size || 10,
+      fontSize: 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     skillItem: {
-      fontSize: resume.document_settings?.skills_font_size || 10,
+      fontSize: 10,
       color: '#4b5563',
     },
     // Experience section
     experienceSection: {
-      marginTop: resume.document_settings?.experience_margin_top || 8,
-      marginBottom: resume.document_settings?.experience_margin_bottom || 8,
+      marginTop: resume.document_settings?.experience_margin_top !== undefined ? resume.document_settings.experience_margin_top : 8,
+      marginBottom: resume.document_settings?.experience_margin_bottom !== undefined ? resume.document_settings.experience_margin_bottom : 8,
     },
     experienceItem: {
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
-      lineHeight: resume.document_settings?.experience_line_height || 1.5,
     },
     experienceHeader: {
       flexDirection: 'row',
@@ -90,22 +89,21 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     companyName: {
-      fontSize: resume.document_settings?.experience_font_size || 10,
+      fontSize: 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     jobTitle: {
-      fontSize: resume.document_settings?.experience_font_size || 10,
+      fontSize: 10,
       color: '#4b5563',
     },
     dateRange: {
-      fontSize: resume.document_settings?.experience_font_size || 10,
+      fontSize: 10,
       color: '#6b7280',
       textAlign: 'right',
     },
     bulletPoint: {
-      fontSize: resume.document_settings?.experience_font_size || 10,
-      lineHeight: resume.document_settings?.experience_line_height || 1.5,
+      fontSize: 10,
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
       color: '#374151',
       marginLeft: 8,
@@ -114,12 +112,11 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Projects section
     projectsSection: {
-      marginTop: resume.document_settings?.projects_margin_top || 8,
-      marginBottom: resume.document_settings?.projects_margin_bottom || 8,
+      marginTop: resume.document_settings?.projects_margin_top !== undefined ? resume.document_settings.projects_margin_top : 8,
+      marginBottom: resume.document_settings?.projects_margin_bottom !== undefined ? resume.document_settings.projects_margin_bottom : 8,
     },
     projectItem: {
       marginBottom: resume.document_settings?.projects_item_spacing || 4,
-      lineHeight: resume.document_settings?.projects_line_height || 1.5,
     },
     projectHeader: {
       flexDirection: 'row',
@@ -128,22 +125,22 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     projectTitle: {
-      fontSize: resume.document_settings?.projects_font_size || 10,
+      fontSize: 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     projectDescription: {
-      fontSize: resume.document_settings?.projects_font_size || 10,
+      fontSize: 10,
       color: '#374151',
     },
     projectLinks: {
-      fontSize: resume.document_settings?.projects_font_size || 10,
+      fontSize: 10,
       color: '#4b5563',
       marginBottom: 4,
       marginLeft: 8,
     },
     projectTechnologies: {
-      fontSize: resume.document_settings?.projects_font_size || 10,
+      fontSize: 10,
       color: '#4b5563',
       marginLeft: 8,
       marginBottom: 4,
@@ -151,12 +148,11 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Education section
     educationSection: {
-      marginTop: resume.document_settings?.education_margin_top || 8,
-      marginBottom: resume.document_settings?.education_margin_bottom || 8,
+      marginTop: resume.document_settings?.education_margin_top !== undefined ? resume.document_settings.education_margin_top : 8,
+      marginBottom: resume.document_settings?.education_margin_bottom !== undefined ? resume.document_settings.education_margin_bottom : 8,
     },
     educationItem: {
       marginBottom: resume.document_settings?.education_item_spacing || 4,
-      lineHeight: resume.document_settings?.education_line_height || 1.5,
     },
     educationHeader: {
       flexDirection: 'row',
@@ -165,12 +161,12 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     schoolName: {
-      fontSize: resume.document_settings?.education_font_size || 10,
+      fontSize: 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     degree: {
-      fontSize: resume.document_settings?.education_font_size || 10,
+      fontSize: 10,
       color: '#4b5563',
     },
   });

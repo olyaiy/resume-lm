@@ -15,6 +15,8 @@ const Slider = React.forwardRef<
       "relative flex w-full touch-none select-none items-center cursor-pointer",
       className
     )}
+    step={1}
+    minStepsBetweenThumbs={1}
     {...props}
   >
     <SliderPrimitive.Track 
@@ -27,12 +29,13 @@ const Slider = React.forwardRef<
     <SliderPrimitive.Thumb 
       className="block h-5 w-5 rounded-full border-2 border-teal-500 bg-white ring-offset-2 
         shadow-lg shadow-teal-500/20 
-        transition-all duration-300 
+        transition-all duration-200 
         hover:scale-110 hover:border-teal-400 hover:shadow-xl hover:shadow-teal-500/30
         focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 
         active:scale-105 active:shadow-teal-500/40
         disabled:pointer-events-none disabled:opacity-50
-        cursor-grab active:cursor-grabbing" 
+        cursor-grab active:cursor-grabbing
+        data-[dragging=true]:cursor-grabbing" 
     />
   </SliderPrimitive.Root>
 ))

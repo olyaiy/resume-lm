@@ -2,7 +2,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import { Resume } from "@/lib/types";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 
 interface DocumentSettingsFormProps {
@@ -17,30 +16,23 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     header_name_bottom_spacing: 4,
 
     // Skills Section
-    skills_font_size: 10,
-    skills_margin_top: 8,
-    skills_margin_bottom: 8,
+    skills_margin_top: 2,
+    skills_margin_bottom: 2,
     skills_item_spacing: 2,
 
     // Experience Section
-    experience_font_size: 10,
-    experience_margin_top: 8,
-    experience_margin_bottom: 8,
-    experience_line_height: 1.5,
+    experience_margin_top: 2,
+    experience_margin_bottom: 2,
     experience_item_spacing: 4,
 
     // Projects Section
-    projects_font_size: 10,
-    projects_margin_top: 8,
-    projects_margin_bottom: 8,
-    projects_line_height: 1.5,
+    projects_margin_top: 2,
+    projects_margin_bottom: 2,
     projects_item_spacing: 4,
 
     // Education Section
-    education_font_size: 10,
-    education_margin_top: 8,
-    education_margin_bottom: 8,
-    education_line_height: 1.5,
+    education_margin_top: 2,
+    education_margin_bottom: 2,
     education_item_spacing: 4,
   };
 
@@ -57,30 +49,11 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium text-muted-foreground">Font Size</Label>
-          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_font_size`] || 10}pt</span>
+          <Label className="text-sm font-medium text-muted-foreground">Space Above {title} Section</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_top`] !== undefined ? resume.document_settings[`${section}_margin_top`] : 2}pt</span>
         </div>
         <Slider
-          value={[resume.document_settings?.[`${section}_font_size`] || 10]}
-          min={8}
-          max={12}
-          step={0.5}
-          onValueChange={([value]) => 
-            onChange('document_settings', {
-              ...resume.document_settings,
-              [`${section}_font_size`]: value
-            })
-          }
-        />
-      </div>
-
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium text-muted-foreground">Space Above</Label>
-          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_top`] || 8}pt</span>
-        </div>
-        <Slider
-          value={[resume.document_settings?.[`${section}_margin_top`] || 8]}
+          value={[Number(resume.document_settings?.[`${section}_margin_top`] !== undefined ? resume.document_settings[`${section}_margin_top`] : 2)]}
           min={0}
           max={16}
           step={1}
@@ -95,11 +68,11 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium text-muted-foreground">Space Below</Label>
-          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_bottom`] || 8}pt</span>
+          <Label className="text-sm font-medium text-muted-foreground">Space Below {title} Section</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_bottom`] !== undefined ? resume.document_settings[`${section}_margin_bottom`] : 2}pt</span>
         </div>
         <Slider
-          value={[resume.document_settings?.[`${section}_margin_bottom`] || 8]}
+          value={[Number(resume.document_settings?.[`${section}_margin_bottom`] !== undefined ? resume.document_settings[`${section}_margin_bottom`] : 2)]}
           min={0}
           max={16}
           step={1}
@@ -111,27 +84,6 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           }
         />
       </div>
-
-      {section !== 'skills' && (
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
-            <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_line_height`] || 1.5}</span>
-          </div>
-          <Slider
-            value={[resume.document_settings?.[`${section}_line_height`] || 1.5]}
-            min={1}
-            max={2}
-            step={0.1}
-            onValueChange={([value]) => 
-              onChange('document_settings', {
-                ...resume.document_settings,
-                [`${section}_line_height`]: value
-              })
-            }
-          />
-        </div>
-      )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
