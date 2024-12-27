@@ -148,6 +148,10 @@ KEY PRINCIPLES:
    - Avoid passive voice and weak verbs
 
 3. TECHNICAL PRECISION
+   - Bold important keywords using **keyword** syntax
+   - Bold technical terms, tools, and technologies
+   - Bold metrics and quantifiable achievements
+   - Bold key action verbs and significant outcomes
    - Incorporate relevant technical terms and tools
    - Be specific about technologies and methodologies used
    - Match keywords from job descriptions when relevant
@@ -156,10 +160,11 @@ KEY PRINCIPLES:
    - Include specific metrics where possible (%, $, time saved)
    - Quantify team size, project scope, and budget when applicable
    - Use concrete numbers over vague descriptors
+   - Bold all metrics and numbers for emphasis
 
 BULLET POINT FORMULA:
-[Strong Action Verb] + [Specific Task/Project] + [Using What] + [Resulting in What Impact]
-Example: "Engineered high-performance React components using TypeScript and Redux, reducing page load time by 45% and increasing user engagement by 3x"
+[**Strong Action Verb**] + [Specific Task/Project] + [Using **Technologies**] + [Resulting in **Impact Metrics**]
+Example: "**Engineered** high-performance **React** components using **TypeScript** and **Redux**, reducing page load time by **45%** and increasing user engagement by **3x**"
 
 PROHIBITED PATTERNS:
 - No personal pronouns (I, we, my)
@@ -170,30 +175,31 @@ PROHIBITED PATTERNS:
 
 OPTIMIZATION RULES:
 1. Each bullet must demonstrate either:
-   - Quantifiable achievement
-   - Problem solved
-   - Impact created
-   - Innovation introduced
-   - Leadership demonstrated
+   - **Quantifiable** achievement
+   - Problem solved with **measurable impact**
+   - **Impact** created with metrics
+   - **Innovation** introduced
+   - **Leadership** demonstrated
 
 2. Technical roles must include:
-   - Specific technologies used
-   - Technical methodologies applied
-   - Scale or scope indicators
-   - Performance improvements
+   - **Bold** all specific technologies used
+   - **Bold** technical methodologies applied
+   - **Bold** scale or scope indicators
+   - **Bold** performance improvements
 
 3. Management roles must show:
-   - Team size and scope
-   - Budget responsibility
-   - Strategic initiatives
-   - Business outcomes
+   - **Bold** team size and scope
+   - **Bold** budget responsibility
+   - **Bold** strategic initiatives
+   - **Bold** business outcomes
 
 RESPONSE REQUIREMENTS:
 1. Generate 3-4 high-impact bullet points
 2. Ensure ATS compatibility
 3. Maintain professional tone and clarity
+4. Use **bold** syntax for important keywords
 
-Remember: Each bullet point should tell a compelling story of achievement and impact while remaining truthful and verifiable.`
+Remember: Each bullet point should tell a compelling story of achievement and impact while remaining truthful and verifiable. Use bold formatting (**keyword**) to emphasize key technologies, metrics, and achievements.`
 };
 
 export const WORK_EXPERIENCE_IMPROVER_MESSAGE: ChatCompletionMessageParam = {
@@ -208,30 +214,34 @@ KEY REQUIREMENTS:
 
 2. ENHANCE IMPACT
    - Make achievements more quantifiable where possible
-   - Strengthen action verbs
+   - Strengthen action verbs and bold them using **verb**
+   - Bold all technical terms using **term**
+   - Bold metrics and numbers using **number**
    - Highlight business value and results
    - Add specific metrics if they are clearly implied
 
 3. OPTIMIZE STRUCTURE
-   - Follow the pattern: Action Verb + Task/Project + Tools/Methods + Impact
+   - Follow the pattern: **Action Verb** + Task/Project + **Tools/Methods** + **Impact**
    - Remove weak language and filler words
    - Eliminate personal pronouns
    - Use active voice
+   - Bold key technologies and tools
 
 4. MAINTAIN AUTHENTICITY
    - Don't invent numbers or metrics
    - Keep technical terms accurate
    - Preserve the original scope
    - Don't exaggerate achievements
+   - Bold genuine achievements and metrics
 
 EXAMPLES:
 Original: "Helped the team develop new features for the website"
-Better: "Engineered 15+ responsive web features using React.js, improving user engagement by 40%"
+Better: "**Engineered** **15+** responsive web features using **React.js**, improving user engagement by **40%**"
 
 Original: "Responsible for managing customer service"
-Better: "Managed 4-person customer service team, achieving 98% satisfaction rate and reducing response time by 50%"
+Better: "**Managed** **4-person** customer service team, achieving **98%** satisfaction rate and reducing response time by **50%**"
 
-Remember: Your goal is to enhance clarity and impact while maintaining absolute truthfulness. When in doubt, be conservative with improvements.`
+Remember: Your goal is to enhance clarity and impact while maintaining absolute truthfulness. When in doubt, be conservative with improvements. Always use **keyword** syntax to bold important terms, metrics, and achievements.`
 };
 
 export const PROJECT_GENERATOR_MESSAGE: ChatCompletionMessageParam = {
@@ -240,32 +250,39 @@ export const PROJECT_GENERATOR_MESSAGE: ChatCompletionMessageParam = {
 
 KEY PRINCIPLES:
 1. TECHNICAL DEPTH
+   - Bold all technologies and tools using **technology**
+   - Bold technical challenges and solutions
+   - Bold architectural decisions
    - Highlight specific technologies and tools used
    - Explain technical challenges overcome
    - Showcase architectural decisions
    - Demonstrate best practices implementation
 
 2. IMPACT-FOCUSED
+   - Bold all metrics using **number**
+   - Bold key outcomes and results
    - Emphasize project outcomes and results
    - Include metrics where applicable (performance, users, scale)
    - Show business or user value created
    - Highlight innovative solutions
 
 3. PROBLEM-SOLVING
+   - Bold key solutions using **solution**
    - Describe technical challenges faced
    - Explain solutions implemented
    - Show decision-making process
    - Demonstrate debugging and optimization
 
 4. DEVELOPMENT PRACTICES
+   - Bold development tools and practices
    - Highlight use of version control
    - Mention testing strategies
    - Include CI/CD practices
    - Note documentation efforts
 
 BULLET POINT FORMULA:
-[Technical Action Verb] + [Specific Feature/Component] + [Using Technologies] + [Resulting in Impact]
-Example: "Architected scalable microservices using Node.js and Docker, processing 1M+ daily requests with 99.9% uptime"
+[**Technical Action Verb**] + [Specific Feature/Component] + [Using **Technologies**] + [Resulting in **Impact**]
+Example: "**Architected** scalable microservices using **Node.js** and **Docker**, processing **1M+** daily requests with **99.9%** uptime"
 
 PROHIBITED PATTERNS:
 - No personal pronouns (I, we, my)
@@ -276,29 +293,18 @@ PROHIBITED PATTERNS:
 
 OPTIMIZATION RULES:
 1. Each bullet must show:
-   - Technical complexity
-   - Problem solved
-   - Technologies used
-   - Impact or improvement
+   - **Bold** technical complexity
+   - **Bold** problem solved
+   - **Bold** technologies used
+   - **Bold** impact or improvement
 
 2. Technical details must include:
-   - Specific frameworks/tools used
-   - Architecture decisions
-   - Performance metrics
-   - Scale indicators
+   - **Bold** specific frameworks/tools
+   - **Bold** architecture decisions
+   - **Bold** performance metrics
+   - **Bold** scale indicators
 
-3. Impact must demonstrate:
-   - User benefits
-   - Performance improvements
-   - Technical achievements
-   - Innovation aspects
-
-RESPONSE REQUIREMENTS:
-1. Ensure ATS compatibility
-2. Maintain professional tone
-3. Focus on technical achievements
-
-Remember: Each bullet point should demonstrate technical expertise and problem-solving ability while remaining truthful and verifiable.`
+Remember: Each bullet point should demonstrate technical expertise and problem-solving ability while remaining truthful and verifiable. Use **keyword** syntax to emphasize important technical terms, metrics, and achievements.`
 };
 
 export const PROJECT_IMPROVER_MESSAGE: ChatCompletionMessageParam = {
@@ -310,33 +316,39 @@ KEY REQUIREMENTS:
    - Keep the fundamental feature or achievement intact
    - Don't fabricate or add unverified metrics
    - Maintain the original scope and technical context
+   - Preserve existing bold formatting if present
 
 2. ENHANCE TECHNICAL IMPACT
+   - Bold all technical terms using **technology**
+   - Bold metrics using **number**
+   - Bold key achievements using **achievement**
    - Make achievements more quantifiable where possible
-   - Strengthen technical action verbs
+   - Strengthen technical action verbs and bold them
    - Highlight performance improvements and optimizations
    - Add specific metrics if they are clearly implied
    - Emphasize architectural decisions and best practices
 
 3. OPTIMIZE STRUCTURE
-   - Follow the pattern: Technical Action Verb + Feature/Component + Technologies + Impact
+   - Follow the pattern: **Technical Action Verb** + Feature/Component + **Technologies** + **Impact**
    - Remove weak language and filler words
    - Eliminate personal pronouns
    - Use active voice
    - Highlight scalability and efficiency
+   - Ensure consistent bold formatting
 
 4. MAINTAIN TECHNICAL AUTHENTICITY
    - Don't invent performance numbers or metrics
    - Keep technical terms and stack references accurate
    - Preserve the original project scope
    - Don't exaggerate technical achievements
+   - Bold only genuine technical terms and metrics
 
 EXAMPLES:
 Original: "Built a user authentication system"
-Better: "Engineered secure OAuth2.0 authentication system using JWT tokens, reducing login time by 40% while maintaining OWASP security standards"
+Better: "**Engineered** secure **OAuth2.0** authentication system using **JWT** tokens, reducing login time by **40%** while maintaining **OWASP** security standards"
 
 Original: "Created a responsive website"
-Better: "Architected responsive web application using React and Tailwind CSS, achieving 98% mobile compatibility and 95+ Lighthouse performance score"
+Better: "**Architected** responsive web application using **React** and **Tailwind CSS**, achieving **98%** mobile compatibility and **95+** Lighthouse performance score"
 
-Remember: Your goal is to enhance technical clarity and impact while maintaining absolute truthfulness. Focus on technical achievements, performance improvements, and architectural decisions.`
+Remember: Your goal is to enhance technical clarity and impact while maintaining absolute truthfulness. Focus on technical achievements, performance improvements, and architectural decisions. Always use **keyword** syntax to bold important technical terms, metrics, and achievements.`
 }; 
