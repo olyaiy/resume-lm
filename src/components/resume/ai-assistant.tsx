@@ -340,9 +340,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 content: functionResult
               });
 
-              // Reset function call tracking
-              functionCallName = undefined;
-              functionCallArgs = '';
+             
 
               // Add a system message confirming the function call
               setMessages(prev => {
@@ -351,9 +349,25 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 const loadingMessage = newMessages[newMessages.length - 1];
                 if (loadingMessage?.role === 'assistant' && loadingMessage.isLoading) {
                   loadingMessage.isLoading = false;
-                  loadingMessage.content = 'Read over the resume ✅';
+                  // Format the function name to be more readable, with special case for update_name and read operations
+                  let displayMessage = 'Operation Complete ✅';
+                  console.log('Function Call Name:', functionCallName);
+                  if (functionCallName === 'update_name') {
+                    displayMessage = 'Changed name ✅';
+                  } else if (functionCallName === 'read_resume') {
+                    const sectionName = args.section === 'all' ? 'Full Resume' : 
+                      args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+                    displayMessage = `Read ${sectionName} ✅`;
+                  }
+                  loadingMessage.content = displayMessage;
                   loadingMessage.isSystemMessage = true;
                 }
+
+                 // Reset function call tracking
+                functionCallName = undefined;
+                functionCallArgs = '';
+
+
                 // Add new assistant message for the upcoming response
                 return [...newMessages, {
                   role: 'assistant',

@@ -16,37 +16,7 @@ const openai = new OpenAI({
 });
 
 
-// Function implementations
-function readResume(resume: Resume, section: string) {
-  switch (section) {
-    case "all":
-      return JSON.stringify(resume);
-    case "basic_info":
-      return JSON.stringify({
-        first_name: resume.first_name,
-        last_name: resume.last_name,
-        email: resume.email,
-        phone_number: resume.phone_number,
-        location: resume.location,
-        website: resume.website,
-        linkedin_url: resume.linkedin_url,
-        github_url: resume.github_url,
-        professional_summary: resume.professional_summary
-      });
-    case "work_experience":
-      return JSON.stringify(resume.work_experience);
-    case "education":
-      return JSON.stringify(resume.education);
-    case "skills":
-      return JSON.stringify(resume.skills);
-    case "projects":
-      return JSON.stringify(resume.projects);
-    case "certifications":
-      return JSON.stringify(resume.certifications);
-    default:
-      return "Invalid section specified";
-  }
-}
+
 
 /**
  * Formats a user's profile information using AI to ensure consistent and professional presentation
@@ -354,14 +324,7 @@ export async function streamChatResponse(
   messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
   resume: Resume
 ) {
-  console.log('🚀 Starting streamChatResponse with:', {
-    messageCount: messages.length,
-    lastMessage: messages[messages.length - 1],
-    resumeId: resume.id
-  });
-
   try {
-    console.log('📤 Initiating OpenAI API call...');
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
