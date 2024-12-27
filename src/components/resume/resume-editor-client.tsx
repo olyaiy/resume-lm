@@ -534,7 +534,10 @@ export function ResumeEditorClient({
                   </div>
                   {/* AI Assistant Section */}
                   <div className="sticky bottom-0 left-0 right-0 pr-4 bg-bg">
-                    <AIAssistant resume={resume} />
+                    <AIAssistant 
+                      resume={resume} 
+                      onUpdateResume={(field: keyof Resume, value: any) => updateField(field, value)}
+                    />
                   </div>
                 </ScrollArea>
 

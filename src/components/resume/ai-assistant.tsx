@@ -10,6 +10,8 @@ import { useRef, useEffect } from "react";
 import type { OpenAI } from "openai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Resume } from "@/lib/types";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -36,6 +38,7 @@ interface Message {
 interface AIAssistantProps {
   className?: string;
   resume: Resume;
+  onUpdateResume: (field: keyof Resume, value: any) => void;
 }
 
 function TypingIndicator({ text }: { text?: string }) {
@@ -109,7 +112,58 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
               <p className="whitespace-pre-wrap font-medium text-xs">{message.content}</p>
             </div>
           ) : (
-            <p className="whitespace-pre-wrap text-[13px] leading-relaxed">{message.content}</p>
+            <div className={cn(
+              "prose-sm max-w-none",
+              isUser ? "prose-invert" : "prose-purple",
+              "markdown-content"
+            )}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                components={{
+                  p: ({ children }) => <p className="whitespace-pre-wrap text-[13px] leading-relaxed m-0">{children}</p>,
+                  a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className={cn(
+                    "underline underline-offset-4",
+                    isUser ? "text-white/90 hover:text-white" : "text-purple-600 hover:text-purple-700"
+                  )}>{children}</a>,
+                  code: ({ inline, children }) => inline 
+                    ? <code className={cn(
+                        "px-1.5 py-0.5 rounded-md text-[12px] font-mono",
+                        isUser 
+                          ? "bg-white/20 text-white" 
+                          : "bg-purple-100/80 text-purple-800"
+                      )}>{children}</code>
+                    : <pre className={cn(
+                        "mt-2 mb-2 p-3 rounded-lg text-[12px] overflow-x-auto",
+                        isUser 
+                          ? "bg-white/10 text-white" 
+                          : "bg-purple-100/50 text-purple-900"
+                      )}><code>{children}</code></pre>,
+                  ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-1">{children}</ul>,
+                  ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-1">{children}</ol>,
+                  li: ({ children }) => <li className="text-[13px]">{children}</li>,
+                  h1: ({ children }) => <h1 className="text-base font-semibold mt-3 mb-2">{children}</h1>,
+                  h2: ({ children }) => <h2 className="text-sm font-semibold mt-2 mb-1.5">{children}</h2>,
+                  h3: ({ children }) => <h3 className="text-sm font-medium mt-2 mb-1">{children}</h3>,
+                  blockquote: ({ children }) => <blockquote className={cn(
+                    "border-l-2 pl-2 my-1.5",
+                    isUser ? "border-white/30" : "border-purple-300"
+                  )}>{children}</blockquote>,
+                  hr: () => <hr className={cn(
+                    "my-2 border-t",
+                    isUser ? "border-white/20" : "border-purple-200/60"
+                  )} />,
+                  table: ({ children }) => (
+                    <div className="overflow-x-auto my-2">
+                      <table className="min-w-full divide-y divide-purple-200/60 text-[12px]">{children}</table>
+                    </div>
+                  ),
+                  th: ({ children }) => <th className="px-2 py-1 font-medium bg-purple-100/50">{children}</th>,
+                  td: ({ children }) => <td className="px-2 py-1 border-t border-purple-200/30">{children}</td>,
+                }}
+              >
+                {message.content}
+              </ReactMarkdown>
+            </div>
           )}
         </div>
         <span className="text-[10px] text-gray-500 px-1.5 opacity-0 transition-opacity group-hover:opacity-100">
@@ -120,7 +174,7 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
   );
 }
 
-export function AIAssistant({ className, resume }: AIAssistantProps) {
+export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
