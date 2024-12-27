@@ -127,15 +127,27 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: resume.document_settings?.projects_item_spacing || 4,
     },
     projectHeader: {
+      flexDirection: 'column',
+      marginBottom: 4,
+    },
+    projectHeaderTop: {
       flexDirection: 'row',
       justifyContent: 'space-between',
       alignItems: 'flex-start',
-      marginBottom: 4,
+      marginBottom: 2,
+    },
+    projectHeaderRight: {
+      alignItems: 'flex-end',
     },
     projectTitle: {
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
+    },
+    projectTechnologies: {
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      color: '#4b5563',
+      fontFamily: 'Helvetica-Bold',
     },
     projectDescription: {
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
@@ -144,15 +156,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     projectLinks: {
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
-      marginBottom: 4,
-      marginLeft: 8,
-    },
-    projectTechnologies: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
-      color: '#4b5563',
-      marginLeft: 8,
-      marginBottom: 4,
-      fontFamily: 'Helvetica-Bold',
+      textAlign: 'right',
     },
     // Education section
     educationSection: {
@@ -279,32 +283,39 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             {resume.projects.map((project, index) => (
               <View key={index} style={styles.projectItem}>
                 <View style={styles.projectHeader}>
-                  <Text style={styles.projectTitle}>{project.name}</Text>
-                  {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
+                  <View style={styles.projectHeaderTop}>
+                    <View>
+                      <Text style={styles.projectTitle}>{project.name}</Text>
+                      {project.technologies && (
+                        <Text style={styles.projectTechnologies}>
+                          Technologies: {project.technologies.join(', ')}
+                        </Text>
+                      )}
+                    </View>
+                    <View style={styles.projectHeaderRight}>
+                      {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
+                      {(project.url || project.github_url) && (
+                        <Text style={styles.projectLinks}>
+                          {project.url && (
+                            <Link src={project.url.startsWith('http') ? project.url : `https://${project.url}`}>
+                              <Text style={styles.link}>{project.url}</Text>
+                            </Link>
+                          )}
+                          {project.url && project.github_url && ' | '}
+                          {project.github_url && (
+                            <Link src={project.github_url.startsWith('http') ? project.github_url : `https://${project.github_url}`}>
+                              <Text style={styles.link}>{project.github_url}</Text>
+                            </Link>
+                          )}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
                 </View>
-                {(project.url || project.github_url) && (
-                  <Text style={styles.projectLinks}>
-                    {project.url && (
-                      <Link src={project.url.startsWith('http') ? project.url : `https://${project.url}`}>
-                        <Text style={styles.link}>{project.url}</Text>
-                      </Link>
-                    )}
-                    {project.url && project.github_url && ' | '}
-                    {project.github_url && (
-                      <Link src={project.github_url.startsWith('http') ? project.github_url : `https://${project.github_url}`}>
-                        <Text style={styles.link}>{project.github_url}</Text>
-                      </Link>
-                    )}
-                  </Text>
-                )}
+                
                 {project.description.map((bullet, bulletIndex) => (
                   <Text key={bulletIndex} style={styles.bulletPoint}>• {bullet}</Text>
                 ))}
-                {project.technologies && (
-                  <Text style={styles.projectTechnologies}>
-                    Technologies: {project.technologies.join(', ')}
-                  </Text>
-                )}
               </View>
             ))}
           </View>
