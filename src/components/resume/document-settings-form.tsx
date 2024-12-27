@@ -14,7 +14,8 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     // Global Settings
     document_font_size: 10,
     document_line_height: 1.5,
-    document_margin: 36,
+    document_margin_vertical: 36,
+    document_margin_horizontal: 36,
 
     // Header Settings
     header_name_size: 24,
@@ -23,21 +24,25 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     // Skills Section
     skills_margin_top: 2,
     skills_margin_bottom: 2,
+    skills_margin_horizontal: 0,
     skills_item_spacing: 2,
 
     // Experience Section
     experience_margin_top: 2,
     experience_margin_bottom: 2,
+    experience_margin_horizontal: 0,
     experience_item_spacing: 4,
 
     // Projects Section
     projects_margin_top: 2,
     projects_margin_bottom: 2,
+    projects_margin_horizontal: 0,
     projects_item_spacing: 4,
 
     // Education Section
     education_margin_top: 2,
     education_margin_bottom: 2,
+    education_margin_horizontal: 0,
     education_item_spacing: 4,
   };
 
@@ -60,7 +65,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
         <Slider
           value={[Number(resume.document_settings?.[`${section}_margin_top`] !== undefined ? resume.document_settings[`${section}_margin_top`] : 2)]}
           min={0}
-          max={16}
+          max={48}
           step={1}
           onValueChange={([value]) => 
             onChange('document_settings', {
@@ -79,12 +84,31 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
         <Slider
           value={[Number(resume.document_settings?.[`${section}_margin_bottom`] !== undefined ? resume.document_settings[`${section}_margin_bottom`] : 2)]}
           min={0}
-          max={16}
+          max={48}
           step={1}
           onValueChange={([value]) => 
             onChange('document_settings', {
               ...resume.document_settings,
               [`${section}_margin_bottom`]: value
+            })
+          }
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium text-muted-foreground">Horizontal Margins</Label>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_margin_horizontal`] !== undefined ? resume.document_settings[`${section}_margin_horizontal`] : 0}pt</span>
+        </div>
+        <Slider
+          value={[Number(resume.document_settings?.[`${section}_margin_horizontal`] !== undefined ? resume.document_settings[`${section}_margin_horizontal`] : 0)]}
+          min={0}
+          max={72}
+          step={2}
+          onValueChange={([value]) => 
+            onChange('document_settings', {
+              ...resume.document_settings,
+              [`${section}_margin_horizontal`]: value
             })
           }
         />
@@ -98,7 +122,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
         <Slider
           value={[Number(resume.document_settings?.[`${section}_item_spacing`] !== undefined ? resume.document_settings[`${section}_item_spacing`] : 4)]}
           min={0}
-          max={8}
+          max={16}
           step={0.5}
           onValueChange={([value]) => 
             onChange('document_settings', {
@@ -176,18 +200,37 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
 
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <Label className="text-sm font-medium text-muted-foreground">Page Margin</Label>
-                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36}pt</span>
+                  <Label className="text-sm font-medium text-muted-foreground">Vertical Margins</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36}pt</span>
                 </div>
                 <Slider
-                  value={[resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36]}
+                  value={[resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36]}
                   min={18}
-                  max={72}
+                  max={108}
                   step={2}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
                       ...resume.document_settings,
-                      document_margin: value
+                      document_margin_vertical: value
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground">Horizontal Margins</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36}pt</span>
+                </div>
+                <Slider
+                  value={[resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36]}
+                  min={18}
+                  max={108}
+                  step={2}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      document_margin_horizontal: value
                     })
                   }
                 />

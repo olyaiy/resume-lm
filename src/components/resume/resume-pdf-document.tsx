@@ -13,7 +13,10 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
   const styles = StyleSheet.create({
     // Base page configuration
     page: {
-      padding: resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36,
+      paddingTop: resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36,
+      paddingBottom: resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36,
+      paddingLeft: resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36,
+      paddingRight: resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36,
       fontFamily: 'Helvetica',
       color: '#1f2937',
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
@@ -63,6 +66,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     skillsSection: {
       marginTop: resume.document_settings?.skills_margin_top !== undefined ? resume.document_settings.skills_margin_top : 2,
       marginBottom: resume.document_settings?.skills_margin_bottom !== undefined ? resume.document_settings.skills_margin_bottom : 2,
+      marginLeft: resume.document_settings?.skills_margin_horizontal !== undefined ? resume.document_settings.skills_margin_horizontal : 0,
+      marginRight: resume.document_settings?.skills_margin_horizontal !== undefined ? resume.document_settings.skills_margin_horizontal : 0,
     },
     skillsGrid: {
       flexDirection: 'column',
@@ -86,6 +91,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     experienceSection: {
       marginTop: resume.document_settings?.experience_margin_top !== undefined ? resume.document_settings.experience_margin_top : 2,
       marginBottom: resume.document_settings?.experience_margin_bottom !== undefined ? resume.document_settings.experience_margin_bottom : 2,
+      marginLeft: resume.document_settings?.experience_margin_horizontal !== undefined ? resume.document_settings.experience_margin_horizontal : 0,
+      marginRight: resume.document_settings?.experience_margin_horizontal !== undefined ? resume.document_settings.experience_margin_horizontal : 0,
     },
     experienceItem: {
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
@@ -122,13 +129,15 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     projectsSection: {
       marginTop: resume.document_settings?.projects_margin_top !== undefined ? resume.document_settings.projects_margin_top : 2,
       marginBottom: resume.document_settings?.projects_margin_bottom !== undefined ? resume.document_settings.projects_margin_bottom : 2,
+      marginLeft: resume.document_settings?.projects_margin_horizontal !== undefined ? resume.document_settings.projects_margin_horizontal : 0,
+      marginRight: resume.document_settings?.projects_margin_horizontal !== undefined ? resume.document_settings.projects_margin_horizontal : 0,
     },
     projectItem: {
       marginBottom: resume.document_settings?.projects_item_spacing || 4,
     },
     projectHeader: {
       flexDirection: 'column',
-      marginBottom: 4,
+      marginBottom: 0,
     },
     projectHeaderTop: {
       flexDirection: 'row',
@@ -162,6 +171,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     educationSection: {
       marginTop: resume.document_settings?.education_margin_top !== undefined ? resume.document_settings.education_margin_top : 2,
       marginBottom: resume.document_settings?.education_margin_bottom !== undefined ? resume.document_settings.education_margin_bottom : 2,
+      marginLeft: resume.document_settings?.education_margin_horizontal !== undefined ? resume.document_settings.education_margin_horizontal : 0,
+      marginRight: resume.document_settings?.education_margin_horizontal !== undefined ? resume.document_settings.education_margin_horizontal : 0,
     },
     educationItem: {
       marginBottom: resume.document_settings?.education_item_spacing || 4,
@@ -288,7 +299,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                       <Text style={styles.projectTitle}>{project.name}</Text>
                       {project.technologies && (
                         <Text style={styles.projectTechnologies}>
-                          Technologies: {project.technologies.join(', ')}
+                          {project.technologies.join(', ')}
                         </Text>
                       )}
                     </View>
