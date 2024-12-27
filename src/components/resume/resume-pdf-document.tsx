@@ -60,11 +60,10 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     skillsGrid: {
       flexDirection: 'column',
-      gap: resume.document_settings?.skills_item_spacing || 4,
-      lineHeight: resume.document_settings?.skills_line_height || 1.5,
+      gap: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
     },
     skillCategory: {
-      marginBottom: resume.document_settings?.skills_item_spacing || 4,
+      marginBottom: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
     },
     skillCategoryTitle: {
       fontSize: resume.document_settings?.skills_font_size || 10,

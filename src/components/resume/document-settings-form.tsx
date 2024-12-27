@@ -20,8 +20,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
     skills_font_size: 10,
     skills_margin_top: 8,
     skills_margin_bottom: 8,
-    skills_line_height: 1.5,
-    skills_item_spacing: 4,
+    skills_item_spacing: 2,
 
     // Experience Section
     experience_font_size: 10,
@@ -113,32 +112,34 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
         />
       </div>
 
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
-          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_line_height`] || 1.5}</span>
+      {section !== 'skills' && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
+            <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_line_height`] || 1.5}</span>
+          </div>
+          <Slider
+            value={[resume.document_settings?.[`${section}_line_height`] || 1.5]}
+            min={1}
+            max={2}
+            step={0.1}
+            onValueChange={([value]) => 
+              onChange('document_settings', {
+                ...resume.document_settings,
+                [`${section}_line_height`]: value
+              })
+            }
+          />
         </div>
-        <Slider
-          value={[resume.document_settings?.[`${section}_line_height`] || 1.5]}
-          min={1}
-          max={2}
-          step={0.1}
-          onValueChange={([value]) => 
-            onChange('document_settings', {
-              ...resume.document_settings,
-              [`${section}_line_height`]: value
-            })
-          }
-        />
-      </div>
+      )}
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium text-muted-foreground">Space Between Items</Label>
-          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_item_spacing`] || 4}pt</span>
+          <span className="text-xs text-muted-foreground/60">{resume.document_settings?.[`${section}_item_spacing`] !== undefined ? resume.document_settings[`${section}_item_spacing`] : 4}pt</span>
         </div>
         <Slider
-          value={[resume.document_settings?.[`${section}_item_spacing`] || 4]}
+          value={[Number(resume.document_settings?.[`${section}_item_spacing`] !== undefined ? resume.document_settings[`${section}_item_spacing`] : 4)]}
           min={0}
           max={8}
           step={0.5}
