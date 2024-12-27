@@ -455,17 +455,30 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           whileHover={{ scale: 1.01 }}
           whileTap={{ scale: 0.99 }}
           onClick={() => setIsExpanded(prev => !prev)}
-          className="relative w-full flex items-center gap-2.5 px-4 py-3.5 hover:bg-purple-200/30 transition-all duration-300 group/button"
+          className={cn(
+            "relative w-full flex items-center gap-2.5 px-3.5 py-2 rounded-t-3xl",
+            isExpanded ? "border border-purple-500/60" : "hover:bg-purple-200/30",
+            "transition-all duration-300 group/button",
+            "after:absolute after:inset-x-4 after:bottom-0 after:h-px after:bg-gradient-to-r",
+            "after:from-transparent after:via-purple-400/40 after:to-transparent"
+          )}
         >
-          <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-md shadow-purple-500/20 transition-all duration-300 group-hover/button:shadow-purple-500/40 group-hover/button:scale-105">
-            <Sparkles className="h-4 w-4 text-white animate-pulse" />
+          <div className="p-1.5 rounded-lg bg-gradient-to-br from-purple-500 to-fuchsia-500 shadow-md 
+            shadow-purple-500/20 transition-all duration-300 group-hover/button:shadow-purple-500/40 
+            group-hover/button:scale-105 ring-1 ring-white/40"
+          >
+            <Sparkles className="h-3.5 w-3.5 text-white animate-pulse" />
           </div>
           <div className="flex-1 text-left transition-all duration-300">
-            <div className="text-sm font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-700 bg-clip-text text-transparent">AI Resume Assistant</div>
-            <p className="text-xs text-purple-700/90">Let AI help you craft the perfect resume</p>
+            <div className="text-[13px] font-semibold bg-gradient-to-r from-purple-700 to-fuchsia-700 
+              bg-clip-text text-transparent leading-none mb-0.5"
+            >
+              AI Resume Assistant
+            </div>
+            <p className="text-[11px] text-purple-700/80">Let AI help you craft the perfect resume</p>
           </div>
           <ChevronUp className={cn(
-            "h-4 w-4 text-purple-600 transition-all duration-300",
+            "h-4 w-4 text-purple-600/80 transition-all duration-300",
             isExpanded ? "rotate-0" : "rotate-180",
             "group-hover/button:text-purple-700 group-hover/button:scale-110"
           )} />
@@ -482,7 +495,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               className="relative"
             >
               <ScrollArea 
-                className="h-full px-4 py-3 overflow-y-auto" 
+                className="h-full px-4 py-0 overflow-y-auto" 
                 ref={scrollAreaRef}
               >
                 <div className="space-y-4">
