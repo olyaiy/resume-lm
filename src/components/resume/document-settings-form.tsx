@@ -11,9 +11,14 @@ interface DocumentSettingsFormProps {
 
 export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormProps) {
   const defaultSettings = {
+    // Global Settings
+    document_font_size: 10,
+    document_line_height: 1.5,
+    document_margin: 36,
+
     // Header Settings
     header_name_size: 24,
-    header_name_bottom_spacing: 4,
+    header_name_bottom_spacing: 24,
 
     // Skills Section
     skills_margin_top: 2,
@@ -123,6 +128,73 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           </Button>
         </CardHeader>
         <CardContent className="space-y-8">
+          {/* Global Document Settings */}
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">Document</Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+
+            <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground">Font Size</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10}pt</span>
+                </div>
+                <Slider
+                  value={[resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10]}
+                  min={8}
+                  max={12}
+                  step={0.5}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      document_font_size: value
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground">Line Height</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_line_height !== undefined ? resume.document_settings.document_line_height : 1.5}</span>
+                </div>
+                <Slider
+                  value={[resume.document_settings?.document_line_height !== undefined ? resume.document_settings.document_line_height : 1.5]}
+                  min={1}
+                  max={2}
+                  step={0.1}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      document_line_height: value
+                    })
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-sm font-medium text-muted-foreground">Page Margin</Label>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36}pt</span>
+                </div>
+                <Slider
+                  value={[resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36]}
+                  min={18}
+                  max={72}
+                  step={2}
+                  onValueChange={([value]) => 
+                    onChange('document_settings', {
+                      ...resume.document_settings,
+                      document_margin: value
+                    })
+                  }
+                />
+              </div>
+            </div>
+          </div>
+
           {/* Header Settings */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
@@ -153,12 +225,12 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <Label className="text-sm font-medium text-muted-foreground">Space Below Name</Label>
-                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 4}pt</span>
+                  <span className="text-xs text-muted-foreground/60">{resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 24}pt</span>
                 </div>
                 <Slider
-                  value={[resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 4]}
+                  value={[resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 24]}
                   min={0}
-                  max={18}
+                  max={50}
                   step={1}
                   onValueChange={([value]) => 
                     onChange('document_settings', {

@@ -96,36 +96,33 @@ export interface Resume {
 }
 
 export interface DocumentSettings {
+  // Global Settings
+  document_font_size?: number;
+  document_line_height?: number;
+  document_margin?: number;
+
   // Header Settings
   header_name_size?: number;
   header_name_bottom_spacing?: number;
 
   // Skills Section
-  skills_font_size?: number;
   skills_margin_top?: number;
   skills_margin_bottom?: number;
-  skills_line_height?: number;
   skills_item_spacing?: number;
 
   // Experience Section
-  experience_font_size?: number;
   experience_margin_top?: number;
   experience_margin_bottom?: number;
-  experience_line_height?: number;
   experience_item_spacing?: number;
 
   // Projects Section
-  projects_font_size?: number;
   projects_margin_top?: number;
   projects_margin_bottom?: number;
-  projects_line_height?: number;
   projects_item_spacing?: number;
 
   // Education Section
-  education_font_size?: number;
   education_margin_top?: number;
   education_margin_bottom?: number;
-  education_line_height?: number;
   education_item_spacing?: number;
 }
 

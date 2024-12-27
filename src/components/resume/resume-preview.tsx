@@ -25,6 +25,21 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   import.meta.url,
 ).toString();
 
+// Add custom styles for PDF annotations to ensure links are clickable
+const customStyles = `
+  .react-pdf__Page__annotations {
+    pointer-events: auto !important;
+    z-index: 10 !important;
+  }
+  .react-pdf__Page__annotations.annotationLayer {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+  }
+`;
+
 interface ResumePreviewProps {
   resume: Resume;
   variant?: 'base' | 'tailored';
@@ -41,6 +56,16 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
+
+  // Add styles to document head
+  useEffect(() => {
+    const styleElement = document.createElement('style');
+    styleElement.innerHTML = customStyles;
+    document.head.appendChild(styleElement);
+    return () => {
+      document.head.removeChild(styleElement);
+    };
+  }, []);
 
   // Generate PDF when resume data changes
   useEffect(() => {
@@ -124,7 +149,8 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
       <Document
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
-        className="relative w-full h-full "
+        className="relative w-full h-full"
+        externalLinkTarget="_blank"
         loading={
           <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
             <div className="space-y-8 animate-pulse">
@@ -189,6 +215,8 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
             pageNumber={index + 1}
             className="mb-4 rounded-xl shadow-lg"
             width={debouncedWidth}
+            renderAnnotationLayer={true}
+            renderTextLayer={true}
           />
         ))}
       </Document>

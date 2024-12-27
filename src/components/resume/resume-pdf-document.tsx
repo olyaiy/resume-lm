@@ -1,7 +1,7 @@
 'use client';
 
 import { Resume } from "@/lib/types";
-import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet } from '@react-pdf/renderer';
+import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
 
 interface ResumePDFDocumentProps {
   resume: Resume;
@@ -13,9 +13,11 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
   const styles = StyleSheet.create({
     // Base page configuration
     page: {
-      padding: 36,
+      padding: resume.document_settings?.document_margin !== undefined ? resume.document_settings.document_margin : 36,
       fontFamily: 'Helvetica',
       color: '#1f2937',
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      lineHeight: resume.document_settings?.document_line_height !== undefined ? resume.document_settings.document_line_height : 1.5,
     },
     // Header section
     header: {
@@ -25,13 +27,13 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     name: {
       fontSize: resume.document_settings?.header_name_size !== undefined ? resume.document_settings.header_name_size : 24,
       fontFamily: 'Helvetica-Bold',
-      marginBottom: resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 4,
+      marginBottom: resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 24,
       color: '#111827',
       textAlign: 'center',
     },
     // Contact information layout
     contactInfo: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
       flexDirection: 'row',
       justifyContent: 'center',
@@ -43,15 +45,19 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       color: '#2563eb',
       textDecoration: 'none',
     },
+    bulletSeparator: {
+      color: '#4b5563',
+      marginHorizontal: 2,
+    },
     // Section titles
     sectionTitle: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       marginBottom: 4,
       color: '#111827',
       textTransform: 'uppercase',
       borderBottom: '0.5pt solid #e5e7eb',
-      paddingBottom: 2,
+      paddingBottom: 0,
     },
     // Skills section
     skillsSection: {
@@ -66,18 +72,18 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
     },
     skillCategoryTitle: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     skillItem: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
     },
     // Experience section
     experienceSection: {
-      marginTop: resume.document_settings?.experience_margin_top !== undefined ? resume.document_settings.experience_margin_top : 8,
-      marginBottom: resume.document_settings?.experience_margin_bottom !== undefined ? resume.document_settings.experience_margin_bottom : 8,
+      marginTop: resume.document_settings?.experience_margin_top !== undefined ? resume.document_settings.experience_margin_top : 2,
+      marginBottom: resume.document_settings?.experience_margin_bottom !== undefined ? resume.document_settings.experience_margin_bottom : 2,
     },
     experienceItem: {
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
@@ -89,21 +95,21 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     companyName: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     jobTitle: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
     },
     dateRange: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#6b7280',
       textAlign: 'right',
     },
     bulletPoint: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
       color: '#374151',
       marginLeft: 8,
@@ -112,8 +118,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Projects section
     projectsSection: {
-      marginTop: resume.document_settings?.projects_margin_top !== undefined ? resume.document_settings.projects_margin_top : 8,
-      marginBottom: resume.document_settings?.projects_margin_bottom !== undefined ? resume.document_settings.projects_margin_bottom : 8,
+      marginTop: resume.document_settings?.projects_margin_top !== undefined ? resume.document_settings.projects_margin_top : 2,
+      marginBottom: resume.document_settings?.projects_margin_bottom !== undefined ? resume.document_settings.projects_margin_bottom : 2,
     },
     projectItem: {
       marginBottom: resume.document_settings?.projects_item_spacing || 4,
@@ -125,22 +131,22 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     projectTitle: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     projectDescription: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#374151',
     },
     projectLinks: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
       marginBottom: 4,
       marginLeft: 8,
     },
     projectTechnologies: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
       marginLeft: 8,
       marginBottom: 4,
@@ -148,8 +154,8 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     // Education section
     educationSection: {
-      marginTop: resume.document_settings?.education_margin_top !== undefined ? resume.document_settings.education_margin_top : 8,
-      marginBottom: resume.document_settings?.education_margin_bottom !== undefined ? resume.document_settings.education_margin_bottom : 8,
+      marginTop: resume.document_settings?.education_margin_top !== undefined ? resume.document_settings.education_margin_top : 2,
+      marginBottom: resume.document_settings?.education_margin_bottom !== undefined ? resume.document_settings.education_margin_bottom : 2,
     },
     educationItem: {
       marginBottom: resume.document_settings?.education_item_spacing || 4,
@@ -161,12 +167,12 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: 4,
     },
     schoolName: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     degree: {
-      fontSize: 10,
+      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       color: '#4b5563',
     },
   });
@@ -178,12 +184,51 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         <View style={styles.header}>
           <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
           <View style={styles.contactInfo}>
-            {resume.email && <Text>{resume.email}</Text>}
-            {resume.phone_number && <Text>{resume.phone_number}</Text>}
-            {resume.location && <Text>{resume.location}</Text>}
-            {resume.website && <Text style={styles.link}>{resume.website}</Text>}
-            {resume.linkedin_url && <Text style={styles.link}>{resume.linkedin_url}</Text>}
-            {resume.github_url && <Text style={styles.link}>{resume.github_url}</Text>}
+            {resume.email && (
+              <>
+                <Link src={`mailto:${resume.email}`}><Text>{resume.email}</Text></Link>
+                {(resume.phone_number || resume.location || resume.website || resume.linkedin_url || resume.github_url) && (
+                  <Text style={styles.bulletSeparator}>•</Text>
+                )}
+              </>
+            )}
+            {resume.phone_number && (
+              <>
+                <Text>{resume.phone_number}</Text>
+                {(resume.location || resume.website || resume.linkedin_url || resume.github_url) && (
+                  <Text style={styles.bulletSeparator}>•</Text>
+                )}
+              </>
+            )}
+            {resume.location && (
+              <>
+                <Text>{resume.location}</Text>
+                {(resume.website || resume.linkedin_url || resume.github_url) && (
+                  <Text style={styles.bulletSeparator}>•</Text>
+                )}
+              </>
+            )}
+            {resume.website && (
+              <>
+                <Link src={resume.website}><Text style={styles.link}>{resume.website}</Text></Link>
+                {(resume.linkedin_url || resume.github_url) && (
+                  <Text style={styles.bulletSeparator}>•</Text>
+                )}
+              </>
+            )}
+            {resume.linkedin_url && (
+              <>
+                <Link src={resume.linkedin_url.startsWith('http') ? resume.linkedin_url : `https://${resume.linkedin_url}`}>
+                  <Text style={styles.link}>{resume.linkedin_url}</Text>
+                </Link>
+                {resume.github_url && <Text style={styles.bulletSeparator}>•</Text>}
+              </>
+            )}
+            {resume.github_url && (
+              <Link src={resume.github_url.startsWith('http') ? resume.github_url : `https://${resume.github_url}`}>
+                <Text style={styles.link}>{resume.github_url}</Text>
+              </Link>
+            )}
           </View>
         </View>
 
@@ -233,19 +278,27 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   <Text style={styles.projectTitle}>{project.name}</Text>
                   {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
                 </View>
+                {(project.url || project.github_url) && (
+                  <Text style={styles.projectLinks}>
+                    {project.url && (
+                      <Link src={project.url.startsWith('http') ? project.url : `https://${project.url}`}>
+                        <Text style={styles.link}>{project.url}</Text>
+                      </Link>
+                    )}
+                    {project.url && project.github_url && ' | '}
+                    {project.github_url && (
+                      <Link src={project.github_url.startsWith('http') ? project.github_url : `https://${project.github_url}`}>
+                        <Text style={styles.link}>{project.github_url}</Text>
+                      </Link>
+                    )}
+                  </Text>
+                )}
                 {project.description.map((bullet, bulletIndex) => (
                   <Text key={bulletIndex} style={styles.bulletPoint}>• {bullet}</Text>
                 ))}
                 {project.technologies && (
                   <Text style={styles.projectTechnologies}>
                     Technologies: {project.technologies.join(', ')}
-                  </Text>
-                )}
-                {(project.url || project.github_url) && (
-                  <Text style={styles.projectLinks}>
-                    {project.url && `Demo: ${project.url}`}
-                    {project.url && project.github_url && ' | '}
-                    {project.github_url && `Code: ${project.github_url}`}
                   </Text>
                 )}
               </View>
