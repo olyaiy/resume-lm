@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Sparkles, ChevronUp, Send, Bot, User } from "lucide-react";
+import { Sparkles, ChevronUp, Send, Bot, User, CheckCircle2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,9 @@ interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
+  isLoading?: boolean;
+  loadingText?: string;
+  isSystemMessage?: boolean;
 }
 
 interface AIAssistantProps {
@@ -22,24 +25,29 @@ interface AIAssistantProps {
   resume: Resume;
 }
 
-function TypingIndicator() {
+function TypingIndicator({ text }: { text?: string }) {
   return (
-    <div className="flex items-center gap-1 px-2">
-      <motion.div
-        className="w-1.5 h-1.5 bg-purple-500 rounded-full"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.2 }}
-      />
-      <motion.div
-        className="w-1.5 h-1.5 bg-purple-500 rounded-full"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.3 }}
-      />
-      <motion.div
-        className="w-1.5 h-1.5 bg-purple-500 rounded-full"
-        animate={{ scale: [1, 1.2, 1] }}
-        transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.4 }}
-      />
+    <div className="flex flex-col gap-2">
+      {text && (
+        <span className="text-xs text-purple-600/70 font-medium">{text}</span>
+      )}
+      <div className="flex items-center gap-1">
+        <motion.div
+          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.2 }}
+        />
+        <motion.div
+          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.3 }}
+        />
+        <motion.div
+          className="w-1.5 h-1.5 bg-purple-500 rounded-full"
+          animate={{ scale: [1, 1.2, 1] }}
+          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.4 }}
+        />
+      </div>
     </div>
   );
 }
@@ -76,9 +84,20 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
           "px-4 py-2.5 rounded-2xl text-sm shadow-sm",
           isUser 
             ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm" 
-            : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"
+            : message.isSystemMessage
+              ? "bg-purple-50/80 backdrop-blur-sm border border-purple-200/60 text-purple-600 rounded-bl-sm"
+              : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"
         )}>
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          {message.isLoading ? (
+            <TypingIndicator text={message.loadingText} />
+          ) : message.isSystemMessage ? (
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-purple-500" />
+              <p className="whitespace-pre-wrap font-medium">{message.content}</p>
+            </div>
+          ) : (
+            <p className="whitespace-pre-wrap">{message.content}</p>
+          )}
         </div>
         <span className="text-xs text-gray-500 px-2 opacity-0 transition-opacity group-hover:opacity-100">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
@@ -140,6 +159,15 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
     setMessage('');
     setIsLoading(true);
     scrollToBottom();
+    
+    // Add initial assistant message with loading state
+    setMessages(prev => [...prev, { 
+      role: 'assistant',
+      content: '',
+      timestamp: new Date(),
+      isLoading: true
+    }]);
+
     // Refocus input after sending
     requestAnimationFrame(() => {
       inputRef.current?.focus();
@@ -164,6 +192,16 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           
           if (functionCall.name) {
             functionCallName = functionCall.name;
+            // Update loading message to show reading state
+            setMessages(prev => {
+              const newMessages = [...prev];
+              const lastMessage = newMessages[newMessages.length - 1];
+              if (lastMessage?.role === 'assistant') {
+                lastMessage.isLoading = true;
+                lastMessage.loadingText = 'Reading your resume...';
+              }
+              return newMessages;
+            });
           }
           if (functionCall.arguments) {
             functionCallArgs += functionCall.arguments;
@@ -215,6 +253,25 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
               functionCallName = undefined;
               functionCallArgs = '';
 
+              // Add a system message confirming the function call
+              setMessages(prev => {
+                const newMessages = [...prev];
+                // Update the loading message to show completion
+                const loadingMessage = newMessages[newMessages.length - 1];
+                if (loadingMessage?.role === 'assistant' && loadingMessage.isLoading) {
+                  loadingMessage.isLoading = false;
+                  loadingMessage.content = 'Read over the resume ✅';
+                  loadingMessage.isSystemMessage = true;
+                }
+                // Add new assistant message for the upcoming response
+                return [...newMessages, {
+                  role: 'assistant',
+                  content: '',
+                  timestamp: new Date(),
+                  isLoading: true
+                }];
+              });
+
               // Get a new response with the function result
               const newResponse = await streamChatResponse(chatMessages, resume);
               for await (const newChunk of newResponse) {
@@ -226,14 +283,9 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
                   
                   if (lastMessage?.role === 'assistant') {
                     lastMessage.content = fullResponse;
-                  } else {
-                    newMessages.push({ 
-                      role: 'assistant', 
-                      content: fullResponse,
-                      timestamp: new Date()
-                    });
+                    lastMessage.isLoading = false;
+                    lastMessage.loadingText = undefined;
                   }
-                  
                   return newMessages;
                 });
               }
@@ -258,11 +310,14 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           
           if (lastMessage?.role === 'assistant') {
             lastMessage.content = fullResponse;
+            lastMessage.isLoading = false;
+            lastMessage.loadingText = undefined;
           } else {
             newMessages.push({ 
               role: 'assistant', 
               content: fullResponse,
-              timestamp: new Date()
+              timestamp: new Date(),
+              isLoading: false
             });
           }
           
@@ -271,11 +326,21 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
       }
     } catch (error) {
       console.error('Error in chat:', error);
-      setMessages(prev => [...prev, { 
-        role: 'assistant', 
-        content: 'Sorry, I encountered an error. Please try again.',
-        timestamp: new Date()
-      }]);
+      setMessages(prev => {
+        const newMessages = [...prev];
+        const lastMessage = newMessages[newMessages.length - 1];
+        if (lastMessage?.role === 'assistant' && lastMessage.isLoading) {
+          lastMessage.content = 'Sorry, I encountered an error. Please try again.';
+          lastMessage.isLoading = false;
+          lastMessage.loadingText = undefined;
+          return newMessages;
+        }
+        return [...prev, { 
+          role: 'assistant', 
+          content: 'Sorry, I encountered an error. Please try again.',
+          timestamp: new Date()
+        }];
+      });
     } finally {
       setIsLoading(false);
     }

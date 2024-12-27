@@ -398,8 +398,21 @@ export async function streamChatResponse(
       function_call: "auto"
     });
 
-    // Simply return the stream for client-side processing
-    return response;
+    // Create an async generator to handle the stream
+    async function* processStream() {
+      try {
+        for await (const chunk of response) {
+          yield chunk;
+        }
+        // Yield a final chunk to indicate stream completion
+        yield { choices: [{ delta: { content: '[DONE]' } }] };
+      } catch (error) {
+        console.error('❌ Error in stream processing:', error);
+        throw error;
+      }
+    }
+
+    return processStream();
   } catch (error) {
     console.error('❌ Fatal error in streamChatResponse:', {
       error: error instanceof Error ? error.message : 'Unknown error',
