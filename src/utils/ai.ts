@@ -321,11 +321,14 @@ export async function processTextImport(text: string) {
  * @returns Streaming response from OpenAI
  */
 export async function streamChatResponse(
-  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
-  resume: Resume
+  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>
 ) {
+
+  
   try {
     const response = await openai.chat.completions.create({
+
+      
       model: "gpt-4o-mini",
       messages: [
         {
@@ -356,6 +359,7 @@ export async function streamChatResponse(
       function_call: "auto"
     });
 
+    
     // Return the response stream directly
     return response;
 

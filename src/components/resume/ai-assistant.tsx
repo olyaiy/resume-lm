@@ -85,24 +85,26 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
 
   
-  async function handleMessageSubmit() {
+  async function handleAIResponse() {
 
     // Prevent empty messages or duplicate submissions while loading
     if (!message.trim() || isLoading) return;
 
 
-    // Create and add the user's message to the chat
+    // Create the user message
     const userMessage = { 
       role: 'user' as const, 
       content: message,
       timestamp: new Date()
     };
+
+    // Add the user's message to the chat history
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
     setIsLoading(true);
     
     // Add initial assistant message with loading state
-    // This provides immediate feedback that the system is processing
+    // provides immediate feedback that the system is processing
     setMessages(prev => [...prev, { 
       role: 'assistant',
       content: '',
@@ -110,23 +112,28 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       isLoading: true
     }]);
 
-    // Refocus input after sending
-    // requestAnimationFrame(() => {
-    //   inputRef.current?.focus();
-    // });
-
 
     try {
-      // Prepare messages for OpenAI API
-      // Convert our internal message format to OpenAI's expected format
-      const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = messages.map(msg => ({
-        role: msg.role,
-        content: msg.content
-      }));
-      chatMessages.push(userMessage);
+      // Include all previous messages plus the new user message
+      const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+        ...messages.map(msg => ({
+          role: msg.role,
+          content: msg.content
+        })),
+        {
+          role: userMessage.role,
+          content: userMessage.content
+        }
+      ];
 
       // Start streaming response from OpenAI
-      const response = await streamChatResponse(chatMessages, resume);
+      const response = await streamChatResponse(chatMessages);
+
+      console.log("--------------------------------------------------------------------------");
+      console.log("FULL MESSAGE SENT TO AI: ", chatMessages);
+      console.log("--------------------------------------------------------------------------");
+      
+      // Initialize variables for function call handling
       let fullResponse = '';
       let functionCallName: string | undefined;
       let functionCallArgs = '';
@@ -141,7 +148,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           const functionCall = delta.function_call;
           
 
-          // IF / WHEN we receive a function name, update UI to show tool usage
+          // WHEN we receive a function name, 
+          // UPDATE UI to show tool usage
           if (functionCall.name) {
             functionCallName = functionCall.name;
             // Update loading message to show generic tool usage state
@@ -165,6 +173,11 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
           // EXECUTE FUNCTION ONCE WE HAVE COMPLETE ARGUMENTS
           if (functionCallName && functionCallArgs && !delta.content) {
+
+            console.log("--------------------------------------------------------------------------");
+            console.log("FULL UNCTION CALL NAME FROM AI: ", functionCallName);
+            console.log("FULL UNCTION CALL ARGUMENTSFROM AI: ", functionCallArgs);
+            console.log("--------------------------------------------------------------------------");
             try {
 
               // Ensure we have complete JSON before parsing
@@ -243,7 +256,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               });
 
               // Get AI's response to the function result
-              const newResponse = await streamChatResponse(chatMessages, resume);
+              const newResponse = await streamChatResponse(chatMessages);
               fullResponse = ''; // Reset fullResponse for new stream
               let isFirstChunk = true;
 
@@ -285,9 +298,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           continue;
         }
 
-        // HANDLE REGULAR CHAT RESPONSES
+        // IF THE MESSAGE IS A REGULAR CHAT RESPONSE
         const content = delta.content || '';
+
+
         if (content === '[DONE]') {
+
+          console.log("--------------------------------------------------------------------------");
+          console.log("FULL TEXT RESPONSE FROM AI: ", fullResponse);
+          console.log("--------------------------------------------------------------------------");
           continue;
         }
         fullResponse += content;
@@ -316,6 +335,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           return newMessages;
         });
       }
+
     } catch (error) {
       // Handle errors gracefully with user-friendly messages
       console.error('Error in chat:', error);
@@ -335,6 +355,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         }];
       });
     } finally {
+      // Reset loading state
       setIsLoading(false);
     }
   }
@@ -441,7 +462,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         <ChatInput 
           message={message} 
           setMessage={setMessage} 
-          onSubmit={handleMessageSubmit} 
+          onSubmit={handleAIResponse} 
           isLoading={isLoading} 
         />
       </motion.div>
