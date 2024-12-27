@@ -11,6 +11,19 @@ import type { OpenAI } from "openai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Resume } from "@/lib/types";
 
+// Define types for OpenAI streaming response
+type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
+  choices: Array<{
+    delta: {
+      content?: string;
+      function_call?: {
+        name?: string;
+        arguments?: string;
+      };
+    };
+  }>;
+};
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -187,8 +200,9 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
 
       for await (const chunk of response) {
         // Handle function calls
-        if (chunk.choices[0]?.delta?.function_call) {
-          const functionCall = chunk.choices[0].delta.function_call;
+        const delta = (chunk as ChatCompletionChunk).choices[0]?.delta;
+        if (delta.function_call) {
+          const functionCall = delta.function_call;
           
           if (functionCall.name) {
             functionCallName = functionCall.name;
@@ -208,7 +222,7 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           }
 
           // Check if we have a complete JSON string
-          if (functionCallName && functionCallArgs && !chunk.choices[0]?.delta?.content) {
+          if (functionCallName && functionCallArgs && !delta.content) {
             try {
               // Verify if we have complete JSON by checking for closing brace
               if (!functionCallArgs.trim().endsWith('}')) {
@@ -274,7 +288,13 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
 
               // Get a new response with the function result
               const newResponse = await streamChatResponse(chatMessages, resume);
+              fullResponse = ''; // Reset fullResponse for new stream
+              let isFirstChunk = true;
+
               for await (const newChunk of newResponse) {
+                if (newChunk.choices[0]?.delta?.content === '[DONE]') {
+                  continue;
+                }
                 const content = newChunk.choices[0]?.delta?.content || '';
                 fullResponse += content;
                 setMessages(prev => {
@@ -283,8 +303,15 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
                   
                   if (lastMessage?.role === 'assistant') {
                     lastMessage.content = fullResponse;
-                    lastMessage.isLoading = false;
-                    lastMessage.loadingText = undefined;
+                    // Only show loading on first empty chunk
+                    if (isFirstChunk) {
+                      lastMessage.isLoading = content.length === 0;
+                      lastMessage.loadingText = content.length === 0 ? 'Thinking...' : undefined;
+                      isFirstChunk = false;
+                    } else {
+                      lastMessage.isLoading = false;
+                      lastMessage.loadingText = undefined;
+                    }
                   }
                   return newMessages;
                 });
@@ -302,7 +329,10 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
         }
 
         // Handle regular content
-        const content = chunk.choices[0]?.delta?.content || '';
+        const content = delta.content || '';
+        if (content === '[DONE]') {
+          continue;
+        }
         fullResponse += content;
         setMessages(prev => {
           const newMessages = [...prev];
@@ -310,14 +340,18 @@ export function AIAssistant({ className, resume }: AIAssistantProps) {
           
           if (lastMessage?.role === 'assistant') {
             lastMessage.content = fullResponse;
-            lastMessage.isLoading = false;
-            lastMessage.loadingText = undefined;
+            // Once we start getting content, remove loading state
+            if (content.length > 0) {
+              lastMessage.isLoading = false;
+              lastMessage.loadingText = undefined;
+            }
           } else {
             newMessages.push({ 
               role: 'assistant', 
               content: fullResponse,
               timestamp: new Date(),
-              isLoading: false
+              isLoading: content.length === 0,
+              loadingText: content.length === 0 ? 'Thinking...' : undefined
             });
           }
           
