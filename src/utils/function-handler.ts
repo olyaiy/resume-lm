@@ -97,9 +97,14 @@ export const functionSchemas = {
  */
 export class FunctionHandler {
   private resume: Resume;
+  private onUpdateResume: (field: keyof Resume, value: any) => void;
 
-  constructor(resume: Resume) {
+  constructor(
+    resume: Resume,
+    onUpdateResume: (field: keyof Resume, value: any) => void
+  ) {
     this.resume = resume;
+    this.onUpdateResume = onUpdateResume;
   }
 
   /**
@@ -166,6 +171,8 @@ export class FunctionHandler {
   private updateName(first_name: string, last_name: string): string {
     this.resume.first_name = first_name;
     this.resume.last_name = last_name;
+    this.onUpdateResume('first_name', first_name);
+    this.onUpdateResume('last_name', last_name);
     return JSON.stringify({
       success: true,
       message: "Name updated successfully",
@@ -192,35 +199,44 @@ export class FunctionHandler {
   ): string {
     switch (section) {
       case "basic_info":
-        // Update basic info fields
-        Object.assign(this.resume, data);
+        Object.entries(data).forEach(([key, value]) => {
+          const typedKey = key as keyof Resume;
+          if (typedKey in this.resume && typeof value === typeof this.resume[typedKey]) {
+            (this.resume[typedKey] as any) = value;
+            this.onUpdateResume(typedKey, value);
+          }
+        });
         break;
 
       case "work_experience":
       case "education":
       case "skills":
       case "projects":
-      case "certifications":
+      case "certifications": {
         const sectionArray = this.resume[section];
         
         switch (action) {
           case "add":
             sectionArray.push(data);
+            this.onUpdateResume(section, sectionArray);
             break;
           case "update":
             if (index === undefined || !sectionArray[index]) {
               throw new Error(`Invalid index for ${section} update`);
             }
             sectionArray[index] = { ...sectionArray[index], ...data };
+            this.onUpdateResume(section, sectionArray);
             break;
           case "delete":
             if (index === undefined || !sectionArray[index]) {
               throw new Error(`Invalid index for ${section} deletion`);
             }
             sectionArray.splice(index, 1);
+            this.onUpdateResume(section, sectionArray);
             break;
         }
         break;
+      }
 
       default:
         throw new Error("Invalid section specified");

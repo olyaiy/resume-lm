@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Resume, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
 import { MessageBubble } from "./ui/message-bubble";
 import { ChatInput } from "./ui/chat-input";
+import { FunctionHandler } from '@/utils/function-handler';
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -49,7 +50,9 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const functionHandler = new FunctionHandler(resume, onUpdateResume);
 
+  // Scroll to bottom of chat
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ 
@@ -80,9 +83,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }, [isLoading]);
 
+
+  
   async function handleMessageSubmit() {
+
+    // Prevent empty messages or duplicate submissions while loading
     if (!message.trim() || isLoading) return;
 
+
+    // Create and add the user's message to the chat
     const userMessage = { 
       role: 'user' as const, 
       content: message,
@@ -93,6 +102,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     setIsLoading(true);
     
     // Add initial assistant message with loading state
+    // This provides immediate feedback that the system is processing
     setMessages(prev => [...prev, { 
       role: 'assistant',
       content: '',
@@ -101,28 +111,37 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }]);
 
     // Refocus input after sending
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-    });
+    // requestAnimationFrame(() => {
+    //   inputRef.current?.focus();
+    // });
+
 
     try {
+      // Prepare messages for OpenAI API
+      // Convert our internal message format to OpenAI's expected format
       const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = messages.map(msg => ({
         role: msg.role,
         content: msg.content
       }));
       chatMessages.push(userMessage);
 
+      // Start streaming response from OpenAI
       const response = await streamChatResponse(chatMessages, resume);
       let fullResponse = '';
       let functionCallName: string | undefined;
       let functionCallArgs = '';
 
+      // Process each chunk from the stream
       for await (const chunk of response) {
-        // Handle function calls
         const delta = (chunk as ChatCompletionChunk).choices[0]?.delta;
+        
+        // IF THE MESSAGE CALLS A FUNCTION
+        // HANDLE FUNCTION CALLS
         if (delta.function_call) {
           const functionCall = delta.function_call;
           
+
+          // IF / WHEN we receive a function name, update UI to show tool usage
           if (functionCall.name) {
             functionCallName = functionCall.name;
             // Update loading message to show generic tool usage state
@@ -138,145 +157,44 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               return newMessages;
             });
           }
+
+          // Accumulate function arguments as they stream in
           if (functionCall.arguments) {
             functionCallArgs += functionCall.arguments;
           }
 
-          // Check if we have a complete JSON string
+          // EXECUTE FUNCTION ONCE WE HAVE COMPLETE ARGUMENTS
           if (functionCallName && functionCallArgs && !delta.content) {
             try {
-              // Verify if we have complete JSON by checking for closing brace
+
+              // Ensure we have complete JSON before parsing
               if (!functionCallArgs.trim().endsWith('}')) {
                 continue;
               }
 
               // Parse the complete arguments
               const args = JSON.parse(functionCallArgs);
-              
-              // Execute the function based on the name and arguments
               let functionResult = '';
+
+
+              /* FUNCTION CALL IMPLEMENTATIONS */
+
+              // READ RESUME
               if (functionCallName === 'read_resume') {
-                // Extract the requested section from the function arguments
-                const section = args.section as string;
+                functionResult = await functionHandler.executeFunction('read_resume', args);
+              } 
 
-                // If 'all' is requested, return the entire resume object
-                if (section === 'all') {
-                  functionResult = JSON.stringify(resume);
-                } 
-                // If 'basic_info' is requested, return only the basic profile information
-                else if (section === 'basic_info') {
-                  functionResult = JSON.stringify({
-                    first_name: resume.first_name,
-                    last_name: resume.last_name,
-                    email: resume.email,
-                    phone_number: resume.phone_number,
-                    location: resume.location,
-                    website: resume.website,
-                    linkedin_url: resume.linkedin_url,
-                    github_url: resume.github_url,
-                    professional_summary: resume.professional_summary
-                  });
-                } 
-                // For any other valid section (work_experience, education, etc.)
-                // return just that section from the resume
-                else {
-                  functionResult = JSON.stringify(resume[section as keyof Resume]);
-                }
-              } else if (functionCallName === 'update_name') {
-                // Update the resume with new name
-                resume.first_name = args.first_name;
-                resume.last_name = args.last_name;
-                // Call the onUpdateResume callback
-                onUpdateResume('first_name', args.first_name);
-                onUpdateResume('last_name', args.last_name);
-                functionResult = JSON.stringify({
-                  success: true,
-                  message: "Name updated successfully",
-                  updated_values: {
-                    first_name: args.first_name,
-                    last_name: args.last_name
-                  }
-                });
-              } else if (functionCallName === 'modify_resume') {
-                const { section, action, index, data } = args;
-
-                switch (section) {
-                  case 'basic_info':
-                    // Update basic info fields
-                    Object.entries(data).forEach(([key, value]) => {
-                      const typedKey = key as keyof Resume;
-                      if (typedKey in resume && typeof value === typeof resume[typedKey]) {
-                        (resume[typedKey] as any) = value;
-                        onUpdateResume(typedKey, value);
-                      }
-                    });
-                    break;
-
-                  case 'work_experience':
-                  case 'education':
-                  case 'skills':
-                  case 'projects':
-                  case 'certifications': {
-                    let sectionArray: Array<WorkExperience | Education | Skill | Project | Certification>;
-                    
-                    // Initialize with the correct type
-                    switch (section) {
-                      case 'work_experience':
-                        sectionArray = [...resume.work_experience];
-                        break;
-                      case 'education':
-                        sectionArray = [...resume.education];
-                        break;
-                      case 'skills':
-                        sectionArray = [...resume.skills];
-                        break;
-                      case 'projects':
-                        sectionArray = [...resume.projects];
-                        break;
-                      case 'certifications':
-                        sectionArray = [...resume.certifications];
-                        break;
-                      default:
-                        throw new Error('Invalid section');
-                    }
-                    
-                    switch (action) {
-                      case 'add':
-                        sectionArray.push(data);
-                        onUpdateResume(section, sectionArray);
-                        break;
-                      case 'update':
-                        if (index === undefined || !sectionArray[index]) {
-                          throw new Error(`Invalid index for ${section} update`);
-                        }
-                        sectionArray[index] = { ...sectionArray[index], ...data };
-                        onUpdateResume(section, sectionArray);
-                        break;
-                      case 'delete':
-                        if (index === undefined || !sectionArray[index]) {
-                          throw new Error(`Invalid index for ${section} deletion`);
-                        }
-                        sectionArray.splice(index, 1);
-                        onUpdateResume(section, sectionArray);
-                        break;
-                    }
-                    break;
-                  }
-
-                  default:
-                    throw new Error('Invalid section specified');
-                }
-
-                functionResult = JSON.stringify({
-                  success: true,
-                  message: `Successfully ${action}ed ${section}`,
-                  section,
-                  action,
-                  index
-                });
+              // UPDATE NAME
+              else if (functionCallName === 'update_name') {
+                functionResult = await functionHandler.executeFunction('update_name', args);
+              } 
+              
+              // MODIFY RESUME
+              else if (functionCallName === 'modify_resume') {
+                functionResult = await functionHandler.executeFunction('modify_resume', args);
               }
 
-              // Add the function result to the messages
+              // Add the function result to chat history
               chatMessages.push({
                 role: 'function',
                 name: functionCallName,
@@ -324,11 +242,13 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 }];
               });
 
-              // Get a new response with the function result
+              // Get AI's response to the function result
               const newResponse = await streamChatResponse(chatMessages, resume);
               fullResponse = ''; // Reset fullResponse for new stream
               let isFirstChunk = true;
 
+
+              // Process AI's response (Streaming)
               for await (const newChunk of newResponse) {
                 if (newChunk.choices[0]?.delta?.content === '[DONE]') {
                   continue;
@@ -357,22 +277,22 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               continue;
             } catch (error) {
               console.error('Error executing function:', error);
-              // If we get a JSON parse error, continue accumulating arguments
               if (error instanceof SyntaxError) {
-                continue;
+                continue; // Continue accumulating JSON if incomplete
               }
             }
           }
           continue;
         }
 
-        // Handle regular content
+        // HANDLE REGULAR CHAT RESPONSES
         const content = delta.content || '';
         if (content === '[DONE]') {
           continue;
         }
         fullResponse += content;
         setMessages(prev => {
+          // Update messages with new content
           const newMessages = [...prev];
           const lastMessage = newMessages[newMessages.length - 1];
           
@@ -397,6 +317,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         });
       }
     } catch (error) {
+      // Handle errors gracefully with user-friendly messages
       console.error('Error in chat:', error);
       setMessages(prev => {
         const newMessages = [...prev];
@@ -418,9 +339,11 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }
 
-  return (
-    <div className={cn("group", className)}>
 
+
+  return (
+
+    <div className={cn("group", className)}>
       {/* MAIN CHAT CONTAINER */}
       <motion.div 
         layout
@@ -523,5 +446,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         />
       </motion.div>
     </div>
+    
   );
 } 

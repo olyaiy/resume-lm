@@ -358,7 +358,10 @@ export async function streamChatResponse(
     // Create an async generator to handle the stream
     async function* processStream() {
       try {
-        const functionHandler = new FunctionHandler(resume);
+        const functionHandler = new FunctionHandler(resume, () => {
+          // Empty callback since this is server-side
+          console.warn('Server-side function handler update attempted');
+        });
         
         for await (const chunk of response) {
           // Handle function calls in the stream
