@@ -97,38 +97,38 @@ export interface Resume {
 
 export interface DocumentSettings {
   // Global Settings
-  document_font_size?: number;
-  document_line_height?: number;
-  document_margin_vertical?: number;
-  document_margin_horizontal?: number;
+  document_font_size: number;
+  document_line_height: number;
+  document_margin_vertical: number;
+  document_margin_horizontal: number;
 
   // Header Settings
-  header_name_size?: number;
-  header_name_bottom_spacing?: number;
+  header_name_size: number;
+  header_name_bottom_spacing: number;
 
   // Skills Section
-  skills_margin_top?: number;
-  skills_margin_bottom?: number;
-  skills_margin_horizontal?: number;
-  skills_item_spacing?: number;
+  skills_margin_top: number;
+  skills_margin_bottom: number;
+  skills_margin_horizontal: number;
+  skills_item_spacing: number;
 
   // Experience Section
-  experience_margin_top?: number;
-  experience_margin_bottom?: number;
-  experience_margin_horizontal?: number;
-  experience_item_spacing?: number;
+  experience_margin_top: number;
+  experience_margin_bottom: number;
+  experience_margin_horizontal: number;
+  experience_item_spacing: number;
 
   // Projects Section
-  projects_margin_top?: number;
-  projects_margin_bottom?: number;
-  projects_margin_horizontal?: number;
-  projects_item_spacing?: number;
+  projects_margin_top: number;
+  projects_margin_bottom: number;
+  projects_margin_horizontal: number;
+  projects_item_spacing: number;
 
   // Education Section
-  education_margin_top?: number;
-  education_margin_bottom?: number;
-  education_margin_horizontal?: number;
-  education_item_spacing?: number;
+  education_margin_top: number;
+  education_margin_bottom: number;
+  education_margin_horizontal: number;
+  education_item_spacing: number;
 }
 
 export interface Profile {
