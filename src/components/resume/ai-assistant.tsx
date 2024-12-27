@@ -27,12 +27,14 @@ type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
 };
 
 export interface Message {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'function';
   content: string;
   timestamp: Date;
   isLoading?: boolean;
   loadingText?: string;
   isSystemMessage?: boolean;
+  isHidden?: boolean;
+  name?: string;
 }
 
 interface AIAssistantProps {
@@ -91,20 +93,22 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     if (!message.trim() || isLoading) return;
 
 
-    // Create the user message
+    // Create the user message OBJECT
     const userMessage = { 
       role: 'user' as const, 
       content: message,
       timestamp: new Date()
     };
 
-    // Add the user's message to the chat history
+    /* UI UPDATES */
+
+      // Add users message to chat UI
     setMessages(prev => [...prev, userMessage]);
+      // Add an assistant message with loading state To chat UI
     setMessage('');
+      // Set loading state
     setIsLoading(true);
-    
-    // Add initial assistant message with loading state
-    // provides immediate feedback that the system is processing
+        // provides immediate feedback that the system is processing
     setMessages(prev => [...prev, { 
       role: 'assistant',
       content: '',
@@ -113,13 +117,23 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }]);
 
 
+    /* AI CALL AND RESPONSE */
     try {
       // Include all previous messages plus the new user message
       const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
-        ...messages.map(msg => ({
-          role: msg.role,
-          content: msg.content
-        })),
+        ...messages.map(msg => {
+          if (msg.role === 'function') {
+            return {
+              role: msg.role,
+              name: msg.name!,
+              content: msg.content
+            };
+          }
+          return {
+            role: msg.role,
+            content: msg.content
+          };
+        }),
         {
           role: userMessage.role,
           content: userMessage.content
@@ -129,9 +143,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       // Start streaming response from OpenAI
       const response = await streamChatResponse(chatMessages);
 
-      console.log("--------------------------------------------------------------------------");
       console.log("FULL MESSAGE SENT TO AI: ", chatMessages);
-      console.log("--------------------------------------------------------------------------");
+      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
       
       // Initialize variables for function call handling
       let fullResponse = '';
@@ -174,16 +187,16 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           // EXECUTE FUNCTION ONCE WE HAVE COMPLETE ARGUMENTS
           if (functionCallName && functionCallArgs && !delta.content) {
 
-            console.log("--------------------------------------------------------------------------");
-            console.log("FULL UNCTION CALL NAME FROM AI: ", functionCallName);
-            console.log("FULL UNCTION CALL ARGUMENTSFROM AI: ", functionCallArgs);
-            console.log("--------------------------------------------------------------------------");
+            
             try {
 
               // Ensure we have complete JSON before parsing
               if (!functionCallArgs.trim().endsWith('}')) {
                 continue;
               }
+
+            console.log("FULL FUNCTION CALL NAME FROM AI: ", functionCallName,"(",functionCallArgs,")");
+            console.log("--------------------------------------------------------------------------");
 
               // Parse the complete arguments
               const args = JSON.parse(functionCallArgs);
@@ -207,6 +220,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 functionResult = await functionHandler.executeFunction('modify_resume', args);
               }
 
+              // Add the function call result to both chat history and messages ui (hidden)
+              setMessages(prev => [...prev, {
+                role: 'function',
+                name: functionCallName,
+                content: functionResult,
+                timestamp: new Date(),
+                isHidden: true
+              }]);
+
               // Add the function result to chat history
               chatMessages.push({
                 role: 'function',
@@ -223,7 +245,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                   loadingMessage.isLoading = false;
                   // Format the function name to be more readable, with special case for update_name and read operations
                   let displayMessage = 'Operation Complete ✅';
-                  console.log('Function Call Name:', functionCallName);
                   if (functionCallName === 'update_name') {
                     displayMessage = 'Changed name ✅';
                   } else if (functionCallName === 'read_resume') {
@@ -304,9 +325,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
         if (content === '[DONE]') {
 
-          console.log("--------------------------------------------------------------------------");
           console.log("FULL TEXT RESPONSE FROM AI: ", fullResponse);
-          console.log("--------------------------------------------------------------------------");
+          console.log("********************************************************");
           continue;
         }
         fullResponse += content;

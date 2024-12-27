@@ -14,6 +14,11 @@ interface MessageBubbleProps {
 }
 
 export function MessageBubble({ message, isLast }: MessageBubbleProps) {
+  // If message is hidden, don't render anything
+  if (message.isHidden) {
+    return null;
+  }
+
   const isUser = message.role === 'user';  // Determine if the message is from the user
   
   return (
