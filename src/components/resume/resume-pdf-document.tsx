@@ -8,6 +8,18 @@ interface ResumePDFDocumentProps {
   variant?: 'base' | 'tailored';
 }
 
+// Add utility function to parse bold text
+function renderTextWithBold(text: string) {
+  const parts = text.split(/(\*\*.*?\*\*)/g);
+  return parts.map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      // Remove the ** markers and render as bold
+      return <Text key={index} style={{ fontFamily: 'Helvetica-Bold' }}>{part.slice(2, -2)}</Text>;
+    }
+    return <Text key={index}>{part}</Text>;
+  });
+}
+
 export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
   // PDF Styles Configuration
   const styles = StyleSheet.create({
@@ -122,8 +134,21 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       marginBottom: resume.document_settings?.experience_item_spacing || 4,
       color: '#374151',
       marginLeft: 8,
-      textIndent: -8,
       paddingLeft: 8,
+      flexDirection: 'row',
+    },
+    bulletText: {
+      flex: 1,
+      flexDirection: 'row',
+      flexWrap: 'wrap',
+      display: 'flex',
+    },
+    bulletDot: {
+      width: 8,
+      marginRight: 4,
+    },
+    bulletTextContent: {
+      flex: 1,
     },
     // Projects section
     projectsSection: {
@@ -280,7 +305,14 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   <Text style={styles.dateRange}>{experience.date}</Text>
                 </View>
                 {experience.description.map((bullet, bulletIndex) => (
-                  <Text key={bulletIndex} style={styles.bulletPoint}>• {bullet}</Text>
+                  <View key={bulletIndex} style={styles.bulletPoint}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <View style={styles.bulletText}>
+                      <Text style={styles.bulletTextContent}>
+                        {renderTextWithBold(bullet)}
+                      </Text>
+                    </View>
+                  </View>
                 ))}
               </View>
             ))}
@@ -325,7 +357,14 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                 </View>
                 
                 {project.description.map((bullet, bulletIndex) => (
-                  <Text key={bulletIndex} style={styles.bulletPoint}>• {bullet}</Text>
+                  <View key={bulletIndex} style={styles.bulletPoint}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <View style={styles.bulletText}>
+                      <Text style={styles.bulletTextContent}>
+                        {renderTextWithBold(bullet)}
+                      </Text>
+                    </View>
+                  </View>
                 ))}
               </View>
             ))}
@@ -346,7 +385,12 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
                   <Text style={styles.dateRange}>{edu.date}</Text>
                 </View>
                 {edu.achievements && edu.achievements.map((achievement, bulletIndex) => (
-                  <Text key={bulletIndex} style={styles.bulletPoint}>• {achievement}</Text>
+                  <View key={bulletIndex} style={styles.bulletPoint}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <View style={styles.bulletText}>
+                      {renderTextWithBold(achievement)}
+                    </View>
+                  </View>
                 ))}
               </View>
             ))}

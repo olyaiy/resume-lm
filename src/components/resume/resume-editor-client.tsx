@@ -10,7 +10,7 @@ import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
 import { CertificationsForm } from "./certifications-form";
-import { Loader2, Save, Trash2, ArrowLeft } from "lucide-react";
+import { Loader2, Save, Trash2, ArrowLeft, Bold } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,12 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "./document-settings-form";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -302,6 +308,22 @@ export function ResumeEditorClient({
                           Settings
                         </TabsTrigger>
                       </TabsList>
+                    </div>
+
+                    <div className="mt-4 px-2">
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground bg-white/40 backdrop-blur-sm border border-purple-200/30 rounded-lg px-3 py-2">
+                              <Bold className="h-4 w-4" />
+                              <span>Pro tip: Use **text** to make words bold in your descriptions</span>
+                            </div>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Example: Implemented **React** components</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
                     </div>
 
                     <TabsContent value="basic" className="space-y-6 mt-6">
