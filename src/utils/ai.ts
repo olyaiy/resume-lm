@@ -351,7 +351,7 @@ export async function streamChatResponse(
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
-      functions: [functionSchemas.read_resume, functionSchemas.update_name],
+      functions: Object.values(functionSchemas),
       function_call: "auto"
     });
 
