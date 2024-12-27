@@ -156,15 +156,32 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           // UPDATE UI to show tool usage
           if (functionCall.name) {
             functionCallName = functionCall.name;
-            // Update loading message to show generic tool usage state
+            // Update messages to complete any existing streaming text
             setMessages(prev => {
               const newMessages = [...prev];
               const lastMessage = newMessages[newMessages.length - 1];
               if (lastMessage?.role === 'assistant') {
-                lastMessage.isLoading = true;
-                lastMessage.loadingText = functionCallName === 'read_resume' 
-                  ? 'Reading your resume...'
-                  : 'Calling tool...';
+                // Complete the existing text message if it has content
+                if (lastMessage.content) {
+                  lastMessage.isLoading = false;
+                  lastMessage.loadingText = undefined;
+                  // Add a new message for the function call
+                  newMessages.push({
+                    role: 'assistant',
+                    content: '',
+                    timestamp: new Date(),
+                    isLoading: true,
+                    loadingText: functionCallName === 'read_resume' 
+                      ? 'Reading your resume...'
+                      : 'Calling tool...'
+                  });
+                } else {
+                  // If no content, use this message for the function call
+                  lastMessage.isLoading = true;
+                  lastMessage.loadingText = functionCallName === 'read_resume' 
+                    ? 'Reading your resume...'
+                    : 'Calling tool...';
+                }
               }
               return newMessages;
             });
@@ -207,24 +224,23 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               // Add a system message confirming the function call
               setMessages(prev => {
                 const newMessages = [...prev];
-
-                // We get the second to last message 
-                const loadingMessage = newMessages[newMessages.length - 2];
                 
-                // If its a loading message..
-                if (loadingMessage && loadingMessage.isLoading && loadingMessage.role === 'assistant') {  
-
+                // Find the most recent loading message by searching backwards
+                const loadingMessageIndex = newMessages.findLastIndex(
+                  msg => msg.isLoading && msg.role === 'assistant'
+                );
+                
+                if (loadingMessageIndex !== -1) {
+                  const loadingMessage = newMessages[loadingMessageIndex];
                   // Disable the loading state
                   loadingMessage.isLoading = false;
                   
-
                   // Format the function name to be more readable, with special case for update_name and read operations
                   let displayMessage = 'Operation Complete ✅';
                   
-                  
-                  
-                  // NAMES FOR EACH FUNCTION CALL
-                  if (functionCallName === 'update_name') { displayMessage = 'Changed name ✅';
+                  // UI NAMES for each function call
+                  if (functionCallName === 'update_name') {
+                    displayMessage = 'Changed name ✅';
                   } else if (functionCallName === 'read_resume') {
                     const sectionName = args.section === 'all' ? 'Full Resume' : 
                       args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -240,11 +256,9 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                   loadingMessage.isSystemMessage = true;
                 }
 
-              
-                 // Reset function call tracking
+                // Reset function call tracking
                 functionCallName = undefined;
                 functionCallArgs = '';
-
 
                 // Add new assistant message for the upcoming response
                 return [...newMessages, {
