@@ -65,11 +65,16 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsSubmitting(true);
       await updateProfile(profile);
-      toast("Changes saved successfully");
+      toast.success("Changes saved successfully", {
+        position: "bottom-right",
+        className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
+      });
       // Force a server revalidation
       router.refresh();
     } catch (error) {
-      toast("Unable to save your changes. Please try again.");
+      toast.error("Unable to save your changes. Please try again.", {
+        position: "bottom-right",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -98,10 +103,15 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         created_at: profile.created_at,
         updated_at: profile.updated_at
       });
-      toast("Profile reset - Don't forget to save your changes to make this permanent");
+      toast.info("Profile reset - Don't forget to save your changes to make this permanent", {
+        position: "bottom-right",
+        className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
+      });
       // Remove server revalidation since we're only updating local state
     } catch (error) {
-      toast("Failed to reset profile. Please try again.");
+      toast.error("Failed to reset profile. Please try again.", {
+        position: "bottom-right",
+      });
       console.error(error);
     } finally {
       setIsResetting(false);
@@ -109,7 +119,10 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   };
 
   const handleLinkedInImport = () => {
-    toast.info("LinkedIn import feature coming soon!");
+    toast.info("LinkedIn import feature coming soon!", {
+      position: "bottom-right",
+      className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
+    });
   };
 
   const handleResumeUpload = async () => {
@@ -198,15 +211,22 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           ...prev,
           ...cleanedProfile
         }));
-        toast("Content imported successfully - Don't forget to save your changes");
+        toast.success("Content imported successfully - Don't forget to save your changes", {
+          position: "bottom-right",
+          className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
+        });
         setIsDialogOpen(false);
         setResumeContent("");
       }
     } catch (error) {
       if (error instanceof Error) {
-        toast("Failed to process content: " + error.message);
+        toast.error("Failed to process content: " + error.message, {
+          position: "bottom-right",
+        });
       } else {
-        toast("Failed to process content: Unknown error");
+        toast.error("Failed to process content: Unknown error", {
+          position: "bottom-right",
+        });
       }
     } finally {
       setIsProcessingResume(false);
@@ -282,102 +302,115 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       </div>
 
       {/* Top Bar */}
-      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+      <div className="h-24 border-b border-white/20 bg-gradient-to-r from-white/95 via-white/98 to-white/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-black/5">
         {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff30_0%,#ffffff40_50%,#f3e8ff30_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff20_0%,#ffffff40_50%,#ffffff20_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#ffffff30_0%,transparent_100%)] pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#ffffff20_0%,transparent_100%)] pointer-events-none" />
         
         {/* Content Container */}
-        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
+        <div className="max-w-[2000px] mx-auto h-full px-8 flex items-center justify-between relative">
           {/* Left Section */}
-          <div className="flex items-center gap-6">
-            {/* Back Button */}
+          <div className="flex items-center gap-8">
+            {/* Back Button with Enhanced Hover */}
             <button 
               onClick={() => router.push('/')}
-              className="group flex items-center text-sm font-medium text-purple-600/70 hover:text-purple-600 transition-all duration-300 px-3 py-2 rounded-lg hover:bg-purple-100/30 hover:shadow-sm hover:shadow-purple-500/5 active:bg-purple-100/40"
+              className="group flex items-center text-sm font-medium text-muted-foreground/60 hover:text-foreground transition-all duration-500 px-4 py-2.5 rounded-xl hover:bg-white/80 hover:shadow-lg hover:shadow-black/[0.03] active:bg-white/70 -ml-4"
             >
-              <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
-              Back to Dashboard
+              <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100/80 shadow-sm shadow-black/[0.02] group-hover:shadow-md group-hover:shadow-black/[0.03] transition-all duration-500 -ml-1 mr-3">
+                <ArrowLeft className="h-4 w-4 text-gray-600 group-hover:-translate-x-0.5 transition-all duration-500" />
+              </div>
+              <span className="bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent group-hover:from-gray-900 group-hover:to-gray-700 transition-all duration-500">
+                Dashboard
+              </span>
             </button>
 
-            {/* Separator */}
-            <div className="h-8 w-px bg-gradient-to-b from-transparent via-purple-200/40 to-transparent" />
+            {/* Separator with Gradient */}
+            <div className="h-12 w-px bg-gradient-to-b from-transparent via-gray-200/50 to-transparent" />
 
-            {/* Profile Title Section */}
-            <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-semibold">
-                <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-                  Edit Profile
-                </span>
-              </h1>
-              <div className="flex items-center gap-2 text-sm text-purple-600/60">
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
-                  <span className="font-medium">Professional Profile</span>
+            {/* Profile Title Section with Enhanced Typography */}
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-semibold tracking-tight">
+                  <span className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">
+                    Profile Editor
+                  </span>
+                </h1>
+                <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-violet-50 border border-violet-100">
+                  <div className="w-2 h-2 rounded-full bg-violet-400 animate-pulse" />
+                  <span className="text-xs font-medium text-violet-600">Editing</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Right Section - Action Buttons */}
-          <div className="flex items-center gap-3">
+          {/* Right Section - Action Buttons with Enhanced Styling */}
+          <div className="flex items-center gap-4">
             <Button
               onClick={handleSubmit}
               disabled={isSubmitting}
-              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+              className="relative group bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white hover:opacity-90 transition-all duration-500 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 h-11 px-6 rounded-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 overflow-hidden"
             >
               <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              {isSubmitting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  <span>Saving Changes...</span>
-                </>
-              ) : (
-                <>
-                  <Save className="mr-2 h-4 w-4" />
-                  <span>Save Changes</span>
-                </>
-              )}
+              <div className="relative flex items-center gap-2.5">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span className="font-medium">Saving Changes...</span>
+                  </>
+                ) : (
+                  <>
+                    <Save className="h-4 w-4" />
+                    <span className="font-medium">Save Changes</span>
+                  </>
+                )}
+              </div>
             </Button>
 
-            {/* Reset Profile Button */}
+            {/* Reset Profile Button with Enhanced Styling */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
                   variant="destructive"
-                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+                  className="relative group bg-gradient-to-b from-rose-500 via-rose-600 to-rose-500 text-white hover:opacity-90 transition-all duration-500 shadow-lg shadow-rose-500/20 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5 h-11 px-6 rounded-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 overflow-hidden"
                   disabled={isResetting}
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  {isResetting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      <span>Resetting...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      <span>Reset Profile</span>
-                    </>
-                  )}
+                  <div className="relative flex items-center gap-2.5">
+                    {isResetting ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        <span className="font-medium">Resetting...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="h-4 w-4" />
+                        <span className="font-medium">Reset Profile</span>
+                      </>
+                    )}
+                  </div>
                 </Button>
               </AlertDialogTrigger>
-              <AlertDialogContent className="sm:max-w-[425px]">
+              <AlertDialogContent className="sm:max-w-[425px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Reset Profile</AlertDialogTitle>
-                  <AlertDialogDescription>
+                  <AlertDialogTitle className="text-xl font-semibold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent">Reset Profile</AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground/70">
                     Are you sure you want to reset your profile? This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
-                <AlertDialogFooter>
-                  <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
+                <AlertDialogFooter className="gap-3">
+                  <AlertDialogCancel 
+                    disabled={isResetting}
+                    className="bg-white hover:bg-gray-50/80 transition-colors duration-300"
+                  >
+                    Cancel
+                  </AlertDialogCancel>
                   <AlertDialogAction
                     onClick={handleReset}
                     disabled={isResetting}
-                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                    className="bg-rose-500 text-white hover:bg-rose-600 transition-colors duration-300"
                   >
-                    {isResetting ? "Resetting..." : "Reset"}
+                    {isResetting ? "Resetting..." : "Reset Profile"}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -385,6 +418,9 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           </div>
         </div>
       </div>
+
+      {/* Spacer for Fixed Header */}
+      <div className="h-8" />
 
       {/* Main content container with consistent styling */}
       <div className="relative pt-24 px-6 md:px-8 lg:px-10 pb-10">
@@ -558,11 +594,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         </div>
 
         {/* Enhanced Tabs with smooth transitions and connected design */}
-        <div className="relative p-6">
-          <div className="absolute inset-x-0 -top-3 h-8 bg-gradient-to-b from-white/60 to-transparent pointer-events-none"></div>
-          <div className="relative bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
+        <div className="relative ">
+          {/* <div className="absolute inset-x-0 -top-3 h-8 bg-gradient-to-b from-white/60 to-transparent pointer-events-none"></div> */}
+          <div className="relative ">
             <Tabs defaultValue="basic" className="w-full ">
-              <TabsList className=" h-full relative bg-white/80  backdrop-blur-xl border border-white/40  py-2 mb-6 rounded-xl overflow-x-auto flex whitespace-nowrap gap-2 shadow-lg">
+              <TabsList className=" h-full relative bg-white/80  backdrop-blur-xl border border-white/40 rounded-xl overflow-x-auto flex whitespace-nowrap gap-2 shadow-lg">
                 <TabsTrigger 
                   value="basic" 
                   className=" group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
@@ -654,7 +690,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   </span>
                 </TabsTrigger>
               </TabsList>
-
               <div className="relative">
                 {/* Content gradient overlay */}
                 <div className="absolute inset-0 bg-gradient-to-b from-white/5 via-white/10 to-white/20 pointer-events-none rounded-2xl"></div>
