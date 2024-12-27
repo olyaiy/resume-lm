@@ -103,7 +103,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     // Add an assistant message with loading state To chat UI
     // Set loading state
     setIsLoading(true);
-    // provides immediate feedback that the system is processing
+    // show that the system is processing
     setMessages(prev => [...prev, { 
       role: 'assistant',
       content: '',
@@ -137,8 +137,9 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       // Start streaming response from OpenAI
       const response = await streamChatResponse(chatMessages);
 
-      console.log("FULL MESSAGE SENT TO AI: ", chatMessages);
-      console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++");
+      console.log("FULL MESSAGE SENT TO AI: ");
+      console.log(chatMessages);
+      console.log("+++++++++++");
       
       // Initialize variables for function call handling
       let fullResponse = '';
@@ -149,13 +150,9 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       for await (const chunk of response) {
         const delta = (chunk as ChatCompletionChunk).choices[0]?.delta;
         
-        // IF THE MESSAGE CALLS A FUNCTION
-        // HANDLE FUNCTION CALLS
+        // IF THE MESSAGE CALLS A FUNCTION, store it
         if (delta.function_call) {
-          const functionCall = delta.function_call;
-          
-
-          // WHEN we receive a function name, 
+          const functionCall = delta.function_call; 
           // UPDATE UI to show tool usage
           if (functionCall.name) {
             functionCallName = functionCall.name;
@@ -172,47 +169,24 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               return newMessages;
             });
           }
-
           // Accumulate function arguments as they stream in
           if (functionCall.arguments) {
             functionCallArgs += functionCall.arguments;
           }
-
-          // EXECUTE FUNCTION ONCE WE HAVE COMPLETE ARGUMENTS
+          // IF we have complete arguments
           if (functionCallName && functionCallArgs && !delta.content) {
-
-            
             try {
-
-              // Ensure we have complete JSON before parsing
+              // Check for complete JSON
               if (!functionCallArgs.trim().endsWith('}')) {
-                continue;
+                continue; // Keep accumulating if JSON is incomplete
               }
 
-            console.log("FULL FUNCTION CALL NAME FROM AI: ", functionCallName,"(",functionCallArgs,")");
-            console.log("--------------------------------------------------------------------------");
+              // Log the function call
+              console.log(`FULL FUNCTION CALL NAME FROM AI:\n${functionCallName}(${functionCallArgs})\n---------`);
 
-              // Parse the complete arguments
-              const args = JSON.parse(functionCallArgs);
-              let functionResult = '';
-
-
-              /* FUNCTION CALL IMPLEMENTATIONS */
-
-              // READ RESUME
-              if (functionCallName === 'read_resume') {
-                functionResult = await functionHandler.executeFunction('read_resume', args);
-              } 
-
-              // UPDATE NAME
-              else if (functionCallName === 'update_name') {
-                functionResult = await functionHandler.executeFunction('update_name', args);
-              } 
-              
-              // MODIFY RESUME
-              else if (functionCallName === 'modify_resume') {
-                functionResult = await functionHandler.executeFunction('modify_resume', args);
-              }
+              // Execute function call and get result
+              const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
+              const args = JSON.parse(functionCallArgs); // Keep args for display messages
 
               // Add the function call result to both chat history and messages ui (hidden)
               setMessages(prev => [...prev, {
@@ -329,9 +303,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
 
         if (content === '[DONE]') {
-
-          console.log("FULL TEXT RESPONSE FROM AI: ", fullResponse);
-          console.log("********************************************************");
           continue;
         }
         fullResponse += content;
@@ -360,6 +331,10 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           return newMessages;
         });
       }
+      console.log("FULL TEXT RESPONSE FROM AI: ", );
+      console.log(fullResponse);
+      console.log("********************************************************");
+
 
     } catch (error) {
       // Handle errors gracefully with user-friendly messages

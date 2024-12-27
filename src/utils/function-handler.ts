@@ -149,12 +149,27 @@ export class FunctionHandler {
   }
 
   /**
-   * Executes a function based on the provided name and arguments
-   * @param name - Name of the function to execute
-   * @param args - Arguments for the function
+   * Handles function calls from AI, including validation and execution
+   * @param functionName - Name of the function from AI
+   * @param functionArgs - JSON string of arguments from AI
    * @returns Result of the function execution
    */
-  async executeFunction(name: AvailableFunctions, args: any): Promise<string> {
+  async handleFunctionCall(functionName: string, functionArgs: string): Promise<string> {
+    // Validate function name
+    const validFunctions = ['read_resume', 'update_name', 'modify_resume'] as const;
+    if (!validFunctions.includes(functionName as any)) {
+      throw new Error(`Invalid function name: ${functionName}`);
+    }
+
+    // Parse and execute
+    const args = JSON.parse(functionArgs);
+    return this.executeFunction(functionName as typeof validFunctions[number], args);
+  }
+
+  /**
+   * Internal method to execute functions
+   */
+  private async executeFunction(name: AvailableFunctions, args: any): Promise<string> {
     switch (name) {
       case "read_resume":
         return this.readResume(args.section);
