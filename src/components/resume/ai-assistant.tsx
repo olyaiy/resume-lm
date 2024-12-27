@@ -138,6 +138,10 @@ export function AIAssistant({ className }: AIAssistantProps) {
     setMessage('');
     setIsLoading(true);
     scrollToBottom();
+    // Refocus input after sending
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+    });
 
     try {
       const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = messages.map(msg => ({
@@ -283,7 +287,7 @@ export function AIAssistant({ className }: AIAssistantProps) {
                 shadow-inner shadow-purple-500/10"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              disabled={isLoading}
+
             />
             <Button 
               type="submit"
