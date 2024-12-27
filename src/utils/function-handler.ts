@@ -63,7 +63,7 @@ export const functionSchemas = {
   },
   modify_resume: {
     name: "modify_resume",
-    description: "Modify a specific section of the resume (add, update, or delete entries)",
+    description: "Modify a specific section of the resume (add, update, or delete entries). For update/delete actions, index is required. For add/update actions, data is required with the appropriate fields for the section.",
     parameters: {
       type: "object",
       properties: {
@@ -83,7 +83,48 @@ export const functionSchemas = {
         },
         data: {
           type: "object",
-          description: "The data to add or update (required for add and update actions)"
+          description: "The data to add or update (required for add and update actions). Include only the relevant fields for the chosen section.",
+          properties: {
+            // Work Experience fields
+            company: { type: "string", description: "Company name (for work_experience)" },
+            position: { type: "string", description: "Job position (for work_experience)" },
+            location: { type: "string", description: "Job location (for work_experience)" },
+            date: { type: "string", description: "Employment date or date range" },
+            description: { type: "array", items: { type: "string" }, description: "Bullet points describing the experience" },
+            technologies: { type: "array", items: { type: "string" }, description: "Technologies used" },
+            
+            // Education fields
+            school: { type: "string", description: "School name (for education)" },
+            degree: { type: "string", description: "Degree type (for education)" },
+            field: { type: "string", description: "Field of study (for education)" },
+            gpa: { type: "string", description: "GPA (for education)" },
+            achievements: { type: "array", items: { type: "string" }, description: "Academic achievements" },
+            
+            // Skills fields
+            category: { type: "string", description: "Skill category (for skills)" },
+            items: { type: "array", items: { type: "string" }, description: "List of skills in this category" },
+            
+            // Projects fields
+            name: { type: "string", description: "Project name (for projects)" },
+            url: { type: "string", description: "Project URL" },
+            project_github_url: { type: "string", description: "Project GitHub URL" },
+            
+            // Certifications fields
+            issuer: { type: "string", description: "Certificate issuer (for certifications)" },
+            date_acquired: { type: "string", description: "Date certificate was acquired" },
+            expiry_date: { type: "string", description: "Certificate expiration date" },
+            credential_id: { type: "string", description: "Certificate credential ID" },
+            
+            // Basic Info fields
+            first_name: { type: "string", description: "First name (for basic_info)" },
+            last_name: { type: "string", description: "Last name (for basic_info)" },
+            email: { type: "string", description: "Email address (for basic_info)" },
+            phone_number: { type: "string", description: "Phone number" },
+            website: { type: "string", description: "Personal website URL" },
+            linkedin_url: { type: "string", description: "LinkedIn profile URL" },
+            github_url: { type: "string", description: "GitHub profile URL" },
+            professional_summary: { type: "string", description: "Professional summary or objective" }
+          }
         }
       },
       required: ["section", "action"]
