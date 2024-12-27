@@ -358,32 +358,10 @@ export async function streamChatResponse(
     // Create an async generator to handle the stream
     async function* processStream() {
       try {
-        const functionHandler = new FunctionHandler(resume, () => {
-          // Empty callback since this is server-side
-          console.warn('Server-side function handler update attempted');
-        });
-        
         for await (const chunk of response) {
-          // Handle function calls in the stream
-          const functionCall = chunk.choices[0]?.delta?.function_call;
-          if (functionCall?.name && functionCall?.arguments) {
-            try {
-              const result = await functionHandler.executeFunction(
-                functionCall.name as any,
-                JSON.parse(functionCall.arguments)
-              );
-              // Yield the function result
-              yield { choices: [{ delta: { content: result } }] };
-            } catch (error) {
-              console.error('Function execution error:', error);
-              throw error;
-            }
-          } else {
-            yield chunk;
-          }
+          // Simply pass through all chunks, including function calls
+          yield chunk;
         }
-        // Yield a final chunk to indicate stream completion
-        yield { choices: [{ delta: { content: '[DONE]' } }] };
       } catch (error) {
         console.error('❌ Error in stream processing:', error);
         throw error;
