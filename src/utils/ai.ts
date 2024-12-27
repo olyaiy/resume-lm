@@ -7,7 +7,7 @@
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
 import { Profile, Resume } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { FunctionHandler, functionSchemas } from "./function-handler";
 
 // Initialize OpenAI client with API key from environment variables
@@ -323,29 +323,11 @@ export async function processTextImport(text: string) {
 export async function streamChatResponse(
   messages: Array<OpenAI.Chat.ChatCompletionMessageParam>
 ) {
-
-  
   try {
     const response = await openai.chat.completions.create({
-
-      
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
-        {
-          role: "system",
-          content: `You are an AI resume assistant helping users craft and improve their resumes. You have access to functions that can read and modify resume content. Follow this process for every request:
-                    1. If the request involves modifying content, first use read_resume to understand the current state
-                    2. Think through your proposed changes and explain your reasoning briefly
-                    3. Execute the necessary modifications immediately using the available functions
-                    4. Provide a concise summary of what you've done
-
-                    Available functions:
-                    - read_resume: View current resume content by section
-                    - update_name: Update first and last name
-                    - modify_resume: Add, update, or delete entries in any section
-
-                    Be direct, professional, and execute changes without waiting for confirmation. Focus on actionable improvements that enhance the resume's impact.`
-        },
+        AI_ASSISTANT_SYSTEM_MESSAGE,
         ...messages
       ],
       stream: true,
@@ -354,16 +336,11 @@ export async function streamChatResponse(
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
-      functions: Object.values(functionSchemas), 
-        // Defined in function-handler.ts
+      functions: Object.values(functionSchemas),
       function_call: "auto"
     });
 
-    
-    // Return the response stream directly
     return response;
-
-    // Error handling
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ Fatal error in streamChatResponse:', message);
