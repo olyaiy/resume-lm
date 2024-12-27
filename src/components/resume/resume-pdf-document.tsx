@@ -184,10 +184,18 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
         <View style={styles.header}>
           <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
           <View style={styles.contactInfo}>
+            {resume.location && (
+              <>
+                <Text>{resume.location}</Text>
+                {(resume.email || resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
+                  <Text style={styles.bulletSeparator}>•</Text>
+                )}
+              </>
+            )}
             {resume.email && (
               <>
                 <Link src={`mailto:${resume.email}`}><Text>{resume.email}</Text></Link>
-                {(resume.phone_number || resume.location || resume.website || resume.linkedin_url || resume.github_url) && (
+                {(resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
                   <Text style={styles.bulletSeparator}>•</Text>
                 )}
               </>
@@ -195,14 +203,6 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             {resume.phone_number && (
               <>
                 <Text>{resume.phone_number}</Text>
-                {(resume.location || resume.website || resume.linkedin_url || resume.github_url) && (
-                  <Text style={styles.bulletSeparator}>•</Text>
-                )}
-              </>
-            )}
-            {resume.location && (
-              <>
-                <Text>{resume.location}</Text>
                 {(resume.website || resume.linkedin_url || resume.github_url) && (
                   <Text style={styles.bulletSeparator}>•</Text>
                 )}
@@ -210,7 +210,9 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             )}
             {resume.website && (
               <>
-                <Link src={resume.website}><Text style={styles.link}>{resume.website}</Text></Link>
+                <Link src={resume.website.startsWith('http') ? resume.website : `https://${resume.website}`}>
+                  <Text style={styles.link}>{resume.website}</Text>
+                </Link>
                 {(resume.linkedin_url || resume.github_url) && (
                   <Text style={styles.bulletSeparator}>•</Text>
                 )}
