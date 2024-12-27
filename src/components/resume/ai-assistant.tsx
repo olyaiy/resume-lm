@@ -239,14 +239,25 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               // Add a system message confirming the function call
               setMessages(prev => {
                 const newMessages = [...prev];
-                // Update the loading message to show completion
-                const loadingMessage = newMessages[newMessages.length - 1];
-                if (loadingMessage?.role === 'assistant' && loadingMessage.isLoading) {
+
+                // 1. We get the last message (which is the loading message)
+                const loadingMessage = newMessages[newMessages.length - 2];
+                
+                console.log("WE SHOULD GET HERE TO DISABLE LOADING STATE : ", loadingMessage);
+                if (loadingMessage && loadingMessage.isLoading && loadingMessage.role === 'assistant') {  
+                  
+                  
+                  // 2. We disable the loading state
                   loadingMessage.isLoading = false;
+                  console.log("DISABLED LOADING STATE : ", loadingMessage.isLoading);
+
                   // Format the function name to be more readable, with special case for update_name and read operations
                   let displayMessage = 'Operation Complete ✅';
-                  if (functionCallName === 'update_name') {
-                    displayMessage = 'Changed name ✅';
+                  
+                  
+                  
+                  // NAMES FOR EACH FUNCTION CALL
+                  if (functionCallName === 'update_name') { displayMessage = 'Changed name ✅';
                   } else if (functionCallName === 'read_resume') {
                     const sectionName = args.section === 'all' ? 'Full Resume' : 
                       args.section.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -256,6 +267,8 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                     const actionName = args.action.charAt(0).toUpperCase() + args.action.slice(1);
                     displayMessage = `${actionName}d ${sectionName} ✅`;
                   }
+
+                  // Update the loading message to show completion
                   loadingMessage.content = displayMessage;
                   loadingMessage.isSystemMessage = true;
                 }
