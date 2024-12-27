@@ -346,34 +346,23 @@ export async function streamChatResponse(
         ...messages
       ],
       stream: true,
-      temperature: 0.7,
-      max_tokens: 8000,
+      temperature: 1,
+      max_tokens: 8190,
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
-      functions: Object.values(functionSchemas),
+      functions: Object.values(functionSchemas), 
+        // Defined in function-handler.ts
       function_call: "auto"
     });
 
-    // Create an async generator to handle the stream
-    async function* processStream() {
-      try {
-        for await (const chunk of response) {
-          // Simply pass through all chunks, including function calls
-          yield chunk;
-        }
-      } catch (error) {
-        console.error('❌ Error in stream processing:', error);
-        throw error;
-      }
-    }
+    // Return the response stream directly
+    return response;
 
-    return processStream();
+    // Error handling
   } catch (error) {
-    console.error('❌ Fatal error in streamChatResponse:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
-      stack: error instanceof Error ? error.stack : undefined
-    });
-    throw new Error('Failed to stream chat response: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    const message = error instanceof Error ? error.message : 'Unknown error';
+    console.error('❌ Fatal error in streamChatResponse:', message);
+    throw new Error(`Failed to stream chat response: ${message}`);
   }
 }
