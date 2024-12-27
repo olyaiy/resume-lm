@@ -3,16 +3,14 @@
 import { useState } from "react";
 import { Sparkles, ChevronUp, Send, Bot, User, CheckCircle2 } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { streamChatResponse } from "@/utils/ai";
 import { useRef, useEffect } from "react";
 import type { OpenAI } from "openai";
 import { motion, AnimatePresence } from "framer-motion";
 import { Resume, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import { submitAiMessage } from "@/utils/ai";
+import { MessageBubble } from "./ui/message-bubble";
+import { ChatInput } from "./ui/chat-input";
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -27,7 +25,7 @@ type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
   }>;
 };
 
-interface Message {
+export interface Message {
   role: 'user' | 'assistant';
   content: string;
   timestamp: Date;
@@ -42,138 +40,6 @@ interface AIAssistantProps {
   onUpdateResume: (field: keyof Resume, value: any) => void;
 }
 
-function TypingIndicator({ text }: { text?: string }) {
-  return (
-    <div className="flex flex-col gap-1.5">
-      {text && (
-        <span className="text-[11px] text-purple-600/70 font-medium">{text}</span>
-      )}
-      <div className="flex items-center gap-0.5">
-        <motion.div
-          className="w-1 h-1 bg-purple-500 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.2 }}
-        />
-        <motion.div
-          className="w-1 h-1 bg-purple-500 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.3 }}
-        />
-        <motion.div
-          className="w-1 h-1 bg-purple-500 rounded-full"
-          animate={{ scale: [1, 1.2, 1] }}
-          transition={{ duration: 1, repeat: Infinity, repeatDelay: 0.4 }}
-        />
-      </div>
-    </div>
-  );
-}
-
-function MessageBubble({ message, isLast }: { message: Message; isLast: boolean }) {
-  const isUser = message.role === 'user';
-  
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 10, scale: 0.98 }}
-      animate={{ opacity: 1, y: 0, scale: 1 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className={cn(
-        "group flex gap-2",
-        isUser ? "flex-row-reverse" : "flex-row"
-      )}
-    >
-      <div className={cn(
-        "flex-shrink-0 w-7 h-7 rounded-lg flex items-center justify-center",
-        isUser ? "bg-gradient-to-br from-purple-500 to-fuchsia-500" : "bg-gradient-to-br from-purple-400 to-fuchsia-400"
-      )}>
-        {isUser ? (
-          <User className="w-3.5 h-3.5 text-white" />
-        ) : (
-          <Bot className="w-3.5 h-3.5 text-white" />
-        )}
-      </div>
-      
-      <div className={cn(
-        "flex flex-col gap-1 max-w-[85%]",
-        isUser ? "items-end" : "items-start"
-      )}>
-        <div className={cn(
-          "px-3.5 py-2 rounded-2xl text-sm shadow-sm",
-          isUser 
-            ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm" 
-            : message.isSystemMessage
-              ? "bg-purple-50/80 backdrop-blur-sm border border-purple-200/60 text-purple-600 rounded-bl-sm"
-              : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"
-        )}>
-          {message.isLoading ? (
-            <TypingIndicator text={message.loadingText} />
-          ) : message.isSystemMessage ? (
-            <div className="flex items-center gap-1.5">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-500" />
-              <p className="whitespace-pre-wrap font-medium text-xs">{message.content}</p>
-            </div>
-          ) : (
-            <div className={cn(
-              "prose-sm max-w-none",
-              isUser ? "prose-invert" : "prose-purple",
-              "markdown-content"
-            )}>
-              <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
-                components={{
-                  p: ({ children }) => <p className="whitespace-pre-wrap text-[13px] leading-relaxed m-0">{children}</p>,
-                  a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className={cn(
-                    "underline underline-offset-4",
-                    isUser ? "text-white/90 hover:text-white" : "text-purple-600 hover:text-purple-700"
-                  )}>{children}</a>,
-                  code: ({ inline, children }) => inline 
-                    ? <code className={cn(
-                        "px-1.5 py-0.5 rounded-md text-[12px] font-mono",
-                        isUser 
-                          ? "bg-white/20 text-white" 
-                          : "bg-purple-100/80 text-purple-800"
-                      )}>{children}</code>
-                    : <pre className={cn(
-                        "mt-2 mb-2 p-3 rounded-lg text-[12px] overflow-x-auto",
-                        isUser 
-                          ? "bg-white/10 text-white" 
-                          : "bg-purple-100/50 text-purple-900"
-                      )}><code>{children}</code></pre>,
-                  ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-1">{children}</ul>,
-                  ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-1">{children}</ol>,
-                  li: ({ children }) => <li className="text-[13px]">{children}</li>,
-                  h1: ({ children }) => <h1 className="text-base font-semibold mt-3 mb-2">{children}</h1>,
-                  h2: ({ children }) => <h2 className="text-sm font-semibold mt-2 mb-1.5">{children}</h2>,
-                  h3: ({ children }) => <h3 className="text-sm font-medium mt-2 mb-1">{children}</h3>,
-                  blockquote: ({ children }) => <blockquote className={cn(
-                    "border-l-2 pl-2 my-1.5",
-                    isUser ? "border-white/30" : "border-purple-300"
-                  )}>{children}</blockquote>,
-                  hr: () => <hr className={cn(
-                    "my-2 border-t",
-                    isUser ? "border-white/20" : "border-purple-200/60"
-                  )} />,
-                  table: ({ children }) => (
-                    <div className="overflow-x-auto my-2">
-                      <table className="min-w-full divide-y divide-purple-200/60 text-[12px]">{children}</table>
-                    </div>
-                  ),
-                  th: ({ children }) => <th className="px-2 py-1 font-medium bg-purple-100/50">{children}</th>,
-                  td: ({ children }) => <td className="px-2 py-1 border-t border-purple-200/30">{children}</td>,
-                }}
-              >
-                {message.content}
-              </ReactMarkdown>
-            </div>
-          )}
-        </div>
-        <span className="text-[10px] text-gray-500 px-1.5 opacity-0 transition-opacity group-hover:opacity-100">
-          {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-        </span>
-      </div>
-    </motion.div>
-  );
-}
 
 export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -246,7 +112,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       }));
       chatMessages.push(userMessage);
 
-      const response = await submitAiMessage(chatMessages, resume);
+      const response = await streamChatResponse(chatMessages, resume);
       let fullResponse = '';
       let functionCallName: string | undefined;
       let functionCallArgs = '';
@@ -649,39 +515,12 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         </AnimatePresence>
 
         {/* Input Bar - Always Visible */}
-        <div className="relative px-4 py-3 border-t border-purple-300/40">
-          <div className="flex gap-2">
-            <input
-              ref={inputRef}
-              type="text"
-              placeholder="Ask AI for help with your resume..."
-              className="flex-1 bg-white/90 backdrop-blur-sm text-sm rounded-lg px-3.5 py-2.5 border border-purple-300/50 
-                focus:outline-none focus:ring-2 focus:ring-purple-500/40 focus:border-purple-400/60 
-                transition-all duration-300 placeholder:text-purple-600/50
-                shadow-inner shadow-purple-500/10"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleMessageSubmit();
-                }
-              }}
-            />
-            <Button 
-              onClick={handleMessageSubmit}
-              size="sm"
-              disabled={isLoading || !message.trim()}
-              className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white 
-                hover:from-purple-700 hover:to-fuchsia-700 transition-all duration-300 
-                shadow-md shadow-purple-500/20 hover:shadow-purple-500/40 
-                hover:-translate-y-0.5 rounded-lg px-4 py-2.5
-                disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-            >
-              <Send className="h-3.5 w-3.5" />
-            </Button>
-          </div>
-        </div>
+        <ChatInput 
+          message={message} 
+          setMessage={setMessage} 
+          onSubmit={handleMessageSubmit} 
+          isLoading={isLoading} 
+        />
       </motion.div>
     </div>
   );

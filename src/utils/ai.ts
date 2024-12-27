@@ -396,15 +396,3 @@ export async function streamChatResponse(
     throw new Error('Failed to stream chat response: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
-
-export async function submitAiMessage(
-  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
-  resume: Resume
-) {
-  try {
-    const response = await streamChatResponse(messages, resume);
-    return response;
-  } catch (error) {
-    throw new Error('Failed to process AI message: ' + (error instanceof Error ? error.message : 'Unknown error'));
-  }
-} 
