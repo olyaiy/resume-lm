@@ -8,30 +8,13 @@ import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
 import { Profile, Resume } from "@/lib/types";
 import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE } from "@/lib/prompts";
+import { FunctionHandler, functionSchemas } from "./function-handler";
 
 // Initialize OpenAI client with API key from environment variables
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Define available functions for the AI assistant
-const availableFunctions = {
-  read_resume: {
-    name: "read_resume",
-    description: "Read the current resume content to understand and analyze it",
-    parameters: {
-      type: "object",
-      properties: {
-        section: {
-          type: "string",
-          enum: ["all", "basic_info", "work_experience", "education", "skills", "projects", "certifications"],
-          description: "The section of the resume to read"
-        }
-      },
-      required: ["section"]
-    }
-  }
-} as const;
 
 // Function implementations
 function readResume(resume: Resume, section: string) {
@@ -394,15 +377,33 @@ export async function streamChatResponse(
       top_p: 1,
       frequency_penalty: 0,
       presence_penalty: 0,
-      functions: [availableFunctions.read_resume],
+      functions: [functionSchemas.read_resume, functionSchemas.update_name],
       function_call: "auto"
     });
 
     // Create an async generator to handle the stream
     async function* processStream() {
       try {
+        const functionHandler = new FunctionHandler(resume);
+        
         for await (const chunk of response) {
-          yield chunk;
+          // Handle function calls in the stream
+          const functionCall = chunk.choices[0]?.delta?.function_call;
+          if (functionCall?.name && functionCall?.arguments) {
+            try {
+              const result = await functionHandler.executeFunction(
+                functionCall.name as any,
+                JSON.parse(functionCall.arguments)
+              );
+              // Yield the function result
+              yield { choices: [{ delta: { content: result } }] };
+            } catch (error) {
+              console.error('Function execution error:', error);
+              throw error;
+            }
+          } else {
+            yield chunk;
+          }
         }
         // Yield a final chunk to indicate stream completion
         yield { choices: [{ delta: { content: '[DONE]' } }] };
@@ -422,4 +423,14 @@ export async function streamChatResponse(
   }
 }
 
-
+export async function submitAiMessage(
+  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
+  resume: Resume
+) {
+  try {
+    const response = await streamChatResponse(messages, resume);
+    return response;
+  } catch (error) {
+    throw new Error('Failed to process AI message: ' + (error instanceof Error ? error.message : 'Unknown error'));
+  }
+} 

@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Resume } from "@/lib/types";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { submitAiMessage } from "@/utils/ai";
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -213,8 +214,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }, [isLoading]);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleMessageSubmit() {
     if (!message.trim() || isLoading) return;
 
     const userMessage = { 
@@ -225,7 +225,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     setMessages(prev => [...prev, userMessage]);
     setMessage('');
     setIsLoading(true);
-    scrollToBottom();
     
     // Add initial assistant message with loading state
     setMessages(prev => [...prev, { 
@@ -247,7 +246,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       }));
       chatMessages.push(userMessage);
 
-      const response = await streamChatResponse(chatMessages, resume);
+      const response = await submitAiMessage(chatMessages, resume);
       let fullResponse = '';
       let functionCallName: string | undefined;
       let functionCallArgs = '';
@@ -260,13 +259,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           
           if (functionCall.name) {
             functionCallName = functionCall.name;
-            // Update loading message to show reading state
+            // Update loading message to show generic tool usage state
             setMessages(prev => {
               const newMessages = [...prev];
               const lastMessage = newMessages[newMessages.length - 1];
               if (lastMessage?.role === 'assistant') {
                 lastMessage.isLoading = true;
-                lastMessage.loadingText = 'Reading your resume...';
+                lastMessage.loadingText = functionCallName === 'read_resume' 
+                  ? 'Reading your resume...'
+                  : 'Calling tool...';
               }
               return newMessages;
             });
@@ -286,13 +287,18 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               // Parse the complete arguments
               const args = JSON.parse(functionCallArgs);
               
-              // Execute the function based on the name
+              // Execute the function based on the name and arguments
               let functionResult = '';
               if (functionCallName === 'read_resume') {
+                // Extract the requested section from the function arguments
                 const section = args.section as string;
+
+                // If 'all' is requested, return the entire resume object
                 if (section === 'all') {
                   functionResult = JSON.stringify(resume);
-                } else if (section === 'basic_info') {
+                } 
+                // If 'basic_info' is requested, return only the basic profile information
+                else if (section === 'basic_info') {
                   functionResult = JSON.stringify({
                     first_name: resume.first_name,
                     last_name: resume.last_name,
@@ -304,10 +310,27 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                     github_url: resume.github_url,
                     professional_summary: resume.professional_summary
                   });
-                } else {
-                  // Type assertion for other valid resume sections
+                } 
+                // For any other valid section (work_experience, education, etc.)
+                // return just that section from the resume
+                else {
                   functionResult = JSON.stringify(resume[section as keyof Resume]);
                 }
+              } else if (functionCallName === 'update_name') {
+                // Update the resume with new name
+                resume.first_name = args.first_name;
+                resume.last_name = args.last_name;
+                // Call the onUpdateResume callback
+                onUpdateResume('first_name', args.first_name);
+                onUpdateResume('last_name', args.last_name);
+                functionResult = JSON.stringify({
+                  success: true,
+                  message: "Name updated successfully",
+                  updated_values: {
+                    first_name: args.first_name,
+                    last_name: args.last_name
+                  }
+                });
               }
 
               // Add the function result to the messages
@@ -525,7 +548,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
         {/* Input Bar - Always Visible */}
         <div className="relative px-4 py-3 border-t border-purple-300/40">
-          <form className="flex gap-2" onSubmit={handleSubmit}>
+          <div className="flex gap-2">
             <input
               ref={inputRef}
               type="text"
@@ -536,9 +559,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
                 shadow-inner shadow-purple-500/10"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                  e.preventDefault();
+                  handleMessageSubmit();
+                }
+              }}
             />
             <Button 
-              type="submit"
+              onClick={handleMessageSubmit}
               size="sm"
               disabled={isLoading || !message.trim()}
               className="bg-gradient-to-r from-purple-600 to-fuchsia-600 text-white 
@@ -549,7 +578,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
             >
               <Send className="h-3.5 w-3.5" />
             </Button>
-          </form>
+          </div>
         </div>
       </motion.div>
     </div>
