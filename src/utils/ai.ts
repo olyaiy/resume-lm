@@ -6,13 +6,64 @@
 'use server';
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
-import { Profile } from "@/lib/types";
+import { Profile, Resume } from "@/lib/types";
 import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE } from "@/lib/prompts";
 
 // Initialize OpenAI client with API key from environment variables
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
+
+// Define available functions for the AI assistant
+const availableFunctions = {
+  read_resume: {
+    name: "read_resume",
+    description: "Read the current resume content to understand and analyze it",
+    parameters: {
+      type: "object",
+      properties: {
+        section: {
+          type: "string",
+          enum: ["all", "basic_info", "work_experience", "education", "skills", "projects", "certifications"],
+          description: "The section of the resume to read"
+        }
+      },
+      required: ["section"]
+    }
+  }
+} as const;
+
+// Function implementations
+function readResume(resume: Resume, section: string) {
+  switch (section) {
+    case "all":
+      return JSON.stringify(resume);
+    case "basic_info":
+      return JSON.stringify({
+        first_name: resume.first_name,
+        last_name: resume.last_name,
+        email: resume.email,
+        phone_number: resume.phone_number,
+        location: resume.location,
+        website: resume.website,
+        linkedin_url: resume.linkedin_url,
+        github_url: resume.github_url,
+        professional_summary: resume.professional_summary
+      });
+    case "work_experience":
+      return JSON.stringify(resume.work_experience);
+    case "education":
+      return JSON.stringify(resume.education);
+    case "skills":
+      return JSON.stringify(resume.skills);
+    case "projects":
+      return JSON.stringify(resume.projects);
+    case "certifications":
+      return JSON.stringify(resume.certifications);
+    default:
+      return "Invalid section specified";
+  }
+}
 
 /**
  * Formats a user's profile information using AI to ensure consistent and professional presentation
@@ -313,16 +364,27 @@ export async function processTextImport(text: string) {
 /**
  * Streams a chat response from the AI assistant
  * @param messages - Array of previous chat messages
+ * @param resume - The current resume being edited
  * @returns Streaming response from OpenAI
  */
-export async function streamChatResponse(messages: Array<OpenAI.Chat.ChatCompletionMessageParam>) {
+export async function streamChatResponse(
+  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>,
+  resume: Resume
+) {
+  console.log('🚀 Starting streamChatResponse with:', {
+    messageCount: messages.length,
+    lastMessage: messages[messages.length - 1],
+    resumeId: resume.id
+  });
+
   try {
+    console.log('📤 Initiating OpenAI API call...');
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
-          content: "You are an AI resume assistant helping users craft and improve their resumes. Be concise, professional, and focus on providing actionable advice for resume improvement."
+          content: "You are an AI resume assistant helping users craft and improve their resumes. Be concise, professional, and focus on providing actionable advice for resume improvement. You can read the resume content using the available functions."
         },
         ...messages
       ],
@@ -331,12 +393,20 @@ export async function streamChatResponse(messages: Array<OpenAI.Chat.ChatComplet
       max_tokens: 8000,
       top_p: 1,
       frequency_penalty: 0,
-      presence_penalty: 0
+      presence_penalty: 0,
+      functions: [availableFunctions.read_resume],
+      function_call: "auto"
     });
 
+    // Simply return the stream for client-side processing
     return response;
   } catch (error) {
+    console.error('❌ Fatal error in streamChatResponse:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
+    });
     throw new Error('Failed to stream chat response: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
+
 

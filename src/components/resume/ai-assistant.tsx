@@ -9,6 +9,7 @@ import { streamChatResponse } from "@/utils/ai";
 import { useRef, useEffect } from "react";
 import type { OpenAI } from "openai";
 import { motion, AnimatePresence } from "framer-motion";
+import { Resume } from "@/lib/types";
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,6 +19,7 @@ interface Message {
 
 interface AIAssistantProps {
   className?: string;
+  resume: Resume;
 }
 
 function TypingIndicator() {
@@ -86,7 +88,7 @@ function MessageBubble({ message, isLast }: { message: Message; isLast: boolean 
   );
 }
 
-export function AIAssistant({ className }: AIAssistantProps) {
+export function AIAssistant({ className, resume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
@@ -150,10 +152,104 @@ export function AIAssistant({ className }: AIAssistantProps) {
       }));
       chatMessages.push(userMessage);
 
-      const response = await streamChatResponse(chatMessages);
+      const response = await streamChatResponse(chatMessages, resume);
       let fullResponse = '';
+      let functionCallName: string | undefined;
+      let functionCallArgs = '';
 
       for await (const chunk of response) {
+        // Handle function calls
+        if (chunk.choices[0]?.delta?.function_call) {
+          const functionCall = chunk.choices[0].delta.function_call;
+          
+          if (functionCall.name) {
+            functionCallName = functionCall.name;
+          }
+          if (functionCall.arguments) {
+            functionCallArgs += functionCall.arguments;
+          }
+
+          // Check if we have a complete JSON string
+          if (functionCallName && functionCallArgs && !chunk.choices[0]?.delta?.content) {
+            try {
+              // Verify if we have complete JSON by checking for closing brace
+              if (!functionCallArgs.trim().endsWith('}')) {
+                continue;
+              }
+
+              // Parse the complete arguments
+              const args = JSON.parse(functionCallArgs);
+              
+              // Execute the function based on the name
+              let functionResult = '';
+              if (functionCallName === 'read_resume') {
+                const section = args.section as string;
+                if (section === 'all') {
+                  functionResult = JSON.stringify(resume);
+                } else if (section === 'basic_info') {
+                  functionResult = JSON.stringify({
+                    first_name: resume.first_name,
+                    last_name: resume.last_name,
+                    email: resume.email,
+                    phone_number: resume.phone_number,
+                    location: resume.location,
+                    website: resume.website,
+                    linkedin_url: resume.linkedin_url,
+                    github_url: resume.github_url,
+                    professional_summary: resume.professional_summary
+                  });
+                } else {
+                  // Type assertion for other valid resume sections
+                  functionResult = JSON.stringify(resume[section as keyof Resume]);
+                }
+              }
+
+              // Add the function result to the messages
+              chatMessages.push({
+                role: 'function',
+                name: functionCallName,
+                content: functionResult
+              });
+
+              // Reset function call tracking
+              functionCallName = undefined;
+              functionCallArgs = '';
+
+              // Get a new response with the function result
+              const newResponse = await streamChatResponse(chatMessages, resume);
+              for await (const newChunk of newResponse) {
+                const content = newChunk.choices[0]?.delta?.content || '';
+                fullResponse += content;
+                setMessages(prev => {
+                  const newMessages = [...prev];
+                  const lastMessage = newMessages[newMessages.length - 1];
+                  
+                  if (lastMessage?.role === 'assistant') {
+                    lastMessage.content = fullResponse;
+                  } else {
+                    newMessages.push({ 
+                      role: 'assistant', 
+                      content: fullResponse,
+                      timestamp: new Date()
+                    });
+                  }
+                  
+                  return newMessages;
+                });
+              }
+              continue;
+            } catch (error) {
+              console.error('Error executing function:', error);
+              // If we get a JSON parse error, continue accumulating arguments
+              if (error instanceof SyntaxError) {
+                continue;
+              }
+            }
+          }
+          continue;
+        }
+
+        // Handle regular content
         const content = chunk.choices[0]?.delta?.content || '';
         fullResponse += content;
         setMessages(prev => {

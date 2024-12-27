@@ -534,7 +534,7 @@ export function ResumeEditorClient({
                   </div>
                   {/* AI Assistant Section */}
                   <div className="sticky bottom-0 left-0 right-0 pr-4 bg-bg">
-                    <AIAssistant />
+                    <AIAssistant resume={resume} />
                   </div>
                 </ScrollArea>
 
