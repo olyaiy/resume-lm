@@ -10,7 +10,7 @@ import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
 import { CertificationsForm } from "./certifications-form";
-import { Loader2, Save, Trash2, ArrowLeft, Bold } from "lucide-react";
+import { Loader2, Save, Trash2, ArrowLeft, Bold, Download } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "./document-settings-form";
+import { pdf } from '@react-pdf/renderer';
+import { ResumePDFDocument } from './resume-pdf-document';
 import {
   Tooltip,
   TooltipContent,
@@ -193,6 +195,37 @@ export function ResumeEditorClient({
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <Button 
+              onClick={async () => {
+                try {
+                  const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(url);
+                  toast({
+                    title: "Download started",
+                    description: "Your resume PDF is being downloaded.",
+                  });
+                } catch (error) {
+                  toast({
+                    title: "Download failed",
+                    description: "Unable to download your resume. Please try again.",
+                    variant: "destructive",
+                  });
+                }
+              }}
+              size="sm"
+              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-teal-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group"
+            >
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff15_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
             <Button 
               onClick={handleSave} 
               disabled={isSaving}
