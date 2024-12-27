@@ -70,11 +70,13 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
     },
     skillCategory: {
       marginBottom: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
+      flexDirection: 'row',
     },
     skillCategoryTitle: {
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
+      marginRight: 4,
     },
     skillItem: {
       fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
@@ -241,7 +243,7 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
             <View style={styles.skillsGrid}>
               {resume.skills.map((skillCategory, index) => (
                 <View key={index} style={styles.skillCategory}>
-                  <Text style={styles.skillCategoryTitle}>{skillCategory.category}</Text>
+                  <Text style={styles.skillCategoryTitle}>{skillCategory.category}:</Text>
                   <Text style={styles.skillItem}>{skillCategory.items.join(', ')}</Text>
                 </View>
               ))}
