@@ -192,7 +192,7 @@ export const ChatArea = memo(function ChatArea({ messages, isLoading }: ChatArea
   }, []);
 
   return (
-    <div className="relative h-[30vh] opacity-100 transition-opacity duration-200">
+    <div className="relative h-[70vh] opacity-100 transition-opacity duration-200">
       <ScrollArea 
         className="h-full px-4 py-0 overflow-y-auto" 
         ref={scrollAreaRef}

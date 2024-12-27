@@ -7,7 +7,7 @@ import { streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
 import type { Resume } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
-import { FunctionHandler } from '@/utils/function-handler';
+import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
 
 // Define types for OpenAI streaming response
@@ -101,13 +101,6 @@ function messageReducer(state: Message[], action: MessageAction): Message[] {
       return state;
   }
 }
-
-// First, add this interface near the top with other types
-interface FunctionArgs {
-  section?: string;
-  action?: string;
-}
-
 export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, dispatch] = useReducer(messageReducer, []);
@@ -148,10 +141,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
       inputRef.current?.focus();
     }
   }, [isExpanded]);
-  
-
-
-  
+   
   async function handleAIResponse(message: string) {
     if (!message.trim() || isLoading) return;
 
@@ -182,6 +172,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     contentBufferRef.current = '';
 
     try {
+      console.log('MESSAGE SENT TO AI', '\n', messages);
       const chatMessages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
         ...messages.map(msg => {
           if (msg.role === 'function') {
@@ -213,8 +204,12 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         if (delta.function_call) {
           const functionCall = delta.function_call;
           
+          // IF we get function call name
           if (functionCall.name && !functionCallName) {
+            // Set the function call name
             functionCallName = functionCall.name;
+
+            // Show function process text
             dispatch({
               type: 'UPDATE_LAST_MESSAGE',
               content: '',
@@ -229,6 +224,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
             functionCallArgs += functionCall.arguments;
           }
 
+          // IF we have function call name and args
           if (functionCallName && functionCallArgs && !delta.content) {
             if (!functionCallArgs.trim().endsWith('}')) {
               continue;
@@ -237,6 +233,16 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
             const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
             const args = JSON.parse(functionCallArgs);
 
+            // Set system message for function completion
+            const displayMessage = getFunctionDisplayMessage(functionCallName, args);
+            // ADD CHECKMARK ✅ MESSAGE TO MESSAGE HISTORY
+            dispatch({
+              type: 'SET_SYSTEM_MESSAGE',
+              content: displayMessage
+            });
+
+
+            // Add function CALL RESULT AND CONTENT to messages
             dispatch({
               type: 'ADD_MESSAGE',
               message: {
@@ -254,13 +260,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
               content: functionResult
             });
 
-            // Set system message for function completion
-            const displayMessage = getFunctionDisplayMessage(functionCallName, args);
-            dispatch({
-              type: 'SET_SYSTEM_MESSAGE',
-              content: displayMessage
-            });
-
+            
             // Add new assistant message for continued conversation
             dispatch({
               type: 'ADD_MESSAGE',

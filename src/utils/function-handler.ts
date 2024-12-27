@@ -19,6 +19,11 @@ interface FunctionParameters {
   };
 }
 
+export interface FunctionArgs {
+  section?: string;
+  action?: string;
+}
+
 /**
  * Type for available function names
  */
