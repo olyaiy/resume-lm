@@ -5,7 +5,7 @@ import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { modifyWorkExperience, streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
-import type { Resume, ResumeSuggestion } from "@/lib/types";
+import type { Resume, WorkExperience } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
@@ -33,7 +33,7 @@ export interface Message {
   isSystemMessage?: boolean;
   isHidden?: boolean;
   name?: string;
-  suggestions?: ResumeSuggestion[];
+  isSuggestion?: boolean;
 }
 
 interface AIAssistantProps {
@@ -362,36 +362,6 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }
 
-  const handleAcceptSuggestion = useCallback((suggestion: ResumeSuggestion) => {
-    // If it's a work experience suggestion
-    if (suggestion.section === 'work_experience') {
-      const newWorkExperience = [...resume.work_experience];
-      
-      switch (suggestion.type) {
-        case 'update':
-          if (typeof suggestion.index === 'number') {
-            newWorkExperience[suggestion.index] = suggestion.proposed;
-          }
-          break;
-        case 'add':
-          newWorkExperience.push(suggestion.proposed);
-          break;
-        case 'delete':
-          if (typeof suggestion.index === 'number') {
-            newWorkExperience.splice(suggestion.index, 1);
-          }
-          break;
-      }
-      
-      onUpdateResume('work_experience', newWorkExperience);
-    }
-    // Handle other sections similarly...
-  }, [resume, onUpdateResume]);
-
-  const handleRejectSuggestion = useCallback((suggestion: ResumeSuggestion) => {
-    // You might want to log rejections or handle them differently
-    console.log('Suggestion rejected:', suggestion);
-  }, []);
 
   return (
     <div className={cn("group", className)}>
@@ -446,25 +416,34 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           <ChatArea 
             messages={messages}
             isLoading={isLoading}
-            onAcceptSuggestion={handleAcceptSuggestion}
-            onRejectSuggestion={handleRejectSuggestion}
           />
         )}
 
         {/* Input Bar */}
         <Button 
           onClick={async () => {
-            try {
-              const modifiedExperience = await modifyWorkExperience(
-                resume.work_experience,
-                "Add quantifiable metrics and use stronger action verbs to demonstrate impact"
-              );
-              
-              console.log('Modified Experience:', modifiedExperience);
-              // Later we can add: onUpdateResume('work_experience', modifiedExperience);
-            } catch (error) {
-              console.error('Error modifying work experience:', error);
-            }
+            const mockWorkExperience: WorkExperience = {
+              company: "Tech Solutions Inc.",
+              position: "Senior Software Engineer",
+              location: "San Francisco, CA",
+              date: "2020 - Present",
+              description: [
+                "Led development of cloud-native microservices architecture using React and Node.js",
+                "Improved system performance by 40% through implementation of caching strategies",
+                "Mentored junior developers and conducted code reviews for team of 8 engineers"
+              ],
+              technologies: ["React", "Node.js", "TypeScript", "AWS", "Docker"]
+            };
+
+            dispatch({
+              type: 'ADD_MESSAGE',
+              message: {
+                role: 'assistant',
+                content: JSON.stringify(mockWorkExperience, null, 2),
+                timestamp: new Date(),
+                isSuggestion: true
+              }
+            });
           }}
         >
           Improve Work Experience

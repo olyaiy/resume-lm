@@ -8,22 +8,17 @@ import { TypingIndicator } from "./typing-indicator";
 import { Message } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
-import { ResumeSuggestion } from "@/lib/types";
-import { SuggestionBubble } from "./suggestion-bubble";
+import { WorkExperience } from "@/lib/types";
+
 
 interface MessageBubbleProps {
   message: Message;
   isLast: boolean;
-  onAcceptSuggestion?: (suggestion: ResumeSuggestion) => void;
-  onRejectSuggestion?: (suggestion: ResumeSuggestion) => void;
 }
 
 // Memoize MessageBubble component
 const MessageBubble = memo(function MessageBubble({ 
   message, 
-  isLast,
-  onAcceptSuggestion,
-  onRejectSuggestion 
 }: MessageBubbleProps) {
   if (message.isHidden) {
     return null;
@@ -32,69 +27,43 @@ const MessageBubble = memo(function MessageBubble({
   const isUser = message.role === 'user';
   
   const renderContent = () => {
-    if (message.suggestions?.length) {
-      return (
-        <div className="space-y-4">
-          {message.content && (
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                p: ({ children }) => <p className="whitespace-pre-wrap text-[13px] leading-relaxed m-0">{children}</p>,
-                a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className={cn(
-                  "underline underline-offset-4",
-                  isUser ? "text-white/90 hover:text-white" : "text-purple-600 hover:text-purple-700"
-                )}>{children}</a>,
-                code: ({ inline, children }) => inline 
-                  ? <code className={cn(
-                      "px-1.5 py-0.5 rounded-md text-[12px] font-mono",
-                      isUser 
-                        ? "bg-white/20 text-white" 
-                        : "bg-purple-100/80 text-purple-800"
-                    )}>{children}</code>
-                  : <pre className={cn(
-                      "mt-2 mb-2 p-3 rounded-lg text-[12px] overflow-x-auto",
-                      isUser 
-                        ? "bg-white/10 text-white" 
-                        : "bg-purple-100/50 text-purple-900"
-                    )}><code>{children}</code></pre>,
-                ul: ({ children }) => <ul className="list-disc pl-4 my-1 space-y-1">{children}</ul>,
-                ol: ({ children }) => <ol className="list-decimal pl-4 my-1 space-y-1">{children}</ol>,
-                li: ({ children }) => <li className="text-[13px]">{children}</li>,
-                h1: ({ children }) => <h1 className="text-base font-semibold mt-3 mb-2">{children}</h1>,
-                h2: ({ children }) => <h2 className="text-sm font-semibold mt-2 mb-1.5">{children}</h2>,
-                h3: ({ children }) => <h3 className="text-sm font-medium mt-2 mb-1">{children}</h3>,
-                blockquote: ({ children }) => <blockquote className={cn(
-                  "border-l-2 pl-2 my-1.5",
-                  isUser ? "border-white/30" : "border-purple-300"
-                )}>{children}</blockquote>,
-                hr: () => <hr className={cn(
-                  "my-2 border-t",
-                  isUser ? "border-white/20" : "border-purple-200/60"
-                )} />,
-                table: ({ children }) => (
-                  <div className="overflow-x-auto my-2">
-                    <table className="min-w-full divide-y divide-purple-200/60 text-[12px]">{children}</table>
-                  </div>
-                ),
-                th: ({ children }) => <th className="px-2 py-1 font-medium bg-purple-100/50">{children}</th>,
-                td: ({ children }) => <td className="px-2 py-1 border-t border-purple-200/30">{children}</td>,
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
-          )}
-          {message.suggestions.map((suggestion) => (
-            <SuggestionBubble
-              key={suggestion.id}
-              suggestion={suggestion}
-              onAccept={onAcceptSuggestion!}
-              onReject={onRejectSuggestion!}
-            />
-          ))}
-        </div>
-      );
+    if (message.isSuggestion) {
+      try {
+        const workExp = JSON.parse(message.content) as WorkExperience;
+        return (
+          <div className="space-y-2">
+            <div className="flex justify-between items-start">
+              <div>
+                <h3 className="font-medium text-purple-900">{workExp.position}</h3>
+                <p className="text-sm text-purple-700">{workExp.company}</p>
+              </div>
+              <div className="text-right">
+                <p className="text-sm text-purple-600">{workExp.location}</p>
+                <p className="text-sm text-purple-600">{workExp.date}</p>
+              </div>
+            </div>
+            <ul className="list-disc pl-4 space-y-1">
+              {workExp.description.map((desc, i) => (
+                <li key={i} className="text-sm text-purple-800">{desc}</li>
+              ))}
+            </ul>
+            {workExp.technologies && (
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                {workExp.technologies.map((tech, i) => (
+                  <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs">
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      } catch (e) {
+        // Fallback to normal rendering if JSON parsing fails
+        return <ReactMarkdown {...defaultMarkdownProps}>{message.content}</ReactMarkdown>;
+      }
     }
-
+    
     return (
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
@@ -220,16 +189,12 @@ const MessageBubble = memo(function MessageBubble({
 interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
-  onAcceptSuggestion?: (suggestion: ResumeSuggestion) => void;
-  onRejectSuggestion?: (suggestion: ResumeSuggestion) => void;
 }
 
 // Memoize ChatArea component
 export const ChatArea = memo(function ChatArea({ 
   messages, 
   isLoading, 
-  onAcceptSuggestion,
-  onRejectSuggestion 
 }: ChatAreaProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -298,8 +263,6 @@ export const ChatArea = memo(function ChatArea({
               key={index} 
               message={msg} 
               isLast={index === messages.length - 1}
-              onAcceptSuggestion={onAcceptSuggestion}
-              onRejectSuggestion={onRejectSuggestion}
             />
           ))}
          
