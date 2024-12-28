@@ -5,7 +5,7 @@ import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
-import type { Resume, WorkExperience, Project } from "@/lib/types";
+import type { Resume, WorkExperience, Project, Skill } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
@@ -26,8 +26,8 @@ type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
 };
 
 type SuggestionData = {
-  type: 'work_experience' | 'project';
-  data: WorkExperience | Project;
+  type: 'work_experience' | 'project' | 'skill';
+  data: WorkExperience | Project | Skill;
 };
 
 export interface Message {
@@ -413,8 +413,30 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         onUpdateResume('projects', updatedProjects);
         break;
       }
+      case 'skill': {
+        const skill = data as Skill;
+        const currentSkills = resume.skills || [];
+        // Check if category already exists
+        const categoryIndex = currentSkills.findIndex(s => s.category === skill.category);
+        let updatedSkills;
+        
+        if (categoryIndex !== -1) {
+          // Update existing category
+          updatedSkills = currentSkills.map((s, index) => 
+            index === categoryIndex 
+              ? { ...s, items: [...new Set([...skill.items, ...s.items])] } // Merge and deduplicate items
+              : s
+          );
+        } else {
+          // Add new category
+          updatedSkills = [...currentSkills, skill];
+        }
+        
+        onUpdateResume('skills', updatedSkills);
+        break;
+      }
     }
-  }, [resume.work_experience, resume.projects, onUpdateResume]);
+  }, [resume, onUpdateResume]);
 
   return (
     <div className={cn("group", className)}>
@@ -483,8 +505,14 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         </Button>
         <Button 
           onClick={() => suggestImprovement(dispatch, 'project')}
+          className="mr-2"
         >
           Suggest Project
+        </Button>
+        <Button 
+          onClick={() => suggestImprovement(dispatch, 'skill')}
+        >
+          Suggest Skills
         </Button>
         <ChatInput 
           onSubmit={handleAIResponse} 

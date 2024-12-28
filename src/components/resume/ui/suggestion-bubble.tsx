@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { WorkExperience, Project } from "@/lib/types";
+import { WorkExperience, Project, Skill } from "@/lib/types";
 import { Check, X, Link as LinkIcon, Github } from "lucide-react";
 import { memo } from 'react';
 
 type SuggestionData = {
-  type: 'work_experience' | 'project';
-  data: WorkExperience | Project;
+  type: 'work_experience' | 'project' | 'skill';
+  data: WorkExperience | Project | Skill;
 };
 
 interface SuggestionBubbleProps {
@@ -208,6 +208,36 @@ export const SuggestionBubble = memo(function SuggestionBubble({
     </>
   );
 
+  const renderSkill = (skill: Skill) => (
+    <>
+      <h3 className={cn(
+        "font-medium text-sm",
+        suggestionStatus === 'accepted' ? "text-green-700" : 
+        suggestionStatus === 'rejected' ? "text-red-700" : 
+        "text-purple-700"
+      )}>
+        {skill.category}
+      </h3>
+      <div className="flex flex-wrap gap-1 mt-2">
+        {skill.items.map((item, i) => (
+          <span 
+            key={i} 
+            className={cn(
+              "px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm",
+              suggestionStatus === 'accepted' 
+                ? "bg-green-100/50 text-green-700 ring-1 ring-green-200/50" : 
+              suggestionStatus === 'rejected'
+                ? "bg-red-100/50 text-red-700 ring-1 ring-red-200/50" :
+                "bg-purple-100/50 text-purple-700 ring-1 ring-purple-200/50"
+            )}
+          >
+            {item}
+          </span>
+        ))}
+      </div>
+    </>
+  );
+
   return (
     <div className="relative">
       <div className={cn(
@@ -216,40 +246,46 @@ export const SuggestionBubble = memo(function SuggestionBubble({
       )}>
         {suggestion.type === 'work_experience' 
           ? renderWorkExperience(suggestion.data as WorkExperience)
-          : renderProject(suggestion.data as Project)
+          : suggestion.type === 'project'
+          ? renderProject(suggestion.data as Project)
+          : renderSkill(suggestion.data as Skill)
         }
 
-        <ul className="list-disc pl-4 mt-2 space-y-1">
-          {suggestion.data.description.map((desc, i) => (
-            <li key={i} className={cn(
-              "text-xs leading-relaxed",
-              suggestionStatus === 'accepted' ? "text-green-700/90" : 
-              suggestionStatus === 'rejected' ? "text-red-700/90" : 
-              "text-purple-700/90"
-            )}>
-              {desc}
-            </li>
-          ))}
-        </ul>
+        {suggestion.type !== 'skill' && (
+          <>
+            <ul className="list-disc pl-4 mt-2 space-y-1">
+              {(suggestion.data as WorkExperience | Project).description.map((desc, i) => (
+                <li key={i} className={cn(
+                  "text-xs leading-relaxed",
+                  suggestionStatus === 'accepted' ? "text-green-700/90" : 
+                  suggestionStatus === 'rejected' ? "text-red-700/90" : 
+                  "text-purple-700/90"
+                )}>
+                  {desc}
+                </li>
+              ))}
+            </ul>
 
-        {suggestion.data.technologies && (
-          <div className="flex flex-wrap gap-1 mt-2">
-            {suggestion.data.technologies.map((tech, i) => (
-              <span 
-                key={i} 
-                className={cn(
-                  "px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm",
-                  suggestionStatus === 'accepted' 
-                    ? "bg-green-100/50 text-green-700 ring-1 ring-green-200/50" : 
-                  suggestionStatus === 'rejected'
-                    ? "bg-red-100/50 text-red-700 ring-1 ring-red-200/50" :
-                    "bg-purple-100/50 text-purple-700 ring-1 ring-purple-200/50"
-                )}
-              >
-                {tech}
-              </span>
-            ))}
-          </div>
+            {'technologies' in suggestion.data && suggestion.data.technologies && (
+              <div className="flex flex-wrap gap-1 mt-2">
+                {suggestion.data.technologies.map((tech, i) => (
+                  <span 
+                    key={i} 
+                    className={cn(
+                      "px-2 py-0.5 rounded-full text-[10px] font-medium backdrop-blur-sm",
+                      suggestionStatus === 'accepted' 
+                        ? "bg-green-100/50 text-green-700 ring-1 ring-green-200/50" : 
+                      suggestionStatus === 'rejected'
+                        ? "bg-red-100/50 text-red-700 ring-1 ring-red-200/50" :
+                        "bg-purple-100/50 text-purple-700 ring-1 ring-purple-200/50"
+                    )}
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            )}
+          </>
         )}
         {renderActionButtons()}
         {renderStatusIndicator()}

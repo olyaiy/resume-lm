@@ -1,7 +1,7 @@
-import { WorkExperience, Project } from "@/lib/types";
 import { MessageAction } from "@/components/resume/ai-assistant";
+import { Skill } from "@/lib/types";
 
-type SuggestionType = 'work_experience' | 'project';
+type SuggestionType = 'work_experience' | 'project' | 'skill';
 
 export function suggestImprovement(dispatch: (action: MessageAction) => void, type: SuggestionType = 'work_experience'): void {
   // Mock Work Experience
@@ -38,14 +38,28 @@ export function suggestImprovement(dispatch: (action: MessageAction) => void, ty
     }
   };
 
+  // Mock Skill
+  const mockSkill: { type: 'skill', data: Skill } = {
+    type: 'skill',
+    data: {
+      category: "Cloud Technologies",
+      items: ["AWS", "Azure", "Google Cloud Platform", "Docker", "Kubernetes", "Terraform", "CI/CD"]
+    }
+  };
+
+  // Determine which mock data to use
+  const mockData = {
+    work_experience: mockWorkExperience,
+    project: mockProject,
+    skill: mockSkill
+  }[type];
+
   // Dispatch suggestion based on type
   dispatch({
     type: 'ADD_MESSAGE',
     message: {
       role: 'assistant',
-      content: type === 'work_experience' 
-        ? JSON.stringify(mockWorkExperience, null, 2)
-        : JSON.stringify(mockProject, null, 2),
+      content: JSON.stringify(mockData, null, 2),
       timestamp: new Date(),
       isSuggestion: true,
       suggestionStatus: 'waiting'
