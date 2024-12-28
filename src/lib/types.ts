@@ -150,3 +150,13 @@ export interface Profile {
   created_at: string;
   updated_at: string;
 }
+
+export interface ResumeSuggestion {
+  id: string;
+  type: 'add' | 'update' | 'delete';
+  section: keyof Resume;
+  index?: number;
+  original?: any;
+  proposed: any;
+  reason: string;
+}

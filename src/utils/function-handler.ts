@@ -1,4 +1,5 @@
 import { Resume } from "@/lib/types";
+import { modifyWorkExperience } from './ai';
 
 /**
  * Interface defining the parameters for each function
@@ -16,6 +17,10 @@ interface FunctionParameters {
     action: "add" | "update" | "delete";
     index?: number;
     data: any;
+  };
+  suggest_modifications: {
+    section: keyof Resume;
+    prompt: string;
   };
 }
 
@@ -128,12 +133,85 @@ export const functionSchemas = {
             website: { type: "string", description: "Personal website URL" },
             linkedin_url: { type: "string", description: "LinkedIn profile URL" },
             github_url: { type: "string", description: "GitHub profile URL" },
-            professional_summary: { type: "string", description: "Professional summary or objective" }
           }
         }
       },
       required: ["section", "action"]
     }
+  },
+  suggest_modifications: {
+    name: "suggest_modifications",
+    description: "Propose modifications to a resume section by providing the section and a clear rewrite instruction",
+    parameters: {
+      type: "object",
+      properties: {
+        section: {
+          type: "string",
+          enum: ["basic_info", "work_experience", "education", "skills", "projects", "certifications", "professional_summary"],
+          description: "The section to improve"
+        },
+        prompt: {
+          type: "string",
+          description: "Instructions starting with 'Rewrite this section to...' followed by specific improvements needed",
+          examples: [
+            "Rewrite this section to include more quantifiable achievements and metrics",
+            "Rewrite this section to emphasize leadership skills and team impact",
+            "Rewrite this section to highlight technical expertise and project outcomes"
+          ]
+        }
+      },
+      required: ["section", "prompt"]
+    }
+  }
+} as const;
+
+const SECTION_SCHEMAS = {
+  work_experience: {
+    company: "string",
+    position: "string",
+    location: "string?",
+    date: "string",
+    description: "string[]",
+    technologies: "string[]?"
+  },
+  education: {
+    school: "string",
+    degree: "string",
+    field: "string",
+    location: "string?",
+    date: "string",
+    gpa: "string?",
+    achievements: "string[]?"
+  },
+  projects: {
+    name: "string",
+    description: "string[]",
+    date: "string?",
+    technologies: "string[]?",
+    url: "string?",
+    github_url: "string?"
+  },
+  skills: {
+    category: "string",
+    items: "string[]"
+  },
+  certifications: {
+    name: "string",
+    issuer: "string",
+    date_acquired: "string?",
+    expiry_date: "string?",
+    credential_id: "string?",
+    url: "string?"
+  },
+  basic_info: {
+    first_name: "string",
+    last_name: "string",
+    email: "string",
+    phone_number: "string?",
+    location: "string?",
+    website: "string?",
+    linkedin_url: "string?",
+    github_url: "string?"
   }
 } as const;
 
@@ -161,12 +239,13 @@ export class FunctionHandler {
    */
   async handleFunctionCall(functionName: string, functionArgs: string): Promise<string> {
     // Validate function name
-    const validFunctions = ['read_resume', 'update_name', 'modify_resume'] as const;
+    const validFunctions = ['read_resume', 'update_name', 'modify_resume', 'suggest_modifications'] as const;
     if (!validFunctions.includes(functionName as any)) {
       throw new Error(`Invalid function name: ${functionName}`);
     }
 
     // Parse and execute
+    console.log("functionName AND ARGS FROM INSIDE THE FUNCTION HANDLERS CLASS", functionName, functionArgs);
     const args = JSON.parse(functionArgs);
     return this.executeFunction(functionName as typeof validFunctions[number], args);
   }
@@ -182,6 +261,8 @@ export class FunctionHandler {
         return this.updateName(args.first_name, args.last_name);
       case "modify_resume":
         return this.modifyResume(args.section, args.action, args.index, args.data);
+      case "suggest_modifications":
+        return this.suggestModifications(args.section, args.prompt);
       default:
         throw new Error(`Unknown function: ${name}`);
     }
@@ -205,8 +286,7 @@ export class FunctionHandler {
           location: this.resume.location,
           website: this.resume.website,
           linkedin_url: this.resume.linkedin_url,
-          github_url: this.resume.github_url,
-          professional_summary: this.resume.professional_summary
+          github_url: this.resume.github_url
         });
       case "work_experience":
         return JSON.stringify(this.resume.work_experience);
@@ -258,57 +338,50 @@ export class FunctionHandler {
     index?: number,
     data?: any
   ): string {
-    switch (section) {
-      case "basic_info":
-        Object.entries(data).forEach(([key, value]) => {
-          const typedKey = key as keyof Resume;
-          if (typedKey in this.resume && typeof value === typeof this.resume[typedKey]) {
-            (this.resume[typedKey] as any) = value;
-            this.onUpdateResume(typedKey, value);
-          }
-        });
-        break;
-
-      case "work_experience":
-      case "education":
-      case "skills":
-      case "projects":
-      case "certifications": {
-        const sectionArray = this.resume[section];
-        
-        switch (action) {
-          case "add":
-            sectionArray.push(data);
-            this.onUpdateResume(section, sectionArray);
-            break;
-          case "update":
-            if (index === undefined || !sectionArray[index]) {
-              throw new Error(`Invalid index for ${section} update`);
-            }
-            sectionArray[index] = { ...sectionArray[index], ...data };
-            this.onUpdateResume(section, sectionArray);
-            break;
-          case "delete":
-            if (index === undefined || !sectionArray[index]) {
-              throw new Error(`Invalid index for ${section} deletion`);
-            }
-            sectionArray.splice(index, 1);
-            this.onUpdateResume(section, sectionArray);
-            break;
-        }
-        break;
-      }
-
-      default:
-        throw new Error("Invalid section specified");
-    }
-
+    // Implementation cleared
     return JSON.stringify({
-      success: true,
-      message: `Successfully ${action}ed ${section}`,
+      success: false,
+      message: "Not implemented",
       section,
       action,
       index
     });
+  }
+
+  private async suggestModifications(
+    section: FunctionParameters["suggest_modifications"]["section"],
+    prompt: string
+  ): Promise<string> {
+    try {
+      if (section === "work_experience") {
+        const entries = this.resume.work_experience;
+        
+        try {
+          const modifiedExperiences = await modifyWorkExperience(entries, prompt);
+          
+          return JSON.stringify({
+            success: true,
+            message: `Generated improvements for work experience`,
+            modifications: modifiedExperiences
+          });
+        } catch (error) {
+          console.error("Error modifying work experience:", error);
+          throw new Error(`Failed to modify work experience: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        }
+      }
+
+      // Handle other sections...
+      return JSON.stringify({
+        success: false,
+        message: `Section ${section} modifications not yet implemented`,
+        modifications: []
+      });
+    } catch (error) {
+      return JSON.stringify({
+        success: false,
+        message: error instanceof Error ? error.message : 'Failed to generate suggestions',
+        modifications: []
+      });
+    }
   }
 } 

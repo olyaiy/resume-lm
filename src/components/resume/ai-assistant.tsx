@@ -3,12 +3,13 @@
 import { useState, useCallback, useEffect, useRef, useReducer } from "react";
 import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { streamChatResponse } from "@/utils/ai";
+import { modifyWorkExperience, streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
-import type { Resume } from "@/lib/types";
+import type { Resume, ResumeSuggestion } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
+import { Button } from "../ui/button";
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -32,6 +33,7 @@ export interface Message {
   isSystemMessage?: boolean;
   isHidden?: boolean;
   name?: string;
+  suggestions?: ResumeSuggestion[];
 }
 
 interface AIAssistantProps {
@@ -226,71 +228,77 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
           // IF we have function call name and args
           if (functionCallName && functionCallArgs && !delta.content) {
-            if (!functionCallArgs.trim().endsWith('}')) {
-              continue;
-            }
+            try {
+              // Try parsing the JSON to validate completeness
+              JSON.parse(functionCallArgs);
+              
+              console.log("functionCallName", functionCallName);
+              console.log("functionCallArgs", functionCallArgs);
+              const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
+              const args = JSON.parse(functionCallArgs) as FunctionArgs;
 
-            const functionResult = await functionHandler.handleFunctionCall(functionCallName, functionCallArgs);
-            const args = JSON.parse(functionCallArgs);
-
-            // Set system message for function completion
-            const displayMessage = getFunctionDisplayMessage(functionCallName, args);
-            // ADD CHECKMARK ✅ MESSAGE TO MESSAGE HISTORY
-            dispatch({
-              type: 'SET_SYSTEM_MESSAGE',
-              content: displayMessage
-            });
+              // Set system message for function completion
+              const displayMessage = getFunctionDisplayMessage(functionCallName, args);
+              // ADD CHECKMARK ✅ MESSAGE TO MESSAGE HISTORY
+              dispatch({
+                type: 'SET_SYSTEM_MESSAGE',
+                content: displayMessage
+              });
 
 
-            // Add function CALL RESULT AND CONTENT to messages
-            dispatch({
-              type: 'ADD_MESSAGE',
-              message: {
+              // Add function CALL RESULT AND CONTENT to messages
+              dispatch({
+                type: 'ADD_MESSAGE',
+                message: {
+                  role: 'function',
+                  name: functionCallName,
+                  content: functionResult,
+                  timestamp: new Date(),
+                  isHidden: true
+                }
+              });
+
+              chatMessages.push({
                 role: 'function',
                 name: functionCallName,
-                content: functionResult,
-                timestamp: new Date(),
-                isHidden: true
-              }
-            });
+                content: functionResult
+              });
 
-            chatMessages.push({
-              role: 'function',
-              name: functionCallName,
-              content: functionResult
-            });
-
-            
-            // Add new assistant message for continued conversation
-            dispatch({
-              type: 'ADD_MESSAGE',
-              message: {
-                role: 'assistant',
-                content: '',
-                timestamp: new Date(),
-                isLoading: true
-              }
-            });
-
-            const newResponse = await streamChatResponse(chatMessages);
-            contentBufferRef.current = '';
-            let isFirstChunk = true;
-
-            for await (const newChunk of newResponse) {
-              if (newChunk.choices[0]?.delta?.content === '[DONE]') continue;
               
-              const content = newChunk.choices[0]?.delta?.content || '';
-              contentBufferRef.current += content;
+              // Add new assistant message for continued conversation
+              dispatch({
+                type: 'ADD_MESSAGE',
+                message: {
+                  role: 'assistant',
+                  content: '',
+                  timestamp: new Date(),
+                  isLoading: true
+                }
+              });
 
-              updateMessageContent(
-                contentBufferRef.current,
-                isFirstChunk && content.length === 0,
-                isFirstChunk && content.length === 0 ? 'Thinking...' : undefined
-              );
+              const newResponse = await streamChatResponse(chatMessages);
+              contentBufferRef.current = '';
+              let isFirstChunk = true;
 
-              if (isFirstChunk) isFirstChunk = false;
+              for await (const newChunk of newResponse) {
+                if (newChunk.choices[0]?.delta?.content === '[DONE]') continue;
+                
+                const content = newChunk.choices[0]?.delta?.content || '';
+                contentBufferRef.current += content;
+
+                updateMessageContent(
+                  contentBufferRef.current,
+                  isFirstChunk && content.length === 0,
+                  isFirstChunk && content.length === 0 ? 'Thinking...' : undefined
+                );
+
+                if (isFirstChunk) isFirstChunk = false;
+              }
+              continue;
+            } catch (e) {
+              // If JSON parsing fails, the response is incomplete
+              continue;
             }
-            continue;
           }
           continue;
         }
@@ -354,6 +362,37 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }
 
+  const handleAcceptSuggestion = useCallback((suggestion: ResumeSuggestion) => {
+    // If it's a work experience suggestion
+    if (suggestion.section === 'work_experience') {
+      const newWorkExperience = [...resume.work_experience];
+      
+      switch (suggestion.type) {
+        case 'update':
+          if (typeof suggestion.index === 'number') {
+            newWorkExperience[suggestion.index] = suggestion.proposed;
+          }
+          break;
+        case 'add':
+          newWorkExperience.push(suggestion.proposed);
+          break;
+        case 'delete':
+          if (typeof suggestion.index === 'number') {
+            newWorkExperience.splice(suggestion.index, 1);
+          }
+          break;
+      }
+      
+      onUpdateResume('work_experience', newWorkExperience);
+    }
+    // Handle other sections similarly...
+  }, [resume, onUpdateResume]);
+
+  const handleRejectSuggestion = useCallback((suggestion: ResumeSuggestion) => {
+    // You might want to log rejections or handle them differently
+    console.log('Suggestion rejected:', suggestion);
+  }, []);
+
   return (
     <div className={cn("group", className)}>
       {/* MAIN CHAT CONTAINER */}
@@ -407,10 +446,29 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           <ChatArea 
             messages={messages}
             isLoading={isLoading}
+            onAcceptSuggestion={handleAcceptSuggestion}
+            onRejectSuggestion={handleRejectSuggestion}
           />
         )}
 
         {/* Input Bar */}
+        <Button 
+          onClick={async () => {
+            try {
+              const modifiedExperience = await modifyWorkExperience(
+                resume.work_experience,
+                "Add quantifiable metrics and use stronger action verbs to demonstrate impact"
+              );
+              
+              console.log('Modified Experience:', modifiedExperience);
+              // Later we can add: onUpdateResume('work_experience', modifiedExperience);
+            } catch (error) {
+              console.error('Error modifying work experience:', error);
+            }
+          }}
+        >
+          Improve Work Experience
+        </Button>
         <ChatInput 
           onSubmit={handleAIResponse} 
           isLoading={isLoading} 

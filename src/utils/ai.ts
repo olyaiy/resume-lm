@@ -5,8 +5,8 @@
  */
 'use server';
 import OpenAI from "openai";
-import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceSchema, openAiProjectSchema } from "@/lib/schemas";
-import { Profile, Resume } from "@/lib/types";
+import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceBulletPointsSchema, openAiProjectSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
+import { Profile, Resume, WorkExperience } from "@/lib/types";
 import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { FunctionHandler, functionSchemas } from "./function-handler";
 
@@ -130,7 +130,7 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
       messages,
       response_format: {
         "type": "json_schema",
-        "json_schema": openAiWorkExperienceSchema
+        "json_schema": openAiWorkExperienceBulletPointsSchema
       },
       temperature: 0.7,
       max_tokens: 8133,
@@ -325,7 +325,7 @@ export async function streamChatResponse(
 ) {
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: "gpt-4o",
       messages: [
         AI_ASSISTANT_SYSTEM_MESSAGE,
         ...messages
@@ -346,5 +346,58 @@ export async function streamChatResponse(
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('❌ Fatal error in streamChatResponse:', message);
     throw new Error(`Failed to stream chat response: ${message}`);
+  }
+}
+
+/**
+ * Modifies a work experience entry based on a custom prompt
+ * @param experience - Original work experience entry
+ * @param prompt - Custom instructions for modification
+ * @returns Modified work experience entry
+ */
+export async function modifyWorkExperience(
+  experience: WorkExperience[],
+  prompt: string
+) {
+  const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
+    {
+      role: "system",
+      content: `You are a professional resume writer. Modify the given work experience based on the user's instructions. 
+      Maintain professionalism and accuracy while implementing the requested changes. 
+      Keep the same company and dates, but modify other fields as requested.
+      Use strong action verbs and quantifiable achievements where possible.`
+    },
+    {
+      role: "user",
+      content: `Please modify this work experience entry according to these instructions: ${prompt}
+
+Current work experience:
+${JSON.stringify(experience, null, 2)}`
+    }
+  ];
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages,
+      response_format: {
+        "type": "json_schema",
+        "json_schema": openAiWorkExperienceSchema
+      },
+      temperature: 0.7,
+      max_tokens: 8287,
+      top_p: 1,
+      frequency_penalty: 0.2,
+      presence_penalty: 0.1
+    });
+
+    if (!response.choices[0].message.content) {
+      throw new Error('No content received from OpenAI');
+    }
+
+    console.log('RESPONSE FROM AI AFTER MODIFYING WORK EXPERIENCE', response.choices[0].message.content);
+    return JSON.parse(response.choices[0].message.content) as WorkExperience;
+  } catch (error) {
+    throw new Error('Failed to modify work experience: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
