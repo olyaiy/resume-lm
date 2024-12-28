@@ -24,7 +24,7 @@ import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
 
 
-import ChatBot from "./assistant/chat-bot";
+import ChatBot from "./assistant/chatbot";
 
 
 interface ResumeEditorClientProps {

@@ -38,9 +38,9 @@ export async function continueConversation(history: Message[]) {
   
     (async () => {
       const { textStream } = streamText({
-        model: openai('gpt-3.5-turbo'),
+        model: openai('gpt-4o-mini'),
         system:
-          "You are a dude that doesn't drop character until the DVD commentary.",
+          "You are a helpful assistant",
         messages: history,
       });
   
