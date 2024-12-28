@@ -17,6 +17,7 @@ interface MessageBubbleProps {
   isLast: boolean;
   dispatch: (action: MessageAction) => void;
   messageIndex: number;
+  onAcceptSuggestion?: (experience: WorkExperience) => void;
 }
 
 // Memoize MessageBubble component
@@ -24,7 +25,8 @@ const MessageBubble = memo(function MessageBubble({
   message, 
   isLast,
   dispatch,
-  messageIndex
+  messageIndex,
+  onAcceptSuggestion
 }: MessageBubbleProps) {
   if (message.isHidden) {
     return null;
@@ -36,10 +38,10 @@ const MessageBubble = memo(function MessageBubble({
     const styles = {
       accepted: {
         check: "bg-green-100 text-green-600",
-        x: "text-gray-300 hover:bg-red-100 hover:text-red-600"
+        x: "hidden"
       },
       rejected: {
-        check: "text-gray-300 hover:bg-green-100 hover:text-green-600",
+        check: "hidden",
         x: "bg-red-100 text-red-600"
       },
       waiting: {
@@ -61,6 +63,15 @@ const MessageBubble = memo(function MessageBubble({
           messageIndex,
           status: 'accepted'
         });
+
+        if (message.isSuggestion && message.content && onAcceptSuggestion) {
+          try {
+            const suggestion = JSON.parse(message.content) as WorkExperience;
+            onAcceptSuggestion(suggestion);
+          } catch (e) {
+            console.error('Failed to parse suggestion:', e);
+          }
+        }
       }
     };
 
@@ -108,29 +119,84 @@ const MessageBubble = memo(function MessageBubble({
     if (message.isSuggestion) {
       try {
         const suggestion = JSON.parse(message.content) as WorkExperience;
+        const statusStyles = {
+          accepted: "border-l-4 border-l-green-500 bg-green-50/50",
+          rejected: "border-l-4 border-l-red-500 bg-red-50/50 opacity-75",
+          waiting: "",
+          no: ""
+        }[message.suggestionStatus || 'waiting'];
+
         return (
-          <div className="space-y-2">
+          <div className={cn(
+            "space-y-2 p-3 rounded-lg transition-all duration-300",
+            statusStyles
+          )}>
             {renderSuggestionButtons(message.suggestionStatus || 'waiting')}
             
             <div className="flex justify-between items-baseline">
-              <h3 className="font-medium text-purple-900">{suggestion.position}</h3>
-              <span className="text-sm text-purple-600">{suggestion.date}</span>
+              <h3 className={cn(
+                "font-medium",
+                message.suggestionStatus === 'accepted' ? "text-green-900" : 
+                message.suggestionStatus === 'rejected' ? "text-red-900/75" : 
+                "text-purple-900"
+              )}>
+                {suggestion.position}
+              </h3>
+              <span className={cn(
+                "text-sm",
+                message.suggestionStatus === 'accepted' ? "text-green-600" : 
+                message.suggestionStatus === 'rejected' ? "text-red-600/75" : 
+                "text-purple-600"
+              )}>
+                {suggestion.date}
+              </span>
             </div>
             <div className="flex items-baseline gap-2">
-              <span className="font-medium text-purple-800">{suggestion.company}</span>
+              <span className={cn(
+                "font-medium",
+                message.suggestionStatus === 'accepted' ? "text-green-800" : 
+                message.suggestionStatus === 'rejected' ? "text-red-800/75" : 
+                "text-purple-800"
+              )}>
+                {suggestion.company}
+              </span>
               {suggestion.location && (
-                <span className="text-sm text-purple-600">• {suggestion.location}</span>
+                <span className={cn(
+                  "text-sm",
+                  message.suggestionStatus === 'accepted' ? "text-green-600" : 
+                  message.suggestionStatus === 'rejected' ? "text-red-600/75" : 
+                  "text-purple-600"
+                )}>
+                  • {suggestion.location}
+                </span>
               )}
             </div>
             <ul className="list-disc pl-4 space-y-1">
               {suggestion.description.map((desc, i) => (
-                <li key={i} className="text-sm text-purple-800">{desc}</li>
+                <li key={i} className={cn(
+                  "text-sm",
+                  message.suggestionStatus === 'accepted' ? "text-green-800" : 
+                  message.suggestionStatus === 'rejected' ? "text-red-800/75" : 
+                  "text-purple-800"
+                )}>
+                  {desc}
+                </li>
               ))}
             </ul>
             {suggestion.technologies && (
               <div className="flex flex-wrap gap-1.5 mt-2">
                 {suggestion.technologies.map((tech, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs">
+                  <span 
+                    key={i} 
+                    className={cn(
+                      "px-2 py-0.5 rounded-full text-xs",
+                      message.suggestionStatus === 'accepted' 
+                        ? "bg-green-100 text-green-700" : 
+                      message.suggestionStatus === 'rejected'
+                        ? "bg-red-100 text-red-700/75" :
+                        "bg-purple-100 text-purple-700"
+                    )}
+                  >
                     {tech}
                   </span>
                 ))}
@@ -269,13 +335,15 @@ interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
   dispatch: (action: MessageAction) => void;
+  onAcceptSuggestion?: (experience: WorkExperience) => void;
 }
 
 // Memoize ChatArea component
 export const ChatArea = memo(function ChatArea({ 
   messages, 
   isLoading,
-  dispatch 
+  dispatch,
+  onAcceptSuggestion
 }: ChatAreaProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -346,6 +414,7 @@ export const ChatArea = memo(function ChatArea({
               isLast={index === messages.length - 1}
               dispatch={dispatch}
               messageIndex={index}
+              onAcceptSuggestion={onAcceptSuggestion}
             />
           ))}
           

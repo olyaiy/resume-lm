@@ -372,6 +372,19 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }
 
+  const handleAcceptSuggestion = useCallback((suggestion: WorkExperience) => {
+    // Get current work experience array
+    const currentWorkExperience = resume.work_experience || [];
+    
+    // Replace first item with new suggestion
+    const updatedWorkExperience = [
+      suggestion,
+      ...currentWorkExperience.slice(1)
+    ];
+
+    // Update resume
+    onUpdateResume('work_experience', updatedWorkExperience);
+  }, [resume.work_experience, onUpdateResume]);
 
   return (
     <div className={cn("group", className)}>
@@ -427,6 +440,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
             messages={messages}
             isLoading={isLoading}
             dispatch={dispatch}
+            onAcceptSuggestion={handleAcceptSuggestion}
           />
         )}
 
