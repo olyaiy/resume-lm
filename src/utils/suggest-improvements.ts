@@ -1,7 +1,7 @@
 import { MessageAction } from "@/components/resume/ai-assistant";
-import { Skill } from "@/lib/types";
+import { Skill, Education } from "@/lib/types";
 
-type SuggestionType = 'work_experience' | 'project' | 'skill';
+type SuggestionType = 'work_experience' | 'project' | 'skill' | 'education';
 
 export function suggestImprovement(dispatch: (action: MessageAction) => void, type: SuggestionType = 'work_experience'): void {
   // Mock Work Experience
@@ -47,11 +47,30 @@ export function suggestImprovement(dispatch: (action: MessageAction) => void, ty
     }
   };
 
+  // Mock Education
+  const mockEducation: { type: 'education', data: Education } = {
+    type: 'education',
+    data: {
+      school: "Stanford University",
+      degree: "Master of Science",
+      field: "Computer Science",
+      location: "Stanford, CA",
+      date: "2018 - 2020",
+      gpa: "3.92",
+      achievements: [
+        "Published research paper on AI-driven software optimization",
+        "Teaching Assistant for Advanced Algorithms course",
+        "President of Computer Science Student Association"
+      ]
+    }
+  };
+
   // Determine which mock data to use
   const mockData = {
     work_experience: mockWorkExperience,
     project: mockProject,
-    skill: mockSkill
+    skill: mockSkill,
+    education: mockEducation
   }[type];
 
   // Dispatch suggestion based on type

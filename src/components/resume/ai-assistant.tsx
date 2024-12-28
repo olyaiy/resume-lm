@@ -5,7 +5,7 @@ import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
-import type { Resume, WorkExperience, Project, Skill } from "@/lib/types";
+import type { Resume, WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
@@ -26,8 +26,8 @@ type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
 };
 
 type SuggestionData = {
-  type: 'work_experience' | 'project' | 'skill';
-  data: WorkExperience | Project | Skill;
+  type: 'work_experience' | 'project' | 'skill' | 'education';
+  data: WorkExperience | Project | Skill | Education;
 };
 
 export interface Message {
@@ -435,6 +435,16 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         onUpdateResume('skills', updatedSkills);
         break;
       }
+      case 'education': {
+        const education = data as Education;
+        const currentEducation = resume.education || [];
+        const updatedEducation = [
+          education,
+          ...currentEducation.slice(1)
+        ];
+        onUpdateResume('education', updatedEducation);
+        break;
+      }
     }
   }, [resume, onUpdateResume]);
 
@@ -511,8 +521,14 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
         </Button>
         <Button 
           onClick={() => suggestImprovement(dispatch, 'skill')}
+          className="mr-2"
         >
           Suggest Skills
+        </Button>
+        <Button 
+          onClick={() => suggestImprovement(dispatch, 'education')}
+        >
+          Suggest Education
         </Button>
         <ChatInput 
           onSubmit={handleAIResponse} 

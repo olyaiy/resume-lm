@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { WorkExperience, Project, Skill } from "@/lib/types";
+import { WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { Check, X, Link as LinkIcon, Github } from "lucide-react";
 import { memo } from 'react';
 
 type SuggestionData = {
-  type: 'work_experience' | 'project' | 'skill';
-  data: WorkExperience | Project | Skill;
+  type: 'work_experience' | 'project' | 'skill' | 'education';
+  data: WorkExperience | Project | Skill | Education;
 };
 
 interface SuggestionBubbleProps {
@@ -238,6 +238,75 @@ export const SuggestionBubble = memo(function SuggestionBubble({
     </>
   );
 
+  const renderEducation = (education: Education) => (
+    <>
+      <div className="flex justify-between items-baseline gap-2">
+        <h3 className={cn(
+          "font-medium text-sm",
+          suggestionStatus === 'accepted' ? "text-green-700" : 
+          suggestionStatus === 'rejected' ? "text-red-700" : 
+          "text-purple-700"
+        )}>
+          {education.degree} in {education.field}
+        </h3>
+        <span className={cn(
+          "text-xs whitespace-nowrap",
+          suggestionStatus === 'accepted' ? "text-green-600/90" : 
+          suggestionStatus === 'rejected' ? "text-red-600/90" : 
+          "text-purple-600/90"
+        )}>
+          {education.date}
+        </span>
+      </div>
+
+      <div className="flex items-baseline gap-1.5 text-xs mt-1">
+        <span className={cn(
+          "font-medium",
+          suggestionStatus === 'accepted' ? "text-green-600" : 
+          suggestionStatus === 'rejected' ? "text-red-600" : 
+          "text-purple-600"
+        )}>
+          {education.school}
+        </span>
+        {education.location && (
+          <span className={cn(
+            suggestionStatus === 'accepted' ? "text-green-500/90" : 
+            suggestionStatus === 'rejected' ? "text-red-500/90" : 
+            "text-purple-500/90"
+          )}>
+            • {education.location}
+          </span>
+        )}
+      </div>
+
+      {education.gpa && (
+        <div className={cn(
+          "text-xs mt-1",
+          suggestionStatus === 'accepted' ? "text-green-600/90" : 
+          suggestionStatus === 'rejected' ? "text-red-600/90" : 
+          "text-purple-600/90"
+        )}>
+          GPA: {education.gpa}
+        </div>
+      )}
+
+      {education.achievements && (
+        <ul className="list-disc pl-4 mt-2 space-y-1">
+          {education.achievements.map((achievement, i) => (
+            <li key={i} className={cn(
+              "text-xs leading-relaxed",
+              suggestionStatus === 'accepted' ? "text-green-700/90" : 
+              suggestionStatus === 'rejected' ? "text-red-700/90" : 
+              "text-purple-700/90"
+            )}>
+              {achievement}
+            </li>
+          ))}
+        </ul>
+      )}
+    </>
+  );
+
   return (
     <div className="relative">
       <div className={cn(
@@ -248,10 +317,12 @@ export const SuggestionBubble = memo(function SuggestionBubble({
           ? renderWorkExperience(suggestion.data as WorkExperience)
           : suggestion.type === 'project'
           ? renderProject(suggestion.data as Project)
+          : suggestion.type === 'education'
+          ? renderEducation(suggestion.data as Education)
           : renderSkill(suggestion.data as Skill)
         }
 
-        {suggestion.type !== 'skill' && (
+        {(suggestion.type === 'work_experience' || suggestion.type === 'project') && (
           <>
             <ul className="list-disc pl-4 mt-2 space-y-1">
               {(suggestion.data as WorkExperience | Project).description.map((desc, i) => (

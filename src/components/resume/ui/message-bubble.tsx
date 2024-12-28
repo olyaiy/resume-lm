@@ -8,12 +8,12 @@ import { TypingIndicator } from "./typing-indicator";
 import { Message, MessageAction } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
-import type { WorkExperience, Project, Skill } from "@/lib/types";
+import type { WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { SuggestionBubble } from "./suggestion-bubble";
 
 type SuggestionData = {
-  type: 'work_experience' | 'project' | 'skill';
-  data: WorkExperience | Project | Skill;
+  type: 'work_experience' | 'project' | 'skill' | 'education';
+  data: WorkExperience | Project | Skill | Education;
 };
 
 interface MessageBubbleProps {
