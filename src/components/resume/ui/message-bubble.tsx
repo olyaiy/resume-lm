@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { TypingIndicator } from "./typing-indicator";
-import { Message } from "../ai-assistant";
+import { Message, MessageAction } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
 import type { WorkExperience } from "@/lib/types";
@@ -15,11 +15,16 @@ import { Button } from "@/components/ui/button";
 interface MessageBubbleProps {
   message: Message;
   isLast: boolean;
+  dispatch: (action: MessageAction) => void;
+  messageIndex: number;
 }
 
 // Memoize MessageBubble component
 const MessageBubble = memo(function MessageBubble({ 
   message, 
+  isLast,
+  dispatch,
+  messageIndex
 }: MessageBubbleProps) {
   if (message.isHidden) {
     return null;
@@ -27,28 +32,85 @@ const MessageBubble = memo(function MessageBubble({
 
   const isUser = message.role === 'user';
   
+  const renderSuggestionButtons = (status: 'accepted' | 'rejected' | 'waiting' | 'no' = 'waiting') => {
+    const styles = {
+      accepted: {
+        check: "bg-green-100 text-green-600",
+        x: "text-gray-300 hover:bg-red-100 hover:text-red-600"
+      },
+      rejected: {
+        check: "text-gray-300 hover:bg-green-100 hover:text-green-600",
+        x: "bg-red-100 text-red-600"
+      },
+      waiting: {
+        check: "hover:bg-green-100 hover:text-green-600",
+        x: "hover:bg-red-100 hover:text-red-600"
+      },
+      no: {
+        check: "hidden",
+        x: "hidden"
+      }
+    };
+
+    const currentStyles = styles[status];
+
+    const handleAccept = () => {
+      if (status !== 'accepted') {
+        dispatch({
+          type: 'UPDATE_SUGGESTION_STATUS',
+          messageIndex,
+          status: 'accepted'
+        });
+      }
+    };
+
+    const handleReject = () => {
+      if (status !== 'rejected') {
+        dispatch({
+          type: 'UPDATE_SUGGESTION_STATUS',
+          messageIndex,
+          status: 'rejected'
+        });
+      }
+    };
+
+    return (
+      <div className="flex justify-end gap-2 mb-2">
+        <Button
+          size="icon"
+          variant="ghost"
+          className={cn(
+            "h-6 w-6 rounded-full transition-colors",
+            currentStyles.check
+          )}
+          onClick={handleAccept}
+          disabled={status === 'accepted'}
+        >
+          <Check className="h-4 w-4" />
+        </Button>
+        <Button
+          size="icon"
+          variant="ghost"
+          className={cn(
+            "h-6 w-6 rounded-full transition-colors",
+            currentStyles.x
+          )}
+          onClick={handleReject}
+          disabled={status === 'rejected'}
+        >
+          <X className="h-4 w-4" />
+        </Button>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     if (message.isSuggestion) {
       try {
         const suggestion = JSON.parse(message.content) as WorkExperience;
         return (
           <div className="space-y-2">
-            <div className="flex justify-end gap-2 mb-2">
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6 rounded-full hover:bg-green-100 hover:text-green-600"
-              >
-                <Check className="h-4 w-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-6 w-6 rounded-full hover:bg-red-100 hover:text-red-600"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+            {renderSuggestionButtons(message.suggestionStatus || 'waiting')}
             
             <div className="flex justify-between items-baseline">
               <h3 className="font-medium text-purple-900">{suggestion.position}</h3>
@@ -206,12 +268,14 @@ const MessageBubble = memo(function MessageBubble({
 interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
+  dispatch: (action: MessageAction) => void;
 }
 
 // Memoize ChatArea component
 export const ChatArea = memo(function ChatArea({ 
   messages, 
-  isLoading, 
+  isLoading,
+  dispatch 
 }: ChatAreaProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -280,9 +344,11 @@ export const ChatArea = memo(function ChatArea({
               key={index} 
               message={msg} 
               isLast={index === messages.length - 1}
+              dispatch={dispatch}
+              messageIndex={index}
             />
           ))}
-         
+          
           <div ref={messagesEndRef} className="h-0 w-full" />
         </div>
       </ScrollArea>

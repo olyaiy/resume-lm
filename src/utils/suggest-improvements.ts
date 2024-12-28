@@ -21,7 +21,8 @@ export function suggestImprovement(dispatch: (action: MessageAction) => void): v
       role: 'assistant',
       content: JSON.stringify(mockWorkExperience, null, 2),
       timestamp: new Date(),
-      isSuggestion: true
+      isSuggestion: true,
+      suggestionStatus: 'waiting'
     }
   });
 } 

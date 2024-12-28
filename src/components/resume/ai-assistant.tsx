@@ -35,6 +35,7 @@ export interface Message {
   isHidden?: boolean;
   name?: string;
   isSuggestion?: boolean;
+  suggestionStatus?: 'accepted' | 'rejected' | 'waiting' | 'no';
 }
 
 interface AIAssistantProps {
@@ -48,7 +49,8 @@ export type MessageAction =
   | { type: 'ADD_MESSAGE'; message: Message }
   | { type: 'UPDATE_LAST_MESSAGE'; content: string; isLoading?: boolean; loadingText?: string }
   | { type: 'ADD_FUNCTION_RESULT'; message: Message }
-  | { type: 'SET_SYSTEM_MESSAGE'; content: string };
+  | { type: 'SET_SYSTEM_MESSAGE'; content: string }
+  | { type: 'UPDATE_SUGGESTION_STATUS'; messageIndex: number; status: 'accepted' | 'rejected' };
 
 // Add this reducer function before the AIAssistant component
 function messageReducer(state: Message[], action: MessageAction): Message[] {
@@ -100,6 +102,13 @@ function messageReducer(state: Message[], action: MessageAction): Message[] {
       ];
     }
     
+    case 'UPDATE_SUGGESTION_STATUS':
+      return state.map((msg, index) => 
+        index === action.messageIndex
+          ? { ...msg, suggestionStatus: action.status }
+          : msg
+      );
+      
     default:
       return state;
   }
@@ -417,6 +426,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
           <ChatArea 
             messages={messages}
             isLoading={isLoading}
+            dispatch={dispatch}
           />
         )}
 
