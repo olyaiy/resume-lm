@@ -1,5 +1,4 @@
 import type { WorkExperience } from "@/lib/types";
-import type { Message } from "@/components/resume/ai-assistant";
 import type { MessageAction } from "@/components/resume/ai-assistant";
 
 export function suggestImprovement(dispatch: (action: MessageAction) => void): void {

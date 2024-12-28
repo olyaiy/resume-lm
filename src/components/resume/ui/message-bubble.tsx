@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, User, CheckCircle2 } from "lucide-react";
+import { Bot, User, CheckCircle2, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -9,6 +9,7 @@ import { Message } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
 import type { WorkExperience } from "@/lib/types";
+import { Button } from "@/components/ui/button";
 
 
 interface MessageBubbleProps {
@@ -32,6 +33,23 @@ const MessageBubble = memo(function MessageBubble({
         const suggestion = JSON.parse(message.content) as WorkExperience;
         return (
           <div className="space-y-2">
+            <div className="flex justify-end gap-2 mb-2">
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6 rounded-full hover:bg-green-100 hover:text-green-600"
+              >
+                <Check className="h-4 w-4" />
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                className="h-6 w-6 rounded-full hover:bg-red-100 hover:text-red-600"
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+            
             <div className="flex justify-between items-baseline">
               <h3 className="font-medium text-purple-900">{suggestion.position}</h3>
               <span className="text-sm text-purple-600">{suggestion.date}</span>
@@ -59,7 +77,7 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         );
       } catch (e) {
-        return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{message.content}</ReactMarkdown>;
+        // return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{message.content}</ReactMarkdown>;
       }
     }
     
