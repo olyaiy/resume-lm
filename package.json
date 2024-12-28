@@ -40,6 +40,7 @@
     "framer-motion": "^11.15.0",
     "lodash": "^4.17.21",
     "lucide-react": "^0.469.0",
+    "marked": "^15.0.4",
     "next": "15.1.2",
     "openai": "^4.77.0",
     "openai-edge": "^1.2.2",

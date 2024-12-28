@@ -386,6 +386,8 @@ export function ResumeEditorClient({
             {/* Editor Panel */}
             <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
               <div className="flex flex-col h-full mr-4">
+
+              <ChatBot />
                 {/* Main Editor Area */}
                 <ScrollArea className="flex-1">
                   <div className="space-y-6 pr-4 pb-6">
@@ -538,7 +540,7 @@ export function ResumeEditorClient({
                   </div>
                   {/* AI Assistant Section */}
                  
-                  <ChatBot />
+                 
 
                 <div>{generation}</div>
                   {/* <TestAssistant /> */}
