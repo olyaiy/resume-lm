@@ -8,7 +8,7 @@ import { TypingIndicator } from "./typing-indicator";
 import { Message } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
-import { WorkExperience } from "@/lib/types";
+import type { WorkExperience } from "@/lib/types";
 
 
 interface MessageBubbleProps {
@@ -29,27 +29,27 @@ const MessageBubble = memo(function MessageBubble({
   const renderContent = () => {
     if (message.isSuggestion) {
       try {
-        const workExp = JSON.parse(message.content) as WorkExperience;
+        const suggestion = JSON.parse(message.content) as WorkExperience;
         return (
           <div className="space-y-2">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-medium text-purple-900">{workExp.position}</h3>
-                <p className="text-sm text-purple-700">{workExp.company}</p>
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-purple-600">{workExp.location}</p>
-                <p className="text-sm text-purple-600">{workExp.date}</p>
-              </div>
+            <div className="flex justify-between items-baseline">
+              <h3 className="font-medium text-purple-900">{suggestion.position}</h3>
+              <span className="text-sm text-purple-600">{suggestion.date}</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="font-medium text-purple-800">{suggestion.company}</span>
+              {suggestion.location && (
+                <span className="text-sm text-purple-600">• {suggestion.location}</span>
+              )}
             </div>
             <ul className="list-disc pl-4 space-y-1">
-              {workExp.description.map((desc, i) => (
+              {suggestion.description.map((desc, i) => (
                 <li key={i} className="text-sm text-purple-800">{desc}</li>
               ))}
             </ul>
-            {workExp.technologies && (
+            {suggestion.technologies && (
               <div className="flex flex-wrap gap-1.5 mt-2">
-                {workExp.technologies.map((tech, i) => (
+                {suggestion.technologies.map((tech, i) => (
                   <span key={i} className="px-2 py-0.5 bg-purple-100 text-purple-700 rounded-full text-xs">
                     {tech}
                   </span>
@@ -59,8 +59,7 @@ const MessageBubble = memo(function MessageBubble({
           </div>
         );
       } catch (e) {
-        // Fallback to normal rendering if JSON parsing fails
-        return <ReactMarkdown {...defaultMarkdownProps}>{message.content}</ReactMarkdown>;
+        return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{message.content}</ReactMarkdown>;
       }
     }
     
