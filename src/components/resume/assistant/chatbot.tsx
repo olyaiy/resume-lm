@@ -8,7 +8,10 @@ import { Card } from "@/components/ui/card";
 import { Send } from "lucide-react";
 
 export default function Page() {
-  const { messages, input, setInput, append } = useChat();
+  const { messages, input, setInput, append } = useChat({
+    api: '/api/chat',
+    maxSteps: 2,
+  });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
