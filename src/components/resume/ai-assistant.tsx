@@ -3,9 +3,9 @@
 import { useState, useCallback, useEffect, useRef, useReducer } from "react";
 import { Sparkles, ChevronUp } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { modifyWorkExperience, streamChatResponse } from "@/utils/ai";
+import { streamChatResponse } from "@/utils/ai";
 import type { OpenAI } from "openai";
-import type { Resume, WorkExperience } from "@/lib/types";
+import type { Resume, WorkExperience, Project } from "@/lib/types";
 import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
@@ -23,6 +23,11 @@ type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
       };
     };
   }>;
+};
+
+type SuggestionData = {
+  type: 'work_experience' | 'project';
+  data: WorkExperience | Project;
 };
 
 export interface Message {
@@ -113,6 +118,7 @@ function messageReducer(state: Message[], action: MessageAction): Message[] {
       return state;
   }
 }
+
 export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   const [messages, dispatch] = useReducer(messageReducer, []);
@@ -372,19 +378,43 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
     }
   }
 
-  const handleAcceptSuggestion = useCallback((suggestion: WorkExperience) => {
-    // Get current work experience array
-    const currentWorkExperience = resume.work_experience || [];
-    
-    // Replace first item with new suggestion
-    const updatedWorkExperience = [
-      suggestion,
-      ...currentWorkExperience.slice(1)
-    ];
+  const handleAcceptSuggestion = useCallback((suggestion: WorkExperience | SuggestionData) => {
+    // Handle legacy WorkExperience type
+    if ('company' in suggestion) {
+      const currentWorkExperience = resume.work_experience || [];
+      const updatedWorkExperience = [
+        suggestion,
+        ...currentWorkExperience.slice(1)
+      ];
+      onUpdateResume('work_experience', updatedWorkExperience);
+      return;
+    }
 
-    // Update resume
-    onUpdateResume('work_experience', updatedWorkExperience);
-  }, [resume.work_experience, onUpdateResume]);
+    // Handle new SuggestionData
+    const { type, data } = suggestion;
+    switch (type) {
+      case 'work_experience': {
+        const workExp = data as WorkExperience;
+        const currentWorkExperience = resume.work_experience || [];
+        const updatedWorkExperience = [
+          workExp,
+          ...currentWorkExperience.slice(1)
+        ];
+        onUpdateResume('work_experience', updatedWorkExperience);
+        break;
+      }
+      case 'project': {
+        const project = data as Project;
+        const currentProjects = resume.projects || [];
+        const updatedProjects = [
+          project,
+          ...currentProjects.slice(1)
+        ];
+        onUpdateResume('projects', updatedProjects);
+        break;
+      }
+    }
+  }, [resume.work_experience, resume.projects, onUpdateResume]);
 
   return (
     <div className={cn("group", className)}>
@@ -446,9 +476,15 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
         {/* Input Bar */}
         <Button 
-          onClick={() => suggestImprovement(dispatch)}
+          onClick={() => suggestImprovement(dispatch, 'work_experience')}
+          className="mr-2"
         >
           Improve Work Experience
+        </Button>
+        <Button 
+          onClick={() => suggestImprovement(dispatch, 'project')}
+        >
+          Suggest Project
         </Button>
         <ChatInput 
           onSubmit={handleAIResponse} 

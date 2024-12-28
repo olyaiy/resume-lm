@@ -2,12 +2,17 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { WorkExperience } from "@/lib/types";
-import { Check, X } from "lucide-react";
+import { WorkExperience, Project } from "@/lib/types";
+import { Check, X, Link as LinkIcon, Github } from "lucide-react";
 import { memo } from 'react';
 
+type SuggestionData = {
+  type: 'work_experience' | 'project';
+  data: WorkExperience | Project;
+};
+
 interface SuggestionBubbleProps {
-  suggestion: WorkExperience;
+  suggestion: SuggestionData;
   suggestionStatus?: 'accepted' | 'rejected' | 'waiting' | 'no';
   onAccept: () => void;
   onReject: () => void;
@@ -98,53 +103,124 @@ export const SuggestionBubble = memo(function SuggestionBubble({
     );
   };
 
-  return (
-    <div className="relative">
-      <div className={cn(
-        "p-3 rounded-xl transition-colors duration-300 backdrop-blur-sm",
-        statusStyles
-      )}>
-        <div className="flex justify-between items-baseline gap-2">
-          <h3 className={cn(
-            "font-medium text-sm",
-            suggestionStatus === 'accepted' ? "text-green-700" : 
-            suggestionStatus === 'rejected' ? "text-red-700" : 
-            "text-purple-700"
+  const renderWorkExperience = (exp: WorkExperience) => (
+    <>
+      <div className="flex justify-between items-baseline gap-2">
+        <h3 className={cn(
+          "font-medium text-sm",
+          suggestionStatus === 'accepted' ? "text-green-700" : 
+          suggestionStatus === 'rejected' ? "text-red-700" : 
+          "text-purple-700"
+        )}>
+          {exp.position}
+        </h3>
+        <span className={cn(
+          "text-xs whitespace-nowrap",
+          suggestionStatus === 'accepted' ? "text-green-600/90" : 
+          suggestionStatus === 'rejected' ? "text-red-600/90" : 
+          "text-purple-600/90"
+        )}>
+          {exp.date}
+        </span>
+      </div>
+
+      <div className="flex items-baseline gap-1.5 text-xs mt-1">
+        <span className={cn(
+          "font-medium",
+          suggestionStatus === 'accepted' ? "text-green-600" : 
+          suggestionStatus === 'rejected' ? "text-red-600" : 
+          "text-purple-600"
+        )}>
+          {exp.company}
+        </span>
+        {exp.location && (
+          <span className={cn(
+            suggestionStatus === 'accepted' ? "text-green-500/90" : 
+            suggestionStatus === 'rejected' ? "text-red-500/90" : 
+            "text-purple-500/90"
           )}>
-            {suggestion.position}
-          </h3>
+            • {exp.location}
+          </span>
+        )}
+      </div>
+    </>
+  );
+
+  const renderProject = (project: Project) => (
+    <>
+      <div className="flex justify-between items-baseline gap-2">
+        <h3 className={cn(
+          "font-medium text-sm",
+          suggestionStatus === 'accepted' ? "text-green-700" : 
+          suggestionStatus === 'rejected' ? "text-red-700" : 
+          "text-purple-700"
+        )}>
+          {project.name}
+        </h3>
+        {project.date && (
           <span className={cn(
             "text-xs whitespace-nowrap",
             suggestionStatus === 'accepted' ? "text-green-600/90" : 
             suggestionStatus === 'rejected' ? "text-red-600/90" : 
             "text-purple-600/90"
           )}>
-            {suggestion.date}
+            {project.date}
           </span>
-        </div>
+        )}
+      </div>
 
-        <div className="flex items-baseline gap-1.5 text-xs mt-1">
-          <span className={cn(
-            "font-medium",
-            suggestionStatus === 'accepted' ? "text-green-600" : 
-            suggestionStatus === 'rejected' ? "text-red-600" : 
-            "text-purple-600"
-          )}>
-            {suggestion.company}
-          </span>
-          {suggestion.location && (
-            <span className={cn(
-              suggestionStatus === 'accepted' ? "text-green-500/90" : 
-              suggestionStatus === 'rejected' ? "text-red-500/90" : 
-              "text-purple-500/90"
-            )}>
-              • {suggestion.location}
-            </span>
+      {(project.url || project.github_url) && (
+        <div className="flex items-center gap-2 mt-1">
+          {project.url && (
+            <a 
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "flex items-center gap-1 text-xs",
+                suggestionStatus === 'accepted' ? "text-green-600" : 
+                suggestionStatus === 'rejected' ? "text-red-600" : 
+                "text-purple-600"
+              )}
+            >
+              <LinkIcon className="h-3 w-3" />
+              Live Demo
+            </a>
+          )}
+          {project.github_url && (
+            <a 
+              href={project.github_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={cn(
+                "flex items-center gap-1 text-xs",
+                suggestionStatus === 'accepted' ? "text-green-600" : 
+                suggestionStatus === 'rejected' ? "text-red-600" : 
+                "text-purple-600"
+              )}
+            >
+              <Github className="h-3 w-3" />
+              GitHub
+            </a>
           )}
         </div>
+      )}
+    </>
+  );
+
+  return (
+    <div className="relative">
+      <div className={cn(
+        "p-3 rounded-xl transition-colors duration-300 backdrop-blur-sm",
+        statusStyles
+      )}>
+        {suggestion.type === 'work_experience' 
+          ? renderWorkExperience(suggestion.data as WorkExperience)
+          : renderProject(suggestion.data as Project)
+        }
 
         <ul className="list-disc pl-4 mt-2 space-y-1">
-          {suggestion.description.map((desc, i) => (
+          {suggestion.data.description.map((desc, i) => (
             <li key={i} className={cn(
               "text-xs leading-relaxed",
               suggestionStatus === 'accepted' ? "text-green-700/90" : 
@@ -156,9 +232,9 @@ export const SuggestionBubble = memo(function SuggestionBubble({
           ))}
         </ul>
 
-        {suggestion.technologies && (
+        {suggestion.data.technologies && (
           <div className="flex flex-wrap gap-1 mt-2">
-            {suggestion.technologies.map((tech, i) => (
+            {suggestion.data.technologies.map((tech, i) => (
               <span 
                 key={i} 
                 className={cn(

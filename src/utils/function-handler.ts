@@ -348,35 +348,60 @@ export class FunctionHandler {
     });
   }
 
+  /**
+   * Suggests improvements for a specific section of the resume using AI
+   * This function takes a section of the resume and a prompt, then returns AI-generated
+   * suggestions for improving that section.
+   * 
+   * @param section - The section of the resume to improve (e.g., "work_experience", "education", etc.)
+   * @param prompt - The instruction for how to improve the section (e.g., "Rewrite to include more metrics")
+   * @returns A Promise resolving to a JSON string containing:
+   *          - success: boolean indicating if the operation succeeded
+   *          - message: descriptive message about the operation result
+   *          - modifications: array of suggested changes
+   * 
+   * Current Implementation Status:
+   * - Fully implemented for work_experience section
+   * - Other sections pending implementation
+   */
   private async suggestModifications(
     section: FunctionParameters["suggest_modifications"]["section"],
     prompt: string
   ): Promise<string> {
     try {
+      // Currently only work experience modifications are implemented
       if (section === "work_experience") {
+        // Get the current work experience entries from the resume
         const entries = this.resume.work_experience;
         
         try {
+          // Call the AI service to modify work experience entries
+          // This uses OpenAI to generate improvements based on the prompt
           const modifiedExperiences = await modifyWorkExperience(entries, prompt);
           
+          // Return successful response with the AI-generated modifications
           return JSON.stringify({
             success: true,
             message: `Generated improvements for work experience`,
             modifications: modifiedExperiences
           });
         } catch (error) {
+          // Log and rethrow any errors that occur during the AI modification process
           console.error("Error modifying work experience:", error);
           throw new Error(`Failed to modify work experience: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
       }
 
-      // Handle other sections...
+      // For any section other than work_experience, return a "not implemented" response
+      // This serves as a placeholder until other sections are implemented
       return JSON.stringify({
         success: false,
         message: `Section ${section} modifications not yet implemented`,
         modifications: []
       });
     } catch (error) {
+      // Catch and handle any unexpected errors that weren't caught in the inner try-catch
+      // Returns a standardized error response
       return JSON.stringify({
         success: false,
         message: error instanceof Error ? error.message : 'Failed to generate suggestions',

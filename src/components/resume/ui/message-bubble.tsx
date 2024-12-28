@@ -8,15 +8,20 @@ import { TypingIndicator } from "./typing-indicator";
 import { Message, MessageAction } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
-import type { WorkExperience } from "@/lib/types";
+import type { WorkExperience, Project } from "@/lib/types";
 import { SuggestionBubble } from "./suggestion-bubble";
+
+type SuggestionData = {
+  type: 'work_experience' | 'project';
+  data: WorkExperience | Project;
+};
 
 interface MessageBubbleProps {
   message: Message;
   isLast: boolean;
   dispatch: (action: MessageAction) => void;
   messageIndex: number;
-  onAcceptSuggestion?: (experience: WorkExperience) => void;
+  onAcceptSuggestion?: (suggestion: SuggestionData) => void;
 }
 
 // Memoize MessageBubble component
@@ -36,7 +41,7 @@ const MessageBubble = memo(function MessageBubble({
   const renderContent = () => {
     if (message.isSuggestion && message.content) {
       try {
-        const suggestion = JSON.parse(message.content) as WorkExperience;
+        const suggestion = JSON.parse(message.content);
         
         return (
           <SuggestionBubble
@@ -125,20 +130,20 @@ const MessageBubble = memo(function MessageBubble({
       )}
     >
       <div className={cn(
-        "flex flex-col gap-2 w-full max-w-full",
+        "flex flex-col gap-2 w-full",
         isUser ? "flex-col items-end" : "flex-col items-start"
       )}>
         <div className={cn(
-          "flex flex-col gap-1 w-full max-w-full",
+          "flex flex-col gap-1 w-full",
           isUser ? "items-end" : "items-start"
         )}>
           <div className={cn(
-            "px-3.5 py-2 rounded-2xl text-sm shadow-sm w-full overflow-hidden",
+            "px-3.5 py-2 rounded-2xl text-sm shadow-sm",
             isUser 
-              ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm"
+              ? "bg-gradient-to-br from-purple-500 to-fuchsia-500 text-white rounded-br-sm max-w-[85%]"
               : message.isSystemMessage
-                ? "bg-purple-50/80 backdrop-blur-sm border-l-2 border-l-purple-400 border-y border-r border-purple-100/60 text-purple-900 rounded-bl-sm"
-                : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm"
+                ? "bg-purple-50/80 backdrop-blur-sm border-l-2 border-l-purple-400 border-y border-r border-purple-100/60 text-purple-900 rounded-bl-sm w-full"
+                : "bg-white/90 backdrop-blur-sm border border-purple-200/60 text-gray-800 rounded-bl-sm w-full"
           )}>
             {message.isLoading ? (
               <TypingIndicator text={message.loadingText} />
@@ -149,7 +154,7 @@ const MessageBubble = memo(function MessageBubble({
               </div>
             ) : (
               <div className={cn(
-                "prose-sm max-w-none overflow-x-auto",
+                "prose-sm w-full break-words",
                 isUser ? "prose-invert" : "prose-purple",
                 "markdown-content"
               )}>
@@ -193,7 +198,7 @@ interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
   dispatch: (action: MessageAction) => void;
-  onAcceptSuggestion?: (experience: WorkExperience) => void;
+  onAcceptSuggestion?: (suggestion: SuggestionData) => void;
 }
 
 // Memoize ChatArea component
