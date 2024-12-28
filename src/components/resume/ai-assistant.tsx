@@ -10,6 +10,7 @@ import { ChatInput } from "./ui/chat-input";
 import { FunctionArgs, FunctionHandler } from '@/utils/function-handler';
 import { ChatArea } from "./ui/message-bubble";
 import { Button } from "../ui/button";
+import { suggestImprovement } from "@/utils/suggest-improvements";
 
 // Define types for OpenAI streaming response
 type ChatCompletionChunk = OpenAI.Chat.ChatCompletionChunk & {
@@ -43,7 +44,7 @@ interface AIAssistantProps {
 }
 
 // Add these types at the top with other interfaces
-type MessageAction = 
+export type MessageAction = 
   | { type: 'ADD_MESSAGE'; message: Message }
   | { type: 'UPDATE_LAST_MESSAGE'; content: string; isLoading?: boolean; loadingText?: string }
   | { type: 'ADD_FUNCTION_RESULT'; message: Message }
@@ -421,30 +422,7 @@ export function AIAssistant({ className, resume, onUpdateResume }: AIAssistantPr
 
         {/* Input Bar */}
         <Button 
-          onClick={async () => {
-            const mockWorkExperience: WorkExperience = {
-              company: "Tech Solutions Inc.",
-              position: "Senior Software Engineer",
-              location: "San Francisco, CA",
-              date: "2020 - Present",
-              description: [
-                "Led development of cloud-native microservices architecture using React and Node.js",
-                "Improved system performance by 40% through implementation of caching strategies",
-                "Mentored junior developers and conducted code reviews for team of 8 engineers"
-              ],
-              technologies: ["React", "Node.js", "TypeScript", "AWS", "Docker"]
-            };
-
-            dispatch({
-              type: 'ADD_MESSAGE',
-              message: {
-                role: 'assistant',
-                content: JSON.stringify(mockWorkExperience, null, 2),
-                timestamp: new Date(),
-                isSuggestion: true
-              }
-            });
-          }}
+          onClick={() => suggestImprovement(dispatch)}
         >
           Improve Work Experience
         </Button>
