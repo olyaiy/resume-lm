@@ -1,6 +1,6 @@
 'use client';
 
-import { Bot, User, CheckCircle2, Check, X } from "lucide-react";
+import { Bot, User, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
@@ -9,8 +9,7 @@ import { Message, MessageAction } from "../ai-assistant";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRef, useEffect, memo, useCallback } from "react";
 import type { WorkExperience } from "@/lib/types";
-import { Button } from "@/components/ui/button";
-
+import { SuggestionBubble } from "./suggestion-bubble";
 
 interface MessageBubbleProps {
   message: Message;
@@ -34,178 +33,37 @@ const MessageBubble = memo(function MessageBubble({
 
   const isUser = message.role === 'user';
   
-  const renderSuggestionButtons = (status: 'accepted' | 'rejected' | 'waiting' | 'no' = 'waiting') => {
-    const styles = {
-      accepted: {
-        check: "bg-green-100 text-green-600",
-        x: "hidden"
-      },
-      rejected: {
-        check: "hidden",
-        x: "bg-red-100 text-red-600"
-      },
-      waiting: {
-        check: "hover:bg-green-100 hover:text-green-600",
-        x: "hover:bg-red-100 hover:text-red-600"
-      },
-      no: {
-        check: "hidden",
-        x: "hidden"
-      }
-    };
-
-    const currentStyles = styles[status];
-
-    const handleAccept = () => {
-      if (status !== 'accepted') {
-        dispatch({
-          type: 'UPDATE_SUGGESTION_STATUS',
-          messageIndex,
-          status: 'accepted'
-        });
-
-        if (message.isSuggestion && message.content && onAcceptSuggestion) {
-          try {
-            const suggestion = JSON.parse(message.content) as WorkExperience;
-            onAcceptSuggestion(suggestion);
-          } catch (e) {
-            console.error('Failed to parse suggestion:', e);
-          }
-        }
-      }
-    };
-
-    const handleReject = () => {
-      if (status !== 'rejected') {
-        dispatch({
-          type: 'UPDATE_SUGGESTION_STATUS',
-          messageIndex,
-          status: 'rejected'
-        });
-      }
-    };
-
-    return (
-      <div className="flex justify-end gap-2 mb-2">
-        <Button
-          size="icon"
-          variant="ghost"
-          className={cn(
-            "h-6 w-6 rounded-full transition-colors",
-            currentStyles.check
-          )}
-          onClick={handleAccept}
-          disabled={status === 'accepted'}
-        >
-          <Check className="h-4 w-4" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className={cn(
-            "h-6 w-6 rounded-full transition-colors",
-            currentStyles.x
-          )}
-          onClick={handleReject}
-          disabled={status === 'rejected'}
-        >
-          <X className="h-4 w-4" />
-        </Button>
-      </div>
-    );
-  };
-
   const renderContent = () => {
-    if (message.isSuggestion) {
+    if (message.isSuggestion && message.content) {
       try {
         const suggestion = JSON.parse(message.content) as WorkExperience;
-        const statusStyles = {
-          accepted: "border-l-4 border-l-green-500 bg-green-50/50",
-          rejected: "border-l-4 border-l-red-500 bg-red-50/50 opacity-75",
-          waiting: "",
-          no: ""
-        }[message.suggestionStatus || 'waiting'];
-
+        
         return (
-          <div className={cn(
-            "space-y-2 p-3 rounded-lg transition-all duration-300",
-            statusStyles
-          )}>
-            {renderSuggestionButtons(message.suggestionStatus || 'waiting')}
-            
-            <div className="flex justify-between items-baseline">
-              <h3 className={cn(
-                "font-medium",
-                message.suggestionStatus === 'accepted' ? "text-green-900" : 
-                message.suggestionStatus === 'rejected' ? "text-red-900/75" : 
-                "text-purple-900"
-              )}>
-                {suggestion.position}
-              </h3>
-              <span className={cn(
-                "text-sm",
-                message.suggestionStatus === 'accepted' ? "text-green-600" : 
-                message.suggestionStatus === 'rejected' ? "text-red-600/75" : 
-                "text-purple-600"
-              )}>
-                {suggestion.date}
-              </span>
-            </div>
-            <div className="flex items-baseline gap-2">
-              <span className={cn(
-                "font-medium",
-                message.suggestionStatus === 'accepted' ? "text-green-800" : 
-                message.suggestionStatus === 'rejected' ? "text-red-800/75" : 
-                "text-purple-800"
-              )}>
-                {suggestion.company}
-              </span>
-              {suggestion.location && (
-                <span className={cn(
-                  "text-sm",
-                  message.suggestionStatus === 'accepted' ? "text-green-600" : 
-                  message.suggestionStatus === 'rejected' ? "text-red-600/75" : 
-                  "text-purple-600"
-                )}>
-                  • {suggestion.location}
-                </span>
-              )}
-            </div>
-            <ul className="list-disc pl-4 space-y-1">
-              {suggestion.description.map((desc, i) => (
-                <li key={i} className={cn(
-                  "text-sm",
-                  message.suggestionStatus === 'accepted' ? "text-green-800" : 
-                  message.suggestionStatus === 'rejected' ? "text-red-800/75" : 
-                  "text-purple-800"
-                )}>
-                  {desc}
-                </li>
-              ))}
-            </ul>
-            {suggestion.technologies && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {suggestion.technologies.map((tech, i) => (
-                  <span 
-                    key={i} 
-                    className={cn(
-                      "px-2 py-0.5 rounded-full text-xs",
-                      message.suggestionStatus === 'accepted' 
-                        ? "bg-green-100 text-green-700" : 
-                      message.suggestionStatus === 'rejected'
-                        ? "bg-red-100 text-red-700/75" :
-                        "bg-purple-100 text-purple-700"
-                    )}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
+          <SuggestionBubble
+            suggestion={suggestion}
+            suggestionStatus={message.suggestionStatus || 'waiting'}
+            onAccept={() => {
+              dispatch({
+                type: 'UPDATE_SUGGESTION_STATUS',
+                messageIndex,
+                status: 'accepted'
+              });
+
+              if (onAcceptSuggestion) {
+                onAcceptSuggestion(suggestion);
+              }
+            }}
+            onReject={() => {
+              dispatch({
+                type: 'UPDATE_SUGGESTION_STATUS',
+                messageIndex,
+                status: 'rejected'
+              });
+            }}
+          />
         );
       } catch (e) {
-        // return <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>{message.content}</ReactMarkdown>;
+        console.error('Failed to parse suggestion:', e);
       }
     }
     
