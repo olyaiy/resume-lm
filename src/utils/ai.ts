@@ -315,41 +315,6 @@ export async function processTextImport(text: string) {
 }
 
 /**
- * Streams a chat response from the AI assistant
- * @param messages - Array of previous chat messages
- * @param resume - The current resume being edited
- * @returns Streaming response from OpenAI
- */
-export async function streamChatResponse(
-  messages: Array<OpenAI.Chat.ChatCompletionMessageParam>
-) {
-  try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [
-        AI_ASSISTANT_SYSTEM_MESSAGE,
-        ...messages
-      ],
-      stream: true,
-      temperature: 1,
-      max_tokens: 8190,
-      top_p: 1,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      functions: Object.values(functionSchemas),
-      function_call: "auto"
-    });
-
-
-    return response;
-  } catch (error) {
-    const message = error instanceof Error ? error.message : 'Unknown error';
-    console.error('❌ Fatal error in streamChatResponse:', message);
-    throw new Error(`Failed to stream chat response: ${message}`);
-  }
-}
-
-/**
  * Modifies a work experience entry based on a custom prompt
  * @param experience - Original work experience entry
  * @param prompt - Custom instructions for modification

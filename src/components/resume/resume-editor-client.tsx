@@ -22,7 +22,10 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "./document-settings-form";
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
-import { AIAssistant } from "./ai-assistant";
+
+
+import ChatBot from "./assistant/chat-bot";
+
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -84,6 +87,7 @@ export function ResumeEditorClient({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [generation, setGeneration] = useState<string>('');
 
   const debouncedResume = useDebouncedValue(resume, 500);
 
@@ -533,12 +537,11 @@ export function ResumeEditorClient({
                     </Tabs>
                   </div>
                   {/* AI Assistant Section */}
-                  <div className="sticky bottom-0 left-0 right-0 pr-4 bg-bg">
-                    <AIAssistant 
-                      resume={resume} 
-                      onUpdateResume={(field: keyof Resume, value: any) => updateField(field, value)}
-                    />
-                  </div>
+                 
+                  <ChatBot />
+
+                <div>{generation}</div>
+                  {/* <TestAssistant /> */}
                 </ScrollArea>
 
                 
