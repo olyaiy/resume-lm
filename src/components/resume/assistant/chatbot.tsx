@@ -178,7 +178,11 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                 <div key={index} className="mt-2 last:mb-8">
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={cn(
-                      "rounded-2xl px-4 max-w-[80%] text-sm py-2",
+                      "rounded-2xl px-4 py-2",
+                      message.toolInvocations?.some(t => t.toolName === 'suggest_work_experience_improvement')
+                        ? "max-w-[90%] p-0 mt-0"
+                        : "max-w-[80%]",
+                      "text-sm",
                       message.role === 'user' ? [
                         "bg-gradient-to-br from-purple-500 to-indigo-500",
                         "text-white",

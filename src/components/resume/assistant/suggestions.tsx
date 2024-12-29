@@ -21,6 +21,15 @@ function isNewItem<T>(current: T[] | undefined, suggested: T[] | undefined, item
   return !current.includes(item);
 }
 
+const renderBoldText = (text: string) => {
+  return text.split(/(\*\*.*?\*\*)/).map((part, index) => {
+    if (part.startsWith('**') && part.endsWith('**')) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+    return part;
+  });
+};
+
 export function Suggestion({ type, content, currentContent, onAccept, onReject }: SuggestionProps) {
   // Helper function to render content based on type
   const renderContent = () => {
@@ -67,7 +76,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                 >
                   <span className="text-purple-800 mt-1">•</span>
                   <p className="text-sm text-purple-800 flex-1">
-                    {point}
+                    {renderBoldText(point)}
                   </p>
                 </div>
               ))}
