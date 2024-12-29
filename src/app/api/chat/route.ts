@@ -89,6 +89,7 @@ Use your tools strategically to deliver maximum value while respecting these gui
 `,
     messages,
     maxSteps: 5,
+    
     tools: {
       getResume: {
         description: 'Get the user Resume.',
@@ -108,8 +109,24 @@ Use your tools strategically to deliver maximum value while respecting these gui
           }).describe('Improved version of the work experience entry'),
         }),
       },
-    }
+    },
+    onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
+      // console.log('text:', '\n', text);
+      // console.log('toolCalls:', '\n', toolCalls);
+      // console.log('toolResults:', '\n', toolResults);
+      // console.log('finishReason:', '\n', finishReason);
+      // console.log('usage:', '\n', usage);
+    },
+    
+  
   });
 
-  return result.toDataStreamResponse();
+  // const allToolCalls = result.flatMap(step => step.toolCalls);
+  // console.log('allToolCalls:', '\n', allToolCalls);
+
+
+
+  return result.toDataStreamResponse({
+    sendUsage: false,
+  });
 }

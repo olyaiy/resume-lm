@@ -43,25 +43,27 @@ const MemoizedMarkdownBlock = memo(
           remarkPlugins={[remarkGfm]}
           components={{
             // Ensure lists are properly styled
-            ul: ({ children }) => <ul className="list-disc ml-4">{children}</ul>,
-            ol: ({ children }) => <ol className="list-decimal ml-4">{children}</ol>,
+            ul: ({ children }) => <ul className="list-disc ml-3">{children}</ul>,
+            ol: ({ children }) => <ol className="list-decimal ml-3">{children}</ol>,
             // Proper heading styles
-            h1: ({ children }) => <h1 className="text-2xl font-bold mt-4 mb-2">{children}</h1>,
-            h2: ({ children }) => <h2 className="text-xl font-bold mt-3 mb-2">{children}</h2>,
-            h3: ({ children }) => <h3 className="text-lg font-bold mt-2 mb-1">{children}</h3>,
+            h1: ({ children }) => <h1 className="text-lg font-bold mt-3 mb-1.5">{children}</h1>,
+            h2: ({ children }) => <h2 className="text-base font-bold mt-2 mb-1">{children}</h2>,
+            h3: ({ children }) => <h3 className="text-sm font-bold mt-1.5 mb-1">{children}</h3>,
             // Code block styling
             code: ({ inline, children }) => 
               inline ? (
-                <code className="bg-muted px-1 py-0.5 rounded">{children}</code>
+                <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
               ) : (
-                <pre className="bg-muted p-4 rounded-lg overflow-x-auto">
+                <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs">
                   <code>{children}</code>
                 </pre>
               ),
             // Proper blockquote styling
             blockquote: ({ children }) => (
-              <blockquote className="border-l-4 border-muted pl-4 italic">{children}</blockquote>
+              <blockquote className="border-l-4 border-muted pl-3 italic text-sm">{children}</blockquote>
             ),
+            // Add default paragraph styling
+            p: ({ children }) => <p className="text-sm">{children}</p>,
           }}
         >
           {content}

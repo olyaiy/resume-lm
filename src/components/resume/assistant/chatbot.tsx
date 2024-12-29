@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 import { Suggestion } from './suggestions';
+import { SuggestionSkeleton } from './suggestion-skeleton';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -50,24 +51,43 @@ const mockWorkExperience = {
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("chat");
-  const [markdownEnabled, setMarkdownEnabled] = React.useState(true);
   
   const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
     maxSteps: 5,
     async onToolCall({ toolCall }) {
-      console.log('GENERAL Tool called:', toolCall);
+      // setIsStreaming(false);
       
       if (toolCall.toolName === 'getResume') {
-        return resume;
+        addToolResult({ toolCallId: toolCall.toolCallId, result: resume });
+        return {
+          first_name: resume.first_name,
+          last_name: resume.last_name,
+          email: resume.email,
+          phone_number: resume.phone_number,
+          location: resume.location,
+          website: resume.website,
+          linkedin_url: resume.linkedin_url,
+          github_url: resume.github_url,
+          work_experience: resume.work_experience,
+          education: resume.education,
+          skills: resume.skills,
+          projects: resume.projects,
+          certifications: resume.certifications,
+          target_role: resume.target_role
+        };
       }
 
       if (toolCall.toolName === 'suggest_work_experience_improvement') {
-        console.log('Suggestion TOOL CALLED:\n', toolCall);
-
         return toolCall.args;
       }
-
+    },
+    onFinish() {
+      console.log('messages:', '\n', messages);
+      // setIsStreaming(false);
+    },
+    onResponse(response) {
+      // setIsStreaming(true);
     },
   });
 
@@ -175,16 +195,12 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4">
 
               {/* Messages */}
-              {messages.map((message: Message, index) => (
+              {messages.map((m: Message, index) => (
                 <div key={index} className="mt-2 last:mb-8">
-                  <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                  <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={cn(
-                      "rounded-2xl px-4 py-2",
-                      message.toolInvocations?.some(t => t.toolName === 'suggest_work_experience_improvement')
-                        ? "max-w-[90%] p-0 mt-0"
-                        : "max-w-[80%]",
-                      "text-sm",
-                      message.role === 'user' ? [
+                      "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                      m.role === 'user' ? [
                         "bg-gradient-to-br from-purple-500 to-indigo-500",
                         "text-white",
                         "shadow-md shadow-purple-500/10",
@@ -198,32 +214,41 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     )}>
 
                       {/* Markdown Messages */}
-                      {markdownEnabled ? (
-                        <MemoizedMarkdown id={message.id} content={message.content} />
-                      ) : (
-                        <div className="whitespace-pre-wrap">{message.content}</div>
-                      )}
+                      <MemoizedMarkdown id={m.id} content={m.content} />
                     
                       {/* Messages for each tool type */}
-                      {message.toolInvocations?.map((toolInvocation: ToolInvocation) => {
+                      {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                         const toolCallId = toolInvocation.toolCallId;
-                        if (!('result' in toolInvocation)) {
+
+                          
+
+                        // ADD READ RESUME MESSAGE
+                        if (toolInvocation.toolName === 'getResume') {
                           return (
-                            <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">
-                              Calling Tool...
+                            <div key={toolCallId}>
+                              {toolInvocation.args.message}
+                              {'result' in toolInvocation ? (
+                                <p>Read Resume ✅ </p>
+                                
+                              ) : (
+                                <p>Reading Resume... 📄 </p>
+                              )}
+                              
                             </div>
                           );
+                        }
+
+
+                        
+                        if (!('result' in toolInvocation)) {
+                          return null;
                         }
                         
                         switch (toolInvocation.toolName) {
                           case 'getResume':
-                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
+                            return null;
                           case 'suggest_work_experience_improvement':
                             const { improved_experience, index } = toolInvocation.args;
-                            console.log('Suggestion TOOL ARGS:\n', toolInvocation.args);
-                            console.log('IMPROVED EXPERIENCE:\n', improved_experience);
-                            console.log('INDEX:\n', index);
-                            console.log('Suggestion TOOL RESULT:\n', toolInvocation.result);
                             return (
                               <div key={toolCallId} className="mt-4">
                                 <Suggestion
@@ -235,12 +260,12 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                       i === index ? improved_experience : exp
                                     )
                                   )}
-                                  onReject={() => console.log('Rejected suggestion')}
+                                  onReject={() => {}}
                                 />
                               </div>
                             );
                           default:
-                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
+                            return null;
                         }
                       })}
                     </div>
@@ -248,57 +273,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                 </div>
               ))}
 
-              {/* Mock Suggestion Component */}
-              <div className="my-4">
-                {/* <Suggestion
-                  type="work_experience"
-                  content={mockWorkExperience}
-                  currentContent={mockCurrentWorkExperience}
-                  onAccept={() => console.log('Accepted suggestion')}
-                  onReject={() => console.log('Rejected suggestion')}
-                /> */}
-              </div>
-
-              {/* Loading Message */}
-              {isLoading && (
-                <div className="flex justify-start">
-                  <div className={cn(
-                    "rounded-2xl px-4 py-3",
-                    "bg-white/60",
-                    "border border-purple-200/60",
-                    "shadow-sm",
-                    "backdrop-blur-sm"
-                  )}>
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
-                      <span className="text-sm text-purple-500">Thinking...</span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
             </ScrollArea>
             
-            {/* Markdown Toggle Button */}
-            <Button
-              onClick={() => setMarkdownEnabled(!markdownEnabled)}
-              variant="ghost"
-              size="sm"
-              className={cn(
-                "absolute bottom-20 right-4 z-20",
-                "bg-white/60 hover:bg-white/80",
-                "border border-purple-200/60",
-                "text-purple-600",
-                "shadow-sm",
-                "backdrop-blur-sm",
-                "transition-all duration-300",
-                "hover:scale-105",
-                !markdownEnabled && "opacity-50"
-              )}
-            >
-              {markdownEnabled ? "Raw Text" : "Markdown"}
-            </Button>
-
           </AccordionContent>
         </AccordionItem>
       </Accordion>
@@ -306,10 +282,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       {/* Input Bar */}
       <form onSubmit={handleSubmit} className={cn(
         "relative z-10",
-        "p-4 border-t border-purple-200/60",
+        "p-2 border-t border-purple-200/60",
         "bg-white/40",
         "backdrop-blur-sm",
-        "flex gap-2"
+        "flex gap-1.5"
       )}>
         <Input
           value={input}
@@ -321,13 +297,16 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             "border-purple-200/60",
             "focus:border-purple-300",
             "focus:ring-2 focus:ring-purple-500/10",
-            "placeholder:text-purple-400"
+            "placeholder:text-purple-400",
+            "text-sm",
+            "h-8",
+            "px-2.5 py-1"
           )}
         />
         <Button 
           type={isLoading ? "button" : "submit"}
           onClick={isLoading ? stop : undefined}
-          size="default"
+          size="sm"
           className={cn(
             isLoading ? [
               "bg-gradient-to-br from-rose-500 to-pink-500",
@@ -342,13 +321,13 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             "transition-all duration-300",
             "hover:scale-105 hover:shadow-lg",
             "hover:-translate-y-0.5",
-            "px-3 h-10"
+            "px-2 h-8"
           )}
         >
           {isLoading ? (
-            <X className="h-4 w-4" />
+            <X className="h-3.5 w-3.5" />
           ) : (
-            <Send className="h-4 w-4" />
+            <Send className="h-3.5 w-3.5" />
           )}
         </Button>
       </form>
