@@ -425,25 +425,25 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                   </div>
 
                   {importOption === 'import-profile' && (
-                    <ScrollArea className="h-[400px] pr-4 mt-4">
+
                       <div className="grid grid-cols-2 gap-6">
                         {/* Left Column */}
                         <div className="space-y-4">
                           <Accordion type="single" collapsible className="space-y-4">
                             {/* Work Experience */}
                             <AccordionItem value="work-experience" className="border-none">
-                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Checkbox
-                                    id="work-experience-section"
-                                    checked={isSectionSelected('work_experience')}
-                                    onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
-                                    className={cn(
-                                      "mt-0.5",
-                                      isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
+                              <div className="flex items-center w-full gap-2">
+                                <Checkbox
+                                  id="work-experience-section"
+                                  checked={isSectionSelected('work_experience')}
+                                  onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
+                                  className={cn(
+                                    "mt-0.5",
+                                    isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
+                                  )}
+                                />
+                                <AccordionTrigger className="w-full py-2 hover:no-underline group">
+                                  <div className="flex flex-col items-start w-full">
                                     <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
                                       Work Experience
                                     </span>
@@ -451,8 +451,8 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                                       {profile.work_experience.length} {profile.work_experience.length === 1 ? 'position' : 'positions'}
                                     </span>
                                   </div>
-                                </div>
-                              </AccordionTrigger>
+                                </AccordionTrigger>
+                              </div>
                               <AccordionContent>
                                 <div className="space-y-2 pt-2">
                                   {profile.work_experience.map((exp: WorkExperience) => {
@@ -487,18 +487,18 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
 
                             {/* Skills */}
                             <AccordionItem value="skills" className="border-none">
-                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Checkbox
-                                    id="skills-section"
-                                    checked={isSectionSelected('skills')}
-                                    onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
-                                    className={cn(
-                                      "mt-0.5",
-                                      isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
+                              <div className="flex items-center w-full gap-2">
+                                <Checkbox
+                                  id="skills-section"
+                                  checked={isSectionSelected('skills')}
+                                  onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
+                                  className={cn(
+                                    "mt-0.5",
+                                    isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
+                                  )}
+                                />
+                                <AccordionTrigger className="w-full py-2 hover:no-underline group">
+                                  <div className="flex flex-col items-start w-full">
                                     <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
                                       Skills
                                     </span>
@@ -506,8 +506,8 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                                       {profile.skills.length} {profile.skills.length === 1 ? 'category' : 'categories'}
                                     </span>
                                   </div>
-                                </div>
-                              </AccordionTrigger>
+                                </AccordionTrigger>
+                              </div>
                               <AccordionContent>
                                 <div className="space-y-2 pt-2">
                                   {profile.skills.map((skill: Skill) => {
@@ -554,18 +554,18 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                           <Accordion type="single" collapsible className="space-y-4">
                             {/* Projects */}
                             <AccordionItem value="projects" className="border-none">
-                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Checkbox
-                                    id="projects-section"
-                                    checked={isSectionSelected('projects')}
-                                    onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
-                                    className={cn(
-                                      "mt-0.5",
-                                      isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
+                              <div className="flex items-center w-full gap-2">
+                                <Checkbox
+                                  id="projects-section"
+                                  checked={isSectionSelected('projects')}
+                                  onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
+                                  className={cn(
+                                    "mt-0.5",
+                                    isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
+                                  )}
+                                />
+                                <AccordionTrigger className="w-full py-2 hover:no-underline group">
+                                  <div className="flex flex-col items-start w-full">
                                     <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
                                       Projects
                                     </span>
@@ -573,8 +573,8 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                                       {profile.projects.length} {profile.projects.length === 1 ? 'project' : 'projects'}
                                     </span>
                                   </div>
-                                </div>
-                              </AccordionTrigger>
+                                </AccordionTrigger>
+                              </div>
                               <AccordionContent>
                                 <div className="space-y-2 pt-2">
                                   {profile.projects.map((project: Project) => {
@@ -615,18 +615,18 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
 
                             {/* Education */}
                             <AccordionItem value="education" className="border-none">
-                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                                <div className="flex items-center gap-2 flex-1">
-                                  <Checkbox
-                                    id="education-section"
-                                    checked={isSectionSelected('education')}
-                                    onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
-                                    className={cn(
-                                      "mt-0.5",
-                                      isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
-                                    )}
-                                  />
-                                  <div className="flex flex-col">
+                              <div className="flex items-center w-full gap-2">
+                                <Checkbox
+                                  id="education-section"
+                                  checked={isSectionSelected('education')}
+                                  onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
+                                  className={cn(
+                                    "mt-0.5",
+                                    isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
+                                  )}
+                                />
+                                <AccordionTrigger className="w-full py-2 hover:no-underline group">
+                                  <div className="flex flex-col items-start w-full">
                                     <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
                                       Education
                                     </span>
@@ -634,8 +634,8 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                                       {profile.education.length} {profile.education.length === 1 ? 'institution' : 'institutions'}
                                     </span>
                                   </div>
-                                </div>
-                              </AccordionTrigger>
+                                </AccordionTrigger>
+                              </div>
                               <AccordionContent>
                                 <div className="space-y-2 pt-2">
                                   {profile.education.map((edu: Education) => {
@@ -670,7 +670,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                           </Accordion>
                         </div>
                       </div>
-                    </ScrollArea>
+                    
                   )}
                 </div>
               </>
