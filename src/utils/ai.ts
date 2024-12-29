@@ -7,7 +7,7 @@
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceBulletPointsSchema, openAiProjectSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
 import { Profile, Resume, WorkExperience } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE } from "@/lib/prompts";
 
 
 // Initialize OpenAI client with API key from environment variables
@@ -282,10 +282,10 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
  */
 export async function processTextImport(text: string) {
   const messages: Array<OpenAI.Chat.ChatCompletionMessageParam> = [
-    TEXT_IMPORT_SYSTEM_MESSAGE,
+    TEXT_ANALYZER_SYSTEM_MESSAGE,
     {
       role: "user",
-      content: `Please analyze the following text and extract relevant professional information:\n\n${text}`
+      content: `:\n\n${text}`
     }
   ];
 
