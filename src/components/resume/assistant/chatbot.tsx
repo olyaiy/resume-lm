@@ -55,14 +55,16 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     api: '/api/chat',
     maxSteps: 5,
     async onToolCall({ toolCall }) {
-      console.log('Tool called:', toolCall);
+      console.log('GENERAL Tool called:', toolCall);
       
       if (toolCall.toolName === 'getResume') {
         return resume;
       }
 
       if (toolCall.toolName === 'suggest_work_experience_improvement') {
-        console.log('Suggestion:\n', toolCall);
+        console.log('Suggestion TOOL CALLED:\n', toolCall);
+
+        return toolCall.args;
       }
 
     },
@@ -203,10 +205,31 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                             </div>
                           );
                         }
-                        // Messages for each tool type
+                        
                         switch (toolInvocation.toolName) {
                           case 'getResume':
                             return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
+                          case 'suggest_work_experience_improvement':
+                            const { improved_experience, index } = toolInvocation.args;
+                            console.log('Suggestion TOOL ARGS:\n', toolInvocation.args);
+                            console.log('IMPROVED EXPERIENCE:\n', improved_experience);
+                            console.log('INDEX:\n', index);
+                            console.log('Suggestion TOOL RESULT:\n', toolInvocation.result);
+                            return (
+                              <div key={toolCallId} className="mt-4">
+                                <Suggestion
+                                  type="work_experience"
+                                  content={improved_experience}
+                                  currentContent={resume.work_experience[index]}
+                                  onAccept={() => onResumeChange('work_experience', 
+                                    resume.work_experience.map((exp, i) => 
+                                      i === index ? improved_experience : exp
+                                    )
+                                  )}
+                                  onReject={() => console.log('Rejected suggestion')}
+                                />
+                              </div>
+                            );
                           default:
                             return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
                         }
