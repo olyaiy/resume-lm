@@ -235,8 +235,29 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
     }
   };
 
+  // Initialize all items as selected when dialog opens
+  const initializeSelectedItems = () => {
+    setSelectedItems({
+      work_experience: profile.work_experience.map(exp => getItemId('work_experience', exp)),
+      education: profile.education.map(edu => getItemId('education', edu)),
+      skills: profile.skills.map(skill => getItemId('skills', skill)),
+      projects: profile.projects.map(project => getItemId('projects', project))
+    });
+  };
+
+  // Reset form and initialize selected items when dialog opens
+  const handleOpenChange = (newOpen: boolean) => {
+    setOpen(newOpen);
+    if (newOpen) {
+      setTargetRole('');
+      setJobDescription('');
+      setImportOption('import-all');
+      initializeSelectedItems();
+    }
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
@@ -405,224 +426,250 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
 
                   {importOption === 'import-all' && (
                     <ScrollArea className="h-[400px] pr-4 mt-4">
-                      <Accordion type="single" collapsible className="space-y-4">
-                        {/* Work Experience */}
-                        <AccordionItem value="work-experience" className="border-none">
-                          <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id="work-experience-section"
-                                checked={isSectionSelected('work_experience')}
-                                onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
-                                className={cn(
-                                  "mt-0.5",
-                                  isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
-                                )}
-                              />
-                              <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
-                                Work Experience
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pt-2">
-                              {profile.work_experience.map((exp: WorkExperience) => {
-                                const id = getItemId('work_experience', exp);
-                                return (
-                                  <div
-                                    key={id}
-                                    className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
-                                  >
-                                    <Checkbox
-                                      id={id}
-                                      checked={selectedItems.work_experience.includes(id)}
-                                      onCheckedChange={() => handleItemSelection('work_experience', id)}
-                                      className="mt-1"
-                                    />
-                                    <div className="flex-1">
-                                      <label
-                                        htmlFor={id}
-                                        className="text-sm font-medium leading-none cursor-pointer"
-                                      >
-                                        <div className="font-semibold text-base mb-1">{exp.position}</div>
-                                        <div className="text-sm text-muted-foreground">{exp.company}</div>
-                                        <div className="text-xs text-muted-foreground mt-1">{exp.date}</div>
-                                      </label>
-                                    </div>
+                      <div className="grid grid-cols-2 gap-6">
+                        {/* Left Column */}
+                        <div className="space-y-4">
+                          <Accordion type="single" collapsible className="space-y-4">
+                            {/* Work Experience */}
+                            <AccordionItem value="work-experience" className="border-none">
+                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Checkbox
+                                    id="work-experience-section"
+                                    checked={isSectionSelected('work_experience')}
+                                    onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
+                                    className={cn(
+                                      "mt-0.5",
+                                      isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
+                                      Work Experience
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {profile.work_experience.length} {profile.work_experience.length === 1 ? 'position' : 'positions'}
+                                    </span>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        {/* Education */}
-                        <AccordionItem value="education" className="border-none">
-                          <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id="education-section"
-                                checked={isSectionSelected('education')}
-                                onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
-                                className={cn(
-                                  "mt-0.5",
-                                  isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
-                                )}
-                              />
-                              <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
-                                Education
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pt-2">
-                              {profile.education.map((edu: Education) => {
-                                const id = getItemId('education', edu);
-                                return (
-                                  <div
-                                    key={id}
-                                    className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
-                                  >
-                                    <Checkbox
-                                      id={id}
-                                      checked={selectedItems.education.includes(id)}
-                                      onCheckedChange={() => handleItemSelection('education', id)}
-                                      className="mt-1"
-                                    />
-                                    <div className="flex-1">
-                                      <label
-                                        htmlFor={id}
-                                        className="text-sm font-medium leading-none cursor-pointer"
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2 pt-2">
+                                  {profile.work_experience.map((exp: WorkExperience) => {
+                                    const id = getItemId('work_experience', exp);
+                                    return (
+                                      <div
+                                        key={id}
+                                        className="flex items-start space-x-2 p-2.5 rounded-md border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
                                       >
-                                        <div className="font-semibold text-base mb-1">{`${edu.degree} in ${edu.field}`}</div>
-                                        <div className="text-sm text-muted-foreground">{edu.school}</div>
-                                        <div className="text-xs text-muted-foreground mt-1">{edu.date}</div>
-                                      </label>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-
-                        {/* Skills */}
-                        <AccordionItem value="skills" className="border-none">
-                          <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id="skills-section"
-                                checked={isSectionSelected('skills')}
-                                onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
-                                className={cn(
-                                  "mt-0.5",
-                                  isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
-                                )}
-                              />
-                              <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
-                                Skills
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pt-2">
-                              {profile.skills.map((skill: Skill) => {
-                                const id = getItemId('skills', skill);
-                                return (
-                                  <div
-                                    key={id}
-                                    className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
-                                  >
-                                    <Checkbox
-                                      id={id}
-                                      checked={selectedItems.skills.includes(id)}
-                                      onCheckedChange={() => handleItemSelection('skills', id)}
-                                      className="mt-1"
-                                    />
-                                    <div className="flex-1">
-                                      <label
-                                        htmlFor={id}
-                                        className="text-sm font-medium leading-none cursor-pointer"
-                                      >
-                                        <div className="font-semibold text-base mb-1">{skill.category}</div>
-                                        <div className="flex flex-wrap gap-2 mt-2">
-                                          {skill.items.map((item: string, index: number) => (
-                                            <Badge
-                                              key={index}
-                                              variant="secondary"
-                                              className="bg-white/60 text-purple-700 border border-purple-200"
-                                            >
-                                              {item}
-                                            </Badge>
-                                          ))}
+                                        <Checkbox
+                                          id={id}
+                                          checked={selectedItems.work_experience.includes(id)}
+                                          onCheckedChange={() => handleItemSelection('work_experience', id)}
+                                          className="mt-0.5"
+                                        />
+                                        <div 
+                                          className="flex-1 cursor-pointer"
+                                          onClick={() => handleItemSelection('work_experience', id)}
+                                        >
+                                          <div className="flex items-baseline justify-between">
+                                            <div className="font-medium text-sm">{exp.position}</div>
+                                            <div className="text-xs text-muted-foreground">{exp.date}</div>
+                                          </div>
+                                          <div className="text-xs text-muted-foreground">{exp.company}</div>
                                         </div>
-                                      </label>
-                                    </div>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
 
-                        {/* Projects */}
-                        <AccordionItem value="projects" className="border-none">
-                          <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
-                            <div className="flex items-center gap-2">
-                              <Checkbox
-                                id="projects-section"
-                                checked={isSectionSelected('projects')}
-                                onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
-                                className={cn(
-                                  "mt-0.5",
-                                  isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
-                                )}
-                              />
-                              <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
-                                Projects
-                              </span>
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pt-2">
-                              {profile.projects.map((project: Project) => {
-                                const id = getItemId('projects', project);
-                                return (
-                                  <div
-                                    key={id}
-                                    className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
-                                  >
-                                    <Checkbox
-                                      id={id}
-                                      checked={selectedItems.projects.includes(id)}
-                                      onCheckedChange={() => handleItemSelection('projects', id)}
-                                      className="mt-1"
-                                    />
-                                    <div className="flex-1">
-                                      <label
-                                        htmlFor={id}
-                                        className="text-sm font-medium leading-none cursor-pointer"
-                                      >
-                                        <div className="font-semibold text-base mb-1">{project.name}</div>
-                                        {project.technologies && (
-                                          <div className="text-sm text-muted-foreground">
-                                            {project.technologies.join(', ')}
-                                          </div>
-                                        )}
-                                        {project.date && (
-                                          <div className="text-xs text-muted-foreground mt-1">
-                                            {project.date}
-                                          </div>
-                                        )}
-                                      </label>
-                                    </div>
+                            {/* Skills */}
+                            <AccordionItem value="skills" className="border-none">
+                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Checkbox
+                                    id="skills-section"
+                                    checked={isSectionSelected('skills')}
+                                    onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
+                                    className={cn(
+                                      "mt-0.5",
+                                      isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
+                                      Skills
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {profile.skills.length} {profile.skills.length === 1 ? 'category' : 'categories'}
+                                    </span>
                                   </div>
-                                );
-                              })}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      </Accordion>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2 pt-2">
+                                  {profile.skills.map((skill: Skill) => {
+                                    const id = getItemId('skills', skill);
+                                    return (
+                                      <div
+                                        key={id}
+                                        className="flex items-start space-x-2 p-2.5 rounded-md border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                      >
+                                        <Checkbox
+                                          id={id}
+                                          checked={selectedItems.skills.includes(id)}
+                                          onCheckedChange={() => handleItemSelection('skills', id)}
+                                          className="mt-0.5"
+                                        />
+                                        <div 
+                                          className="flex-1 cursor-pointer"
+                                          onClick={() => handleItemSelection('skills', id)}
+                                        >
+                                          <div className="font-medium text-sm mb-1">{skill.category}</div>
+                                          <div className="flex flex-wrap gap-1">
+                                            {skill.items.map((item: string, index: number) => (
+                                              <Badge
+                                                key={index}
+                                                variant="secondary"
+                                                className="bg-white/60 text-purple-700 border border-purple-200 text-[10px] px-1.5 py-0"
+                                              >
+                                                {item}
+                                              </Badge>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+
+                        {/* Right Column */}
+                        <div className="space-y-4">
+                          <Accordion type="single" collapsible className="space-y-4">
+                            {/* Projects */}
+                            <AccordionItem value="projects" className="border-none">
+                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Checkbox
+                                    id="projects-section"
+                                    checked={isSectionSelected('projects')}
+                                    onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
+                                    className={cn(
+                                      "mt-0.5",
+                                      isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
+                                      Projects
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {profile.projects.length} {profile.projects.length === 1 ? 'project' : 'projects'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2 pt-2">
+                                  {profile.projects.map((project: Project) => {
+                                    const id = getItemId('projects', project);
+                                    return (
+                                      <div
+                                        key={id}
+                                        className="flex items-start space-x-2 p-2.5 rounded-md border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                      >
+                                        <Checkbox
+                                          id={id}
+                                          checked={selectedItems.projects.includes(id)}
+                                          onCheckedChange={() => handleItemSelection('projects', id)}
+                                          className="mt-0.5"
+                                        />
+                                        <div 
+                                          className="flex-1 cursor-pointer"
+                                          onClick={() => handleItemSelection('projects', id)}
+                                        >
+                                          <div className="flex items-baseline justify-between">
+                                            <div className="font-medium text-sm">{project.name}</div>
+                                            {project.date && (
+                                              <div className="text-xs text-muted-foreground">{project.date}</div>
+                                            )}
+                                          </div>
+                                          {project.technologies && (
+                                            <div className="text-xs text-muted-foreground line-clamp-1">
+                                              {project.technologies.join(', ')}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+
+                            {/* Education */}
+                            <AccordionItem value="education" className="border-none">
+                              <AccordionTrigger className="flex items-center gap-2 py-2 hover:no-underline group">
+                                <div className="flex items-center gap-2 flex-1">
+                                  <Checkbox
+                                    id="education-section"
+                                    checked={isSectionSelected('education')}
+                                    onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
+                                    className={cn(
+                                      "mt-0.5",
+                                      isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
+                                    )}
+                                  />
+                                  <div className="flex flex-col">
+                                    <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
+                                      Education
+                                    </span>
+                                    <span className="text-xs text-muted-foreground">
+                                      {profile.education.length} {profile.education.length === 1 ? 'institution' : 'institutions'}
+                                    </span>
+                                  </div>
+                                </div>
+                              </AccordionTrigger>
+                              <AccordionContent>
+                                <div className="space-y-2 pt-2">
+                                  {profile.education.map((edu: Education) => {
+                                    const id = getItemId('education', edu);
+                                    return (
+                                      <div
+                                        key={id}
+                                        className="flex items-start space-x-2 p-2.5 rounded-md border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                      >
+                                        <Checkbox
+                                          id={id}
+                                          checked={selectedItems.education.includes(id)}
+                                          onCheckedChange={() => handleItemSelection('education', id)}
+                                          className="mt-0.5"
+                                        />
+                                        <div 
+                                          className="flex-1 cursor-pointer"
+                                          onClick={() => handleItemSelection('education', id)}
+                                        >
+                                          <div className="flex items-baseline justify-between">
+                                            <div className="font-medium text-sm">{`${edu.degree} in ${edu.field}`}</div>
+                                            <div className="text-xs text-muted-foreground">{edu.date}</div>
+                                          </div>
+                                          <div className="text-xs text-muted-foreground">{edu.school}</div>
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </AccordionContent>
+                            </AccordionItem>
+                          </Accordion>
+                        </div>
+                      </div>
                     </ScrollArea>
                   )}
                 </div>
