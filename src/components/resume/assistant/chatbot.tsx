@@ -6,10 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, Check, X, Loader2, Sparkles, Bot } from "lucide-react";
-import { Resume, WorkExperience, Education, Project, Skill, Certification } from '@/lib/types';
-import { Message, ToolInvocation } from 'ai';
+import { Send, Loader2, Bot } from "lucide-react";
+import { Resume } from '@/lib/types';
+import { Message } from 'ai';
 import { cn } from '@/lib/utils';
+import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
+
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 interface ChatBotProps {
@@ -17,48 +19,20 @@ interface ChatBotProps {
   onResumeChange: (field: keyof Resume, value: any) => void;
 }
 
-type ResumeArraySection = {
-  work_experience: WorkExperience[];
-  education: Education[];
-  skills: Skill[];
-  projects: Project[];
-  certifications: Certification[];
-};
-
-interface ModificationSuggestion {
-  section: keyof ResumeArraySection;
-  index: number;
-  modification: {
-    original: any;
-    suggested: any;
-    explanation: string;
-  };
-  status?: 'accepted' | 'rejected';
-}
-
-interface GroupedSuggestions {
-  [key: string]: ModificationSuggestion[];
-}
-
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const accordionRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   
-  const { messages, input, setInput, append, addToolResult, stop, isLoading } = useChat({
+  const { messages, input, setInput, append, isLoading } = useChat({
     api: '/api/chat',
-    maxSteps: 5,
     async onToolCall({ toolCall }) {
+      console.log('Tool called:', toolCall);
+      
       if (toolCall.toolName === 'getResume') {
         return resume;
       }
     },
   });
-
-  // Add state for tracking suggestion decisions
-  const [suggestionStatuses, setSuggestionStatuses] = React.useState<{
-    [messageId: string]: { [suggestionIndex: number]: 'accepted' | 'rejected' };
-  }>({});
 
   // Scroll to bottom helper function
   const scrollToBottom = () => {
@@ -82,14 +56,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       append({ content: input, role: 'user' });
       setInput('');
     }
-  };
-
-  const handleStop = () => {
-    stop();
-    append({
-      content: "AI response cancelled",
-      role: "system",
-    });
   };
 
   return (
@@ -117,22 +83,22 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         onValueChange={setAccordionValue}
         className="relative z-10"
       >
-        <AccordionItem value="chat" className="border-none">
+        <AccordionItem value="chat" className="border-none  py-0 my-0 ">
           <AccordionTrigger className={cn(
-            "px-3 py-2",
+            "px-3 py-2  ",
             "hover:no-underline",
             "group",
             "transition-all duration-300",
             "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100"
           )}>
             <div className={cn(
-              "flex items-center gap-2 w-full",
+              "flex items-center gap-2 w-full ",
               "transition-transform duration-300",
               "group-hover:scale-[0.99]",
               "group-data-[state=closed]:scale-95"
             )}>
               <div className={cn(
-                "p-1.5 rounded-lg",
+                "p-1.5 rounded-lg ",
                 "bg-purple-100/80 text-purple-600",
                 "group-hover:bg-purple-200/80",
                 "transition-colors duration-300",
@@ -162,13 +128,13 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
               </div>
             </div>
           </AccordionTrigger>
-          <AccordionContent>
-            <ScrollArea ref={scrollAreaRef} className="h-[500px] px-4 space-y-4">
+          <AccordionContent className="space-y-4">
+            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4 space-y-4">
               {messages.map((message: Message, index) => (
-                <div key={index} className="space-y-2">
+                <div key={index} className="space-y-4">
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={cn(
-                      "rounded-2xl px-4 py-3 max-w-[80%] text-sm",
+                      "rounded-2xl px-4  max-w-[80%] text-sm py-2",
                       message.role === 'user' ? [
                         "bg-gradient-to-br from-purple-500 to-indigo-500",
                         "text-white",
@@ -181,7 +147,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         "backdrop-blur-sm"
                       ]
                     )}>
-                      {message.content}
+                      <MemoizedMarkdown id={message.id} content={message.content} />
                     </div>
                   </div>
                 </div>
@@ -227,41 +193,22 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             "placeholder:text-purple-400"
           )}
         />
-        {isLoading ? (
-          <Button 
-            type="button" 
-            size="icon" 
-            onClick={handleStop}
-            className={cn(
-              "bg-gradient-to-br from-rose-100/90 to-pink-100/90",
-              "hover:from-rose-200/90 hover:to-pink-200/90",
-              "text-rose-600 hover:text-rose-700",
-              "border border-rose-200/60",
-              "shadow-sm",
-              "transition-all duration-300",
-              "hover:scale-105 hover:shadow-md"
-            )}
-          >
-            <X className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button 
-            type="submit" 
-            size="icon"
-            className={cn(
-              "bg-gradient-to-br from-purple-500 to-indigo-500",
-              "hover:from-purple-600 hover:to-indigo-600",
-              "text-white",
-              "border-none",
-              "shadow-md shadow-purple-500/10",
-              "transition-all duration-300",
-              "hover:scale-105 hover:shadow-lg",
-              "hover:-translate-y-0.5"
-            )}
-          >
-            <Send className="h-4 w-4" />
-          </Button>
-        )}
+        <Button 
+          type="submit" 
+          size="icon"
+          className={cn(
+            "bg-gradient-to-br from-purple-500 to-indigo-500",
+            "hover:from-purple-600 hover:to-indigo-600",
+            "text-white",
+            "border-none",
+            "shadow-md shadow-purple-500/10",
+            "transition-all duration-300",
+            "hover:scale-105 hover:shadow-lg",
+            "hover:-translate-y-0.5"
+          )}
+        >
+          <Send className="h-4 w-4" />
+        </Button>
       </form>
     </Card>
   );
