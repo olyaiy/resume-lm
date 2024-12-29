@@ -31,6 +31,18 @@ export async function POST(req: Request) {
           'Get the user Resume.',
         parameters: z.object({}),
       },
+      suggestModification: {
+        description: 'Suggest a modification to a specific section of the resume.',
+        parameters: z.object({
+          section: z.enum(['work_experience', 'education', 'skills', 'projects', 'certifications']),
+          index: z.number(),
+          modification: z.object({
+            original: z.any(),
+            suggested: z.any(),
+            explanation: z.string()
+          })
+        }),
+      },
     },
   });
 
