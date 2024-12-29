@@ -1,5 +1,7 @@
 import { ToolInvocation, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
+
+import { Resume } from '@/lib/types';
 import { z } from 'zod';
 
 interface Message {
@@ -8,30 +10,26 @@ interface Message {
   toolInvocations?: ToolInvocation[];
 }
 
+interface ChatRequest {
+  messages: Message[];
+  resume: Resume; // Resume data passed from the client
+}
+
 export async function POST(req: Request) {
-  const { messages }: { messages: Message[] } = await req.json();
+  const { messages, resume }: ChatRequest = await req.json();
 
   const result = streamText({
     model: openai('gpt-4o-mini'),
-    system: 'You are a helpful assistant.',
+    system: 'You are a helpful resume assistant. You can access the user\'s resume data to provide specific advice and answers.',
     messages,
+    maxSteps: 5,
     tools: {
-      getWeather: {
-        description: 'Get the weather for a location',
-        parameters: z.object({
-          city: z.string().describe('The city to get the weather for'),
-          unit: z
-            .enum(['C', 'F'])
-            .describe('The unit to display the temperature in'),
-        }),
-        execute: async ({ city, unit }) => {
-          const weather = {
-            value: 24,
-            description: 'Sunny',
-          };
 
-          return `It is currently ${weather.value}°${unit} and ${weather.description} in ${city}!`;
-        },
+      // client-side tool that is automatically executed on the client:
+      getResume: {
+        description:
+          'Get the user Resume.',
+        parameters: z.object({}),
       },
     },
   });

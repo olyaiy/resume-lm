@@ -8,7 +8,7 @@ import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceBulletPointsSchema, openAiProjectSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
 import { Profile, Resume, WorkExperience } from "@/lib/types";
 import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE } from "@/lib/prompts";
-import { FunctionHandler, functionSchemas } from "./function-handler";
+
 
 // Initialize OpenAI client with API key from environment variables
 const openai = new OpenAI({

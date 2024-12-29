@@ -6,12 +6,26 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Send } from "lucide-react";
+import { Resume } from '@/lib/types';
 
-export default function Page() {
+interface ChatBotProps {
+  resume: Resume;
+  onResumeChange: (field: keyof Resume, value: any) => void;
+}
+
+export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const { messages, input, setInput, append } = useChat({
     api: '/api/chat',
-    maxSteps: 2,
-  });
+    maxSteps: 5,
+    // run client-side tools that are automatically executed:
+    async onToolCall({ toolCall }) {
+      if (toolCall.toolName === 'getResume') {
+        console.log('getResume tool called');
+        console.log(resume);
+        return resume;
+      }
+    },
+});
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -38,6 +52,7 @@ export default function Page() {
               }`}
             >
               {message.content}
+              
             </div>
           </div>
         ))}
