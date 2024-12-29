@@ -85,7 +85,7 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
   const [selectedBaseResume, setSelectedBaseResume] = useState<string>(baseResumes?.[0]?.id || '');
   const [jobDescription, setJobDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [importOption, setImportOption] = useState<'import-all' | 'ai' | 'scratch'>('ai');
+  const [importOption, setImportOption] = useState<'import-all' | 'ai' | 'scratch'>('import-all');
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
   const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
@@ -133,32 +133,7 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       let resume: Resume;
 
       if (type === 'base') {
-        if (importOption === 'ai') {
-          try {
-            // Get the user's profile first
-            const supabase = createClient();
-            const { data: profile } = await supabase
-              .from('profiles')
-              .select('*')
-              .single();
-
-            if (profile) {
-              // Get AI recommendations first
-              const aiResponse = await importProfileToResume(profile, targetRole);
-              const aiRecommendations = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
-              // Then create the resume with the recommendations
-              resume = await createBaseResume(targetRole, 'ai', aiRecommendations);
-            } else {
-              resume = await createBaseResume(targetRole, 'fresh');
-            }
-          } catch (error) {
-            console.error('AI Import error:', error);
-            // Continue with resume creation even if AI fails
-            resume = await createBaseResume(targetRole, 'fresh');
-          }
-        } else {
-          resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
-        }
+        resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       } else {
         resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       }
@@ -274,15 +249,15 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                   />
                 </div>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
                   <Label className={cn(
-                    "text-lg font-medium",
+                    "text-base font-medium",
                     type === 'base' ? "text-purple-950" : "text-pink-950"
                   )}>
                     Resume Content
                   </Label>
-                  <div className="grid grid-cols-3 gap-5">
-                    <div className="h-full">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
                       <input
                         type="radio"
                         id="import-all"
@@ -295,60 +270,27 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                       <Label
                         htmlFor="import-all"
                         className={cn(
-                          "flex flex-col items-center justify-center rounded-2xl p-6 h-[240px]",
-                          "bg-white border-2 shadow-sm",
+                          "flex items-center h-[88px] rounded-lg p-3",
+                          "bg-white border shadow-sm",
                           "hover:border-purple-200 hover:bg-purple-50/50",
                           "transition-all duration-300 cursor-pointer",
                           "peer-checked:border-purple-500 peer-checked:bg-purple-50",
                           "peer-checked:shadow-md peer-checked:shadow-purple-100"
                         )}
                       >
-                        <div className="flex flex-col items-center text-center">
-                          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center mb-5">
-                            <Copy className="h-8 w-8 text-purple-600" />
-                          </div>
-                          <div className="font-semibold text-lg text-purple-950 mb-3">Import All</div>
-                          <span className="text-sm leading-relaxed text-gray-600">
-                            Import your entire profile, including all work experience, skills, and projects
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center shrink-0">
+                          <Copy className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div className="ml-3 flex flex-col">
+                          <div className="font-medium text-sm text-purple-950">Import from Profile</div>
+                          <span className="text-xs text-gray-600 line-clamp-2">
+                            Import your experience and skills
                           </span>
                         </div>
                       </Label>
                     </div>
 
-                    <div className="h-full">
-                      <input
-                        type="radio"
-                        id="ai"
-                        name="importOption"
-                        value="ai"
-                        checked={importOption === 'ai'}
-                        onChange={(e) => setImportOption(e.target.value as 'import-all' | 'ai' | 'scratch')}
-                        className="sr-only peer"
-                      />
-                      <Label
-                        htmlFor="ai"
-                        className={cn(
-                          "flex flex-col items-center justify-center rounded-2xl p-6 h-[240px]",
-                          "bg-white border-2 shadow-sm",
-                          "hover:border-purple-200 hover:bg-purple-50/50",
-                          "transition-all duration-300 cursor-pointer",
-                          "peer-checked:border-purple-500 peer-checked:bg-purple-50",
-                          "peer-checked:shadow-md peer-checked:shadow-purple-100"
-                        )}
-                      >
-                        <div className="flex flex-col items-center text-center">
-                          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center mb-5">
-                            <Brain className="h-8 w-8 text-purple-600" />
-                          </div>
-                          <div className="font-semibold text-lg text-purple-950 mb-3">AI Import</div>
-                          <span className="text-sm leading-relaxed text-gray-600">
-                            Let AI select and import the most relevant experience and skills from your profile
-                          </span>
-                        </div>
-                      </Label>
-                    </div>
-
-                    <div className="h-full">
+                    <div>
                       <input
                         type="radio"
                         id="scratch"
@@ -361,21 +303,21 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                       <Label
                         htmlFor="scratch"
                         className={cn(
-                          "flex flex-col items-center justify-center rounded-2xl p-6 h-[240px]",
-                          "bg-white border-2 shadow-sm",
+                          "flex items-center h-[88px] rounded-lg p-3",
+                          "bg-white border shadow-sm",
                           "hover:border-purple-200 hover:bg-purple-50/50",
                           "transition-all duration-300 cursor-pointer",
                           "peer-checked:border-purple-500 peer-checked:bg-purple-50",
                           "peer-checked:shadow-md peer-checked:shadow-purple-100"
                         )}
                       >
-                        <div className="flex flex-col items-center text-center">
-                          <div className="h-16 w-16 rounded-2xl bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center mb-5">
-                            <Wand2 className="h-8 w-8 text-purple-600" />
-                          </div>
-                          <div className="font-semibold text-lg text-purple-950 mb-3">Start Fresh</div>
-                          <span className="text-sm leading-relaxed text-gray-600">
-                            Start with a blank resume and manually add your experience and skills
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center shrink-0">
+                          <Wand2 className="h-5 w-5 text-purple-600" />
+                        </div>
+                        <div className="ml-3 flex flex-col">
+                          <div className="font-medium text-sm text-purple-950">Start Fresh</div>
+                          <span className="text-xs text-gray-600 line-clamp-2">
+                            Create a blank resume
                           </span>
                         </div>
                       </Label>

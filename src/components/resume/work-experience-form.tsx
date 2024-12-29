@@ -198,7 +198,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div className="flex gap-4">
         <Button 
           variant="outline" 

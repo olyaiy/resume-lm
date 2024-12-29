@@ -200,7 +200,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       <div className="flex gap-4">
         <Button 
           variant="outline" 
