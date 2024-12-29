@@ -9,11 +9,69 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Resume } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, FileText, Sparkles, Brain, Wand2, Copy } from "lucide-react";
+import { Loader2, FileText, Sparkles, Brain, Wand2, Copy, ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { importProfileToResume } from "@/utils/ai";
 import { createClient } from "@/utils/supabase/client";
 import { createBaseResume } from "@/utils/actions";
+
+interface MiniResumePreviewProps {
+  name: string;
+  type: 'base' | 'tailored';
+  className?: string;
+}
+
+function MiniResumePreview({ name, type, className }: MiniResumePreviewProps) {
+  const gradientFrom = type === 'base' ? 'purple-600' : 'pink-600';
+  const gradientTo = type === 'base' ? 'indigo-600' : 'rose-600';
+  const accentBorder = type === 'base' ? 'purple-200' : 'pink-200';
+
+  return (
+    <div className={cn(
+      "relative w-full aspect-[8.5/11]",
+      "flex flex-col items-center justify-center",
+      "rounded-lg overflow-hidden",
+      "border shadow-lg",
+      `border-${accentBorder}`,
+      "bg-white/80 backdrop-blur-sm",
+      "transition-all duration-300",
+      "group",
+      className
+    )}>
+      {/* Background gradient */}
+      <div className="absolute inset-0 opacity-5">
+        <div className={cn(
+          "absolute inset-0",
+          `bg-gradient-to-br from-${gradientFrom} to-${gradientTo}`
+        )} />
+      </div>
+
+      {/* Content */}
+      <div className="relative px-3 py-4 text-center">
+        <div className={cn(
+          "text-xs font-medium line-clamp-2",
+          `text-${gradientFrom}`
+        )}>
+          {name}
+        </div>
+      </div>
+
+      {/* Lines to simulate text */}
+      <div className="absolute inset-x-4 top-1/3 space-y-2">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className={cn(
+              "h-1 rounded-full",
+              `bg-${gradientFrom}/10`,
+              "w-full"
+            )}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
 
 interface CreateResumeDialogProps {
   children: React.ReactNode;
@@ -24,16 +82,19 @@ interface CreateResumeDialogProps {
 export function CreateResumeDialog({ children, type, baseResumes }: CreateResumeDialogProps) {
   const [open, setOpen] = useState(false);
   const [targetRole, setTargetRole] = useState('');
-  const [selectedBaseResume, setSelectedBaseResume] = useState<string>('');
+  const [selectedBaseResume, setSelectedBaseResume] = useState<string>(baseResumes?.[0]?.id || '');
+  const [jobDescription, setJobDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [importOption, setImportOption] = useState<'import-all' | 'ai' | 'scratch'>('ai');
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
+  const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
+  const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
   const router = useRouter();
 
   const handleCreate = async () => {
     if (type === 'base' && !targetRole.trim()) {
       setIsTargetRoleInvalid(true);
-      setTimeout(() => setIsTargetRoleInvalid(false), 820); // Duration of shake animation + small buffer
+      setTimeout(() => setIsTargetRoleInvalid(false), 820);
       toast({
         title: "Required Field Missing",
         description: "Target role is a required field. Please enter your target role.",
@@ -42,13 +103,29 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       return;
     }
 
-    if (type === 'tailored' && !selectedBaseResume) {
-      toast({
-        title: "Error",
-        description: "Please select a base resume",
-        variant: "destructive",
-      });
-      return;
+    if (type === 'tailored') {
+      let hasError = false;
+      
+      if (!selectedBaseResume) {
+        setIsBaseResumeInvalid(true);
+        setTimeout(() => setIsBaseResumeInvalid(false), 820);
+        hasError = true;
+      }
+      
+      if (!jobDescription.trim()) {
+        setIsJobDescriptionInvalid(true);
+        setTimeout(() => setIsJobDescriptionInvalid(false), 820);
+        hasError = true;
+      }
+
+      if (hasError) {
+        toast({
+          title: "Required Fields Missing",
+          description: "Please select a base resume and provide a job description.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     try {
@@ -109,7 +186,14 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       <DialogTrigger asChild>
         {children}
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[800px] p-0 bg-gradient-to-b from-white/95 to-white/90 backdrop-blur-2xl border-white/40 shadow-2xl">
+      <DialogContent className={cn(
+        "sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto",
+        "bg-gradient-to-b backdrop-blur-2xl border-white/40 shadow-2xl",
+        type === 'base' 
+          ? "from-purple-50/95 to-indigo-50/90 border-purple-200/40"
+          : "from-pink-50/95 to-rose-50/90 border-pink-200/40",
+        "rounded-xl"
+      )}>
         <style jsx global>{`
           @keyframes shake {
             0%, 100% { transform: translateX(0); }
@@ -121,29 +205,34 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
           }
         `}</style>
         {/* Header Section with Icon */}
-        <div className="relative px-10 pt-10 pb-8 border-b border-gray-100">
-          <div className="flex items-center gap-5">
+        <div className={cn(
+          "relative px-8 pt-6 pb-4 border-b sticky top-0 z-10 bg-white/50 backdrop-blur-xl",
+          type === 'base' 
+            ? "border-purple-200/20"
+            : "border-pink-200/20"
+        )}>
+          <div className="flex items-center gap-4">
             <div className={cn(
-              "p-4 rounded-2xl transition-all duration-300",
+              "p-3 rounded-xl transition-all duration-300",
               type === 'base' 
-                ? "bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100"
-                : "bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100"
+                ? "bg-gradient-to-br from-purple-100/80 to-indigo-100/80 border border-purple-200/60"
+                : "bg-gradient-to-br from-pink-100/80 to-rose-100/80 border border-pink-200/60"
             )}>
               {type === 'base' 
-                ? <FileText className="w-8 h-8 text-purple-600" />
-                : <Sparkles className="w-8 h-8 text-pink-600" />
+                ? <FileText className="w-6 h-6 text-purple-600" />
+                : <Sparkles className="w-6 h-6 text-pink-600" />
               }
             </div>
             <div>
               <DialogTitle className={cn(
-                "text-2xl font-semibold",
+                "text-xl font-semibold",
                 type === 'base'
                   ? "text-purple-950"
                   : "text-pink-950"
               )}>
                 Create {type === 'base' ? 'Base' : 'Tailored'} Resume
               </DialogTitle>
-              <DialogDescription className="mt-2 text-base text-muted-foreground">
+              <DialogDescription className="mt-1 text-sm text-muted-foreground">
                 {type === 'base' 
                   ? "Create a new base resume template that you can use for multiple job applications"
                   : "Create a tailored resume based on an existing base resume"}
@@ -153,8 +242,13 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
         </div>
 
         {/* Content Section */}
-        <div className="px-10 py-8 space-y-10">
-          <div className="space-y-8">
+        <div className={cn(
+          "px-8 py-6 space-y-6",
+          type === 'base'
+            ? "bg-gradient-to-b from-purple-50/30 to-indigo-50/30"
+            : "bg-gradient-to-b from-pink-50/30 to-rose-50/30"
+        )}>
+          <div className="space-y-6">
             {type === 'base' ? (
               <>
                 <div className="space-y-3">
@@ -290,44 +384,212 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                 </div>
               </>
             ) : (
-              <div className="space-y-3">
-                <Label 
-                  htmlFor="base-resume"
-                  className="text-lg font-medium text-pink-950"
-                >
-                  Select Base Resume
-                </Label>
-                <Select value={selectedBaseResume} onValueChange={setSelectedBaseResume}>
-                  <SelectTrigger 
-                    id="base-resume" 
-                    className="bg-white/80 border-gray-200 h-12 text-base focus:border-pink-500 focus:ring-pink-500/20"
-                  >
-                    <SelectValue placeholder="Select a base resume" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {baseResumes?.map((resume) => (
-                      <SelectItem 
-                        key={resume.id} 
-                        value={resume.id}
-                        className="focus:bg-pink-50"
+              <div className="space-y-2">
+                {(!baseResumes || baseResumes.length === 0) ? (
+                  <div className="flex flex-col items-center justify-center p-8 space-y-4">
+                    <div className="p-4 rounded-2xl bg-pink-50/50 border border-pink-100">
+                      <Sparkles className="w-8 h-8 text-pink-600" />
+                    </div>
+                    <div className="text-center space-y-2 max-w-sm">
+                      <h3 className="font-semibold text-base text-pink-950">No Base Resumes Found</h3>
+                      <p className="text-xs text-muted-foreground">
+                        You need to create a base resume first before you can create a tailored version.
+                      </p>
+                    </div>
+                    <CreateResumeDialog type="base">
+                      <Button
+                        className={cn(
+                          "mt-2 text-white shadow-lg hover:shadow-xl transition-all duration-500",
+                          "bg-gradient-to-r from-purple-600 to-indigo-600",
+                          "hover:from-purple-700 hover:to-indigo-700"
+                        )}
                       >
-                        {resume.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Create Base Resume
+                      </Button>
+                    </CreateResumeDialog>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-2">
+                      <Label 
+                        htmlFor="base-resume"
+                        className="text-base font-medium text-pink-950"
+                      >
+                        Select Base Resume <span className="text-red-500">*</span>
+                      </Label>
+                      <Select 
+                        value={selectedBaseResume} 
+                        onValueChange={setSelectedBaseResume}
+                      >
+                        <SelectTrigger 
+                          id="base-resume" 
+                          className={cn(
+                            "bg-white/80 border-gray-200 h-10 text-sm focus:border-pink-500 focus:ring-pink-500/20",
+                            isBaseResumeInvalid && "border-red-500 shake"
+                          )}
+                        >
+                          <SelectValue placeholder="Select a base resume" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {baseResumes?.map((resume) => (
+                            <SelectItem 
+                              key={resume.id} 
+                              value={resume.id}
+                              className="focus:bg-pink-50 text-sm"
+                            >
+                              {resume.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Resume Selection Visualization */}
+                    <div className="flex items-center justify-center gap-4">
+                      {selectedBaseResume && baseResumes ? (
+                        <>
+                          <MiniResumePreview
+                            name={baseResumes.find(r => r.id === selectedBaseResume)?.name || ''}
+                            type="base"
+                            className="w-24 hover:-translate-y-1 transition-transform duration-300"
+                          />
+                          <div className="flex flex-col items-center gap-1">
+                            <ArrowRight className="w-6 h-6 text-pink-600 animate-pulse" />
+                            <span className="text-xs font-medium text-muted-foreground">Tailored For Job</span>
+                          </div>
+                          <MiniResumePreview
+                            name="Tailored Resume"
+                            type="tailored"
+                            className="w-24 hover:-translate-y-1 transition-transform duration-300"
+                          />
+                        </>
+                      ) : (
+                        <div className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-pink-100">
+                          <div className="text-sm font-medium text-muted-foreground">
+                            Select a base resume to see preview
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label 
+                        htmlFor="job-description"
+                        className="text-base font-medium text-pink-950"
+                      >
+                        Job Description <span className="text-red-500">*</span>
+                      </Label>
+                      <textarea
+                        id="job-description"
+                        placeholder="Paste the job description here..."
+                        value={jobDescription}
+                        onChange={(e) => setJobDescription(e.target.value)}
+                        className={cn(
+                          "w-full min-h-[120px] rounded-md bg-white/80 border-gray-200 text-base",
+                          "focus:border-pink-500 focus:ring-pink-500/20 placeholder:text-gray-400",
+                          "resize-y p-4",
+                          isJobDescriptionInvalid && "border-red-500 shake"
+                        )}
+                        required
+                      />
+                    </div>
+
+                    <div className="">
+                    
+                      <div className="grid grid-cols-2 gap-4">
+                        <div className="h-full">
+                          <input
+                            type="radio"
+                            id="ai-tailor"
+                            name="tailorOption"
+                            value="ai"
+                            checked={importOption === 'ai'}
+                            onChange={(e) => setImportOption('ai')}
+                            className="sr-only peer"
+                          />
+                          <Label
+                            htmlFor="ai-tailor"
+                            className={cn(
+                              "flex flex-col items-center justify-center rounded-xl p-4",
+                              "bg-white/80 border-2 shadow-sm h-full",
+                              "hover:border-pink-200 hover:bg-pink-50/50",
+                              "transition-all duration-300 cursor-pointer",
+                              "peer-checked:border-pink-500 peer-checked:bg-pink-50",
+                              "peer-checked:shadow-md peer-checked:shadow-pink-100"
+                            )}
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-3">
+                                <Brain className="h-6 w-6 text-pink-600" />
+                              </div>
+                              <div className="font-semibold text-sm text-pink-950 mb-1.5">Tailor with AI</div>
+                              <span className="text-xs leading-relaxed text-gray-600">
+                                Let AI analyze the job description and optimize your resume for the best match
+                              </span>
+                            </div>
+                          </Label>
+                        </div>
+
+                        <div className="h-full">
+                          <input
+                            type="radio"
+                            id="manual-tailor"
+                            name="tailorOption"
+                            value="import-all"
+                            checked={importOption === 'import-all'}
+                            onChange={(e) => setImportOption('import-all')}
+                            className="sr-only peer"
+                          />
+                          <Label
+                            htmlFor="manual-tailor"
+                            className={cn(
+                              "flex flex-col items-center justify-center rounded-xl p-4",
+                              "bg-white/80 border-2 shadow-sm h-full",
+                              "hover:border-pink-200 hover:bg-pink-50/50",
+                              "transition-all duration-300 cursor-pointer",
+                              "peer-checked:border-pink-500 peer-checked:bg-pink-50",
+                              "peer-checked:shadow-md peer-checked:shadow-pink-100"
+                            )}
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-3">
+                                <Copy className="h-6 w-6 text-pink-600" />
+                              </div>
+                              <div className="font-semibold text-sm text-pink-950 mb-1.5">Copy Base Resume</div>
+                              <span className="text-xs leading-relaxed text-gray-600">
+                                Create an exact copy of your base resume and make your own modifications
+                              </span>
+                            </div>
+                          </Label>
+                        </div>
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
             )}
           </div>
         </div>
 
         {/* Footer Section */}
-        <div className="px-10 py-6 border-t border-gray-100 bg-gray-50/80">
+        <div className={cn(
+          "px-8 py-4 border-t sticky bottom-0 z-10 bg-white/50 backdrop-blur-xl",
+          type === 'base'
+            ? "border-purple-200/20 bg-white/40"
+            : "border-pink-200/20 bg-white/40"
+        )}>
           <div className="flex justify-end gap-3">
             <Button 
               variant="outline" 
               onClick={() => setOpen(false)}
-              className="border-gray-200 hover:bg-white/60 text-gray-600"
+              className={cn(
+                "border-gray-200 text-gray-600",
+                "hover:bg-white/60",
+                type === 'base'
+                  ? "hover:border-purple-200"
+                  : "hover:border-pink-200"
+              )}
             >
               Cancel
             </Button>

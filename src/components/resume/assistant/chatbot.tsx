@@ -11,7 +11,6 @@ import { Resume, WorkExperience, Education, Project, Skill, Certification } from
 import { Message, ToolInvocation } from 'ai';
 import { cn } from '@/lib/utils';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 
 interface ChatBotProps {
   resume: Resume;
@@ -182,33 +181,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         "backdrop-blur-sm"
                       ]
                     )}>
-                      <div className={cn(
-                        "prose prose-sm max-w-none whitespace-pre-wrap",
-                        "prose-headings:font-semibold prose-headings:text-inherit",
-                        "prose-h1:text-lg prose-h1:mt-2 prose-h1:mb-1",
-                        "prose-h2:text-base prose-h2:mt-2 prose-h2:mb-1",
-                        "prose-h3:text-sm prose-h3:mt-1.5 prose-h3:mb-0.5",
-                        "prose-p:my-1 prose-p:leading-normal",
-                        "prose-pre:bg-black/5 prose-pre:rounded",
-                        "prose-code:text-inherit prose-code:bg-black/5 prose-code:rounded prose-code:px-1",
-                        "prose-ul:my-1 prose-li:my-0 prose-li:marker:text-current",
-                        "prose-hr:my-2 prose-hr:border-current/20",
-                        message.role === 'user' ? [
-                          "prose-invert",
-                          "prose-a:text-blue-200 prose-a:hover:text-blue-300",
-                          "prose-strong:text-white",
-                          "prose-em:text-gray-200",
-                          "prose-headings:text-white"
-                        ] : [
-                          "prose-purple",
-                          "prose-a:text-purple-600 prose-a:hover:text-purple-700",
-                          "prose-strong:text-purple-900",
-                          "prose-em:text-purple-800",
-                          "prose-headings:text-purple-900"
-                        ]
-                      )}>
-                        <MemoizedMarkdown id={message.id || String(index)} content={message.content} />
-                      </div>
+                      {message.content}
                     </div>
                   </div>
                 </div>
