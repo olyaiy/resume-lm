@@ -17,6 +17,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import Tiptap from "../ui/tiptap";
 
 interface AISuggestion {
   id: string;
@@ -336,13 +337,13 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   {exp.description.map((desc, descIndex) => (
                     <div key={descIndex} className="flex gap-1 items-start group/item">
                       <div className="flex-1">
-                        <Textarea
-                          value={desc}
-                          onChange={(e) => {
+                        <Tiptap 
+                          content={desc} 
+                          onChange={(newContent) => {
                             const updated = [...experiences];
-                            updated[index].description[descIndex] = e.target.value;
+                            updated[index].description[descIndex] = newContent;
                             onChange(updated);
-                            
+
                             // Clear improvement state when manually edited
                             if (improvedPoints[index]?.[descIndex]) {
                               setImprovedPoints(prev => {
@@ -357,7 +358,6 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                               });
                             }
                           }}
-                          placeholder="Start with a strong action verb"
                           className={cn(
                             "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
                             "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
@@ -371,6 +371,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                             ]
                           )}
                         />
+
                         {improvedPoints[index]?.[descIndex] && (
                           <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
                             <span className="text-[10px] font-medium text-purple-600 flex items-center gap-1">

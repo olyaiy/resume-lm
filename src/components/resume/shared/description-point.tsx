@@ -1,6 +1,6 @@
 'use client';
 
-import { Textarea } from "@/components/ui/textarea";
+import Tiptap from "@/components/ui/tiptap";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
@@ -44,22 +44,26 @@ export function DescriptionPoint({
   return (
     <div className="flex gap-1 items-start group/item">
       <div className="flex-1">
-        <Textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          placeholder={placeholder}
-          className={cn(
-            "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
-            "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-            "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
-            "placeholder:text-gray-400",
-            isImproved && [
-              "border-purple-400",
-              "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
-              "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
-              "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
-            ]
-          )}
+        <Tiptap
+          content={value}
+          onChange={onChange}
+          editorProps={{
+            attributes: {
+              placeholder,
+              class: cn(
+                "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
+                "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
+                "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
+                "placeholder:text-gray-400",
+                isImproved && [
+                  "border-purple-400",
+                  "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
+                  "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
+                  "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
+                ]
+              )
+            }
+          }}
         />
         {isImproved && (
           <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
@@ -163,19 +167,23 @@ export function DescriptionPoint({
                     <div className="space-y-2">
                       <div>
                         <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
-                        <Textarea
-                          value={improvementPrompt}
-                          onChange={(e) => onImprovementPromptChange(e.target.value)}
-                          placeholder={improvementPromptPlaceholder}
-                          className={cn(
-                            "h-14 mt-0.5 text-xs",
-                            "bg-white",
-                            "border-purple-200",
-                            "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
-                            "hover:bg-white",
-                            "resize-none",
-                            "text-purple-900 placeholder:text-purple-400"
-                          )}
+                        <Tiptap
+                          content={improvementPrompt}
+                          onChange={onImprovementPromptChange}
+                          editorProps={{
+                            attributes: {
+                              placeholder: improvementPromptPlaceholder,
+                              class: cn(
+                                "h-14 mt-0.5 text-xs",
+                                "bg-white",
+                                "border-purple-200",
+                                "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
+                                "hover:bg-white",
+                                "resize-none",
+                                "text-purple-900 placeholder:text-purple-400"
+                              )
+                            }
+                          }}
                         />
                       </div>
                     </div>
