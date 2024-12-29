@@ -87,20 +87,21 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       >
         <AccordionItem value="chat" className="border-none  py-0 my-0 ">
           <AccordionTrigger className={cn(
-            "px-3 py-2  ",
+            "px-3 py-1.5",
             "hover:no-underline",
             "group",
             "transition-all duration-300",
+            "data-[state=open]:border-b border-purple-200/60",
             "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100"
           )}>
             <div className={cn(
-              "flex items-center gap-2 w-full ",
+              "flex items-center gap-2 w-full",
               "transition-transform duration-300",
               "group-hover:scale-[0.99]",
               "group-data-[state=closed]:scale-95"
             )}>
               <div className={cn(
-                "p-1.5 rounded-lg ",
+                "p-1.5 rounded-lg",
                 "bg-purple-100/80 text-purple-600",
                 "group-hover:bg-purple-200/80",
                 "transition-colors duration-300",
@@ -131,9 +132,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             </div>
           </AccordionTrigger>
           <AccordionContent className="space-y-4">
-            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4 space-y-4">
+            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4">
               {messages.map((message: Message, index) => (
-                <div key={index} className="mb-2 last:mb-8">
+                <div key={index} className="mt-2 last:mb-8">
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={cn(
                       "rounded-2xl px-4 max-w-[80%] text-sm py-2",
