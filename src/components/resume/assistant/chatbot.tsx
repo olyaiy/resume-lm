@@ -60,6 +60,11 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       if (toolCall.toolName === 'getResume') {
         return resume;
       }
+
+      if (toolCall.toolName === 'suggest_work_experience_improvement') {
+        console.log('Suggestion:\n', toolCall);
+      }
+
     },
   });
 
@@ -202,10 +207,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         switch (toolInvocation.toolName) {
                           case 'getResume':
                             return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
-                          case 'updateResume':
-                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Updated Resume ✅</div>;
-                          case 'askForConfirmation':
-                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Confirmation Required ⚠️</div>;
                           default:
                             return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
                         }
@@ -217,13 +218,13 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
               {/* Mock Suggestion Component */}
               <div className="my-4">
-                <Suggestion
+                {/* <Suggestion
                   type="work_experience"
                   content={mockWorkExperience}
                   currentContent={mockCurrentWorkExperience}
                   onAccept={() => console.log('Accepted suggestion')}
                   onReject={() => console.log('Rejected suggestion')}
-                />
+                /> */}
               </div>
 
               {/* Loading Message */}

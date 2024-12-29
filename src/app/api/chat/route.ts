@@ -2,7 +2,7 @@ import { ToolInvocation, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { openrouter } from "@openrouter/ai-sdk-provider";
 
-import { Resume } from '@/lib/types';
+import { Resume, WorkExperience } from '@/lib/types';
 import { z } from 'zod';
 
 interface Message {
@@ -40,6 +40,7 @@ When responding:
 
 Available Tools:
 - getResume: Access the user's current resume data for analysis
+- suggest_work_experience_improvement: Suggest improvements for a specific work experience entry
 
 Remember to provide detailed, professional guidance while maintaining a helpful and encouraging tone.`,
     messages,
@@ -48,6 +49,20 @@ Remember to provide detailed, professional guidance while maintaining a helpful 
       getResume: {
         description: 'Get the user Resume.',
         parameters: z.object({}),
+      },
+      suggest_work_experience_improvement: {
+        description: 'Suggest improvements for a specific work experience entry',
+        parameters: z.object({
+          index: z.number().describe('Index of the work experience entry to improve'),
+          improved_experience: z.object({
+            company: z.string(),
+            position: z.string(),
+            location: z.string().optional(),
+            date: z.string(),
+            description: z.array(z.string()),
+            technologies: z.array(z.string()).optional(),
+          }).describe('Improved version of the work experience entry'),
+        }),
       },
     }
   });
