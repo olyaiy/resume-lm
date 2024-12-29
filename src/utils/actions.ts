@@ -297,7 +297,7 @@ export async function deleteResume(resumeId: string): Promise<void> {
 
 export async function createBaseResume(
   name: string, 
-  importOption: 'import-all' | 'ai' | 'fresh' = 'import-all',
+  importOption: 'import-profile' | 'ai' | 'fresh' = 'import-profile',
   selectedContent?: {
     work_experience: WorkExperience[];
     education: Education[];
@@ -399,31 +399,30 @@ export async function createBaseResume(
     website: aiRecommendations?.website || (importOption === 'fresh' ? '' : profile?.website || ''),
     linkedin_url: aiRecommendations?.linkedin_url || (importOption === 'fresh' ? '' : profile?.linkedin_url || ''),
     github_url: aiRecommendations?.github_url || (importOption === 'fresh' ? '' : profile?.github_url || ''),
-    work_experience: importOption === 'ai' && Array.isArray(aiRecommendations?.work_experience) 
-      ? [...aiRecommendations.work_experience]
-      : (importOption === 'import-all' && Array.isArray(profile?.work_experience) 
-        ? [...profile.work_experience] 
-        : selectedContent?.work_experience || []),
-    education: importOption === 'ai' && Array.isArray(aiRecommendations?.education)
-      ? [...aiRecommendations.education]
-      : (importOption === 'import-all' && Array.isArray(profile?.education) 
-        ? [...profile.education] 
-        : selectedContent?.education || []),
-    skills: importOption === 'ai' && Array.isArray(aiRecommendations?.skills)
-      ? [...aiRecommendations.skills]
-      : (importOption === 'import-all' && Array.isArray(profile?.skills) 
-        ? [...profile.skills] 
-        : selectedContent?.skills || []),
-    projects: importOption === 'ai' && Array.isArray(aiRecommendations?.projects)
-      ? [...aiRecommendations.projects]
-      : (importOption === 'import-all' && Array.isArray(profile?.projects) 
-        ? [...profile.projects] 
-        : selectedContent?.projects || []),
+    // For import-profile, use only the selected content. For AI, use AI recommendations. For fresh, use empty arrays
+    work_experience: importOption === 'import-profile' && selectedContent 
+      ? selectedContent.work_experience
+      : (importOption === 'ai' && Array.isArray(aiRecommendations?.work_experience)
+        ? [...aiRecommendations.work_experience]
+        : []),
+    education: importOption === 'import-profile' && selectedContent
+      ? selectedContent.education
+      : (importOption === 'ai' && Array.isArray(aiRecommendations?.education)
+        ? [...aiRecommendations.education]
+        : []),
+    skills: importOption === 'import-profile' && selectedContent
+      ? selectedContent.skills
+      : (importOption === 'ai' && Array.isArray(aiRecommendations?.skills)
+        ? [...aiRecommendations.skills]
+        : []),
+    projects: importOption === 'import-profile' && selectedContent
+      ? selectedContent.projects
+      : (importOption === 'ai' && Array.isArray(aiRecommendations?.projects)
+        ? [...aiRecommendations.projects]
+        : []),
     certifications: importOption === 'ai' && Array.isArray(aiRecommendations?.certifications)
       ? [...aiRecommendations.certifications]
-      : (importOption === 'import-all' && Array.isArray(profile?.certifications) 
-        ? [...profile.certifications] 
-        : []),
+      : [],
     section_order: [
       'work_experience',
       'education',
@@ -432,11 +431,11 @@ export async function createBaseResume(
       'certifications'
     ],
     section_configs: {
-      work_experience: { visible: true },
-      education: { visible: true },
-      skills: { visible: true },
-      projects: { visible: true },
-      certifications: { visible: true }
+      work_experience: { visible: (selectedContent?.work_experience?.length ?? 0) > 0 || importOption === 'ai' },
+      education: { visible: (selectedContent?.education?.length ?? 0) > 0 || importOption === 'ai' },
+      skills: { visible: (selectedContent?.skills?.length ?? 0) > 0 || importOption === 'ai' },
+      projects: { visible: (selectedContent?.projects?.length ?? 0) > 0 || importOption === 'ai' },
+      certifications: { visible: importOption === 'ai' && Array.isArray(aiRecommendations?.certifications) }
     }
   };
 

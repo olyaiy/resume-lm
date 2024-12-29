@@ -90,7 +90,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
   const [selectedBaseResume, setSelectedBaseResume] = useState<string>(baseResumes?.[0]?.id || '');
   const [jobDescription, setJobDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [importOption, setImportOption] = useState<'import-all' | 'ai' | 'scratch'>('import-all');
+  const [importOption, setImportOption] = useState<'import-profile' | 'ai' | 'scratch'>('import-profile');
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
   const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
@@ -251,7 +251,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
     if (newOpen) {
       setTargetRole('');
       setJobDescription('');
-      setImportOption('import-all');
+      setImportOption('import-profile');
       initializeSelectedItems();
     }
   };
@@ -360,15 +360,15 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                     <div>
                       <input
                         type="radio"
-                        id="import-all"
+                        id="import-profile"
                         name="importOption"
-                        value="import-all"
-                        checked={importOption === 'import-all'}
-                        onChange={(e) => setImportOption(e.target.value as 'import-all' | 'ai' | 'scratch')}
+                        value="import-profile"
+                        checked={importOption === 'import-profile'}
+                        onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'ai' | 'scratch')}
                         className="sr-only peer"
                       />
                       <Label
-                        htmlFor="import-all"
+                        htmlFor="import-profile"
                         className={cn(
                           "flex items-center h-[88px] rounded-lg p-3",
                           "bg-white border shadow-sm",
@@ -397,7 +397,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                         name="importOption"
                         value="scratch"
                         checked={importOption === 'scratch'}
-                        onChange={(e) => setImportOption(e.target.value as 'import-all' | 'ai' | 'scratch')}
+                        onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'ai' | 'scratch')}
                         className="sr-only peer"
                       />
                       <Label
@@ -424,7 +424,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                     </div>
                   </div>
 
-                  {importOption === 'import-all' && (
+                  {importOption === 'import-profile' && (
                     <ScrollArea className="h-[400px] pr-4 mt-4">
                       <div className="grid grid-cols-2 gap-6">
                         {/* Left Column */}
@@ -827,20 +827,29 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                             type="radio"
                             id="manual-tailor"
                             name="tailorOption"
-                            value="import-all"
-                            checked={importOption === 'import-all'}
-                            onChange={(e) => setImportOption('import-all')}
+                            value="import-profile"
+                            checked={importOption === 'import-profile'}
+                            onChange={(e) => setImportOption('import-profile')}
                             className="sr-only peer"
                           />
-                          <Label
-                            htmlFor="manual-tailor"
+                          <div
+                            role="button"
+                            tabIndex={0}
+                            onClick={() => setImportOption('import-profile')}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                setImportOption('import-profile');
+                              }
+                            }}
                             className={cn(
                               "flex flex-col items-center justify-center rounded-xl p-4",
                               "bg-white/80 border-2 shadow-sm h-full",
                               "hover:border-pink-200 hover:bg-pink-50/50",
                               "transition-all duration-300 cursor-pointer",
                               "peer-checked:border-pink-500 peer-checked:bg-pink-50",
-                              "peer-checked:shadow-md peer-checked:shadow-pink-100"
+                              "peer-checked:shadow-md peer-checked:shadow-pink-100",
+                              "focus:outline-none focus:ring-2 focus:ring-pink-500/50"
                             )}
                           >
                             <div className="flex flex-col items-center text-center">
@@ -852,7 +861,7 @@ export function CreateResumeDialog({ children, type, baseResumes, profile }: Cre
                                 Create an exact copy of your base resume and make your own modifications
                               </span>
                             </div>
-                          </Label>
+                          </div>
                         </div>
                       </div>
                     </div>
