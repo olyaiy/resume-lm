@@ -344,51 +344,50 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
             </div>
           </div>
 
-          {/* Right Section - Action Buttons with Enhanced Styling */}
-          <div className="flex items-center gap-4">
-            <Button
-              onClick={handleSubmit}
+          {/* Right Section - Action Buttons */}
+          <div className="flex items-center gap-3">
+            {/* Save Button */}
+            <Button 
+              onClick={handleSubmit} 
               disabled={isSubmitting}
-              className="relative group bg-gradient-to-b from-gray-900 via-gray-800 to-gray-900 text-white hover:opacity-90 transition-all duration-500 shadow-lg shadow-black/10 hover:shadow-xl hover:shadow-black/20 hover:-translate-y-0.5 h-11 px-6 rounded-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 overflow-hidden"
+              size="sm"
+              className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
             >
               <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-              <div className="relative flex items-center gap-2.5">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                    <span className="font-medium">Saving Changes...</span>
-                  </>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    <span className="font-medium">Save Changes</span>
-                  </>
-                )}
-              </div>
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving changes...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              )}
             </Button>
 
-            {/* Reset Profile Button with Enhanced Styling */}
+            {/* Reset Profile Button */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button
+                  size="sm"
                   variant="destructive"
-                  className="relative group bg-gradient-to-b from-rose-500 via-rose-600 to-rose-500 text-white hover:opacity-90 transition-all duration-500 shadow-lg shadow-rose-500/20 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5 h-11 px-6 rounded-xl disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0 overflow-hidden"
+                  className="bg-gradient-to-r from-red-600 to-rose-600 text-white hover:from-red-700 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-rose-500/20 hover:-translate-y-0.5 h-10 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
                   disabled={isResetting}
                 >
                   <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                  <div className="relative flex items-center gap-2.5">
-                    {isResetting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        <span className="font-medium">Resetting...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Trash2 className="h-4 w-4" />
-                        <span className="font-medium">Reset Profile</span>
-                      </>
-                    )}
-                  </div>
+                  {isResetting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Resetting...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="mr-2 h-4 w-4" />
+                      Reset Profile
+                    </>
+                  )}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent className="sm:max-w-[425px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
