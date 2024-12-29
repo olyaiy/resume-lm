@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume } from "@/lib/types";
+import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { importProfileToResume } from "@/utils/ai";
 
@@ -298,10 +298,15 @@ export async function deleteResume(resumeId: string): Promise<void> {
 export async function createBaseResume(
   name: string, 
   importOption: 'import-all' | 'ai' | 'fresh' = 'import-all',
-  aiRecommendations?: Partial<Resume>
+  selectedContent?: {
+    work_experience: WorkExperience[];
+    education: Education[];
+    skills: Skill[];
+    projects: Project[];
+  }
 ): Promise<Resume> {
   console.log('\n========== CREATE BASE RESUME START ==========');
-  console.log('Input Parameters:', { name, importOption, hasAiRecommendations: !!aiRecommendations });
+  console.log('Input Parameters:', { name, importOption, hasSelectedContent: !!selectedContent });
 
   const supabase = await createClient();
 
@@ -342,7 +347,8 @@ export async function createBaseResume(
   }
 
   // For AI option, get AI recommendations if not provided
-  if (importOption === 'ai' && !aiRecommendations && profile) {
+  let aiRecommendations: Partial<Resume> | undefined;
+  if (importOption === 'ai' && profile) {
     try {
       console.log('\nRequesting AI Analysis...');
       const aiResponse = await importProfileToResume(profile, name);
@@ -393,42 +399,45 @@ export async function createBaseResume(
     website: aiRecommendations?.website || (importOption === 'fresh' ? '' : profile?.website || ''),
     linkedin_url: aiRecommendations?.linkedin_url || (importOption === 'fresh' ? '' : profile?.linkedin_url || ''),
     github_url: aiRecommendations?.github_url || (importOption === 'fresh' ? '' : profile?.github_url || ''),
-    professional_summary: aiRecommendations?.professional_summary || '',
     work_experience: importOption === 'ai' && Array.isArray(aiRecommendations?.work_experience) 
       ? [...aiRecommendations.work_experience]
-      : (importOption === 'import-all' && Array.isArray(profile?.work_experience) ? [...profile.work_experience] : []),
+      : (importOption === 'import-all' && Array.isArray(profile?.work_experience) 
+        ? [...profile.work_experience] 
+        : selectedContent?.work_experience || []),
     education: importOption === 'ai' && Array.isArray(aiRecommendations?.education)
       ? [...aiRecommendations.education]
-      : (importOption === 'import-all' && Array.isArray(profile?.education) ? [...profile.education] : []),
+      : (importOption === 'import-all' && Array.isArray(profile?.education) 
+        ? [...profile.education] 
+        : selectedContent?.education || []),
     skills: importOption === 'ai' && Array.isArray(aiRecommendations?.skills)
       ? [...aiRecommendations.skills]
-      : (importOption === 'import-all' && Array.isArray(profile?.skills) ? [...profile.skills] : []),
+      : (importOption === 'import-all' && Array.isArray(profile?.skills) 
+        ? [...profile.skills] 
+        : selectedContent?.skills || []),
     projects: importOption === 'ai' && Array.isArray(aiRecommendations?.projects)
       ? [...aiRecommendations.projects]
-      : (importOption === 'import-all' && Array.isArray(profile?.projects) ? [...profile.projects] : []),
+      : (importOption === 'import-all' && Array.isArray(profile?.projects) 
+        ? [...profile.projects] 
+        : selectedContent?.projects || []),
     certifications: importOption === 'ai' && Array.isArray(aiRecommendations?.certifications)
       ? [...aiRecommendations.certifications]
-      : (importOption === 'import-all' && Array.isArray(profile?.certifications) ? [...profile.certifications] : []),
-    section_order: importOption === 'ai' && Array.isArray(aiRecommendations?.section_order) && aiRecommendations.section_order.length > 0
-      ? [...aiRecommendations.section_order]
-      : [
-          'professional_summary',
-          'work_experience',
-          'education',
-          'skills',
-          'projects',
-          'certifications'
-        ],
-    section_configs: importOption === 'ai' && aiRecommendations?.section_configs
-      ? { ...aiRecommendations.section_configs }
-      : {
-          professional_summary: { visible: true },
-          work_experience: { visible: true },
-          education: { visible: true },
-          skills: { visible: true },
-          projects: { visible: true },
-          certifications: { visible: true }
-        }
+      : (importOption === 'import-all' && Array.isArray(profile?.certifications) 
+        ? [...profile.certifications] 
+        : []),
+    section_order: [
+      'work_experience',
+      'education',
+      'skills',
+      'projects',
+      'certifications'
+    ],
+    section_configs: {
+      work_experience: { visible: true },
+      education: { visible: true },
+      skills: { visible: true },
+      projects: { visible: true },
+      certifications: { visible: true }
+    }
   };
 
   console.log('\nPrepared Resume Data:', {

@@ -7,13 +7,16 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Resume } from "@/lib/types";
+import { Resume, Profile, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Sparkles, Brain, Wand2, Copy, ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { importProfileToResume } from "@/utils/ai";
 import { createClient } from "@/utils/supabase/client";
 import { createBaseResume } from "@/utils/actions";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Checkbox } from "@/components/ui/checkbox";
 
 interface MiniResumePreviewProps {
   name: string;
@@ -77,9 +80,10 @@ interface CreateResumeDialogProps {
   children: React.ReactNode;
   type: 'base' | 'tailored';
   baseResumes?: Resume[];
+  profile: Profile;
 }
 
-export function CreateResumeDialog({ children, type, baseResumes }: CreateResumeDialogProps) {
+export function CreateResumeDialog({ children, type, baseResumes, profile }: CreateResumeDialogProps) {
   const [open, setOpen] = useState(false);
   const [targetRole, setTargetRole] = useState('');
   const [selectedBaseResume, setSelectedBaseResume] = useState<string>(baseResumes?.[0]?.id || '');
@@ -89,7 +93,62 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
   const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
+  const [selectedItems, setSelectedItems] = useState<{
+    work_experience: string[];
+    education: string[];
+    skills: string[];
+    projects: string[];
+  }>({
+    work_experience: [],
+    education: [],
+    skills: [],
+    projects: []
+  });
   const router = useRouter();
+
+  const getItemId = (type: keyof typeof selectedItems, item: any): string => {
+    switch (type) {
+      case 'work_experience':
+        return `${item.company}-${item.position}-${item.date}`;
+      case 'projects':
+        return item.name;
+      case 'education':
+        return `${item.school}-${item.degree}-${item.field}`;
+      case 'skills':
+        return item.category;
+      default:
+        return '';
+    }
+  };
+
+  const handleItemSelection = (section: keyof typeof selectedItems, id: string) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [section]: prev[section].includes(id)
+        ? prev[section].filter(x => x !== id)
+        : [...prev[section], id]
+    }));
+  };
+
+  const handleSectionSelection = (section: keyof typeof selectedItems, checked: boolean) => {
+    setSelectedItems(prev => ({
+      ...prev,
+      [section]: checked 
+        ? profile[section].map(item => getItemId(section, item))
+        : []
+    }));
+  };
+
+  const isSectionSelected = (section: keyof typeof selectedItems): boolean => {
+    const sectionItems = profile[section].map(item => getItemId(section, item));
+    return sectionItems.length > 0 && sectionItems.every(id => selectedItems[section].includes(id));
+  };
+
+  const isSectionPartiallySelected = (section: keyof typeof selectedItems): boolean => {
+    const sectionItems = profile[section].map(item => getItemId(section, item));
+    const selectedCount = sectionItems.filter(id => selectedItems[section].includes(id)).length;
+    return selectedCount > 0 && selectedCount < sectionItems.length;
+  };
 
   const handleCreate = async () => {
     if (type === 'base' && !targetRole.trim()) {
@@ -133,7 +192,26 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
       let resume: Resume;
 
       if (type === 'base') {
-        resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
+        const selectedContent = {
+          work_experience: profile.work_experience.filter(exp => 
+            selectedItems.work_experience.includes(getItemId('work_experience', exp))
+          ),
+          education: profile.education.filter(edu => 
+            selectedItems.education.includes(getItemId('education', edu))
+          ),
+          skills: profile.skills.filter(skill => 
+            selectedItems.skills.includes(getItemId('skills', skill))
+          ),
+          projects: profile.projects.filter(project => 
+            selectedItems.projects.includes(getItemId('projects', project))
+          ),
+        };
+
+        resume = await createBaseResume(
+          targetRole, 
+          importOption === 'scratch' ? 'fresh' : importOption,
+          selectedContent
+        );
       } else {
         resume = await createBaseResume(targetRole, importOption === 'scratch' ? 'fresh' : importOption);
       }
@@ -323,6 +401,225 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                       </Label>
                     </div>
                   </div>
+
+                  {importOption === 'import-all' && (
+                    <ScrollArea className="h-[400px] pr-4 mt-4">
+                      <div className="space-y-6">
+                        {/* Work Experience */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="work-experience-section"
+                              checked={isSectionSelected('work_experience')}
+                              onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
+                              className={cn(
+                                "mt-0.5",
+                                isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
+                              )}
+                            />
+                            <Label 
+                              htmlFor="work-experience-section"
+                              className="text-sm font-semibold text-purple-950 cursor-pointer"
+                            >
+                              Work Experience
+                            </Label>
+                          </div>
+                          <div className="space-y-2">
+                            {profile.work_experience.map((exp: WorkExperience) => {
+                              const id = getItemId('work_experience', exp);
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={selectedItems.work_experience.includes(id)}
+                                    onCheckedChange={() => handleItemSelection('work_experience', id)}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <label
+                                      htmlFor={id}
+                                      className="text-sm font-medium leading-none cursor-pointer"
+                                    >
+                                      <div className="font-semibold text-base mb-1">{exp.position}</div>
+                                      <div className="text-sm text-muted-foreground">{exp.company}</div>
+                                      <div className="text-xs text-muted-foreground mt-1">{exp.date}</div>
+                                    </label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Education */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="education-section"
+                              checked={isSectionSelected('education')}
+                              onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
+                              className={cn(
+                                "mt-0.5",
+                                isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
+                              )}
+                            />
+                            <Label 
+                              htmlFor="education-section"
+                              className="text-sm font-semibold text-purple-950 cursor-pointer"
+                            >
+                              Education
+                            </Label>
+                          </div>
+                          <div className="space-y-2">
+                            {profile.education.map((edu: Education) => {
+                              const id = getItemId('education', edu);
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={selectedItems.education.includes(id)}
+                                    onCheckedChange={() => handleItemSelection('education', id)}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <label
+                                      htmlFor={id}
+                                      className="text-sm font-medium leading-none cursor-pointer"
+                                    >
+                                      <div className="font-semibold text-base mb-1">{`${edu.degree} in ${edu.field}`}</div>
+                                      <div className="text-sm text-muted-foreground">{edu.school}</div>
+                                      <div className="text-xs text-muted-foreground mt-1">{edu.date}</div>
+                                    </label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Skills */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="skills-section"
+                              checked={isSectionSelected('skills')}
+                              onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
+                              className={cn(
+                                "mt-0.5",
+                                isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
+                              )}
+                            />
+                            <Label 
+                              htmlFor="skills-section"
+                              className="text-sm font-semibold text-purple-950 cursor-pointer"
+                            >
+                              Skills
+                            </Label>
+                          </div>
+                          <div className="space-y-2">
+                            {profile.skills.map((skill: Skill) => {
+                              const id = getItemId('skills', skill);
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={selectedItems.skills.includes(id)}
+                                    onCheckedChange={() => handleItemSelection('skills', id)}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <label
+                                      htmlFor={id}
+                                      className="text-sm font-medium leading-none cursor-pointer"
+                                    >
+                                      <div className="font-semibold text-base mb-1">{skill.category}</div>
+                                      <div className="flex flex-wrap gap-2 mt-2">
+                                        {skill.items.map((item: string, index: number) => (
+                                          <Badge
+                                            key={index}
+                                            variant="secondary"
+                                            className="bg-white/60 text-purple-700 border border-purple-200"
+                                          >
+                                            {item}
+                                          </Badge>
+                                        ))}
+                                      </div>
+                                    </label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* Projects */}
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Checkbox
+                              id="projects-section"
+                              checked={isSectionSelected('projects')}
+                              onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
+                              className={cn(
+                                "mt-0.5",
+                                isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
+                              )}
+                            />
+                            <Label 
+                              htmlFor="projects-section"
+                              className="text-sm font-semibold text-purple-950 cursor-pointer"
+                            >
+                              Projects
+                            </Label>
+                          </div>
+                          <div className="space-y-2">
+                            {profile.projects.map((project: Project) => {
+                              const id = getItemId('projects', project);
+                              return (
+                                <div
+                                  key={id}
+                                  className="flex items-start space-x-3 p-4 rounded-lg border border-gray-200 bg-white/50 hover:bg-white/80 transition-colors"
+                                >
+                                  <Checkbox
+                                    id={id}
+                                    checked={selectedItems.projects.includes(id)}
+                                    onCheckedChange={() => handleItemSelection('projects', id)}
+                                    className="mt-1"
+                                  />
+                                  <div className="flex-1">
+                                    <label
+                                      htmlFor={id}
+                                      className="text-sm font-medium leading-none cursor-pointer"
+                                    >
+                                      <div className="font-semibold text-base mb-1">{project.name}</div>
+                                      {project.technologies && (
+                                        <div className="text-sm text-muted-foreground">
+                                          {project.technologies.join(', ')}
+                                        </div>
+                                      )}
+                                      {project.date && (
+                                        <div className="text-xs text-muted-foreground mt-1">
+                                          {project.date}
+                                        </div>
+                                      )}
+                                    </label>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+                    </ScrollArea>
+                  )}
                 </div>
               </>
             ) : (
@@ -338,7 +635,7 @@ export function CreateResumeDialog({ children, type, baseResumes }: CreateResume
                         You need to create a base resume first before you can create a tailored version.
                       </p>
                     </div>
-                    <CreateResumeDialog type="base">
+                    <CreateResumeDialog type="base" profile={profile}>
                       <Button
                         className={cn(
                           "mt-2 text-white shadow-lg hover:shadow-xl transition-all duration-500",

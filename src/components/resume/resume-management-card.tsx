@@ -6,11 +6,13 @@ import { ResumeList } from "./resume-list";
 import { Resume } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Profile } from "@/lib/types";
 
 interface ResumeManagementCardProps {
   type: 'base' | 'tailored';
   resumes: Resume[];
   baseResumes?: Resume[];
+  profile: Profile;
   icon: React.ReactNode;
   title: string;
   description: string;
@@ -30,6 +32,7 @@ export function ResumeManagementCard({
   type,
   resumes,
   baseResumes,
+  profile,
   icon,
   title,
   description,
@@ -119,7 +122,7 @@ export function ResumeManagementCard({
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <CreateResumeDialog type={type} baseResumes={type === 'tailored' ? baseResumes : undefined}>
+            <CreateResumeDialog type={type} baseResumes={type === 'tailored' ? baseResumes : undefined} profile={profile}>
               <Button 
                 variant="outline" 
                 size="sm"
@@ -215,7 +218,7 @@ export function ResumeManagementCard({
                   <p className="text-xs text-muted-foreground/80 mb-4 leading-relaxed">
                     {emptyDescription}
                   </p>
-                  <CreateResumeDialog type={type} baseResumes={type === 'tailored' ? baseResumes : undefined}>
+                  <CreateResumeDialog type={type} baseResumes={type === 'tailored' ? baseResumes : undefined} profile={profile}>
                     <Button 
                       variant="outline" 
                       size="sm"

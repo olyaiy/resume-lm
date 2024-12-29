@@ -103,6 +103,7 @@ export default async function Home() {
                 <ResumeManagementCard
                   type="base"
                   resumes={baseResumes}
+                  profile={profile}
                   icon={<FileText className="h-5 w-5" />}
                   title="Base Resumes"
                   description="Your resume templates"
@@ -126,11 +127,12 @@ export default async function Home() {
                 type="tailored"
                 resumes={tailoredResumes}
                 baseResumes={baseResumes}
+                profile={profile}
                 icon={<Sparkles className="h-5 w-5" />}
                 title="Tailored Resumes"
                 description="Job-specific resumes"
                 emptyTitle="No tailored resumes yet"
-                emptyDescription="Customize a resume for your next job application"
+                emptyDescription="Create a tailored resume for a specific job"
                 gradientFrom="pink-600"
                 gradientTo="rose-600"
                 accentColor={{
