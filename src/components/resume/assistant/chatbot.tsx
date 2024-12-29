@@ -131,10 +131,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
           <AccordionContent className="space-y-4">
             <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4 space-y-4">
               {messages.map((message: Message, index) => (
-                <div key={index} className="space-y-4">
+                <div key={index} className="mb-2 last:mb-8">
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <div className={cn(
-                      "rounded-2xl px-4  max-w-[80%] text-sm py-2",
+                      "rounded-2xl px-4 max-w-[80%] text-sm py-2",
                       message.role === 'user' ? [
                         "bg-gradient-to-br from-purple-500 to-indigo-500",
                         "text-white",
