@@ -1,14 +1,17 @@
 'use client';
 
+import React, { useEffect, useRef } from 'react';
 import { useChat } from 'ai/react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, Check, X, Sparkles } from "lucide-react";
+import { Send, Check, X, Loader2, Sparkles, Bot } from "lucide-react";
 import { Resume, WorkExperience, Education, Project, Skill, Certification } from '@/lib/types';
 import { Message, ToolInvocation } from 'ai';
 import { cn } from '@/lib/utils';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 
 interface ChatBotProps {
   resume: Resume;
@@ -31,229 +34,261 @@ interface ModificationSuggestion {
     suggested: any;
     explanation: string;
   };
+  status?: 'accepted' | 'rejected';
+}
+
+interface GroupedSuggestions {
+  [key: string]: ModificationSuggestion[];
 }
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
-  const { messages, input, setInput, append, addToolResult } = useChat({
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const accordionRef = useRef<HTMLDivElement>(null);
+  const [accordionValue, setAccordionValue] = React.useState<string>("");
+  
+  const { messages, input, setInput, append, addToolResult, stop, isLoading } = useChat({
     api: '/api/chat',
     maxSteps: 5,
     async onToolCall({ toolCall }) {
       if (toolCall.toolName === 'getResume') {
-        console.log('getResume tool called');
-        console.log(resume);
         return resume;
       }
     },
   });
 
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (input.trim()) {
-      append({ content: input, role: 'user' });
+  // Add state for tracking suggestion decisions
+  const [suggestionStatuses, setSuggestionStatuses] = React.useState<{
+    [messageId: string]: { [suggestionIndex: number]: 'accepted' | 'rejected' };
+  }>({});
+
+  // Scroll to bottom helper function
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
     }
   };
 
-  const handleModification = (toolCallId: string, suggestion: ModificationSuggestion, accept: boolean) => {
-    if (accept) {
-      console.log('Applying modification:', {
-        section: suggestion.section,
-        index: suggestion.index,
-        currentValue: resume[suggestion.section],
-        suggestedValue: suggestion.modification.suggested
-      });
+  // Auto scroll on new messages or when streaming
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading]);
 
-      // Verify the current array exists
-      const currentArray = resume[suggestion.section];
-      if (!Array.isArray(currentArray)) {
-        console.error('Current section is not an array:', {
-          section: suggestion.section,
-          value: currentArray
-        });
-        return;
-      }
-
-      // Create new array with the modification
-      const newValue = [...currentArray];
-      console.log('New array before modification:', newValue);
-
-      // Verify and format the suggested value based on section type
-      if (suggestion.section === 'work_experience') {
-        console.log('Work experience suggested value:', suggestion.modification.suggested);
-        
-        // If the suggestion is a string, assume it's a new description point
-        if (typeof suggestion.modification.suggested === 'string') {
-          const currentExperience = newValue[suggestion.index] as WorkExperience;
-          if (!currentExperience || typeof currentExperience === 'string') {
-            console.error('Invalid current work experience entry');
-            return;
-          }
-          
-          // Update just the description at the specified index
-          currentExperience.description[suggestion.index] = suggestion.modification.suggested;
-        } else {
-          // For full work experience object updates, verify the structure
-          const suggestedExp = suggestion.modification.suggested as WorkExperience;
-          if (!suggestedExp.company || !suggestedExp.position || !Array.isArray(suggestedExp.description)) {
-            console.error('Invalid work experience structure:', suggestedExp);
-            return;
-          }
-          newValue[suggestion.index] = suggestedExp;
-        }
-      } else {
-        // For other sections, apply the modification directly
-        newValue[suggestion.index] = suggestion.modification.suggested;
-      }
-
-      console.log('New array after modification:', newValue);
-
-      // Apply the change
-      onResumeChange(suggestion.section, newValue);
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    if (input.trim()) {
+      setAccordionValue("chat"); // Expand the accordion when sending a message
+      append({ content: input, role: 'user' });
+      setInput('');
     }
+  };
 
-    // Add the result to the chat
-    addToolResult({ 
-      toolCallId, 
-      result: accept ? 'Modification accepted' : 'Modification rejected' 
+  const handleStop = () => {
+    stop();
+    append({
+      content: "AI response cancelled",
+      role: "system",
     });
   };
 
   return (
-    <Card className="flex flex-col h-[600px] w-full max-w-2xl mx-auto">
-      <ScrollArea className="flex-1 p-4 space-y-4">
-        {messages.map((message: Message, index) => (
-          <div key={index} className="space-y-2">
-            <div
-              className={`flex ${
-                message.role === 'user' ? 'justify-end' : 'justify-start'
-              }`}
-            >
-              <div
-                className={`rounded-lg px-4 py-2 max-w-[80%] text-sm ${
-                  message.role === 'user'
-                    ? 'bg-primary text-primary-foreground ml-auto'
-                    : 'bg-muted'
-                }`}
-              >
-                {message.content}
+    <Card className={cn(
+      "flex flex-col w-full max-w-2xl mx-auto",
+      "bg-gradient-to-br from-purple-50/95 via-purple-50/90 to-indigo-50/95",
+      "border-2 border-purple-200/60",
+      "shadow-lg shadow-purple-500/5",
+      "transition-all duration-500",
+      "hover:shadow-xl hover:shadow-purple-500/10",
+      "overflow-hidden",
+      "relative"
+    )}>
+      {/* Animated Background Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-10" />
+      
+      {/* Floating Gradient Orbs */}
+      <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70" />
+      <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70" />
+
+      <Accordion
+        type="single"
+        collapsible
+        value={accordionValue}
+        onValueChange={setAccordionValue}
+        className="relative z-10"
+      >
+        <AccordionItem value="chat" className="border-none">
+          <AccordionTrigger className={cn(
+            "px-3 py-2",
+            "hover:no-underline",
+            "group",
+            "transition-all duration-300",
+            "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100"
+          )}>
+            <div className={cn(
+              "flex items-center gap-2 w-full",
+              "transition-transform duration-300",
+              "group-hover:scale-[0.99]",
+              "group-data-[state=closed]:scale-95"
+            )}>
+              <div className={cn(
+                "p-1.5 rounded-lg",
+                "bg-purple-100/80 text-purple-600",
+                "group-hover:bg-purple-200/80",
+                "transition-colors duration-300",
+                "group-data-[state=closed]:bg-white/60"
+              )}>
+                <Bot className="h-3.5 w-3.5" />
+              </div>
+              <div className="flex items-center gap-2">
+                <span className={cn(
+                  "text-sm font-medium text-purple-600",
+                  "group-hover:text-purple-700",
+                  "transition-colors duration-300"
+                )}>
+                  AI Assistant
+                </span>
+                {messages.length > 0 && (
+                  <span className={cn(
+                    "px-1.5 py-0.5 text-[10px] rounded-full",
+                    "bg-purple-100/80 text-purple-600",
+                    "group-hover:bg-purple-200/80",
+                    "transition-colors duration-300",
+                    "group-data-[state=closed]:bg-white/60"
+                  )}>
+                    {messages.length}
+                  </span>
+                )}
               </div>
             </div>
-            
-            {message.toolInvocations?.map((toolInvocation: ToolInvocation) => {
-              if (toolInvocation.toolName === 'suggestModification' && !('result' in toolInvocation)) {
-                const suggestion = toolInvocation.args as ModificationSuggestion;
-                return (
-                  <div key={toolInvocation.toolCallId} className={cn(
-                    "relative group/suggestions",
-                    "p-6 mt-4",
-                    "rounded-xl",
-                    "bg-gradient-to-br from-purple-50/95 via-purple-50/90 to-indigo-50/95",
-                    "border border-purple-200/60",
-                    "shadow-lg shadow-purple-500/5",
-                    "transition-all duration-500",
-                    "hover:shadow-xl hover:shadow-purple-500/10",
-                    "overflow-hidden",
-                    "w-full max-w-full"
-                  )}>
-                    {/* Animated Background Pattern */}
-                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-10" />
-                    
-                    {/* Floating Gradient Orbs */}
-                    <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70" />
-                    <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70" />
-                    
-                    {/* Content */}
-                    <div className="relative">
-                      <div className="flex items-center gap-2 mb-4">
-                        <div className="p-1.5 rounded-lg bg-purple-100/80 text-purple-600">
-                          <Sparkles className="h-4 w-4" />
-                        </div>
-                        <span className="font-semibold text-purple-600">AI Suggestion</span>
-                      </div>
-                      
-                      <div className="space-y-4">
-                        <div className="text-sm text-purple-900">{suggestion.modification.explanation}</div>
-                        <div className="flex gap-3">
-                          <div className="flex-1 min-w-0">
-                            <div className="text-xs font-medium text-purple-700 mb-2">Suggested Change:</div>
-                            <pre className="text-sm bg-white/60 p-4 rounded-lg border border-purple-200/60 overflow-x-auto whitespace-pre-wrap break-words">
-                              {JSON.stringify(suggestion.modification.suggested, null, 2)}
-                            </pre>
-                          </div>
-                          <div className="flex flex-col gap-2 flex-shrink-0">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleModification(toolInvocation.toolCallId, suggestion, true)}
-                              className={cn(
-                                "h-9 w-9",
-                                "bg-green-100/80 hover:bg-green-200/80",
-                                "text-green-600 hover:text-green-700",
-                                "border border-green-200/60",
-                                "shadow-sm",
-                                "transition-all duration-300",
-                                "hover:scale-105 hover:shadow-md",
-                                "hover:-translate-y-0.5"
-                              )}
-                            >
-                              <Check className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleModification(toolInvocation.toolCallId, suggestion, false)}
-                              className={cn(
-                                "h-9 w-9",
-                                "bg-rose-100/80 hover:bg-rose-200/80",
-                                "text-rose-600 hover:text-rose-700",
-                                "border border-rose-200/60",
-                                "shadow-sm",
-                                "transition-all duration-300",
-                                "hover:scale-105 hover:shadow-md",
-                                "hover:-translate-y-0.5"
-                              )}
-                            >
-                              <X className="h-4 w-4" />
-                            </Button>
-                          </div>
-                        </div>
+          </AccordionTrigger>
+          <AccordionContent>
+            <ScrollArea ref={scrollAreaRef} className="h-[500px] px-4 space-y-4">
+              {messages.map((message: Message, index) => (
+                <div key={index} className="space-y-2">
+                  <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div className={cn(
+                      "rounded-2xl px-4 py-3 max-w-[80%] text-sm",
+                      message.role === 'user' ? [
+                        "bg-gradient-to-br from-purple-500 to-indigo-500",
+                        "text-white",
+                        "shadow-md shadow-purple-500/10",
+                        "ml-auto"
+                      ] : [
+                        "bg-white/60",
+                        "border border-purple-200/60",
+                        "shadow-sm",
+                        "backdrop-blur-sm"
+                      ]
+                    )}>
+                      <div className={cn(
+                        "prose prose-sm max-w-none whitespace-pre-wrap",
+                        "prose-headings:font-semibold prose-headings:text-inherit",
+                        "prose-h1:text-lg prose-h1:mt-2 prose-h1:mb-1",
+                        "prose-h2:text-base prose-h2:mt-2 prose-h2:mb-1",
+                        "prose-h3:text-sm prose-h3:mt-1.5 prose-h3:mb-0.5",
+                        "prose-p:my-1 prose-p:leading-normal",
+                        "prose-pre:bg-black/5 prose-pre:rounded",
+                        "prose-code:text-inherit prose-code:bg-black/5 prose-code:rounded prose-code:px-1",
+                        "prose-ul:my-1 prose-li:my-0 prose-li:marker:text-current",
+                        "prose-hr:my-2 prose-hr:border-current/20",
+                        message.role === 'user' ? [
+                          "prose-invert",
+                          "prose-a:text-blue-200 prose-a:hover:text-blue-300",
+                          "prose-strong:text-white",
+                          "prose-em:text-gray-200",
+                          "prose-headings:text-white"
+                        ] : [
+                          "prose-purple",
+                          "prose-a:text-purple-600 prose-a:hover:text-purple-700",
+                          "prose-strong:text-purple-900",
+                          "prose-em:text-purple-800",
+                          "prose-headings:text-purple-900"
+                        ]
+                      )}>
+                        <MemoizedMarkdown id={message.id || String(index)} content={message.content} />
                       </div>
                     </div>
-                  </div>
-                );
-              }
-              
-              if (toolInvocation.toolName === 'getResume') {
-                return (
-                  <div key={toolInvocation.toolCallId} className="flex justify-start">
-                    <div className="rounded-lg px-4 py-2 bg-muted/50 text-xs">
-                      <span className="text-muted-foreground">📄 Reading resume...</span>
-                    </div>
-                  </div>
-                );
-              }
-
-              return 'result' in toolInvocation ? (
-                <div key={toolInvocation.toolCallId} className="flex justify-start">
-                  <div className="rounded-lg px-4 py-2 bg-muted/50 text-xs">
-                    <span className="text-muted-foreground">{toolInvocation.result}</span>
                   </div>
                 </div>
-              ) : null;
-            })}
-          </div>
-        ))}
-      </ScrollArea>
+              ))}
+              {isLoading && (
+                <div className="flex justify-start">
+                  <div className={cn(
+                    "rounded-2xl px-4 py-3",
+                    "bg-white/60",
+                    "border border-purple-200/60",
+                    "shadow-sm",
+                    "backdrop-blur-sm"
+                  )}>
+                    <div className="flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-purple-500" />
+                      <span className="text-sm text-purple-500">Thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </ScrollArea>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
-      <form onSubmit={handleSubmit} className="p-4 border-t flex gap-2">
+      <form onSubmit={handleSubmit} className={cn(
+        "relative z-10",
+        "p-4 border-t border-purple-200/60",
+        "bg-white/40",
+        "backdrop-blur-sm",
+        "flex gap-2"
+      )}>
         <Input
           value={input}
           onChange={(event) => setInput(event.target.value)}
-          placeholder="Type your message..."
-          className="flex-1"
+          placeholder="Ask me anything about your resume..."
+          className={cn(
+            "flex-1",
+            "bg-white/60",
+            "border-purple-200/60",
+            "focus:border-purple-300",
+            "focus:ring-2 focus:ring-purple-500/10",
+            "placeholder:text-purple-400"
+          )}
         />
-        <Button type="submit" size="icon">
-          <Send className="h-4 w-4" />
-        </Button>
+        {isLoading ? (
+          <Button 
+            type="button" 
+            size="icon" 
+            onClick={handleStop}
+            className={cn(
+              "bg-gradient-to-br from-rose-100/90 to-pink-100/90",
+              "hover:from-rose-200/90 hover:to-pink-200/90",
+              "text-rose-600 hover:text-rose-700",
+              "border border-rose-200/60",
+              "shadow-sm",
+              "transition-all duration-300",
+              "hover:scale-105 hover:shadow-md"
+            )}
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        ) : (
+          <Button 
+            type="submit" 
+            size="icon"
+            className={cn(
+              "bg-gradient-to-br from-purple-500 to-indigo-500",
+              "hover:from-purple-600 hover:to-indigo-600",
+              "text-white",
+              "border-none",
+              "shadow-md shadow-purple-500/10",
+              "transition-all duration-300",
+              "hover:scale-105 hover:shadow-lg",
+              "hover:-translate-y-0.5"
+            )}
+          >
+            <Send className="h-4 w-4" />
+          </Button>
+        )}
       </form>
     </Card>
   );

@@ -387,7 +387,7 @@ export function ResumeEditorClient({
             <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
               <div className="flex flex-col h-full mr-4">
 
-              <ChatBot resume={resume} onResumeChange={updateField} />
+              
                 {/* Main Editor Area */}
                 <ScrollArea className="flex-1">
                   <div className="space-y-6 pr-4 pb-6">
@@ -545,6 +545,7 @@ export function ResumeEditorClient({
                 <div>{generation}</div>
                   {/* <TestAssistant /> */}
                 </ScrollArea>
+                <ChatBot resume={resume} onResumeChange={updateField} />
 
                 
               </div>

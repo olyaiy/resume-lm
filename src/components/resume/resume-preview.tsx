@@ -10,7 +10,7 @@
 
 import { Resume } from "@/lib/types";
 import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -52,7 +52,7 @@ interface ResumePreviewProps {
  * Displays a PDF preview of the resume using react-pdf.
  * Handles PDF generation and responsive display.
  */
-export function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
+export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
@@ -222,4 +222,11 @@ export function ResumePreview({ resume, variant = 'base', containerWidth }: Resu
       </Document>
     </div>
   );
-} 
+}, (prevProps, nextProps) => {
+  // Custom comparison function to determine if re-render is needed
+  return (
+    prevProps.resume === nextProps.resume &&
+    prevProps.variant === nextProps.variant &&
+    prevProps.containerWidth === nextProps.containerWidth
+  );
+}); 

@@ -2,6 +2,7 @@
 
 import { Resume } from "@/lib/types";
 import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
+import { memo } from 'react';
 
 interface ResumePDFDocumentProps {
   resume: Resume;
@@ -20,7 +21,7 @@ function renderTextWithBold(text: string) {
   });
 }
 
-export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
+export const ResumePDFDocument = memo(function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
   // PDF Styles Configuration
   const styles = StyleSheet.create({
     // Base page configuration
@@ -399,4 +400,10 @@ export function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumen
       </PDFPage>
     </PDFDocument>
   );
-} 
+}, (prevProps, nextProps) => {
+  // Custom comparison function
+  return (
+    prevProps.resume === nextProps.resume &&
+    prevProps.variant === nextProps.variant
+  );
+}); 
