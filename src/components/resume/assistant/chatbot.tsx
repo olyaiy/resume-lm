@@ -10,6 +10,7 @@ import { Send, Loader2, Bot } from "lucide-react";
 import { Resume } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
+import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -23,8 +24,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   
-  const { messages, input, setInput, append, isLoading } = useChat({
+  const { messages, input, setInput, append, isLoading, addToolResult } = useChat({
     api: '/api/chat',
+    maxSteps: 5,
     async onToolCall({ toolCall }) {
       console.log('Tool called:', toolCall);
       
@@ -148,6 +150,36 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                       ]
                     )}>
                       <MemoizedMarkdown id={message.id} content={message.content} />
+                    
+                      {message.toolInvocations?.map((toolInvocation: ToolInvocation) => {
+            const toolCallId = toolInvocation.toolCallId;
+            
+            if (!('result' in toolInvocation)) {
+              return (
+                <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">
+                  Processing...
+                </div>
+              );
+            }
+
+            // Simple messages for each tool type
+            switch (toolInvocation.toolName) {
+              case 'getResume':
+                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
+              case 'updateResume':
+                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Updated Resume ✅</div>;
+              case 'askForConfirmation':
+                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Confirmation Required ⚠️</div>;
+              default:
+                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
+            }
+          })}
+                    
+                    
+                    
+                    
+                    
+                    
                     </div>
                   </div>
                 </div>
@@ -168,6 +200,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                   </div>
                 </div>
               )}
+
+
+
             </ScrollArea>
           </AccordionContent>
         </AccordionItem>

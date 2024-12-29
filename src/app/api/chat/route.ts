@@ -20,7 +20,8 @@ export async function POST(req: Request) {
   const { messages, resume }: ChatRequest = await req.json();
 
   const result = streamText({
-    model: openrouter("openai/gpt-4o-mini"),
+    // model: openrouter("openai/gpt-4o"),
+    model: openai("gpt-4o-mini"),
     system: `You are an expert resume optimization assistant with deep knowledge of industry standards and hiring practices. 
 
 Your role is to:
@@ -44,15 +45,10 @@ Remember to provide detailed, professional guidance while maintaining a helpful 
     messages,
     maxSteps: 5,
     tools: {
-      // client-side tool that is automatically executed on the client:
       getResume: {
         description: 'Get the user Resume.',
         parameters: z.object({}),
       },
-    },
-    onStepFinish({ text, toolCalls, toolResults }) {
-      // Log each step for debugging
-      console.log('Step completed:', { text, toolCalls, toolResults });
     }
   });
 
