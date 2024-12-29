@@ -7,6 +7,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Send } from "lucide-react";
 import { Resume } from '@/lib/types';
+import { Message, ToolInvocation } from 'ai';
 
 interface ChatBotProps {
   resume: Resume;
@@ -14,10 +15,9 @@ interface ChatBotProps {
 }
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
-  const { messages, input, setInput, append } = useChat({
+  const { messages, input, setInput, append, addToolResult } = useChat({
     api: '/api/chat',
     maxSteps: 5,
-    // run client-side tools that are automatically executed:
     async onToolCall({ toolCall }) {
       if (toolCall.toolName === 'getResume') {
         console.log('getResume tool called');
@@ -25,7 +25,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         return resume;
       }
     },
-});
+  });
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -37,23 +37,33 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   return (
     <Card className="flex flex-col h-[600px] w-full max-w-2xl mx-auto">
       <ScrollArea className="flex-1 p-4 space-y-4">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            }`}
-          >
+        {messages.map((message: Message, index) => (
+          <div key={index} className="space-y-2">
             <div
-              className={`rounded-lg px-4 py-2 max-w-[80%] ${
-                message.role === 'user'
-                  ? 'bg-primary text-primary-foreground ml-auto'
-                  : 'bg-muted'
+              className={`flex ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
               }`}
             >
-              {message.content}
-              
+              <div
+                className={`rounded-lg px-4 py-2 max-w-[80%] ${
+                  message.role === 'user'
+                    ? 'bg-primary text-primary-foreground ml-auto'
+                    : 'bg-muted'
+                }`}
+              >
+                {message.content}
+              </div>
             </div>
+            
+            {message.toolInvocations?.map((toolInvocation: ToolInvocation) => (
+              <div key={toolInvocation.toolCallId} className="flex justify-start">
+                <div className="rounded-lg px-4 py-2 bg-muted/50 text-sm">
+                  {toolInvocation.toolName === 'getResume' && (
+                    <span className="text-muted-foreground">📄 Reading resume...</span>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         ))}
       </ScrollArea>
