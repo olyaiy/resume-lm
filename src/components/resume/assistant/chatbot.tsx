@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Send, Loader2, Bot } from "lucide-react";
+import { Send, Loader2, Bot, X } from "lucide-react";
 import { Resume } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -24,7 +24,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   
-  const { messages, input, setInput, append, isLoading, addToolResult } = useChat({
+  const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
     maxSteps: 5,
     async onToolCall({ toolCall }) {
@@ -174,9 +174,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                 return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
             }
           })}
-                    
-                    
-                    
+
                     
                     
                     
@@ -229,20 +227,31 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
           )}
         />
         <Button 
-          type="submit" 
-          size="icon"
+          type={isLoading ? "button" : "submit"}
+          onClick={isLoading ? stop : undefined}
+          size="default"
           className={cn(
-            "bg-gradient-to-br from-purple-500 to-indigo-500",
-            "hover:from-purple-600 hover:to-indigo-600",
+            isLoading ? [
+              "bg-gradient-to-br from-rose-500 to-pink-500",
+              "hover:from-rose-600 hover:to-pink-600",
+            ] : [
+              "bg-gradient-to-br from-purple-500 to-indigo-500",
+              "hover:from-purple-600 hover:to-indigo-600",
+            ],
             "text-white",
             "border-none",
             "shadow-md shadow-purple-500/10",
             "transition-all duration-300",
             "hover:scale-105 hover:shadow-lg",
-            "hover:-translate-y-0.5"
+            "hover:-translate-y-0.5",
+            "px-3 h-10"
           )}
         >
-          <Send className="h-4 w-4" />
+          {isLoading ? (
+            <X className="h-4 w-4" />
+          ) : (
+            <Send className="h-4 w-4" />
+          )}
         </Button>
       </form>
     </Card>
