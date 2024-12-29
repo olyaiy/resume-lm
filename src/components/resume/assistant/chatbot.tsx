@@ -12,6 +12,7 @@ import { Message } from 'ai';
 import { cn } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
+import { Suggestion } from './suggestions';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
@@ -19,6 +20,32 @@ interface ChatBotProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: any) => void;
 }
+
+// Mock work experience data for demonstration
+const mockCurrentWorkExperience = {
+  company: "TechCorp Solutions",
+  position: "Software Engineer",
+  location: "San Francisco, CA",
+  date: "2020 - Present",
+  description: [
+    "Developed microservices architecture using Node.js and TypeScript",
+    "Mentored team of 5 junior developers and implemented agile best practices",
+  ],
+  technologies: ["React", "Node.js", "TypeScript"]
+};
+
+const mockWorkExperience = {
+  company: "TechCorp Solutions",
+  position: "Senior Software Engineer",
+  location: "San Francisco, CA",
+  date: "2020 - Present",
+  description: [
+    "Led development of a microservices architecture that improved system scalability by 300%",
+    "Mentored team of 5 junior developers and implemented agile best practices",
+    "Reduced API response time by 60% through implementation of Redis caching"
+  ],
+  technologies: ["React", "Node.js", "TypeScript", "Redis", "AWS"]
+};
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -51,6 +78,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     scrollToBottom();
   }, [messages, isLoading]);
 
+  // Handle form submission
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     if (input.trim()) {
@@ -86,6 +114,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         className="relative z-10"
       >
         <AccordionItem value="chat" className="border-none  py-0 my-0 ">
+
+          {/* Accordion Trigger */}
           <AccordionTrigger className={cn(
             "px-3 py-1.5",
             "hover:no-underline",
@@ -131,8 +161,12 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
               </div>
             </div>
           </AccordionTrigger>
+
+          {/* Accordion Content */}
           <AccordionContent className="space-y-4">
             <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4">
+
+              {/* Messages */}
               {messages.map((message: Message, index) => (
                 <div key={index} className="mt-2 last:mb-8">
                   <div className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -150,39 +184,49 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         "backdrop-blur-sm"
                       ]
                     )}>
+
+                      {/* Markdown Messages */}
                       <MemoizedMarkdown id={message.id} content={message.content} />
                     
+                      {/* Messages for each tool type */}
                       {message.toolInvocations?.map((toolInvocation: ToolInvocation) => {
-            const toolCallId = toolInvocation.toolCallId;
-            
-            if (!('result' in toolInvocation)) {
-              return (
-                <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">
-                  Processing...
-                </div>
-              );
-            }
-
-            // Simple messages for each tool type
-            switch (toolInvocation.toolName) {
-              case 'getResume':
-                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
-              case 'updateResume':
-                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Updated Resume ✅</div>;
-              case 'askForConfirmation':
-                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Confirmation Required ⚠️</div>;
-              default:
-                return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
-            }
-          })}
-
-                    
-                    
-                    
+                        const toolCallId = toolInvocation.toolCallId;
+                        if (!('result' in toolInvocation)) {
+                          return (
+                            <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">
+                              Calling Tool...
+                            </div>
+                          );
+                        }
+                        // Messages for each tool type
+                        switch (toolInvocation.toolName) {
+                          case 'getResume':
+                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Read Resume ✅</div>;
+                          case 'updateResume':
+                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Updated Resume ✅</div>;
+                          case 'askForConfirmation':
+                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">Confirmation Required ⚠️</div>;
+                          default:
+                            return <div key={toolCallId} className="mt-2 text-xs text-purple-600/70">{toolInvocation.toolName} ✅</div>;
+                        }
+                      })}
                     </div>
                   </div>
                 </div>
               ))}
+
+              {/* Mock Suggestion Component */}
+              <div className="my-4">
+                <Suggestion
+                  type="work_experience"
+                  content={mockWorkExperience}
+                  currentContent={mockCurrentWorkExperience}
+                  onAccept={() => console.log('Accepted suggestion')}
+                  onReject={() => console.log('Rejected suggestion')}
+                />
+              </div>
+
+              {/* Loading Message */}
               {isLoading && (
                 <div className="flex justify-start">
                   <div className={cn(
@@ -200,13 +244,12 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                 </div>
               )}
 
-
-
             </ScrollArea>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
 
+      {/* Input Bar */}
       <form onSubmit={handleSubmit} className={cn(
         "relative z-10",
         "p-4 border-t border-purple-200/60",
