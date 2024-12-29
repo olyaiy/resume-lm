@@ -49,7 +49,8 @@ const mockWorkExperience = {
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [accordionValue, setAccordionValue] = React.useState<string>("");
+  const [accordionValue, setAccordionValue] = React.useState<string>("chat");
+  const [markdownEnabled, setMarkdownEnabled] = React.useState(true);
   
   const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
@@ -197,7 +198,11 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     )}>
 
                       {/* Markdown Messages */}
-                      <MemoizedMarkdown id={message.id} content={message.content} />
+                      {markdownEnabled ? (
+                        <MemoizedMarkdown id={message.id} content={message.content} />
+                      ) : (
+                        <div className="whitespace-pre-wrap">{message.content}</div>
+                      )}
                     
                       {/* Messages for each tool type */}
                       {message.toolInvocations?.map((toolInvocation: ToolInvocation) => {
@@ -273,6 +278,27 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
               )}
 
             </ScrollArea>
+            
+            {/* Markdown Toggle Button */}
+            <Button
+              onClick={() => setMarkdownEnabled(!markdownEnabled)}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "absolute bottom-20 right-4 z-20",
+                "bg-white/60 hover:bg-white/80",
+                "border border-purple-200/60",
+                "text-purple-600",
+                "shadow-sm",
+                "backdrop-blur-sm",
+                "transition-all duration-300",
+                "hover:scale-105",
+                !markdownEnabled && "opacity-50"
+              )}
+            >
+              {markdownEnabled ? "Raw Text" : "Markdown"}
+            </Button>
+
           </AccordionContent>
         </AccordionItem>
       </Accordion>
