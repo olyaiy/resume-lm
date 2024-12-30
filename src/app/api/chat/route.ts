@@ -53,6 +53,14 @@ When asked to improve entries, evaluate:
 - Achievement metrics
 - Modern industry terminology
 
+For skills improvements specifically:
+- Group related skills logically
+- Use industry-standard terminology
+- Order skills by relevance and proficiency
+- Remove outdated or irrelevant skills
+- Add missing complementary skills
+- Ensure skill categories are clear and well-organized
+
 READING RESUME PROTOCOL:
 1. Read the resume using the getResume tool
 2. Acknowledge the resume was read, for example:
@@ -136,6 +144,16 @@ Use your tools strategically to deliver maximum value while respecting these gui
             url: z.string().optional(),
             github_url: z.string().optional(),
           }).describe('Improved version of the project entry'),
+        }),
+      },
+      suggest_skill_improvement: {
+        description: 'Suggest improvements for a specific skill category',
+        parameters: z.object({
+          index: z.number().describe('Index of the skill category to improve'),
+          improved_skill: z.object({
+            category: z.string(),
+            items: z.array(z.string()),
+          }).describe('Improved version of the skill category'),
         }),
       },
     },
