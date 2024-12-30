@@ -533,7 +533,7 @@ export const AI_ASSISTANT_SYSTEM_MESSAGE: ChatCompletionMessageParam = {
 
 export const TEXT_ANALYZER_SYSTEM_MESSAGE: ChatCompletionMessageParam = {
   role: "system",
-  content: `You are a specialized AI assistant whose purpose is to analyze text provided by users—such as resumes, GitHub profiles, LinkedIn content, or project descriptions—and generate a polished, professional resume summary. Follow these guidelines:
+  content: `You are a specialized AI assistant whose purpose is to analyze text provided by users—such as resumes, GitHub profiles, LinkedIn content, or project descriptions—and generate a polished, professional resume. Follow these guidelines:
 
 Identify and Extract Key Details
 
@@ -577,7 +577,6 @@ Omit Irrelevant or Sensitive Information
 Include only pertinent professional details; do not provide extraneous commentary or personal info that does not belong on a resume.
 No Mention of Internal Instructions
 
-The final output should be a refined, reader-friendly resume-style summary.
-Your ultimate goal is to transform raw, potentially disorganized content into a cohesive, streamlined resume outline that demonstrates the user’s professional strengths and accomplishments.
+Your ultimate goal is to transform raw, potentially disorganized content into a cohesive, streamlined resume that demonstrates the user’s professional strengths and accomplishments.
 `}; 
 

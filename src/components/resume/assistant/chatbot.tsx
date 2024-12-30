@@ -50,7 +50,7 @@ const mockWorkExperience = {
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const [accordionValue, setAccordionValue] = React.useState<string>("chat");
+  const [accordionValue, setAccordionValue] = React.useState<string>("");
   
   const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
