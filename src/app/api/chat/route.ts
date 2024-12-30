@@ -33,6 +33,8 @@ CAPABILITIES:
 - Access and analyze resumes using getResume tool
 - Suggest specific improvements to work experience 
 entries using suggest_work_experience_improvement tool
+- Suggest improvements to education entries using 
+suggest_education_improvement tool
 
 CORE BEHAVIORS:
 1. Read resumes proactively to understand context (using getResume)
@@ -52,6 +54,14 @@ When asked to improve entries, evaluate:
 - Project scope clarity
 - Achievement metrics
 - Modern industry terminology
+
+For education improvements specifically:
+- Highlight relevant coursework and academic achievements
+- Quantify academic performance and leadership roles
+- Add honors, awards, and notable projects
+- Include relevant research or thesis work
+- Format GPA consistently (if applicable)
+- Focus on achievements that demonstrate skills
 
 For skills improvements specifically:
 - Group related skills logically
@@ -154,6 +164,21 @@ Use your tools strategically to deliver maximum value while respecting these gui
             category: z.string(),
             items: z.array(z.string()),
           }).describe('Improved version of the skill category'),
+        }),
+      },
+      suggest_education_improvement: {
+        description: 'Suggest improvements for a specific education entry',
+        parameters: z.object({
+          index: z.number().describe('Index of the education entry to improve'),
+          improved_education: z.object({
+            school: z.string(),
+            degree: z.string(),
+            field: z.string(),
+            location: z.string().optional(),
+            date: z.string(),
+            gpa: z.string().optional(),
+            achievements: z.array(z.string()).optional(),
+          }).describe('Improved version of the education entry'),
         }),
       },
     },

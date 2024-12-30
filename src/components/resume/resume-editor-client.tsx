@@ -79,7 +79,6 @@ export function ResumeEditorClient({
   const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);
   const previewPanelRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
-  const pathname = usePathname();
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);

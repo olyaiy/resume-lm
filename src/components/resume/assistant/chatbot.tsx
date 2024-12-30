@@ -79,6 +79,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       if (toolCall.toolName === 'suggest_skill_improvement') {
         return toolCall.args;
       }
+
+      if (toolCall.toolName === 'suggest_education_improvement') {
+        return toolCall.args;
+      }
     },
     onFinish() {
       console.log('messages:', '\n', messages);
@@ -333,6 +337,26 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                   onAccept={() => onResumeChange('skills', 
                                     resume.skills.map((skill, i) => 
                                       i === args.index ? args.improved_skill : skill
+                                    )
+                                  )}
+                                  onReject={() => {}}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        if (toolName === 'suggest_education_improvement') {
+                          return (
+                            <div key={toolCallId} className="mt-2">
+                              <div className="flex justify-start">
+                                <Suggestion
+                                  type="education"
+                                  content={args.improved_education}
+                                  currentContent={resume.education[args.index]}
+                                  onAccept={() => onResumeChange('education', 
+                                    resume.education.map((edu, i) => 
+                                      i === args.index ? args.improved_education : edu
                                     )
                                   )}
                                   onReject={() => {}}
