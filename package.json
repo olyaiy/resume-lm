@@ -9,6 +9,9 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ai-sdk/anthropic": "^1.0.6",
+    "@ai-sdk/google": "^1.0.12",
+    "@ai-sdk/google-vertex": "^2.0.12",
     "@ai-sdk/openai": "^1.0.11",
     "@openrouter/ai-sdk-provider": "^0.0.6",
     "@radix-ui/react-accordion": "^1.2.2",

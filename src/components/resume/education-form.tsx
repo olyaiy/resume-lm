@@ -44,14 +44,14 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
+    <div className="space-y-3">
+      <div className="flex gap-3">
         <Button 
           variant="outline" 
-          className="flex-1 h-16 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800 transition-all duration-300 rounded-xl"
+          className="flex-1 h-8 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800 transition-all duration-300 rounded-xl"
           onClick={addEducation}
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
           Add Education
         </Button>
 
@@ -59,27 +59,27 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
           profile={profile}
           onImport={handleImportFromProfile}
           type="education"
-          buttonClassName="flex-1 mb-0 h-16 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800"
+          buttonClassName="flex-1 mb-0 h-8 bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 hover:from-indigo-500/10 hover:via-indigo-500/15 hover:to-blue-500/10 border-2 border-dashed border-indigo-500/30 hover:border-indigo-500/40 text-indigo-700 hover:text-indigo-800"
         />
       </div>
 
       {education.map((edu, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-indigo-500/5 via-indigo-500/10 to-blue-500/5 backdrop-blur-md border-2 border-indigo-500/30 hover:border-indigo-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
-          <CardContent className="p-6">
-            <div className="space-y-6">
+          <CardContent className="p-4">
+            <div className="space-y-4">
               {/* School Name and Delete Button Row */}
               <div className="flex items-center justify-between gap-2">
                 <div className="relative group flex-1 min-w-0">
                   <Input
                     value={edu.school}
                     onChange={(e) => updateEducation(index, 'school', e.target.value)}
-                    className="text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
+                    className="text-base font-semibold bg-white/50 border-gray-200 rounded-lg h-9
                       focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                       hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
                     placeholder="Institution Name"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                     INSTITUTION
                   </div>
                 </div>
@@ -87,7 +87,7 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeEducation(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0"
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 shrink-0 h-9 w-9"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -98,30 +98,30 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                 <Input
                   value={edu.location}
                   onChange={(e) => updateEducation(index, 'location', e.target.value)}
-                  className="bg-white/50 border-gray-200 rounded-lg
+                  className="bg-white/50 border-gray-200 rounded-lg h-9
                     focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                     hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                     placeholder:text-gray-400"
                   placeholder="City, Country"
                 />
-                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                   LOCATION
                 </div>
               </div>
 
               {/* Degree and Field Row */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="relative group">
                   <Input
                     value={edu.degree}
                     onChange={(e) => updateEducation(index, 'degree', e.target.value)}
-                    className="bg-white/50 border-gray-200 rounded-lg
+                    className="bg-white/50 border-gray-200 rounded-lg h-9
                       focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                       hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
                     placeholder="Bachelor's, Master's, etc."
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                     DEGREE
                   </div>
                 </div>
@@ -129,13 +129,13 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                   <Input
                     value={edu.field}
                     onChange={(e) => updateEducation(index, 'field', e.target.value)}
-                    className="bg-white/50 border-gray-200 rounded-lg
+                    className="bg-white/50 border-gray-200 rounded-lg h-9
                       focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                       hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
                     placeholder="Field of Study"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                     FIELD OF STUDY
                   </div>
                 </div>
@@ -147,19 +147,19 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                   type="text"
                   value={edu.date}
                   onChange={(e) => updateEducation(index, 'date', e.target.value)}
-                  className="bg-white/50 border-gray-200 rounded-lg
+                  className="bg-white/50 border-gray-200 rounded-lg h-9
                     focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                     hover:border-indigo-500/30 hover:bg-white/60 transition-colors w-full"
                   placeholder="e.g., '2019 - 2023' or '2020 - Present'"
                 />
-                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                   DATE
                 </div>
               </div>
 
               {/* Current Status Note */}
-              <div className="flex items-center space-x-2">
-                <span className="text-xs text-gray-500">Use 'Present' in the date field for current education</span>
+              <div className="flex items-center space-x-2 -mt-2">
+                <span className="text-[10px] text-gray-500">Use 'Present' in the date field for current education</span>
               </div>
 
               {/* GPA */}
@@ -171,21 +171,21 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                   max="4.0"
                   value={edu.gpa || ''}
                   onChange={(e) => updateEducation(index, 'gpa', e.target.value ? parseFloat(e.target.value) : undefined)}
-                  className="bg-white/50 border-gray-200 rounded-lg
+                  className="bg-white/50 border-gray-200 rounded-lg h-9
                     focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                     hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                     placeholder:text-gray-400"
                   placeholder="0.00"
                 />
-                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[10px] font-medium text-indigo-700">
                   GPA (OPTIONAL)
                 </div>
               </div>
 
               {/* Achievements */}
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
-                  <Label className="text-sm font-medium text-indigo-700">Achievements & Activities</Label>
+                  <Label className="text-xs font-medium text-indigo-700">Achievements & Activities</Label>
                   <span className="text-[10px] text-gray-500">One achievement per line</span>
                 </div>
                 <Textarea
@@ -194,7 +194,7 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
                     e.target.value.split('\n').filter(Boolean)
                   )}
                   placeholder="• Dean's List 2020-2021&#10;• President of Computer Science Club&#10;• First Place in Hackathon 2022"
-                  className="min-h-[150px] bg-white/50 border-gray-200 rounded-lg
+                  className="min-h-[120px] bg-white/50 border-gray-200 rounded-lg
                     focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20
                     hover:border-indigo-500/30 hover:bg-white/60 transition-colors
                     placeholder:text-gray-400"

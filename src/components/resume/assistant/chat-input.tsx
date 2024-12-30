@@ -4,19 +4,32 @@ import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import React from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+export type AIModel = "gpt-4o" | "claude" | "gemini" | "gpt-4o-mini";
 
 export default function ChatInput({ 
     input, 
     setInput, 
     isLoading, 
-    onSubmit, 
-    onStop 
+    onSubmit,
+    onStop,
+    model = "gpt-4o-mini",
+    onModelChange,
   }: {
     input: string;
     setInput: (value: string) => void;
     isLoading: boolean;
     onSubmit: (e: React.FormEvent) => void;
     onStop: () => void;
+    model?: AIModel;
+    onModelChange?: (model: AIModel) => void;
   }) {
     return (
       <form onSubmit={onSubmit} className={cn(
@@ -26,6 +39,28 @@ export default function ChatInput({
         "backdrop-blur-sm",
         "flex gap-1.5"
       )}>
+        <Select
+          value={model}
+          onValueChange={(value) => onModelChange?.(value as AIModel)}
+        >
+          <SelectTrigger className={cn(
+            "w-[100px]",
+            "h-8",
+            "bg-white/60",
+            "border-purple-200/60",
+            "focus:border-purple-300",
+            "focus:ring-2 focus:ring-purple-500/10",
+            "text-sm"
+          )}>
+            <SelectValue placeholder="Model" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="gpt-4o">ChatGPT</SelectItem>
+            <SelectItem value="claude">Claude</SelectItem>
+            <SelectItem value="gemini">Gemini</SelectItem>
+            <SelectItem value="gpt-4o-mini">GPT-4o Mini</SelectItem>
+          </SelectContent>
+        </Select>
         <Input
           value={input}
           onChange={(event) => setInput(event.target.value)}

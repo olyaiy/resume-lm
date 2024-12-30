@@ -237,7 +237,7 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume, varia
             )}
             {resume.email && (
               <>
-                <Link src={`mailto:${resume.email}`}><Text>{resume.email}</Text></Link>
+                <Link src={`mailto:${resume.email}`}><Text style={styles.link}>{resume.email}</Text></Link>
                 {(resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
                   <Text style={styles.bulletSeparator}>•</Text>
                 )}

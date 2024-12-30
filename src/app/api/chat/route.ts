@@ -1,8 +1,13 @@
 import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
-import { openrouter } from "@openrouter/ai-sdk-provider";
+// import { openrouter } from "@openrouter/ai-sdk-provider";
+import { anthropic } from '@ai-sdk/anthropic';
+import { google } from '@ai-sdk/google';
+import { vertex } from '@ai-sdk/google-vertex';
 
-import { Resume, WorkExperience } from '@/lib/types';
+
+
+import { Resume } from '@/lib/types';
 import { z } from 'zod';
 
 interface Message {
@@ -13,15 +18,22 @@ interface Message {
 
 interface ChatRequest {
   messages: Message[];
-  resume: Resume; // Resume data passed from the client
+  resume: Resume;
+  model: 'gpt-4' | 'claude' | 'gemini';
 }
 
 export async function POST(req: Request) {
-  const { messages }: ChatRequest = await req.json();
+  const { messages, model = 'gpt-4' }: ChatRequest = await req.json();
+
+  const modelConfig = {
+    'gpt-4': openai("gpt-4o"),
+    'claude': anthropic("claude-3-5-sonnet-20241022"),
+    'gemini': google("gemini-1.5-pro"),
+    'gpt-4o-mini': openai("gpt-4o-mini"),
+  };
 
   const result = streamText({
-    // model: openrouter("openai/gpt-4o"),
-    model: openai("gpt-4o"),
+    model: modelConfig[model],
     system: `
 You are an expert technical resume consultant 
 specializing in computer science and software 

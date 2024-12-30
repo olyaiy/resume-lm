@@ -199,13 +199,13 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
+    <div className="space-y-3">
+      <div className="flex gap-3">
         <Button 
           variant="outline" 
           onClick={addExperience}
           className={cn(
-            "flex-1 h-16",
+            "flex-1 h-9",
             "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
             "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
             "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
@@ -214,7 +214,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
             "rounded-xl"
           )}
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-4 w-4 mr-2" />
           Add Work Experience
         </Button>
 
@@ -222,7 +222,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
           profile={profile}
           onImport={handleImportFromProfile}
           type="work_experience"
-          buttonClassName="flex-1 mb-0"
+          buttonClassName="flex-1 mb-0 h-9"
         />
       </div>
 
@@ -243,17 +243,17 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
             </div>
           </div>
           
-          <CardContent className="p-6 space-y-8">
+          <CardContent className="p-4 space-y-4">
             {/* Header with Delete Button */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Position Title - Full Width */}
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3">
                 <div className="relative flex-1">
                   <Input
                     value={exp.position}
                     onChange={(e) => updateExperience(index, 'position', e.target.value)}
                     className={cn(
-                      "text-sm md:text-base font-semibold tracking-tight",
+                      "text-sm md:text-base font-semibold tracking-tight h-9",
                       "bg-white/50 border-gray-200 rounded-lg",
                       "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                       "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
@@ -261,7 +261,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     )}
                     placeholder="Position Title"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                     POSITION
                   </div>
                 </div>
@@ -269,7 +269,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeExperience(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 mt-1"
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300"
                 >
                   <Trash2 className="h-4 w-4" />
                 </Button>
@@ -282,14 +282,14 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     value={exp.company}
                     onChange={(e) => updateExperience(index, 'company', e.target.value)}
                     className={cn(
-                      "text-sm font-medium bg-white/50 border-gray-200 rounded-lg",
+                      "text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-9",
                       "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                       "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
                       "placeholder:text-gray-400"
                     )}
                     placeholder="Company Name"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                     COMPANY
                   </div>
                 </div>
@@ -298,14 +298,14 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     value={exp.location}
                     onChange={(e) => updateExperience(index, 'location', e.target.value)}
                     className={cn(
-                      "bg-white/50 border-gray-200 rounded-lg",
+                      "bg-white/50 border-gray-200 rounded-lg h-9",
                       "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                       "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
                       "placeholder:text-gray-400"
                     )}
                     placeholder="Location"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                     LOCATION
                   </div>
                 </div>
@@ -317,23 +317,25 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   type="text"
                   value={exp.date}
                   onChange={(e) => updateExperience(index, 'date', e.target.value)}
-                  className="w-full bg-white/50 border-gray-200 rounded-lg
-                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                  className={cn(
+                    "w-full bg-white/50 border-gray-200 rounded-lg h-9",
+                    "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
+                    "hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                  )}
                   placeholder="e.g., 'Jan 2023 - Present' or '2020 - 2022'"
                 />
-                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                   DATE
                 </div>
-                <span className=" ml-2 text-[9px] md:text-[11px] text-gray-500">Use 'Present' in the date field for current positions</span>
+                <span className="ml-2 text-[9px] md:text-[11px] text-gray-500">Use 'Present' in the date field for current positions</span>
               </div>
 
               {/* Description Section */}
-              <div className="space-y-4">
+              <div className="space-y-3">
                 <Label className="text-[11px] md:text-xs font-medium text-gray-600">
                   Key Responsibilities & Achievements
                 </Label>
-                <div className="space-y-3 pl-0">
+                <div className="space-y-2 pl-0">
                   {exp.description.map((desc, descIndex) => (
                     <div key={descIndex} className="flex gap-1 items-start group/item">
                       <div className="flex-1">
@@ -344,7 +346,6 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                             updated[index].description[descIndex] = newContent;
                             onChange(updated);
 
-                            // Clear improvement state when manually edited
                             if (improvedPoints[index]?.[descIndex]) {
                               setImprovedPoints(prev => {
                                 const newState = { ...prev };
@@ -359,7 +360,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                             }
                           }}
                           className={cn(
-                            "min-h-[80px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
+                            "min-h-[60px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
                             "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                             "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
                             "placeholder:text-gray-400",
@@ -524,7 +525,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   {aiSuggestions[index]?.length > 0 && (
                     <div className={cn(
                       "relative group/suggestions",
-                      "p-6 mt-4",
+                      "p-4 mt-3",
                       "rounded-xl",
                       "bg-gradient-to-br from-purple-50/95 via-purple-50/90 to-indigo-50/95",
                       "border border-purple-200/60",
@@ -565,7 +566,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                                     value={suggestion.point}
                                     readOnly
                                     className={cn(
-                                      "min-h-[80px] text-sm",
+                                      "min-h-[60px] text-sm",
                                       "bg-white/60",
                                       "border-purple-200/60",
                                       "text-purple-900",
@@ -737,7 +738,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
               </div>
 
               {/* Technologies Section */}
-              <div className="space-y-3 pt-2">
+              {/* <div className="space-y-2 pt-1">
                 <div className="flex justify-between items-baseline">
                   <Label className="text-[11px] md:text-xs font-medium text-gray-600">Technologies & Skills Used</Label>
                   <span className="text-[7px] md:text-[9px] text-gray-500">Separate with commas</span>
@@ -749,13 +750,13 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   )}
                   placeholder="React, TypeScript, Node.js, etc."
                   className={cn(
-                    "bg-white/50 border-gray-200 rounded-lg",
+                    "bg-white/50 border-gray-200 rounded-lg h-9",
                     "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                     "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
                     "placeholder:text-gray-400"
                   )}
                 />
-              </div>
+              </div> */}
             </div>
           </CardContent>
         </Card>

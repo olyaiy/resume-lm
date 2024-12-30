@@ -40,9 +40,9 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
 
   return (
     <Card className="relative group bg-gradient-to-r from-teal-500/5 via-teal-500/10 to-cyan-500/5 backdrop-blur-md border border-teal-500/30 hover:border-teal-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
-      <CardContent className="p-4 sm:p-6">
+      <CardContent className="p-3 sm:p-4">
         {profile && (
-          <div className="mb-4 sm:mb-6">
+          <div className="mb-3 sm:mb-4">
             <Button
               onClick={handleFillFromProfile}
               className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white text-sm hover:from-teal-700 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5"
@@ -53,9 +53,9 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
           </div>
         )}
 
-        <div className="space-y-3 sm:space-y-4">
+        <div className="space-y-2 sm:space-y-3">
           {/* Name Row */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 gap-2 sm:gap-3">
             {/* First Name */}
             <div className="relative group">
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -66,7 +66,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
               <Input
                 value={resume.first_name || ''}
                 onChange={(e) => onChange('first_name', e.target.value)}
-                className="pr-10 text-sm sm:text-base font-medium bg-white/50 border-gray-200 rounded-lg
+                className="pr-10 text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-9
                   focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                   hover:border-teal-500/30 hover:bg-white/60 transition-colors
                   placeholder:text-gray-400"
@@ -87,7 +87,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
               <Input
                 value={resume.last_name || ''}
                 onChange={(e) => onChange('last_name', e.target.value)}
-                className="pr-10 text-sm sm:text-base font-medium bg-white/50 border-gray-200 rounded-lg
+                className="pr-10 text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-9
                   focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                   hover:border-teal-500/30 hover:bg-white/60 transition-colors
                   placeholder:text-gray-400"
@@ -110,7 +110,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
               type="email"
               value={resume.email || ''}
               onChange={(e) => onChange('email', e.target.value)}
-              className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+              className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                 focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                 hover:border-teal-500/30 hover:bg-white/60 transition-colors
                 placeholder:text-gray-400"
@@ -132,7 +132,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
               type="tel"
               value={resume.phone_number || ''}
               onChange={(e) => onChange('phone_number', e.target.value)}
-              className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+              className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                 focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                 hover:border-teal-500/30 hover:bg-white/60 transition-colors
                 placeholder:text-gray-400"
@@ -153,7 +153,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
             <Input
               value={resume.location || ''}
               onChange={(e) => onChange('location', e.target.value)}
-              className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+              className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                 focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                 hover:border-teal-500/30 hover:bg-white/60 transition-colors
                 placeholder:text-gray-400"
@@ -165,7 +165,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
           </div>
 
           {/* Online Presence */}
-          <div className="space-y-3 sm:space-y-4">
+          <div className="space-y-2 sm:space-y-3">
             {/* Website */}
             <div className="relative group">
               <div className="absolute right-2.5 top-1/2 -translate-y-1/2">
@@ -177,7 +177,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
                 type="url"
                 value={resume.website || ''}
                 onChange={(e) => onChange('website', e.target.value)}
-                className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+                className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                   focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                   hover:border-teal-500/30 hover:bg-white/60 transition-colors
                   placeholder:text-gray-400"
@@ -199,7 +199,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
                 type="url"
                 value={resume.linkedin_url || ''}
                 onChange={(e) => onChange('linkedin_url', e.target.value)}
-                className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+                className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                   focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                   hover:border-teal-500/30 hover:bg-white/60 transition-colors
                   placeholder:text-gray-400"
@@ -221,7 +221,7 @@ export function BasicInfoForm({ resume, profile, onChange }: BasicInfoFormProps)
                 type="url"
                 value={resume.github_url || ''}
                 onChange={(e) => onChange('github_url', e.target.value)}
-                className="pr-10 text-sm sm:text-base bg-white/50 border-gray-200 rounded-lg
+                className="pr-10 text-sm bg-white/50 border-gray-200 rounded-lg h-9
                   focus:border-teal-500/40 focus:ring-2 focus:ring-teal-500/20
                   hover:border-teal-500/30 hover:bg-white/60 transition-colors
                   placeholder:text-gray-400"

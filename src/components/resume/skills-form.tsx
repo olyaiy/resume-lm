@@ -49,14 +49,14 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
+    <div className="space-y-3">
+      <div className="flex gap-3">
         <Button 
           variant="outline" 
-          className="flex-1 h-16 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800 transition-all duration-300 rounded-xl"
+          className="flex-1 h-8 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800 transition-all duration-300 rounded-xl"
           onClick={addSkillCategory}
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
           Add Skill Category
         </Button>
 
@@ -64,27 +64,27 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
           profile={profile}
           onImport={handleImportFromProfile}
           type="skills"
-          buttonClassName="flex-1 mb-0 h-16 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800"
+          buttonClassName="flex-1 mb-0 h-8 bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 hover:from-rose-500/10 hover:via-rose-500/15 hover:to-pink-500/10 border-2 border-dashed border-rose-500/30 hover:border-rose-500/40 text-rose-700 hover:text-rose-800"
         />
       </div>
 
       {skills.map((skill, index) => (
         <Card key={index} className="relative group bg-gradient-to-r from-rose-500/5 via-rose-500/10 to-pink-500/5 backdrop-blur-md border-2 border-rose-500/30 hover:border-rose-500/40 hover:shadow-lg transition-all duration-300 shadow-sm">
-          <CardContent className="p-6">
-            <div className="space-y-6">
+          <CardContent className="p-4">
+            <div className="space-y-3">
               {/* Category Name and Delete Button Row */}
-              <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center justify-between gap-3">
                 <div className="relative group flex-1">
                   <Input
                     value={skill.category}
                     onChange={(e) => updateSkillCategory(index, 'category', e.target.value)}
-                    className="text-lg font-semibold bg-white/50 border-gray-200 rounded-lg
+                    className="text-base font-medium h-8 bg-white/50 border-gray-200 rounded-lg
                       focus:border-rose-500/40 focus:ring-2 focus:ring-rose-500/20
                       hover:border-rose-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
                     placeholder="Category Name"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-rose-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-rose-700">
                     CATEGORY
                   </div>
                 </div>
@@ -92,44 +92,44 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeSkillCategory(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300"
+                  className="h-8 w-8 text-gray-400 hover:text-red-500 transition-colors duration-300"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
               {/* Skills Input */}
-              <div className="space-y-4">
+              <div className="space-y-2">
                 <div className="relative group">
                   <Input
                     value={skill.items.join(', ')}
                     onChange={(e) => handleSkillInput(index, e.target.value)}
-                    className="bg-white/50 border-gray-200 rounded-lg
+                    className="h-8 bg-white/50 border-gray-200 rounded-lg
                       focus:border-rose-500/40 focus:ring-2 focus:ring-rose-500/20
                       hover:border-rose-500/30 hover:bg-white/60 transition-colors
                       placeholder:text-gray-400"
                     placeholder="Enter skills separated by commas (e.g., JavaScript, React, Node.js)"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[10px] font-medium text-rose-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-rose-700">
                     SKILLS
                   </div>
                 </div>
 
                 {/* Skills Display */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5">
                   {skill.items.map((item, skillIndex) => (
                     <Badge
                       key={skillIndex}
                       variant="secondary"
                       className={cn(
-                        "bg-white/60 hover:bg-white/80 text-rose-700 border border-rose-200",
-                        "transition-all duration-300 group/badge cursor-default"
+                        "bg-white/60 hover:bg-white/80 text-rose-700 border border-rose-200 py-0.5",
+                        "transition-all duration-300 group/badge cursor-default text-xs"
                       )}
                     >
                       {item}
                       <button
                         onClick={() => removeSkill(index, skillIndex)}
-                        className="ml-2 hover:text-red-500 opacity-50 hover:opacity-100 transition-opacity"
+                        className="ml-1.5 hover:text-red-500 opacity-50 hover:opacity-100 transition-opacity"
                       >
                         ×
                       </button>
@@ -139,7 +139,7 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
               </div>
 
               {/* Helper Text */}
-              <div className="text-[10px] text-gray-500 italic">
+              <div className="text-[9px] text-gray-500 italic">
                 Pro tip: Add skills that are relevant to your target role and that you're confident discussing in interviews
               </div>
             </div>

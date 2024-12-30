@@ -12,7 +12,7 @@ import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 import { Suggestion } from './suggestions';
 import { SuggestionSkeleton } from './suggestion-skeleton';
-import ChatInput from './chat-input';
+import ChatInput, { AIModel } from './chat-input';
 import { LoadingDots } from '@/components/ui/loading-dots';
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -27,10 +27,14 @@ interface ChatBotProps {
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
+  const [selectedModel, setSelectedModel] = React.useState<AIModel>("gpt-4o-mini");
   
   const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
-    maxSteps: 5,
+    body: {
+      model: selectedModel,
+    },
+    maxSteps: 10,
     async onToolCall({ toolCall }) {
       // setIsStreaming(false);
       
@@ -335,6 +339,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         isLoading={isLoading}
         onSubmit={handleSubmit}
         onStop={stop}
+        model={selectedModel}
+        onModelChange={setSelectedModel}
       />
     </Card>
   );

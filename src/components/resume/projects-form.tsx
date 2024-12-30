@@ -200,22 +200,22 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex gap-4">
+    <div className="space-y-3">
+      <div className="flex gap-3">
         <Button 
           variant="outline" 
           onClick={addProject}
           className={cn(
-            "flex-1 h-16",
-            "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
-            "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
-            "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
-            "text-cyan-700 hover:text-cyan-800",
+            "flex-1 h-8",
+            "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
+            "hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10",
+            "border-2 border-dashed border-violet-500/30 hover:border-violet-500/40",
+            "text-violet-700 hover:text-violet-800",
             "transition-all duration-300",
             "rounded-xl"
           )}
         >
-          <Plus className="h-5 w-5 mr-2" />
+          <Plus className="h-3.5 w-3.5 mr-1.5" />
           Add Project
         </Button>
 
@@ -223,7 +223,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
           profile={profile}
           onImport={handleImportFromProfile}
           type="projects"
-          buttonClassName="flex-1 mb-0"
+          buttonClassName="flex-1 mb-0 h-8"
         />
       </div>
 
@@ -232,37 +232,37 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
           key={index} 
           className={cn(
             "relative group transition-all duration-300",
-            "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
-            "backdrop-blur-md border-2 border-cyan-500/30",
-            "hover:border-cyan-500/40 hover:shadow-lg hover:scale-[1.002]",
+            "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
+            "backdrop-blur-md border-2 border-violet-500/30",
+            "hover:border-violet-500/40 hover:shadow-lg hover:scale-[1.002]",
             "shadow-sm"
           )}
         >
-          <div className="absolute -left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <div className="bg-cyan-100/80 rounded-lg p-1.5 cursor-move shadow-sm">
-              <GripVertical className="h-4 w-4 text-cyan-600" />
+          <div className="absolute -left-2.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <div className="bg-violet-100/80 rounded-lg p-1 cursor-move shadow-sm">
+              <GripVertical className="h-3.5 w-3.5 text-violet-600" />
             </div>
           </div>
           
-          <CardContent className="p-6 space-y-8">
+          <CardContent className="p-4 space-y-4">
             {/* Header with Delete Button */}
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Project Name - Full Width */}
-              <div className="flex items-start gap-4">
+              <div className="flex items-start gap-3">
                 <div className="relative flex-1">
                   <Input
                     value={project.name}
                     onChange={(e) => updateProject(index, 'name', e.target.value)}
                     className={cn(
-                      "text-sm md:text-base font-semibold tracking-tight",
+                      "text-sm font-semibold tracking-tight h-8 py-1",
                       "bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                      "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
+                      "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                      "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                       "placeholder:text-gray-400"
                     )}
                     placeholder="Project Name"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
                     PROJECT NAME
                   </div>
                 </div>
@@ -270,9 +270,9 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                   variant="ghost" 
                   size="icon"
                   onClick={() => removeProject(index)}
-                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 mt-1"
+                  className="text-gray-400 hover:text-red-500 transition-colors duration-300 h-8 w-8"
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-3.5 w-3.5" />
                 </Button>
               </div>
 
@@ -283,14 +283,14 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                     value={project.url || ''}
                     onChange={(e) => updateProject(index, 'url', e.target.value)}
                     className={cn(
-                      "text-sm font-medium bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                      "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
+                      "text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-8 py-1",
+                      "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                      "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                       "placeholder:text-gray-400"
                     )}
                     placeholder="Live URL"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
                     LIVE URL
                   </div>
                 </div>
@@ -299,14 +299,14 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                     value={project.github_url || ''}
                     onChange={(e) => updateProject(index, 'github_url', e.target.value)}
                     className={cn(
-                      "bg-white/50 border-gray-200 rounded-lg",
-                      "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
-                      "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
+                      "h-8 py-1 bg-white/50 border-gray-200 rounded-lg",
+                      "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                      "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                       "placeholder:text-gray-400"
                     )}
                     placeholder="GitHub URL"
                   />
-                  <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
                     GITHUB URL
                   </div>
                 </div>
@@ -318,22 +318,22 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                   type="text"
                   value={project.date || ''}
                   onChange={(e) => updateProject(index, 'date', e.target.value)}
-                  className="w-full bg-white/50 border-gray-200 rounded-lg
-                    focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20
-                    hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
+                  className="w-full h-8 py-1 bg-white/50 border-gray-200 rounded-lg
+                    focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20
+                    hover:border-violet-500/30 hover:bg-white/60 transition-colors"
                   placeholder="e.g., 'Jan 2023 - Present' or '2020 - 2022'"
                 />
-                <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
                   DATE
                 </div>
               </div>
 
               {/* Description Section */}
-              <div className="space-y-4">
-                <Label className="text-[11px] md:text-xs font-medium text-gray-600">
+              <div className="space-y-2">
+                <Label className="text-[11px] font-medium text-violet-700">
                   Key Features & Technical Achievements
                 </Label>
-                <div className="space-y-3 pl-0">
+                <div className="space-y-2 pl-0">
                   {project.description.map((desc, descIndex) => (
                     <DescriptionPoint
                       key={descIndex}
@@ -399,7 +399,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                   />
 
                   {project.description.length === 0 && !aiSuggestions[index]?.length && (
-                    <div className="text-[11px] md:text-xs text-gray-500 italic px-4 py-3 bg-gray-50/50 rounded-lg">
+                    <div className="text-[11px] text-gray-500 italic px-3 py-2 bg-gray-50/50 rounded-lg">
                       Add points to describe your project's features and achievements
                     </div>
                   )}
@@ -415,11 +415,11 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                       onChange(updated);
                     }}
                     className={cn(
-                      "flex-1 text-cyan-600 hover:text-cyan-700 transition-colors text-[11px] md:text-xs",
-                      "border-cyan-200 hover:border-cyan-300 hover:bg-cyan-50/50"
+                      "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[11px] h-7",
+                      "border-violet-200 hover:border-violet-300 hover:bg-violet-50/50"
                     )}
                   >
-                    <Plus className="h-4 w-4 mr-1" />
+                    <Plus className="h-3.5 w-3.5 mr-1" />
                     Add Point
                   </Button>
 
@@ -432,8 +432,8 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                           onClick={() => generateAIPoints(index)}
                           disabled={loadingAI[index]}
                           className={cn(
-                            "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
-                            "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
+                            "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[11px] h-7",
+                            "border-violet-200 hover:border-violet-300 hover:bg-violet-50/50"
                           )}
                         >
                           Write points with AI
@@ -444,10 +444,10 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
                         align="start"
                         sideOffset={2}
                         className={cn(
-                          "w-72 p-3.5",
-                          "bg-purple-50",
-                          "border-2 border-purple-300",
-                          "shadow-lg shadow-purple-100/50",
+                          "w-72 p-3",
+                          "bg-violet-50",
+                          "border-2 border-violet-300",
+                          "shadow-lg shadow-violet-100/50",
                           "rounded-lg"
                         )}
                       >
