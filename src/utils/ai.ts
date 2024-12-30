@@ -11,7 +11,7 @@ import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_E
 import { openai as openaiVercel } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { resumeSchema, textImportSchema } from "@/lib/zod-schemas";
+import { resumeSchema, simplifiedJobSchema, simplifiedResumeSchema, textImportSchema } from "@/lib/zod-schemas";
 
 
 // Initialize OpenAI client with API key from environment variables
@@ -440,14 +440,8 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
 }
   
 
-export async function tailorResumeToJob(resume: Resume, jobDescription: string) {
-  const simplifiedResume = {
-    work_experience: resume.work_experience,
-    education: resume.education,
-    skills: resume.skills,
-    projects: resume.projects,
-    target_role: resume.target_role
-  };
+export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<typeof simplifiedJobSchema>) {
+ 
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
     schema: z.object({
@@ -462,36 +456,28 @@ export async function tailorResumeToJob(resume: Resume, jobDescription: string) 
     If no items are provided for a section, please leave it blank.
     
     Resume:
-    ${JSON.stringify(simplifiedResume, null, 2)}
+    ${JSON.stringify(simplifiedResumeSchema, null, 2)}
     
     Job Description:
-    ${jobDescription}
+    ${JSON.stringify(jobListing, null, 2)}
     `,
   
   });
 
   console.log('THIS IS THE BASE RESUME\n');
-  console.dir(simplifiedResume, { depth: null, colors: true });
+  console.dir(simplifiedResumeSchema, { depth: null, colors: true });
   // console.log('Tailored Resume to Job\n', object);
   console.log('THIS IS THE TAILORED RESUME\n');
   console.dir(object, { depth: null, colors: true });
+
+  return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
 }
 
 
+
+
 export async function formatJobListing(jobListing: string) {
-  const simplifiedJobSchema = z.object({
-    company_name: z.string(),
-    position_title: z.string(),
-    job_url: z.string().url().nullable(),
-    description: z.string().nullable(),
-    location: z.string().nullable(),
-    salary_range: z.object({
-      min: z.number().optional(),
-      max: z.number().optional(),
-      currency: z.string().optional(),
-    }).nullable(),
-    keywords: z.array(z.string()).default([]),
-  });
+  
 
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
@@ -499,35 +485,32 @@ export async function formatJobListing(jobListing: string) {
       content: simplifiedJobSchema
     }),
     prompt: `Analyze this job listing carefully and extract structured information.
+        
+    TASK 1 - ESSENTIAL INFORMATION:
+    Extract the basic details (company, position, URL, location, salary).
 
-TASK 1 - ESSENTIAL INFORMATION:
-Extract the basic details (company, position, URL, location, salary).
+    TASK 2 - KEYWORD ANALYSIS:
+    1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
+    2. Soft Skills: Extract interpersonal and professional competencies
+    3. Industry Knowledge: Capture domain-specific knowledge requirements
+    4. Required Qualifications: List education, certifications, and experience levels
+    5. Responsibilities: Key job functions and deliverables
 
-TASK 2 - KEYWORD ANALYSIS:
-1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
-2. Soft Skills: Extract interpersonal and professional competencies
-3. Industry Knowledge: Capture domain-specific knowledge requirements
-4. Required Qualifications: List education, certifications, and experience levels
-5. Responsibilities: Key job functions and deliverables
-
-Format the output according to the schema, ensuring:
-- Keywords are normalized (e.g., "React.js" → "React")
-- Skills are deduplicated and categorized
-- Required vs. preferred skills are distinguished
-- Seniority level is inferred from context
-
-Job Listing Text:
-${jobListing}`,
+    Format the output according to the schema, ensuring:
+    - Keywords are normalized (e.g., "React.js" → "React")
+    - Skills are deduplicated and categorized
+    - Required vs. preferred skills are distinguished
+    - Seniority level is inferred from context
+    Job Listing Text:${jobListing}`,    
     system: `You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of technical roles and industry requirements.
-Your task is to:
-1. Parse job listings with high precision
-2. Extract and categorize keywords that match modern ATS systems
-3. Identify both explicit and implicit requirements
-4. Maintain context-awareness for industry-specific terminology
-5. Recognize variations of the same skill (e.g., "AWS" = "Amazon Web Services")
-
-Focus on accuracy and relevance. Do not infer or add information not present in the original text.`,
-  });
+  Your task is to:
+  1. Parse job listings with high precision
+  2. Extract and categorize keywords that match modern ATS systems
+  3. Identify both explicit and implicit requirements
+  4. Maintain context-awareness for industry-specific terminology
+  5. Recognize variations of the same skill (e.g., "AWS" = "Amazon Web Services")
+    Focus on accuracy and relevance. Do not infer or add information not present in the original text.`,
+    });
 
   console.log('THIS IS THE JOB LISTING\n');
   console.dir(object, { depth: null, colors: true });

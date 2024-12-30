@@ -199,6 +199,31 @@ export const jobSchema = z.object({
   is_active: z.boolean().default(true),
 });
 
+export const simplifiedJobSchema = z.object({
+    company_name: z.string(),
+    position_title: z.string(),
+    job_url: z.string().url().nullable(),
+    description: z.string().nullable(),
+    location: z.string().nullable(),
+    salary_range: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      currency: z.string().optional(),
+    }).nullable(),
+    keywords: z.array(z.string()).default([]),
+    work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable(),
+    employment_type: z.enum(['full_time', 'part_time', 'co_op', 'internship']).nullable(),
+    is_active: z.boolean().default(true),
+  });
+  
+export const simplifiedResumeSchema = z.object({
+    work_experience: z.array(workExperienceSchema).optional(),
+    education: z.array(educationSchema).optional(),
+    skills: z.array(skillSchema).optional(),
+    projects: z.array(projectSchema).optional(),
+    target_role: z.string()
+  });
+
 // Add type inference helper
 export type Job = z.infer<typeof jobSchema>;
 export type SalaryRange = z.infer<typeof salaryRangeSchema>; 

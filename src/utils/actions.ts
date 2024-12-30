@@ -3,6 +3,8 @@
 import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
+import { z } from 'zod';
+import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
 
 interface DashboardData {
   profile: Profile | null;
@@ -397,13 +399,62 @@ export async function createBaseResume(
   return resume;
 } 
 
-export async function createTailoredResume(resume: Resume, baseResumeID: string, jobListing: string) {
-  // const supabase = await createClient();
+export async function createTailoredResume(
+  baseResume: Resume,
+  jobId: string,
+  userId: string,
+  tailoredContent: z.infer<typeof simplifiedResumeSchema>
+) {
+  const supabase = await createClient();
 
-  // const { data: resume, error: resumeError } = await supabase.from('resumes').select('*').eq('id', resumeId).single();
+  // Combine base resume settings with tailored content
+  const newResume = {
+    ...tailoredContent,
+    user_id: userId,
+    job_id: jobId,
+    is_base_resume: false,
+    // Preserve document settings and section configurations from base resume
+    document_settings: baseResume.document_settings,
+    section_configs: baseResume.section_configs,
+    section_order: baseResume.section_order,
+    // Add metadata
+    resume_title: `Tailored Resume for ${tailoredContent.target_role || 'New Role'}`,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
+  };
+
+  const { data, error } = await supabase
+    .from('resumes')
+    .insert([newResume])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }
 
+export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
+  const supabase = await createClient();
 
-export async function createJob(jobListing: string) {
-  
+  const jobData = {
+    company_name: jobListing.company_name,
+    position_title: jobListing.position_title,
+    job_url: jobListing.job_url,
+    description: jobListing.description,
+    location: jobListing.location,
+    salary_range: jobListing.salary_range,
+    keywords: jobListing.keywords,
+    work_location: jobListing.work_location || 'in_person', 
+    employment_type: jobListing.employment_type || 'full_time', 
+    is_active: true
+  };
+
+  const { data, error } = await supabase
+    .from('jobs')
+    .insert([jobData])
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }

@@ -15,6 +15,7 @@ import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { MiniResumePreview } from "./shared/mini-resume-preview";
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
+import { createJob } from "@/utils/actions";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -33,39 +34,42 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const router = useRouter();
 
   const handleCreate = async () => {
-    let hasError = false;
-    
-    if (!selectedBaseResume) {
-      setIsBaseResumeInvalid(true);
-      setTimeout(() => setIsBaseResumeInvalid(false), 820);
-      hasError = true;
-    }
-    
-    if (!jobDescription.trim()) {
-      setIsJobDescriptionInvalid(true);
-      setTimeout(() => setIsJobDescriptionInvalid(false), 820);
-      hasError = true;
-    }
-
-    if (hasError) {
-      toast({
-        title: "Required Fields Missing",
-        description: "Please select a base resume and provide a job description.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       setIsCreating(true);
-    //   const resume = await createTailoredResume(Resume,'132','132')
+      
+      // 1. Format the job listing
+      const formattedJobListing = await formatJobListing(jobDescription);
+      console.log('1. Formatted Job Listing:', formattedJobListing);
+
+      // 2. Create job in database and get ID
+      const jobEntry = await createJob(formattedJobListing);
+      if (!jobEntry?.id) throw new Error("Failed to create job entry");
+      console.log('2. Created Job Entry:', jobEntry);
+
+      // 3. Get the base resume object
+      const baseResume = baseResumes?.find(r => r.id === selectedBaseResume);
+      if (!baseResume) throw new Error("Base resume not found");
+      console.log('3. Selected Base Resume:', baseResume);
+
+      // 4. Tailor the resume using the formatted job listing
+      const tailoredContent = await tailorResumeToJob(baseResume, formattedJobListing);
+      console.log('4. Tailored Content:', tailoredContent);
+      
+      // 5. Create the tailored resume with job reference
+      const resume = await createTailoredResume(
+        baseResume,
+        jobEntry.id,
+        profile.id,
+        tailoredContent
+      );
+      console.log('5. Created Tailored Resume:', resume);
 
       toast({
         title: "Success",
         description: "Resume created successfully",
       });
 
-    //   router.push(`/resumes/${resume.id}`);
+      router.push(`/resumes/${resume.id}`);
       setOpen(false);
     } catch (error) {
       toast({
