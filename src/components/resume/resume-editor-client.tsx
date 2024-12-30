@@ -22,6 +22,7 @@ import { DocumentSettingsForm } from "./document-settings-form";
 
 import ChatBot from "./assistant/chatbot";
 import { ResumeEditorHeader } from "./resume-editor-header";
+import { ResumeEditorTabs } from "./resume-editor-tabs";
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -222,98 +223,7 @@ export function ResumeEditorClient({
                 <ScrollArea className="flex-1">
                   <div className="space-y-6 pr-4 pb-6">
                     <Tabs defaultValue="basic" className="w-full">
-                      <TabsList className="w-full h-full relative bg-white/80 backdrop-blur-xl border border-white/40 rounded-xl overflow-x-auto grid grid-cols-3 @[500px]:grid-cols-6 gap-1.5 p-1.5 shadow-lg">
-                        <TabsTrigger 
-                          value="basic" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500/10 data-[state=active]:to-cyan-500/10
-                            data-[state=active]:border-teal-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-teal-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-teal-100">
-                            <User className="h-4 w-4 text-teal-600 transition-colors group-data-[state=inactive]:text-teal-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Basic Info
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-teal-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="work" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/10 data-[state=active]:to-blue-500/10
-                            data-[state=active]:border-cyan-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-cyan-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-cyan-100">
-                            <Briefcase className="h-4 w-4 text-cyan-600 transition-colors group-data-[state=inactive]:text-cyan-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Work
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-cyan-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="projects" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/10 data-[state=active]:to-purple-500/10
-                            data-[state=active]:border-violet-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-violet-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-violet-100">
-                            <FolderGit2 className="h-4 w-4 text-violet-600 transition-colors group-data-[state=inactive]:text-violet-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Projects
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-violet-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="education" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/10 data-[state=active]:to-blue-500/10
-                            data-[state=active]:border-indigo-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-indigo-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-indigo-100">
-                            <GraduationCap className="h-4 w-4 text-indigo-600 transition-colors group-data-[state=inactive]:text-indigo-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Education
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-indigo-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="skills" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500/10 data-[state=active]:to-pink-500/10
-                            data-[state=active]:border-rose-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-rose-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-rose-100">
-                            <Wrench className="h-4 w-4 text-rose-600 transition-colors group-data-[state=inactive]:text-rose-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Skills
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-rose-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                        <TabsTrigger 
-                          value="settings" 
-                          className="group flex flex-col items-center justify-center gap-1 px-2 py-2 rounded-xl font-medium relative transition-all duration-300
-                            data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500/10 data-[state=active]:to-slate-500/10
-                            data-[state=active]:border-gray-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                            data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                        >
-                          <div className="p-1.5 rounded-full bg-gray-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-gray-100">
-                            <Settings className="h-4 w-4 text-gray-600 transition-colors group-data-[state=inactive]:text-gray-500/70" />
-                          </div>
-                          <span className="relative text-xs @[500px]:text-sm">
-                            Settings
-                            <div className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full bg-gray-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                          </span>
-                        </TabsTrigger>
-                      </TabsList>
+                      <ResumeEditorTabs />
 
                       <TabsContent value="basic" className="space-y-6 mt-6">
                         <BasicInfoForm
