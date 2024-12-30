@@ -9,12 +9,14 @@ export function SettingsButton() {
 
   return (
     <Button 
-      variant="outline" 
-      className="bg-white/50 border-gray-200 hover:border-gray-300 hover:bg-white/60"
+      variant="ghost" 
+      className="relative group px-4 py-2 hover:bg-transparent"
       onClick={() => router.push('/settings')}
     >
-      <Settings className="h-4 w-4 mr-2" />
-      Settings
+      <span className="relative z-10 flex items-center gap-2 bg-gradient-to-r from-purple-600/80 via-pink-500/80 to-indigo-500/80 bg-clip-text text-transparent group-hover:from-purple-700 group-hover:via-pink-600 group-hover:to-indigo-600 transition-all duration-500 animate-gradient-x">
+        <Settings className="w-4 h-4" />
+        <span>Settings</span>
+      </span>
     </Button>
   );
 } 
