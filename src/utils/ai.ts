@@ -12,6 +12,7 @@ import { openai as openaiVercel } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { resumeSchema, simplifiedJobSchema, simplifiedResumeSchema, textImportSchema } from "@/lib/zod-schemas";
+import { anthropic } from "@ai-sdk/anthropic";
 
 
 // Initialize OpenAI client with API key from environment variables
@@ -442,7 +443,8 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
 export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<typeof simplifiedJobSchema>) {
  
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    // model: openaiVercel("gpt-4o-mini"),
+    model: anthropic("claude-3-5-sonnet-20240620"),
     schema: z.object({
       content: simplifiedResumeSchema,
     }),

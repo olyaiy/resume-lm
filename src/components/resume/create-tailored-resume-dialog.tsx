@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus } from "lucide-react";
+import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus, FileText, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createBaseResume, createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
@@ -16,6 +16,84 @@ import { MiniResumePreview } from "./shared/mini-resume-preview";
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
 import { createJob } from "@/utils/actions";
+import { Progress } from "@/components/ui/progress";
+import { LoadingDots } from "@/components/ui/loading-dots";
+
+// Define the creation steps
+const CREATION_STEPS = [
+  { id: 'analyzing', label: 'Analyzing Job Description' },
+  { id: 'formatting', label: 'Formatting Requirements' },
+  { id: 'tailoring', label: 'Tailoring Resume Content' },
+  { id: 'finalizing', label: 'Finalizing Resume' },
+] as const;
+
+type CreationStep = typeof CREATION_STEPS[number]['id'];
+
+function LoadingOverlay({ currentStep }: { currentStep: CreationStep }) {
+  const currentStepIndex = CREATION_STEPS.findIndex(step => step.id === currentStep);
+  const progress = ((currentStepIndex + 1) / CREATION_STEPS.length) * 100;
+
+  return (
+    <div className="absolute inset-0 bg-white/80 backdrop-blur-sm flex items-center justify-center z-50">
+      <div className="max-w-md w-full space-y-8 p-8">
+        {/* Progress bar */}
+        <div className="space-y-3">
+          <div className="flex justify-between text-sm text-muted-foreground">
+            <span>Creating Resume</span>
+            <span>{Math.round(progress)}%</span>
+          </div>
+          <Progress value={progress} className="h-2" />
+        </div>
+
+        {/* Steps */}
+        <div className="space-y-4">
+          {CREATION_STEPS.map((step, index) => {
+            const isActive = step.id === currentStep;
+            const isCompleted = index < currentStepIndex;
+            
+            return (
+              <div
+                key={step.id}
+                className={cn(
+                  "flex items-center gap-3 p-3 rounded-lg transition-colors duration-300",
+                  isActive && "bg-pink-50 text-pink-900",
+                  isCompleted && "text-muted-foreground"
+                )}
+              >
+                {isCompleted ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-500" />
+                ) : isActive ? (
+                  <div className="h-5 w-5 flex items-center justify-center">
+                    <LoadingDots className="text-pink-600" />
+                  </div>
+                ) : (
+                  <div className="h-5 w-5 rounded-full border-2 border-muted" />
+                )}
+                <span className={cn(
+                  "text-sm font-medium",
+                  isActive && "text-pink-900",
+                  !isActive && !isCompleted && "text-muted-foreground"
+                )}>
+                  {step.label}
+                </span>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Current action description */}
+        <div className="text-center">
+          <p className="text-sm text-muted-foreground animate-pulse">
+            {currentStep === 'analyzing' && "Reading and understanding the job requirements..."}
+            {currentStep === 'formatting' && "Structuring the job information..."}
+            {currentStep === 'tailoring' && "Optimizing your resume for the best match..."}
+            {currentStep === 'finalizing' && "Putting the final touches..."}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -28,6 +106,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const [selectedBaseResume, setSelectedBaseResume] = useState<string>(baseResumes?.[0]?.id || '');
   const [jobDescription, setJobDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
+  const [currentStep, setCurrentStep] = useState<CreationStep>('analyzing');
   const [importOption, setImportOption] = useState<'import-profile' | 'ai'>('ai');
   const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
   const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
@@ -36,10 +115,12 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const handleCreate = async () => {
     try {
       setIsCreating(true);
+      setCurrentStep('analyzing');
       
       // 1. Format the job listing
       const formattedJobListing = await formatJobListing(jobDescription);
       console.log('1. Formatted Job Listing:', formattedJobListing);
+      setCurrentStep('formatting');
 
       // 2. Create job in database and get ID
       const jobEntry = await createJob(formattedJobListing);
@@ -50,10 +131,12 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       const baseResume = baseResumes?.find(r => r.id === selectedBaseResume);
       if (!baseResume) throw new Error("Base resume not found");
       console.log('3. Selected Base Resume:', baseResume);
+      setCurrentStep('tailoring');
 
       // 4. Tailor the resume using the formatted job listing
       const tailoredContent = await tailorResumeToJob(baseResume, formattedJobListing);
       console.log('4. Tailored Content:', tailoredContent);
+      setCurrentStep('finalizing');
       
       // 5. Create the tailored resume with job reference
       const resume = await createTailoredResume(
@@ -178,7 +261,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         </div>
 
         {/* Content Section */}
-        <div className="px-8 py-6 space-y-6 bg-gradient-to-b from-pink-50/30 to-rose-50/30">
+        <div className="px-8 py-6 space-y-6 bg-gradient-to-b from-pink-50/30 to-rose-50/30 relative">
+          {isCreating && <LoadingOverlay currentStep={currentStep} />}
           <div className="space-y-6">
             <div className="space-y-2">
               <Label 
