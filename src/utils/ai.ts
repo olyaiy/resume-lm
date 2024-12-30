@@ -438,4 +438,50 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
   
   return updatedResume;
 }
+  
 
+export async function tailorResumeToJob(resume: Resume, jobDescription: string) {
+  const simplifiedResume = {
+    work_experience: resume.work_experience,
+    education: resume.education,
+    skills: resume.skills,
+    projects: resume.projects,
+    target_role: resume.target_role
+  };
+
+ 
+ 
+ 
+  const { object } = await generateObject({
+    model: openaiVercel("gpt-4o-mini"),
+    schema: z.object({
+      content: resumeSchema,
+    }),
+    prompt: `
+    You are a professional resume writer focusing on tailoring resumes
+    to job descriptions.
+    Please tailor the following resume to the job description. 
+    Do not hallucinate or make up information. 
+    Focus on relevent keywords and information from the job description.
+
+    
+    Resume:
+    ${JSON.stringify(simplifiedResume, null, 2)}
+    
+    Job Description:
+    ${jobDescription}
+    `,
+  
+  });
+
+  console.log('THIS IS THE BASE RESUME\n');
+  console.dir(resume, { depth: null, colors: true });
+
+  // console.log('Tailored Resume to Job\n', object);
+  console.log('THIS IS THE TAILORED RESUME\n');
+  console.dir(object, { depth: null, colors: true });
+
+
+
+
+}

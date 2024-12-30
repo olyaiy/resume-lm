@@ -140,11 +140,11 @@ export const sectionConfigSchema = z.object({
 
 // Main Resume Schema
 export const resumeSchema = z.object({
-  id: z.string().uuid(),
-  user_id: z.string().uuid(),
+//   id: z.string().uuid(),
+//   user_id: z.string().uuid(),
   name: z.string(),
   target_role: z.string(),
-  is_base_resume: z.boolean(),
+//   is_base_resume: z.boolean(),
   first_name: z.string(),
   last_name: z.string(),
   email: z.string().email(),
@@ -158,11 +158,11 @@ export const resumeSchema = z.object({
   skills: z.array(skillSchema),
   projects: z.array(projectSchema),
   certifications: z.array(certificationSchema),
-  created_at: z.string().datetime(),
-  updated_at: z.string().datetime(),
-  document_settings: documentSettingsSchema.optional(),
-  section_order: z.array(z.string()).optional(),
-  section_configs: z.record(sectionConfigSchema).optional(),
+//   created_at: z.string().datetime(),
+//   updated_at: z.string().datetime(),
+//   document_settings: documentSettingsSchema.optional(),
+//   section_order: z.array(z.string()).optional(),
+//   section_configs: z.record(sectionConfigSchema).optional(),
 });
 
 // Type inference helpers

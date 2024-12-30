@@ -10,9 +10,10 @@ import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createBaseResume } from "@/utils/actions";
+import { createBaseResume, createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { MiniResumePreview } from "./shared/mini-resume-preview";
+import { tailorResumeToJob } from "@/utils/ai";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -56,14 +57,14 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
     try {
       setIsCreating(true);
-      const resume = await createBaseResume('', importOption === 'ai' ? 'ai' : 'import-profile');
+    //   const resume = await createTailoredResume(Resume,'132','132')
 
       toast({
         title: "Success",
         description: "Resume created successfully",
       });
 
-      router.push(`/resumes/${resume.id}`);
+    //   router.push(`/resumes/${resume.id}`);
       setOpen(false);
     } catch (error) {
       toast({
@@ -333,6 +334,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 </div>
               </div>
             </div>
+
+            <Button 
+              onClick={async () => {
+                if (!selectedBaseResume || !baseResumes) return;
+                const baseResume = baseResumes.find(r => r.id === selectedBaseResume);
+                if (!baseResume) return;
+                
+                try {
+                  const result = await tailorResumeToJob(baseResume, jobDescription);
+                  console.log('AI Tailoring Result:', result);
+                } catch (error) {
+                  console.error('AI Tailoring Error:', error);
+                }
+              }}
+              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+            >
+              Test AI Tailoring
+            </Button>
           </div>
         </div>
 
