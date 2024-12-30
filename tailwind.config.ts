@@ -88,7 +88,21 @@ const config = {
   				'100%': {
   					transform: 'translate(0px, 0px) scale(1)'
   				}
-  			}
+  			},
+        'loading-dot': {
+          '0%': {
+            opacity: '0.2',
+            transform: 'translateX(-2px) scale(0.8)'
+          },
+          '50%': {
+            opacity: '0.8',
+            transform: 'translateX(2px) scale(1)'
+          },
+          '100%': {
+            opacity: '0.2',
+            transform: 'translateX(-2px) scale(0.8)'
+          }
+        }
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',

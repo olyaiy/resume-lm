@@ -1,4 +1,4 @@
-import { ToolInvocation, streamText } from 'ai';
+import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { openai } from '@ai-sdk/openai';
 import { openrouter } from "@openrouter/ai-sdk-provider";
 
@@ -54,6 +54,7 @@ When asked to improve entries, evaluate:
 - Project scope clarity
 - Achievement metrics
 - Modern industry terminology
+- DO NOT ADD DATES YOU ARE NOT AWARE OF
 
 For education improvements specifically:
 - Highlight relevant coursework and academic achievements
@@ -86,11 +87,10 @@ If the user doesn't specify a section, read the entire resume.
 
 
 SUGGESTION PROTOCOL:
-1. After using the tool, briefly list 2-4 bullet points explaining the suggested improvements
-2. Use suggest_work_experience_improvement tool to implement changes
-3. ALWAYS USE THE TOOL TO IMPLEMENT SUGGESTIONS, never actually write the changes yourself
-4. In the suggestions, use asterisks, ** to highlight bolded text, key words, and phrases.
-5. In the suggestions, don't always re-write the entire bullet point, you may modify 
+1. After using the tool, in one to two sentances, briefly explain the improvements
+2. ALWAYS USE THE TOOLS TO IMPLEMENT SUGGESTIONS, never actually write the changes yourself
+3. In the suggestions, use asterisks, ** to highlight bolded text, key words, and phrases.
+4. In the suggestions, don't always re-write the entire bullet point, you may modify 
 specific workds, phrase, or sections as well. Do not over-do it. Think carefully, and critically.
 
 RESPONSE STRUCTURE:
@@ -110,7 +110,6 @@ Use your tools strategically to deliver maximum value while respecting these gui
 `,
     messages,
     maxSteps: 5,
-    
     tools: {
       getResume: {
         description: 'Get the user Resume. Can request specific sections or "all" for the entire resume.',
@@ -182,15 +181,34 @@ Use your tools strategically to deliver maximum value while respecting these gui
         }),
       },
     },
-    experimental_toolCallStreaming: true,
+    // onChunk({ chunk }) {
+
+      // if (chunk.type === 'tool-call-streaming-start') {
+      //   console.log(chunk.toolName, 'STARTED STREAMING THIS TOOL');
+      // }
+
+      // if (chunk.type === 'tool-call') {
+      //   console.log(chunk.toolName, 'CALLED TOOL NON STREAM');
+      // }
+
+      // if (chunk.type === 'tool-call-delta') {
+      //   console.log(chunk.toolName, 'STREAMTED TOOL CHUNK');
+      // }
+    // },
+    experimental_transform: smoothStream(),
+
+  
+    // experimental_toolCallStreaming: true,
 
     onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
       // console.log('text:', '\n', text);
-      console.log('toolCalls:', '\n', toolCalls);
-      console.log('toolResults:', '\n', toolResults);
-      console.log('finishReason:', '\n', finishReason);
+      // console.log('toolCalls:', '\n', toolCalls);
+      // console.log('toolResults:', '\n', toolResults);
+      // console.log('finishReason:', '\n', finishReason);
       // console.log('usage:', '\n', usage);
     },
+
+    
     
   
   });
