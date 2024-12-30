@@ -3,7 +3,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
-import { importProfileToResume } from "@/utils/ai";
 
 interface DashboardData {
   profile: Profile | null;
@@ -297,7 +296,7 @@ export async function deleteResume(resumeId: string): Promise<void> {
 
 export async function createBaseResume(
   name: string, 
-  importOption: 'import-profile' | 'ai' | 'fresh' = 'import-profile',
+  importOption: 'import-profile' | 'fresh' | 'import-resume' = 'import-profile',
   selectedContent?: {
     work_experience: WorkExperience[];
     education: Education[];
@@ -305,8 +304,6 @@ export async function createBaseResume(
     projects: Project[];
   }
 ): Promise<Resume> {
-  console.log('\n========== CREATE BASE RESUME START ==========');
-  console.log('Input Parameters:', { name, importOption, hasSelectedContent: !!selectedContent });
 
   const supabase = await createClient();
 
@@ -316,12 +313,11 @@ export async function createBaseResume(
     console.error('Authentication Error:', userError);
     throw new Error('User not authenticated');
   }
-  console.log('User authenticated:', { userId: user.id });
 
   // Get user's profile for initial data if not starting fresh
   let profile = null;
   if (importOption !== 'fresh') {
-    console.log('\nFetching user profile...');
+
     const { data, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -331,98 +327,36 @@ export async function createBaseResume(
     if (profileError) {
       console.error('Profile fetch error:', profileError);
     }
-    
     profile = data;
-    console.log('Profile fetch result:', {
-      success: !!data,
-      hasWorkExperience: Array.isArray(data?.work_experience),
-      workExperienceCount: data?.work_experience?.length || 0,
-      hasEducation: Array.isArray(data?.education),
-      educationCount: data?.education?.length || 0,
-      hasSkills: Array.isArray(data?.skills),
-      skillsCount: data?.skills?.length || 0,
-      hasProjects: Array.isArray(data?.projects),
-      projectsCount: data?.projects?.length || 0
-    });
   }
 
-  // For AI option, get AI recommendations if not provided
-  let aiRecommendations: Partial<Resume> | undefined;
-  if (importOption === 'ai' && profile) {
-    try {
-      console.log('\nRequesting AI Analysis...');
-      const aiResponse = await importProfileToResume(profile, name);
-      console.log('\nAI Response received:', {
-        type: typeof aiResponse,
-        isString: typeof aiResponse === 'string',
-        length: typeof aiResponse === 'string' ? aiResponse.length : 'N/A'
-      });
-
-      if (typeof aiResponse === 'string') {
-        console.log('AI Response Preview:', aiResponse.substring(0, 200) + '...');
-      }
-
-      aiRecommendations = typeof aiResponse === 'string' ? JSON.parse(aiResponse) : aiResponse;
-      
-      console.log('\nParsed AI Recommendations:', {
-        success: !!aiRecommendations,
-        hasWorkExperience: Array.isArray(aiRecommendations?.work_experience),
-        workExperienceCount: aiRecommendations?.work_experience?.length || 0,
-        workExperienceExample: aiRecommendations?.work_experience?.[0]?.company,
-        hasEducation: Array.isArray(aiRecommendations?.education),
-        educationCount: aiRecommendations?.education?.length || 0,
-        hasSkills: Array.isArray(aiRecommendations?.skills),
-        skillsCount: aiRecommendations?.skills?.length || 0,
-        hasProjects: Array.isArray(aiRecommendations?.projects),
-        projectsCount: aiRecommendations?.projects?.length || 0
-      });
-    } catch (error) {
-      console.error('\nAI Analysis Error:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : undefined
-      });
-      console.log('Proceeding with empty resume creation');
-    }
-  }
-
-  console.log('\nPreparing new resume data...');
   const newResume: Partial<Resume> = {
     user_id: user.id,
     name,
     target_role: name,
     is_base_resume: true,
-    first_name: aiRecommendations?.first_name || (importOption === 'fresh' ? '' : profile?.first_name || ''),
-    last_name: aiRecommendations?.last_name || (importOption === 'fresh' ? '' : profile?.last_name || ''),
-    email: aiRecommendations?.email || (importOption === 'fresh' ? '' : profile?.email || ''),
-    phone_number: aiRecommendations?.phone_number || (importOption === 'fresh' ? '' : profile?.phone_number || ''),
-    location: aiRecommendations?.location || (importOption === 'fresh' ? '' : profile?.location || ''),
-    website: aiRecommendations?.website || (importOption === 'fresh' ? '' : profile?.website || ''),
-    linkedin_url: aiRecommendations?.linkedin_url || (importOption === 'fresh' ? '' : profile?.linkedin_url || ''),
-    github_url: aiRecommendations?.github_url || (importOption === 'fresh' ? '' : profile?.github_url || ''),
-    // For import-profile, use only the selected content. For AI, use AI recommendations. For fresh, use empty arrays
-    work_experience: importOption === 'import-profile' && selectedContent 
+    first_name: importOption === 'fresh' ? '' : profile?.first_name || '',
+    last_name: importOption === 'fresh' ? '' : profile?.last_name || '',
+    email: importOption === 'fresh' ? '' : profile?.email || '',
+    phone_number: importOption === 'fresh' ? '' : profile?.phone_number || '',
+    location: importOption === 'fresh' ? '' : profile?.location || '',
+    website: importOption === 'fresh' ? '' : profile?.website || '',
+    linkedin_url: importOption === 'fresh' ? '' : profile?.linkedin_url || '',
+    github_url: importOption === 'fresh' ? '' : profile?.github_url || '',
+    // For import-profile, use only the selected content. For fresh, use empty arrays
+    work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent 
       ? selectedContent.work_experience
-      : (importOption === 'ai' && Array.isArray(aiRecommendations?.work_experience)
-        ? [...aiRecommendations.work_experience]
-        : []),
-    education: importOption === 'import-profile' && selectedContent
-      ? selectedContent.education
-      : (importOption === 'ai' && Array.isArray(aiRecommendations?.education)
-        ? [...aiRecommendations.education]
-        : []),
-    skills: importOption === 'import-profile' && selectedContent
-      ? selectedContent.skills
-      : (importOption === 'ai' && Array.isArray(aiRecommendations?.skills)
-        ? [...aiRecommendations.skills]
-        : []),
-    projects: importOption === 'import-profile' && selectedContent
-      ? selectedContent.projects
-      : (importOption === 'ai' && Array.isArray(aiRecommendations?.projects)
-        ? [...aiRecommendations.projects]
-        : []),
-    certifications: importOption === 'ai' && Array.isArray(aiRecommendations?.certifications)
-      ? [...aiRecommendations.certifications]
       : [],
+    education: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
+      ? selectedContent.education
+      : [],
+    skills: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
+      ? selectedContent.skills
+      : [],
+    projects: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
+      ? selectedContent.projects
+      : [],
+    certifications: [],
     section_order: [
       'work_experience',
       'education',
@@ -431,51 +365,15 @@ export async function createBaseResume(
       'certifications'
     ],
     section_configs: {
-      work_experience: { visible: (selectedContent?.work_experience?.length ?? 0) > 0 || importOption === 'ai' },
-      education: { visible: (selectedContent?.education?.length ?? 0) > 0 || importOption === 'ai' },
-      skills: { visible: (selectedContent?.skills?.length ?? 0) > 0 || importOption === 'ai' },
-      projects: { visible: (selectedContent?.projects?.length ?? 0) > 0 || importOption === 'ai' },
-      certifications: { visible: importOption === 'ai' && Array.isArray(aiRecommendations?.certifications) }
+      work_experience: { visible: (selectedContent?.work_experience?.length ?? 0) > 0 },
+      education: { visible: (selectedContent?.education?.length ?? 0) > 0 },
+      skills: { visible: (selectedContent?.skills?.length ?? 0) > 0 },
+      projects: { visible: (selectedContent?.projects?.length ?? 0) > 0 },
+      certifications: { visible: false }
     }
   };
 
-  console.log('\nPrepared Resume Data:', {
-    basicInfo: {
-      name: newResume.name,
-      targetRole: newResume.target_role,
-      isBaseResume: newResume.is_base_resume,
-      firstName: newResume.first_name,
-      lastName: newResume.last_name,
-    },
-    arrayFields: {
-      workExperience: {
-        isArray: Array.isArray(newResume.work_experience),
-        length: newResume.work_experience?.length || 0,
-        firstItem: newResume.work_experience?.[0]?.company || 'none'
-      },
-      education: {
-        isArray: Array.isArray(newResume.education),
-        length: newResume.education?.length || 0,
-        firstItem: newResume.education?.[0]?.school || 'none'
-      },
-      skills: {
-        isArray: Array.isArray(newResume.skills),
-        length: newResume.skills?.length || 0,
-        firstItem: newResume.skills?.[0]?.category || 'none'
-      },
-      projects: {
-        isArray: Array.isArray(newResume.projects),
-        length: newResume.projects?.length || 0,
-        firstItem: newResume.projects?.[0]?.name || 'none'
-      }
-    },
-    sections: {
-      orderLength: newResume.section_order?.length || 0,
-      configKeys: Object.keys(newResume.section_configs || {})
-    }
-  });
 
-  console.log('\nInserting resume into database...');
   const { data: resume, error: createError } = await supabase
     .from('resumes')
     .insert([newResume])
@@ -496,20 +394,6 @@ export async function createBaseResume(
     console.error('\nNo resume data returned after insert');
     throw new Error('Resume creation failed: No data returned');
   }
-
-  console.log('\nCreated Resume:', {
-    id: resume.id,
-    name: resume.name,
-    arrays: {
-      workExperience: resume.work_experience?.length || 0,
-      education: resume.education?.length || 0,
-      skills: resume.skills?.length || 0,
-      projects: resume.projects?.length || 0,
-      certifications: resume.certifications?.length || 0
-    }
-  });
-
-  console.log('========== CREATE BASE RESUME END ==========\n');
   return resume;
 } 
 

@@ -6,14 +6,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Profile, WorkExperience, Education, Skill, Project } from "@/lib/types";
+import { Profile, WorkExperience, Education, Skill, Project, Resume } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Copy, Wand2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createBaseResume } from "@/utils/actions";
+import { convertTextToResume } from "@/utils/ai";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Textarea } from "@/components/ui/textarea";
 
 interface CreateBaseResumeDialogProps {
   children: React.ReactNode;
@@ -24,7 +26,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
   const [open, setOpen] = useState(false);
   const [targetRole, setTargetRole] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [importOption, setImportOption] = useState<'import-profile' | 'scratch'>('import-profile');
+  const [importOption, setImportOption] = useState<'import-profile' | 'scratch' | 'import-resume'>('import-profile');
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const [selectedItems, setSelectedItems] = useState<{
     work_experience: string[];
@@ -37,6 +39,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
     skills: [],
     projects: []
   });
+  const [resumeText, setResumeText] = useState('');
   const router = useRouter();
 
   const getItemId = (type: keyof typeof selectedItems, item: any): string => {
@@ -97,6 +100,79 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
 
     try {
       setIsCreating(true);
+
+      if (importOption === 'import-resume') {
+        if (!resumeText.trim()) {
+          toast({
+            title: "Required Field Missing",
+            description: "Please paste your resume text.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        console.log('Starting import-resume flow');
+        console.log('Resume Text:', resumeText);
+
+        // Create an empty resume to pass to convertTextToResume
+        const emptyResume: Resume = {
+          id: '',
+          user_id: '',
+          name: targetRole,
+          target_role: targetRole,
+          is_base_resume: true,
+          first_name: '',
+          last_name: '',
+          email: '',
+          work_experience: [],
+          education: [],
+          skills: [],
+          projects: [],
+          certifications: [],
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        console.log('Empty Resume Template:', emptyResume);
+
+        // Convert the text to resume format
+        console.log('Converting text to resume format...');
+        const convertedResume = await convertTextToResume(resumeText, emptyResume);
+        console.log('Converted Resume:', convertedResume);
+
+        // Create the base resume with the converted content
+        console.log('Creating base resume with converted content...');
+        console.log('Target Role:', targetRole);
+        console.log('Import Option:', 'import-resume');
+        
+        // Extract just the content sections needed for createBaseResume
+        const selectedContent = {
+          work_experience: convertedResume.work_experience || [],
+          education: convertedResume.education || [],
+          skills: convertedResume.skills || [],
+          projects: convertedResume.projects || [],
+        };
+        
+        console.log('Selected Content:', selectedContent);
+        
+        const resume = await createBaseResume(
+          targetRole,
+          'import-resume',
+          selectedContent
+        );
+        
+        console.log('Created Resume:', resume);
+
+        toast({
+          title: "Success",
+          description: "Resume created successfully",
+        });
+
+        router.push(`/resumes/${resume.id}`);
+        setOpen(false);
+        return;
+      }
+
       const selectedContent = {
         work_experience: profile.work_experience.filter(exp => 
           selectedItems.work_experience.includes(getItemId('work_experience', exp))
@@ -112,11 +188,18 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         ),
       };
 
+      console.log('Creating base resume with selected content...');
+      console.log('Target Role:', targetRole);
+      console.log('Import Option:', importOption === 'scratch' ? 'fresh' : importOption);
+      console.log('Selected Content:', selectedContent);
+
       const resume = await createBaseResume(
         targetRole, 
         importOption === 'scratch' ? 'fresh' : importOption,
         selectedContent
       );
+
+      console.log('Created Resume:', resume);
 
       toast({
         title: "Success",
@@ -126,6 +209,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       router.push(`/resumes/${resume.id}`);
       setOpen(false);
     } catch (error) {
+      console.error('Create resume error:', error);
       toast({
         title: "Error",
         description: "Failed to create resume",
@@ -227,7 +311,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
               <Label className="text-base font-medium text-purple-950">
                 Resume Content
               </Label>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <input
                     type="radio"
@@ -235,7 +319,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                     name="importOption"
                     value="import-profile"
                     checked={importOption === 'import-profile'}
-                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch')}
+                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch' | 'import-resume')}
                     className="sr-only peer"
                   />
                   <Label
@@ -268,7 +352,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                     name="importOption"
                     value="scratch"
                     checked={importOption === 'scratch'}
-                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch')}
+                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch' | 'import-resume')}
                     className="sr-only peer"
                   />
                   <Label
@@ -289,6 +373,39 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       <div className="font-medium text-sm text-purple-950">Start Fresh</div>
                       <span className="text-xs text-gray-600 line-clamp-2">
                         Create a blank resume
+                      </span>
+                    </div>
+                  </Label>
+                </div>
+
+                <div>
+                  <input
+                    type="radio"
+                    id="import-resume"
+                    name="importOption"
+                    value="import-resume"
+                    checked={importOption === 'import-resume'}
+                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch' | 'import-resume')}
+                    className="sr-only peer"
+                  />
+                  <Label
+                    htmlFor="import-resume"
+                    className={cn(
+                      "flex items-center h-[88px] rounded-lg p-3",
+                      "bg-white border shadow-sm",
+                      "hover:border-purple-200 hover:bg-purple-50/50",
+                      "transition-all duration-300 cursor-pointer",
+                      "peer-checked:border-purple-500 peer-checked:bg-purple-50",
+                      "peer-checked:shadow-md peer-checked:shadow-purple-100"
+                    )}
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center shrink-0">
+                      <Plus className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className="ml-3 flex flex-col">
+                      <div className="font-medium text-sm text-purple-950">Import from Resume</div>
+                      <span className="text-xs text-gray-600 line-clamp-2">
+                        Paste your existing resume
                       </span>
                     </div>
                   </Label>
@@ -539,6 +656,21 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       </AccordionItem>
                     </Accordion>
                   </div>
+                </div>
+              )}
+
+              {importOption === 'import-resume' && (
+                <div className="space-y-3">
+                  <Label htmlFor="resume-text" className="text-sm font-medium text-purple-950">
+                    Paste your resume text
+                  </Label>
+                  <Textarea
+                    id="resume-text"
+                    value={resumeText}
+                    onChange={(e) => setResumeText(e.target.value)}
+                    placeholder="Paste your resume content here..."
+                    className="h-[200px] bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
+                  />
                 </div>
               )}
             </div>
