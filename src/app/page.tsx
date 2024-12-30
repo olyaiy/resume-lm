@@ -17,10 +17,9 @@ import { getDashboardData } from "../utils/actions";
 import { User, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { SettingsButton } from "@/components/settings/settings-button";
-import { LogoutButton } from "@/components/auth/logout-button";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ResumeManagementCard } from "@/components/resume/resume-management-card";
+import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 
 export default async function Home() {
   // Fetch dashboard data and handle authentication
@@ -66,25 +65,7 @@ export default async function Home() {
 
       {/* Main Content Layer */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        {/* Dashboard Header */}
-        <header className="sticky top-0 z-20 py-6 px-4 md:px-6 lg:px-8 border-b bg-white/50 backdrop-blur-lg">
-          <div className="max-w-[1800px] mx-auto">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div className="space-y-1.5">
-                <h1 className="text-2xl sm:text-3xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                  Welcome back, {profile.first_name}! 👋
-                </h1>
-                <p className="text-sm sm:text-base text-muted-foreground">
-                  Here's what's happening with your resumes
-                </p>
-              </div>
-              <div className="flex items-center gap-3 self-end sm:self-auto">
-                <LogoutButton />
-                <SettingsButton />
-              </div>
-            </div>
-          </div>
-        </header>
+        <DashboardHeader firstName={profile.first_name} />
 
         {/* Main Dashboard Content */}
         <div className="flex-1 px-4 md:px-6 lg:px-8 py-6 md:py-8">

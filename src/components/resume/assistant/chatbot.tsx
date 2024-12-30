@@ -33,6 +33,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     api: '/api/chat',
     body: {
       model: selectedModel,
+      target_role: resume.target_role,
+      resume: resume,
     },
     maxSteps: 10,
     async onToolCall({ toolCall }) {

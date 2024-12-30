@@ -20,10 +20,11 @@ interface ChatRequest {
   messages: Message[];
   resume: Resume;
   model: 'gpt-4' | 'claude' | 'gemini';
+  target_role: string;
 }
 
 export async function POST(req: Request) {
-  const { messages, model = 'gpt-4' }: ChatRequest = await req.json();
+  const { messages, model = 'gpt-4', target_role, resume }: ChatRequest = await req.json();
 
   const modelConfig = {
     'gpt-4': openai("gpt-4o"),
@@ -40,6 +41,9 @@ specializing in computer science and software
 engineering careers. Your expertise spans resume 
 optimization, technical writing, and industry best 
 practices for tech job applications.
+
+TARGET ROLE: ${target_role}
+Your goal is to help optimize the resume for this specific role.
 
 CAPABILITIES:
 - Access and analyze resumes using getResume tool
@@ -193,41 +197,15 @@ Use your tools strategically to deliver maximum value while respecting these gui
         }),
       },
     },
-    // onChunk({ chunk }) {
-
-      // if (chunk.type === 'tool-call-streaming-start') {
-      //   console.log(chunk.toolName, 'STARTED STREAMING THIS TOOL');
-      // }
-
-      // if (chunk.type === 'tool-call') {
-      //   console.log(chunk.toolName, 'CALLED TOOL NON STREAM');
-      // }
-
-      // if (chunk.type === 'tool-call-delta') {
-      //   console.log(chunk.toolName, 'STREAMTED TOOL CHUNK');
-      // }
-    // },
+ 
     experimental_transform: smoothStream(),
 
-  
-    // experimental_toolCallStreaming: true,
 
-    onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
-      // console.log('text:', '\n', text);
-      // console.log('toolCalls:', '\n', toolCalls);
-      // console.log('toolResults:', '\n', toolResults);
-      // console.log('finishReason:', '\n', finishReason);
-      // console.log('usage:', '\n', usage);
-    },
 
     
     
   
   });
-
-  // const allToolCalls = result.flatMap(step => step.toolCalls);
-  // console.log('allToolCalls:', '\n', allToolCalls);
-
 
 
   return result.toDataStreamResponse({
