@@ -11,7 +11,7 @@ import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_E
 import { openai as openaiVercel } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { resumeSchema } from "@/lib/zod-schemas";
+import { resumeSchema, textImportSchema } from "@/lib/zod-schemas";
 
 
 // Initialize OpenAI client with API key from environment variables
@@ -369,58 +369,6 @@ ${JSON.stringify(experience, null, 2)}`
   }
 }
 
-// Create a partial schema for text import that only includes the fields we want to extract
-const textImportSchema = z.object({
-  // Basic Information
-  first_name: z.string().optional(),
-  last_name: z.string().optional(),
-  email: z.string().optional(),
-  phone_number: z.string().optional(),
-  location: z.string().optional(),
-  website: z.string().optional(),
-  linkedin_url: z.string().optional(),
-  github_url: z.string().optional(),
-  
-  // Resume Sections
-  work_experience: z.array(z.object({
-    company: z.string(),
-    position: z.string(),
-    date: z.string(),
-    description: z.array(z.string()),
-    technologies: z.array(z.string()).optional(),
-    location: z.string().optional(),
-  })).optional(),
-  education: z.array(z.object({
-    school: z.string(),
-    degree: z.string(),
-    field: z.string(),
-    date: z.string(),
-    description: z.array(z.string()).optional(),
-    gpa: z.string().optional(),
-    location: z.string().optional(),
-    achievements: z.array(z.string()).optional(),
-  })).optional(),
-  skills: z.array(z.object({
-    category: z.string(),
-    items: z.array(z.string()),
-  })).optional(),
-  projects: z.array(z.object({
-    name: z.string(),
-    description: z.array(z.string()),
-    technologies: z.array(z.string()).optional(),
-    date: z.string().optional(),
-    url: z.string().optional(),
-    github_url: z.string().optional(),
-  })).optional(),
-  certifications: z.array(z.object({
-    name: z.string(),
-    issuer: z.string(),
-    date_acquired: z.string().optional(),
-    expiry_date: z.string().optional(),
-    credential_id: z.string().optional(),
-    url: z.string().optional(),
-  })).optional(),
-});
 
 export async function addTextToResume(prompt: string, existingResume: Resume) {
   const { object } = await generateObject({
@@ -455,3 +403,39 @@ export async function addTextToResume(prompt: string, existingResume: Resume) {
   
   return updatedResume;
 }
+
+
+export async function convertTextToResume(prompt: string, existingResume: Resume) {
+  const { object } = await generateObject({
+    model: openaiVercel("gpt-4o-mini"),
+    schema: z.object({
+      content: textImportSchema
+    }),
+    prompt: `Extract relevant resume information from the following text, including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
+  
+  });
+  
+  // Merge the AI-generated content with existing resume data
+  const updatedResume = {
+    ...existingResume,
+    // Update basic information if provided
+    ...(object.content.first_name && { first_name: object.content.first_name }),
+    ...(object.content.last_name && { last_name: object.content.last_name }),
+    ...(object.content.email && { email: object.content.email }),
+    ...(object.content.phone_number && { phone_number: object.content.phone_number }),
+    ...(object.content.location && { location: object.content.location }),
+    ...(object.content.website && { website: object.content.website }),
+    ...(object.content.linkedin_url && { linkedin_url: object.content.linkedin_url }),
+    ...(object.content.github_url && { github_url: object.content.github_url }),
+    
+    // Merge section arrays
+    work_experience: [...existingResume.work_experience, ...(object.content.work_experience || [])],
+    education: [...existingResume.education, ...(object.content.education || [])],
+    skills: [...existingResume.skills, ...(object.content.skills || [])],
+    projects: [...existingResume.projects, ...(object.content.projects || [])],
+    certifications: [...(existingResume.certifications || []), ...(object.content.certifications || [])],
+  };
+  
+  return updatedResume;
+}
+

@@ -43,6 +43,59 @@ export const certificationSchema = z.object({
   url: z.string().url().optional(),
 });
 
+// Schema for text import functionality
+export const textImportSchema = z.object({
+  // Basic Information
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  email: z.string().optional(),
+  phone_number: z.string().optional(),
+  location: z.string().optional(),
+  website: z.string().optional(),
+  linkedin_url: z.string().optional(),
+  github_url: z.string().optional(),
+  
+  // Resume Sections
+  work_experience: z.array(z.object({
+    company: z.string(),
+    position: z.string(),
+    date: z.string(),
+    description: z.array(z.string()),
+    technologies: z.array(z.string()).optional(),
+    location: z.string().optional(),
+  })).optional(),
+  education: z.array(z.object({
+    school: z.string(),
+    degree: z.string(),
+    field: z.string(),
+    date: z.string(),
+    description: z.array(z.string()).optional(),
+    gpa: z.string().optional(),
+    location: z.string().optional(),
+    achievements: z.array(z.string()).optional(),
+  })).optional(),
+  skills: z.array(z.object({
+    category: z.string(),
+    items: z.array(z.string()),
+  })).optional(),
+  projects: z.array(z.object({
+    name: z.string(),
+    description: z.array(z.string()),
+    technologies: z.array(z.string()).optional(),
+    date: z.string().optional(),
+    url: z.string().optional(),
+    github_url: z.string().optional(),
+  })).optional(),
+  certifications: z.array(z.object({
+    name: z.string(),
+    issuer: z.string(),
+    date_acquired: z.string().optional(),
+    expiry_date: z.string().optional(),
+    credential_id: z.string().optional(),
+    url: z.string().optional(),
+  })).optional(),
+});
+
 export const documentSettingsSchema = z.object({
   // Global Settings
   document_font_size: z.number(),
