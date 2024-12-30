@@ -9,6 +9,7 @@ import { ResumePDFDocument } from './resume-pdf-document';
 import { pdf } from '@react-pdf/renderer';
 import { useRouter } from "next/navigation";
 import { TextImport } from "./text-import";
+import { cn } from "@/lib/utils";
 
 interface ResumeEditorHeaderProps {
   resume: Resume;
@@ -43,12 +44,56 @@ export function ResumeEditorHeader({
     }
   };
 
+  // Dynamic color classes based on resume type
+  const colors = resume.is_base_resume ? {
+    gradient: "from-purple-600 via-purple-500 to-indigo-600",
+    border: "border-purple-200/50",
+    background: "from-purple-50/95 via-white/95 to-purple-50/95",
+    shadow: "shadow-purple-500/10",
+    text: "text-purple-600",
+    hover: "hover:text-purple-600",
+    textOpacity: "text-purple-600/60",
+    gradientOverlay: "#f3e8ff30",
+    buttonGradient: "from-purple-500 to-indigo-600",
+    buttonHover: "hover:from-purple-600 hover:to-indigo-700",
+    buttonShadow: "shadow-purple-500/20"
+  } : {
+    gradient: "from-pink-600 via-pink-500 to-rose-600",
+    border: "border-pink-200/50",
+    background: "from-pink-50/95 via-white/95 to-pink-50/95",
+    shadow: "shadow-pink-500/10",
+    text: "text-pink-600",
+    hover: "hover:text-pink-600",
+    textOpacity: "text-pink-600/60",
+    gradientOverlay: "#fce7f330",
+    buttonGradient: "from-pink-500 to-rose-600",
+    buttonHover: "hover:from-pink-600 hover:to-rose-700",
+    buttonShadow: "shadow-pink-500/20"
+  };
+
   return (
-    <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
+    <div className={cn(
+      "h-20 border-b backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg",
+      colors.border,
+      `bg-gradient-to-r ${colors.background}`,
+      colors.shadow
+    )}>
       {/* Gradient Overlays */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff30_0%,#ffffff40_50%,#f3e8ff30_100%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
+      <div className={cn(
+        "absolute inset-0",
+        `bg-[linear-gradient(to_right,${colors.gradientOverlay}_0%,#ffffff40_50%,${colors.gradientOverlay}_100%)]`,
+        "pointer-events-none"
+      )} />
+      <div className={cn(
+        "absolute inset-0",
+        `bg-[radial-gradient(circle_800px_at_50%_-40%,${colors.gradientOverlay}_0%,transparent_100%)]`,
+        "pointer-events-none"
+      )} />
+      <div className={cn(
+        "absolute inset-0",
+        `bg-[radial-gradient(circle_600px_at_100%_100%,${colors.gradientOverlay}_0%,transparent_100%)]`,
+        "pointer-events-none"
+      )} />
       
       {/* Content Container */}
       <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
@@ -57,7 +102,11 @@ export function ResumeEditorHeader({
           {/* Back Button */}
           <button 
             onClick={handleBackClick}
-            className="group flex items-center text-xs font-medium text-purple-600/60 hover:text-purple-600 transition-all duration-300 -mb-1 w-fit"
+            className={cn(
+              "group flex items-center text-xs font-medium -mb-1 w-fit transition-all duration-300",
+              colors.textOpacity,
+              colors.hover
+            )}
           >
             <ArrowLeft className="h-3 w-3 mr-1 group-hover:-translate-x-1 transition-transform duration-300" />
             Back
@@ -66,11 +115,14 @@ export function ResumeEditorHeader({
           {/* Resume Title Section */}
           <div className="flex flex-col gap-0.5">
             <h1 className="text-2xl font-semibold">
-              <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+              <span className={cn(
+                "bg-gradient-to-r bg-clip-text text-transparent",
+                colors.gradient
+              )}>
                 {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
               </span>
             </h1>
-            <div className="flex items-center gap-2 text-sm text-purple-600/60">
+            <div className={cn("flex items-center gap-2 text-sm", colors.textOpacity)}>
               {resume.is_base_resume ? (
                 <div className="flex items-center gap-2">
                   <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
@@ -122,7 +174,13 @@ export function ResumeEditorHeader({
                 }
               }}
               size="sm"
-              className="bg-gradient-to-br from-purple-500 to-indigo-600 text-white hover:from-purple-600 hover:to-indigo-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-purple-500/20 hover:-translate-y-0.5 h-9 px-4 relative overflow-hidden group"
+              className={cn(
+                "text-white transition-all duration-500 shadow-md hover:shadow-lg h-9 px-4 relative overflow-hidden group",
+                "hover:-translate-y-0.5",
+                `bg-gradient-to-br ${colors.buttonGradient}`,
+                colors.buttonHover,
+                colors.buttonShadow
+              )}
             >
               <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               <Download className="mr-2 h-4 w-4" />
