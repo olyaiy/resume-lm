@@ -2,27 +2,27 @@ import { z } from "zod";
 
 // Base schemas for reusable components
 export const workExperienceSchema = z.object({
-  company: z.string(),
-  position: z.string(),
+  company: z.string().optional(),
+  position: z.string().optional(),
   location: z.string().optional(),
-  date: z.string(),
-  description: z.array(z.string()),
+  date: z.string().optional(),
+  description: z.array(z.string()).optional(),
   technologies: z.array(z.string()).optional(),
 });
 
 export const educationSchema = z.object({
-  school: z.string(),
-  degree: z.string(),
-  field: z.string(),
+  school: z.string().optional(),
+  degree: z.string().optional(),
+  field: z.string().optional(),
   location: z.string().optional(),
-  date: z.string(),
+  date: z.string().optional(),
   gpa: z.string().optional(),
   achievements: z.array(z.string()).optional(),
 });
 
 export const projectSchema = z.object({
-  name: z.string(),
-  description: z.array(z.string()),
+  name: z.string().optional(),
+  description: z.array(z.string()).optional(),
   date: z.string().optional(),
   technologies: z.array(z.string()).optional(),
   url: z.string().url().optional(),
@@ -30,13 +30,13 @@ export const projectSchema = z.object({
 });
 
 export const skillSchema = z.object({
-  category: z.string(),
-  items: z.array(z.string()),
+  category: z.string().optional(),
+  items: z.array(z.string()).optional(),
 });
 
 export const certificationSchema = z.object({
-  name: z.string(),
-  issuer: z.string(),
+  name: z.string().optional(),
+  issuer: z.string().optional(),
   date_acquired: z.string().optional(),
   expiry_date: z.string().optional(),
   credential_id: z.string().optional(),
@@ -145,19 +145,19 @@ export const resumeSchema = z.object({
   name: z.string(),
   target_role: z.string(),
 //   is_base_resume: z.boolean(),
-  first_name: z.string(),
-  last_name: z.string(),
-  email: z.string().email(),
+  first_name: z.string().optional(),
+  last_name: z.string().optional(),
+  email: z.string().email().optional(),
   phone_number: z.string().optional(),
   location: z.string().optional(),
   website: z.string().url().optional(),
   linkedin_url: z.string().url().optional(),
   github_url: z.string().url().optional(),
-  work_experience: z.array(workExperienceSchema),
-  education: z.array(educationSchema),
-  skills: z.array(skillSchema),
-  projects: z.array(projectSchema),
-  certifications: z.array(certificationSchema),
+  work_experience: z.array(workExperienceSchema).optional(),
+  education: z.array(educationSchema).optional(),
+  skills: z.array(skillSchema).optional(),
+  projects: z.array(projectSchema).optional(),
+  certifications: z.array(certificationSchema).optional(),
 //   created_at: z.string().datetime(),
 //   updated_at: z.string().datetime(),
 //   document_settings: documentSettingsSchema.optional(),
@@ -173,4 +173,32 @@ export type Project = z.infer<typeof projectSchema>;
 export type Skill = z.infer<typeof skillSchema>;
 export type Certification = z.infer<typeof certificationSchema>;
 export type DocumentSettings = z.infer<typeof documentSettingsSchema>;
-export type SectionConfig = z.infer<typeof sectionConfigSchema>; 
+export type SectionConfig = z.infer<typeof sectionConfigSchema>;
+
+// Salary range schema
+export const salaryRangeSchema = z.object({
+  min: z.number().optional(),
+  max: z.number().optional(),
+  currency: z.string().optional(),
+});
+
+// Jobs schema
+export const jobSchema = z.object({
+  id: z.string().uuid(),
+  company_name: z.string().optional(),
+  position_title: z.string().optional(),
+  job_url: z.string().url().nullable(),
+  description: z.string().nullable(),
+  location: z.string().nullable(),
+  salary_range: salaryRangeSchema.nullable(),
+  created_at: z.string().datetime(),
+  updated_at: z.string().datetime(),
+  keywords: z.array(z.string()).default([]),
+  work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable(),
+  employment_type: z.enum(['full_time', 'part_time', 'co_op', 'internship']).nullable(),
+  is_active: z.boolean().default(true),
+});
+
+// Add type inference helper
+export type Job = z.infer<typeof jobSchema>;
+export type SalaryRange = z.infer<typeof salaryRangeSchema>; 

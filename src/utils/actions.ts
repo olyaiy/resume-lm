@@ -402,3 +402,8 @@ export async function createTailoredResume(resume: Resume, baseResumeID: string,
 
   // const { data: resume, error: resumeError } = await supabase.from('resumes').select('*').eq('id', resumeId).single();
 }
+
+
+export async function createJob(jobListing: string) {
+  
+}

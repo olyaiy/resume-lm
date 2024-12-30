@@ -40,24 +40,26 @@ export interface Certification {
   url?: string;
 }
 
+export interface SalaryRange {
+  min?: number;
+  max?: number;
+  currency?: string;
+}
+
 export interface Job {
   id: string;
-  user_id: string;
   company_name: string;
   position_title: string;
-  job_url?: string;
-  description?: string;
-  location?: string;
-  salary_range?: {
-    min?: number;
-    max?: number;
-    currency?: string;
-  };
-  status: 'active' | 'applied' | 'interviewing' | 'offered' | 'rejected' | 'archived';
-  requirements?: string[];
-  notes?: string;
+  job_url: string | null;
+  description: string | null;
+  location: string | null;
+  salary_range: SalaryRange | null;
+  keywords: string[];
+  work_location: 'remote' | 'in_person' | 'hybrid' | null;
+  employment_type: 'full_time' | 'part_time' | 'co_op' | 'internship' | null;
   created_at: string;
   updated_at: string;
+  is_active: boolean;
 }
 
 export interface SectionConfig {

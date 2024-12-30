@@ -14,6 +14,7 @@ import { createBaseResume, createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { MiniResumePreview } from "./shared/mini-resume-preview";
 import { tailorResumeToJob } from "@/utils/ai";
+import { formatJobListing } from "@/utils/ai";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -335,23 +336,50 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
               </div>
             </div>
 
-            <Button 
-              onClick={async () => {
-                if (!selectedBaseResume || !baseResumes) return;
-                const baseResume = baseResumes.find(r => r.id === selectedBaseResume);
-                if (!baseResume) return;
-                
-                try {
-                  const result = await tailorResumeToJob(baseResume, jobDescription);
-                  console.log('AI Tailoring Result:', result);
-                } catch (error) {
-                  console.error('AI Tailoring Error:', error);
-                }
-              }}
-              className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-            >
-              Test AI Tailoring
-            </Button>
+            <div className="flex gap-2">
+              <Button 
+                onClick={async () => {
+                  if (!selectedBaseResume || !baseResumes) return;
+                  const baseResume = baseResumes.find(r => r.id === selectedBaseResume);
+                  if (!baseResume) return;
+                  
+                  try {
+                    const result = await tailorResumeToJob(baseResume, jobDescription);
+                    console.log('AI Tailoring Result:', result);
+                  } catch (error) {
+                    console.error('AI Tailoring Error:', error);
+                  }
+                }}
+                className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white"
+              >
+                Test AI Tailoring
+              </Button>
+
+              <Button 
+                onClick={async () => {
+                  if (!jobDescription) return;
+                  
+                  try {
+                    const result = await formatJobListing(jobDescription);
+                    console.log('Job Listing Format Result:', result);
+                    toast({
+                      title: "Job Listing Parsed",
+                      description: "Check console for results",
+                    });
+                  } catch (error) {
+                    console.error('Job Format Error:', error);
+                    toast({
+                      title: "Error",
+                      description: "Failed to parse job listing",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white"
+              >
+                Test Job Format
+              </Button>
+            </div>
           </div>
         </div>
 

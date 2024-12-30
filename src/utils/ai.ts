@@ -6,7 +6,7 @@
 'use server';
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceBulletPointsSchema, openAiProjectSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
-import { Profile, Resume, WorkExperience } from "@/lib/types";
+import { Job, Profile, Resume, WorkExperience } from "@/lib/types";
 import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { openai as openaiVercel } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
@@ -448,10 +448,6 @@ export async function tailorResumeToJob(resume: Resume, jobDescription: string) 
     projects: resume.projects,
     target_role: resume.target_role
   };
-
- 
- 
- 
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
     schema: z.object({
@@ -463,7 +459,7 @@ export async function tailorResumeToJob(resume: Resume, jobDescription: string) 
     Please tailor the following resume to the job description. 
     Do not hallucinate or make up information. 
     Focus on relevent keywords and information from the job description.
-
+    If no items are provided for a section, please leave it blank.
     
     Resume:
     ${JSON.stringify(simplifiedResume, null, 2)}
@@ -475,13 +471,66 @@ export async function tailorResumeToJob(resume: Resume, jobDescription: string) 
   });
 
   console.log('THIS IS THE BASE RESUME\n');
-  console.dir(resume, { depth: null, colors: true });
-
+  console.dir(simplifiedResume, { depth: null, colors: true });
   // console.log('Tailored Resume to Job\n', object);
   console.log('THIS IS THE TAILORED RESUME\n');
   console.dir(object, { depth: null, colors: true });
+}
 
 
+export async function formatJobListing(jobListing: string) {
+  const simplifiedJobSchema = z.object({
+    company_name: z.string(),
+    position_title: z.string(),
+    job_url: z.string().url().nullable(),
+    description: z.string().nullable(),
+    location: z.string().nullable(),
+    salary_range: z.object({
+      min: z.number().optional(),
+      max: z.number().optional(),
+      currency: z.string().optional(),
+    }).nullable(),
+    keywords: z.array(z.string()).default([]),
+  });
 
+  const { object } = await generateObject({
+    model: openaiVercel("gpt-4o-mini"),
+    schema: z.object({
+      content: simplifiedJobSchema
+    }),
+    prompt: `Analyze this job listing carefully and extract structured information.
 
+TASK 1 - ESSENTIAL INFORMATION:
+Extract the basic details (company, position, URL, location, salary).
+
+TASK 2 - KEYWORD ANALYSIS:
+1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
+2. Soft Skills: Extract interpersonal and professional competencies
+3. Industry Knowledge: Capture domain-specific knowledge requirements
+4. Required Qualifications: List education, certifications, and experience levels
+5. Responsibilities: Key job functions and deliverables
+
+Format the output according to the schema, ensuring:
+- Keywords are normalized (e.g., "React.js" → "React")
+- Skills are deduplicated and categorized
+- Required vs. preferred skills are distinguished
+- Seniority level is inferred from context
+
+Job Listing Text:
+${jobListing}`,
+    system: `You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of technical roles and industry requirements.
+Your task is to:
+1. Parse job listings with high precision
+2. Extract and categorize keywords that match modern ATS systems
+3. Identify both explicit and implicit requirements
+4. Maintain context-awareness for industry-specific terminology
+5. Recognize variations of the same skill (e.g., "AWS" = "Amazon Web Services")
+
+Focus on accuracy and relevance. Do not infer or add information not present in the original text.`,
+  });
+
+  console.log('THIS IS THE JOB LISTING\n');
+  console.dir(object, { depth: null, colors: true });
+
+  return object.content satisfies Partial<Job>;
 }
