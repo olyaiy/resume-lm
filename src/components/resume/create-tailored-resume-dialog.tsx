@@ -59,8 +59,9 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       const resume = await createTailoredResume(
         baseResume,
         jobEntry.id,
-        profile.id,
-        tailoredContent
+        formattedJobListing.position_title || '',
+        formattedJobListing.company_name || '',
+        tailoredContent,
       );
       console.log('5. Created Tailored Resume:', resume);
 

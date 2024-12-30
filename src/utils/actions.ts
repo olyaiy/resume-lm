@@ -402,23 +402,41 @@ export async function createBaseResume(
 export async function createTailoredResume(
   baseResume: Resume,
   jobId: string,
-  userId: string,
+  jobTitle: string,
+  companyName: string,
   tailoredContent: z.infer<typeof simplifiedResumeSchema>
 ) {
   const supabase = await createClient();
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    console.error('Authentication Error:', userError);
+    throw new Error('User not authenticated');
+  }
+
   // Combine base resume settings with tailored content
   const newResume = {
     ...tailoredContent,
-    user_id: userId,
+    user_id: user.id,
     job_id: jobId,
     is_base_resume: false,
+    // Copy all contact information from base resume
+    first_name: baseResume.first_name,
+    last_name: baseResume.last_name,
+    email: baseResume.email,
+    phone_number: baseResume.phone_number,
+    location: baseResume.location,
+    website: baseResume.website,
+    linkedin_url: baseResume.linkedin_url,
+    github_url: baseResume.github_url,
     // Preserve document settings and section configurations from base resume
     document_settings: baseResume.document_settings,
     section_configs: baseResume.section_configs,
     section_order: baseResume.section_order,
     // Add metadata
-    resume_title: `Tailored Resume for ${tailoredContent.target_role || 'New Role'}`,
+    resume_title: `Tailored Resume for ${jobTitle} at ${companyName}`,
+    name: `Tailored Resume for ${jobTitle} at ${companyName}`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

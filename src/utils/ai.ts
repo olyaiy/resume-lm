@@ -362,7 +362,6 @@ ${JSON.stringify(experience, null, 2)}`
       throw new Error('No content received from OpenAI');
     }
 
-    console.log('RESPONSE FROM AI AFTER MODIFYING WORK EXPERIENCE', response.choices[0].message.content);
     return JSON.parse(response.choices[0].message.content) as WorkExperience;
   } catch (error) {
     throw new Error('Failed to modify work experience: ' + (error instanceof Error ? error.message : 'Unknown error'));
@@ -445,7 +444,7 @@ export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<type
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
     schema: z.object({
-      content: resumeSchema,
+      content: simplifiedResumeSchema,
     }),
     prompt: `
     You are a professional resume writer focusing on tailoring resumes
@@ -456,7 +455,7 @@ export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<type
     If no items are provided for a section, please leave it blank.
     
     Resume:
-    ${JSON.stringify(simplifiedResumeSchema, null, 2)}
+    ${JSON.stringify(resume, null, 2)}
     
     Job Description:
     ${JSON.stringify(jobListing, null, 2)}
@@ -465,10 +464,11 @@ export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<type
   });
 
   console.log('THIS IS THE BASE RESUME\n');
-  console.dir(simplifiedResumeSchema, { depth: null, colors: true });
-  // console.log('Tailored Resume to Job\n', object);
+  console.dir(resume, { depth: null, colors: true });
+
   console.log('THIS IS THE TAILORED RESUME\n');
-  console.dir(object, { depth: null, colors: true });
+  console.dir(object.content, { depth: null, colors: true });
+
 
   return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
 }
@@ -512,8 +512,6 @@ export async function formatJobListing(jobListing: string) {
     Focus on accuracy and relevance. Do not infer or add information not present in the original text.`,
     });
 
-  console.log('THIS IS THE JOB LISTING\n');
-  console.dir(object, { depth: null, colors: true });
 
   return object.content satisfies Partial<Job>;
 }
