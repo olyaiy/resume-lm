@@ -17,7 +17,7 @@ interface ChatRequest {
 }
 
 export async function POST(req: Request) {
-  const { messages, resume }: ChatRequest = await req.json();
+  const { messages }: ChatRequest = await req.json();
 
   const result = streamText({
     // model: openrouter("openai/gpt-4o"),
