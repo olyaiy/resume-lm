@@ -59,7 +59,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       // setIsStreaming(false);
       
       if (toolCall.toolName === 'getResume') {
-        const formattedResume = {
+        const params = toolCall.args as { sections: 'all' | string[] };
+        
+        const personalInfo = {
           first_name: resume.first_name,
           last_name: resume.last_name,
           email: resume.email,
@@ -68,16 +70,26 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
           website: resume.website,
           linkedin_url: resume.linkedin_url,
           github_url: resume.github_url,
+        };
+
+        const sectionMap = {
+          personal_info: personalInfo,
           work_experience: resume.work_experience,
           education: resume.education,
           skills: resume.skills,
           projects: resume.projects,
           certifications: resume.certifications,
-          target_role: resume.target_role
         };
+
+        const result = params.sections === 'all' 
+          ? { ...sectionMap, target_role: resume.target_role }
+          : params.sections.reduce((acc, section) => ({
+              ...acc,
+              [section]: sectionMap[section as keyof typeof sectionMap]
+            }), {});
         
-        addToolResult({ toolCallId: toolCall.toolCallId, result: formattedResume });
-        return formattedResume;
+        addToolResult({ toolCallId: toolCall.toolCallId, result });
+        return result;
       }
 
       if (toolCall.toolName === 'suggest_work_experience_improvement') {

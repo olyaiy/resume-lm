@@ -92,8 +92,20 @@ Use your tools strategically to deliver maximum value while respecting these gui
     
     tools: {
       getResume: {
-        description: 'Get the user Resume.',
-        parameters: z.object({}),
+        description: 'Get the user Resume. Can request specific sections or "all" for the entire resume.',
+        parameters: z.object({
+          sections: z.union([
+            z.literal('all'),
+            z.array(z.enum([
+              'personal_info',
+              'work_experience',
+              'education',
+              'skills',
+              'projects',
+              'certifications'
+            ]))
+          ]).describe('Specify "all" for full resume or an array of specific sections'),
+        }),
       },
       suggest_work_experience_improvement: {
         description: 'Suggest improvements for a specific work experience entry',
