@@ -476,3 +476,96 @@ export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>)
   if (error) throw error;
   return data;
 }
+
+export async function deleteJob(jobId: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  // Check if user is admin
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError || !profile) {
+    throw new Error('Failed to fetch user profile');
+  }
+
+  if (!profile.is_admin) {
+    throw new Error('Unauthorized: Only admins can delete jobs');
+  }
+
+  const { error } = await supabase
+    .from('jobs')
+    .delete()
+    .eq('id', jobId);
+
+  if (error) {
+    throw new Error('Failed to delete job');
+  }
+
+  revalidatePath('/', 'layout');
+}
+
+interface JobListingParams {
+  page: number;
+  pageSize: number;
+  filters?: {
+    workLocation?: 'remote' | 'in_person' | 'hybrid';
+    employmentType?: 'full_time' | 'part_time' | 'co_op' | 'internship';
+    keywords?: string[];
+  };
+}
+
+export async function getJobListings({ 
+  page = 1, 
+  pageSize = 10, 
+  filters 
+}: JobListingParams) {
+  const supabase = await createClient();
+
+  // Calculate offset
+  const offset = (page - 1) * pageSize;
+
+  // Start building the query
+  let query = supabase
+    .from('jobs')
+    .select('*', { count: 'exact' })
+    .eq('is_active', true)
+    .order('created_at', { ascending: false });
+
+  // Apply filters if they exist
+  if (filters) {
+    if (filters.workLocation) {
+      query = query.eq('work_location', filters.workLocation);
+    }
+    if (filters.employmentType) {
+      query = query.eq('employment_type', filters.employmentType);
+    }
+    if (filters.keywords && filters.keywords.length > 0) {
+      query = query.contains('keywords', filters.keywords);
+    }
+  }
+
+  // Add pagination
+  const { data: jobs, error, count } = await query
+    .range(offset, offset + pageSize - 1);
+
+  if (error) {
+    console.error('Error fetching jobs:', error);
+    throw new Error('Failed to fetch job listings');
+  }
+
+  return {
+    jobs,
+    totalCount: count ?? 0,
+    currentPage: page,
+    totalPages: Math.ceil((count ?? 0) / pageSize)
+  };
+}

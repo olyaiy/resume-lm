@@ -20,6 +20,7 @@ import { Card } from "@/components/ui/card";
 import { ProfileCard } from "@/components/profile/profile-card";
 import { ResumeManagementCard } from "@/components/resume/resume-management-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { JobListingsCard } from "@/components/jobs/job-listings-card";
 
 export default async function Home() {
   // Fetch dashboard data and handle authentication
@@ -123,6 +124,11 @@ export default async function Home() {
                   text: "pink-600"
                 }}
               />
+            </div>
+
+            {/* Job Listings */}
+            <div className="mt-6">
+              <JobListingsCard />
             </div>
           </div>
         </div>
