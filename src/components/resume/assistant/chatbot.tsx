@@ -59,8 +59,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       // setIsStreaming(false);
       
       if (toolCall.toolName === 'getResume') {
-        addToolResult({ toolCallId: toolCall.toolCallId, result: resume });
-        return {
+        const formattedResume = {
           first_name: resume.first_name,
           last_name: resume.last_name,
           email: resume.email,
@@ -76,6 +75,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
           certifications: resume.certifications,
           target_role: resume.target_role
         };
+        
+        addToolResult({ toolCallId: toolCall.toolCallId, result: formattedResume });
+        return formattedResume;
       }
 
       if (toolCall.toolName === 'suggest_work_experience_improvement') {
@@ -196,81 +198,116 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
               {/* Messages */}
               {messages.map((m: Message, index) => (
-                <div key={index} className="mt-2 last:mb-8">
-                  <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={cn(
-                      "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                      m.role === 'user' ? [
-                        "bg-gradient-to-br from-purple-500 to-indigo-500",
-                        "text-white",
-                        "shadow-md shadow-purple-500/10",
-                        "ml-auto"
-                      ] : [
-                        "bg-white/60",
-                        "border border-purple-200/60",
-                        "shadow-sm",
-                        "backdrop-blur-sm"
-                      ]
-                    )}>
+                <React.Fragment key={index}>
+                  {/* Regular Message Content */}
+                  {m.content && (
+                    <div className="mt-2">
+                      <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                        <div className={cn(
+                          "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                          m.role === 'user' ? [
+                            "bg-gradient-to-br from-purple-500 to-indigo-500",
+                            "text-white",
+                            "shadow-md shadow-purple-500/10",
+                            "ml-auto"
+                          ] : [
+                            "bg-white/60",
+                            "border border-purple-200/60",
+                            "shadow-sm",
+                            "backdrop-blur-sm"
+                          ]
+                        )}>
+                          <MemoizedMarkdown id={m.id} content={m.content} />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
-                      {/* Markdown Messages */}
-                      <MemoizedMarkdown id={m.id} content={m.content} />
-                    
-                      {/* Messages for each tool type */}
-                      {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
-                        const toolCallId = toolInvocation.toolCallId;
+                  {/* Tool Invocations as Separate Bubbles */}
+                  {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
+                    const { toolName, toolCallId, state, args } = toolInvocation;
 
-                          
-
-                        // ADD READ RESUME MESSAGE
-                        if (toolInvocation.toolName === 'getResume') {
-                          return (
-                            <div key={toolCallId}>
-                              {toolInvocation.args.message}
-                              {'result' in toolInvocation ? (
-                                <p>Read Resume ✅ </p>
-                                
+                    switch (state) {
+                      case 'partial-call':
+                        return (
+                          <div key={toolCallId} className="mt-2 w-[90%]">
+                            <div className="flex justify-start  w-[90%]">
+                              {toolName === 'suggest_work_experience_improvement' ? (
+                                <SuggestionSkeleton />
                               ) : (
-                                <p>Reading Resume... 📄 </p>
+                                <div className={cn(
+                                  "rounded-2xl px-4 py-2 w-full text-sm",
+                                  "bg-white/60 border border-purple-200/60",
+                                  "shadow-sm backdrop-blur-sm"
+                                )}>
+                                  <div className="flex items-center gap-2">
+                                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                    <span>Processing...</span>
+                                  </div>
+                                </div>
                               )}
-                              
+                            </div>
+                          </div>
+                        );
+
+                      case 'call':
+                        return (
+                          <div key={toolCallId} className="mt-2">
+                            <div className="flex justify-start">
+                              <div className={cn(
+                                "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                                "bg-white/60 border border-purple-200/60",
+                                "shadow-sm backdrop-blur-sm"
+                              )}>
+                                <div className="flex items-center gap-2">
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                  <span>Analyzing resume...</span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        );
+
+                      case 'result':
+                        if (toolName === 'getResume') {
+                          return (
+                            <div key={toolCallId} className="mt-2">
+                              <div className="flex justify-start">
+                                <div className={cn(
+                                  "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                                  "bg-white/60 border border-purple-200/60",
+                                  "shadow-sm backdrop-blur-sm"
+                                )}>
+                                  {args.message}
+                                  <p>Read Resume ✅</p>
+                                </div>
+                              </div>
                             </div>
                           );
                         }
 
-
-                        
-                        if (!('result' in toolInvocation)) {
-                          return null;
-                        }
-                        
-                        switch (toolInvocation.toolName) {
-                          case 'getResume':
-                            return null;
-                          case 'suggest_work_experience_improvement':
-                            const { improved_experience, index } = toolInvocation.args;
-                            return (
-                              <div key={toolCallId} className="mt-4">
+                        if (toolName === 'suggest_work_experience_improvement') {
+                          return (
+                            <div key={toolCallId} className="mt-2">
+                              <div className="flex justify-start">
                                 <Suggestion
                                   type="work_experience"
-                                  content={improved_experience}
-                                  currentContent={resume.work_experience[index]}
+                                  content={args.improved_experience}
+                                  currentContent={resume.work_experience[args.index]}
                                   onAccept={() => onResumeChange('work_experience', 
                                     resume.work_experience.map((exp, i) => 
-                                      i === index ? improved_experience : exp
+                                      i === args.index ? args.improved_experience : exp
                                     )
                                   )}
                                   onReject={() => {}}
                                 />
                               </div>
-                            );
-                          default:
-                            return null;
+                            </div>
+                          );
                         }
-                      })}
-                    </div>
-                  </div>
-                </div>
+                    }
+                  })}
+                </React.Fragment>
               ))}
 
             </ScrollArea>

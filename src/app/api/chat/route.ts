@@ -110,11 +110,13 @@ Use your tools strategically to deliver maximum value while respecting these gui
         }),
       },
     },
+    experimental_toolCallStreaming: true,
+
     onStepFinish({ text, toolCalls, toolResults, finishReason, usage }) {
       // console.log('text:', '\n', text);
-      // console.log('toolCalls:', '\n', toolCalls);
-      // console.log('toolResults:', '\n', toolResults);
-      // console.log('finishReason:', '\n', finishReason);
+      console.log('toolCalls:', '\n', toolCalls);
+      console.log('toolResults:', '\n', toolResults);
+      console.log('finishReason:', '\n', finishReason);
       // console.log('usage:', '\n', usage);
     },
     

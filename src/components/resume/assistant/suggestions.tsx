@@ -24,6 +24,8 @@ function compareDescriptions(current: string, suggested: string): {
   text: string;
   isNew: boolean;
   isBold: boolean;
+  isStart: boolean;
+  isEnd: boolean;
 }[] {
   const splitText = (text: string): string[] => {
     return text.match(/\*\*[^*]+\*\*|\S+/g) || [];
@@ -32,11 +34,21 @@ function compareDescriptions(current: string, suggested: string): {
   const currentWords = splitText(current);
   const suggestedWords = splitText(suggested);
   
-  return suggestedWords.map(word => ({
-    text: word,
-    isNew: !currentWords.includes(word),
-    isBold: word.startsWith('**') && word.endsWith('**')
-  }));
+  const result = suggestedWords.map((word, index) => {
+    const isNew = !currentWords.includes(word);
+    const prevIsNew = index > 0 ? !currentWords.includes(suggestedWords[index - 1]) : false;
+    const nextIsNew = index < suggestedWords.length - 1 ? !currentWords.includes(suggestedWords[index + 1]) : false;
+    
+    return {
+      text: word,
+      isNew,
+      isBold: word.startsWith('**') && word.endsWith('**'),
+      isStart: isNew && !prevIsNew,
+      isEnd: isNew && !nextIsNew
+    };
+  });
+
+  return result;
 }
   
 
@@ -134,7 +146,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                 const currentPoint = currentWork?.description?.[index];
                 const comparedWords = currentPoint 
                   ? compareDescriptions(currentPoint, point)
-                  : [{ text: point, isNew: true, isBold: false }];
+                  : [{ text: point, isNew: true, isBold: false, isStart: true, isEnd: true }];
 
                 return (
                   <div key={index} className="flex items-start gap-1.5">
@@ -144,7 +156,9 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                         <span
                           key={wordIndex}
                           className={cn(
-                            word.isNew && DIFF_HIGHLIGHT_CLASSES
+                            word.isNew && "bg-green-300",
+                            word.isStart && "rounded-l-sm pl-1",
+                            word.isEnd && "rounded-r-sm pr-1"
                           )}
                         >
                           {word.isBold ? (
@@ -160,7 +174,8 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                 );
               })}
             </div>
-            {work.technologies && (
+              {/* COMMENTING FOR NOW, DO NOT REMOVE */}
+            {/* {work.technologies && (
               <div className="flex flex-wrap gap-1 mt-1">
                 {work.technologies.map((tech, index) => (
                   <span
@@ -176,7 +191,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                   </span>
                 ))}
               </div>
-            )}
+            )} */}
           </div>
         );
 
