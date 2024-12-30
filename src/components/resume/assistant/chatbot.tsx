@@ -22,31 +22,7 @@ interface ChatBotProps {
   onResumeChange: (field: keyof Resume, value: any) => void;
 }
 
-// Mock work experience data for demonstration
-const mockCurrentWorkExperience = {
-  company: "TechCorp Solutions",
-  position: "Software Engineer",
-  location: "San Francisco, CA",
-  date: "2020 - Present",
-  description: [
-    "Developed microservices architecture using Node.js and TypeScript",
-    "Mentored team of 5 junior developers and implemented agile best practices",
-  ],
-  technologies: ["React", "Node.js", "TypeScript"]
-};
 
-const mockWorkExperience = {
-  company: "TechCorp Solutions",
-  position: "Senior Software Engineer",
-  location: "San Francisco, CA",
-  date: "2020 - Present",
-  description: [
-    "Led development of a microservices architecture that improved system scalability by 300%",
-    "Mentored team of 5 junior developers and implemented agile best practices",
-    "Reduced API response time by 60% through implementation of Redis caching"
-  ],
-  technologies: ["React", "Node.js", "TypeScript", "Redis", "AWS"]
-};
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -93,6 +69,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       }
 
       if (toolCall.toolName === 'suggest_work_experience_improvement') {
+        return toolCall.args;
+      }
+
+      if (toolCall.toolName === 'suggest_project_improvement') {
         return toolCall.args;
       }
     },
@@ -242,9 +222,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     switch (state) {
                       case 'partial-call':
                         return (
-                          <div key={toolCallId} className="mt-2 w-[90%]">
-                            <div className="flex justify-start  w-[90%]">
-                              {toolName === 'suggest_work_experience_improvement' ? (
+                          <div key={toolCallId} className="mt-2 max-w-[90%]">
+                            <div className="flex justify-start  max-w-[90%]">
+                              {toolName === 'suggest_work_experience_improvement' || toolName === 'suggest_project_improvement' ? (
                                 <SuggestionSkeleton />
                               ) : (
                                 <div className={cn(
@@ -309,6 +289,26 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                   onAccept={() => onResumeChange('work_experience', 
                                     resume.work_experience.map((exp, i) => 
                                       i === args.index ? args.improved_experience : exp
+                                    )
+                                  )}
+                                  onReject={() => {}}
+                                />
+                              </div>
+                            </div>
+                          );
+                        }
+
+                        if (toolName === 'suggest_project_improvement') {
+                          return (
+                            <div key={toolCallId} className="mt-2">
+                              <div className="flex justify-start">
+                                <Suggestion
+                                  type="project"
+                                  content={args.improved_project}
+                                  currentContent={resume.projects[args.index]}
+                                  onAccept={() => onResumeChange('projects', 
+                                    resume.projects.map((proj, i) => 
+                                      i === args.index ? args.improved_project : proj
                                     )
                                   )}
                                   onReject={() => {}}

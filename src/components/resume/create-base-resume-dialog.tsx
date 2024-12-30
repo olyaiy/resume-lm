@@ -348,39 +348,6 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                 <div>
                   <input
                     type="radio"
-                    id="scratch"
-                    name="importOption"
-                    value="scratch"
-                    checked={importOption === 'scratch'}
-                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch' | 'import-resume')}
-                    className="sr-only peer"
-                  />
-                  <Label
-                    htmlFor="scratch"
-                    className={cn(
-                      "flex items-center h-[88px] rounded-lg p-3",
-                      "bg-white border shadow-sm",
-                      "hover:border-purple-200 hover:bg-purple-50/50",
-                      "transition-all duration-300 cursor-pointer",
-                      "peer-checked:border-purple-500 peer-checked:bg-purple-50",
-                      "peer-checked:shadow-md peer-checked:shadow-purple-100"
-                    )}
-                  >
-                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center shrink-0">
-                      <Wand2 className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div className="ml-3 flex flex-col">
-                      <div className="font-medium text-sm text-purple-950">Start Fresh</div>
-                      <span className="text-xs text-gray-600 line-clamp-2">
-                        Create a blank resume
-                      </span>
-                    </div>
-                  </Label>
-                </div>
-
-                <div>
-                  <input
-                    type="radio"
                     id="import-resume"
                     name="importOption"
                     value="import-resume"
@@ -406,6 +373,39 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       <div className="font-medium text-sm text-purple-950">Import from Resume</div>
                       <span className="text-xs text-gray-600 line-clamp-2">
                         Paste your existing resume
+                      </span>
+                    </div>
+                  </Label>
+                </div>
+
+                <div>
+                  <input
+                    type="radio"
+                    id="scratch"
+                    name="importOption"
+                    value="scratch"
+                    checked={importOption === 'scratch'}
+                    onChange={(e) => setImportOption(e.target.value as 'import-profile' | 'scratch' | 'import-resume')}
+                    className="sr-only peer"
+                  />
+                  <Label
+                    htmlFor="scratch"
+                    className={cn(
+                      "flex items-center h-[88px] rounded-lg p-3",
+                      "bg-white border shadow-sm",
+                      "hover:border-purple-200 hover:bg-purple-50/50",
+                      "transition-all duration-300 cursor-pointer",
+                      "peer-checked:border-purple-500 peer-checked:bg-purple-50",
+                      "peer-checked:shadow-md peer-checked:shadow-purple-100"
+                    )}
+                  >
+                    <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-purple-50 to-indigo-50 border border-purple-100 flex items-center justify-center shrink-0">
+                      <Wand2 className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div className="ml-3 flex flex-col">
+                      <div className="font-medium text-sm text-purple-950">Start Fresh</div>
+                      <span className="text-xs text-gray-600 line-clamp-2">
+                        Create a blank resume
                       </span>
                     </div>
                   </Label>

@@ -56,11 +56,14 @@ When asked to improve entries, evaluate:
 READING RESUME PROTOCOL:
 1. Read the resume using the getResume tool
 2. Acknowledge the resume was read, for example:
-"I have read your resume, and here are the highlights..."
-3. If the user simply asks you to read the resume, use the tool then 
+"I have read your resume, and ..."
+3. If the user JUST simply asks you to read the resume, use the tool then 
 briefly note a few strengths and weaknesses.
-4. use the getResume tool freely, as much as needed. 
-5. If the user asks you to read a specific section, use the tool to read that section. 
+4. If the user asks you to read a specific section, use the tool to read that section. 
+5. If the user asks you to read a seciton, then use a tool, just mentioned that you read 
+it and now you will perform the action. 
+6. use the getResume tool freely, as much as needed. 
+7. If the user asks you to read a specific section, use the tool to read that section. 
 If the user doesn't specify a section, read the entire resume.
 
 
@@ -119,6 +122,20 @@ Use your tools strategically to deliver maximum value while respecting these gui
             description: z.array(z.string()),
             technologies: z.array(z.string()).optional(),
           }).describe('Improved version of the work experience entry'),
+        }),
+      },
+      suggest_project_improvement: {
+        description: 'Suggest improvements for a specific project entry',
+        parameters: z.object({
+          index: z.number().describe('Index of the project entry to improve'),
+          improved_project: z.object({
+            name: z.string(),
+            description: z.array(z.string()),
+            date: z.string().optional(),
+            technologies: z.array(z.string()).optional(),
+            url: z.string().optional(),
+            github_url: z.string().optional(),
+          }).describe('Improved version of the project entry'),
         }),
       },
     },
