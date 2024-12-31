@@ -40,10 +40,10 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     }
   }
 
-  const { error } = await supabase.auth.signUp(data)
+  const { error: signupError } = await supabase.auth.signUp(data)
 
-  if (error) {
-    return { success: false, error: error.message }
+  if (signupError) {
+    return { success: false, error: signupError.message }
   }
 
   return { success: true }

@@ -27,8 +27,11 @@ export default async function Home() {
   let data;
   try {
     data = await getDashboardData();
+    if (!data.profile) {
+      redirect("/auth/login");
+    }
   } catch {
-    // Redirect to login if not authenticated or error occurs
+    // Redirect to login if error occurs
     redirect("/auth/login");
   }
 
