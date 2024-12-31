@@ -5,7 +5,7 @@ import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Bot} from "lucide-react";
-import { Resume } from '@/lib/types';
+import { Certification, Education, Project, Resume, Skill, WorkExperience } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
@@ -19,7 +19,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 
 interface ChatBotProps {
   resume: Resume;
-  onResumeChange: (field: keyof Resume, value: any) => void;
+  onResumeChange: (field: keyof Resume, value: Resume[typeof field]) => void;
 }
 
 
@@ -94,9 +94,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       console.log('messages:', '\n', messages);
       // setIsStreaming(false);
     },
-    onResponse(response) {
-      // setIsStreaming(true);
-    },
+    // onResponse(response) {
+    //   setIsStreaming(true);
+    // },
   });
 
   // Scroll to bottom helper function
@@ -315,7 +315,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                             content={args[config.content]}
                             currentContent={resume[config.field][args.index]}
                             onAccept={() => onResumeChange(config.field, 
-                              resume[config.field].map((item: any, i: number) => 
+                              resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
                                 i === args.index ? args[config.content] : item
                               )
                             )}

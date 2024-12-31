@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, X, Sparkles, ArrowRight } from "lucide-react";
+import { Check, X, Sparkles } from "lucide-react";
 import { WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { useState } from 'react';
 
@@ -57,14 +57,14 @@ function isNewItem<T>(current: T[] | undefined, suggested: T[] | undefined, item
   return !current.includes(item);
 }
 
-const renderBoldText = (text: string) => {
-  return text.split(/(\*\*.*?\*\*)/).map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <strong key={index}>{part.slice(2, -2)}</strong>;
-    }
-    return part;
-  });
-};
+// const renderBoldText = (text: string) => {
+//   return text.split(/(\*\*.*?\*\*)/).map((part, index) => {
+//     if (part.startsWith('**') && part.endsWith('**')) {
+//       return <strong key={index}>{part.slice(2, -2)}</strong>;
+//     }
+//     return part;
+//   });
+// };
 
 export function Suggestion({ type, content, currentContent, onAccept, onReject }: SuggestionProps) {
   const [status, setStatus] = useState<'pending' | 'accepted' | 'rejected'>('pending');

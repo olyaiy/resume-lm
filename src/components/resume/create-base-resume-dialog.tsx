@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -42,16 +42,16 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
   const [resumeText, setResumeText] = useState('');
   const router = useRouter();
 
-  const getItemId = (type: keyof typeof selectedItems, item: any): string => {
+  const getItemId = (type: keyof typeof selectedItems, item: WorkExperience | Education | Skill | Project): string => {
     switch (type) {
       case 'work_experience':
-        return `${item.company}-${item.position}-${item.date}`;
+        return `${(item as WorkExperience).company}-${(item as WorkExperience).position}-${(item as WorkExperience).date}`;
       case 'projects':
-        return item.name;
+        return (item as Project).name;
       case 'education':
-        return `${item.school}-${item.degree}-${item.field}`;
+        return `${(item as Education).school}-${(item as Education).degree}-${(item as Education).field}`;
       case 'skills':
-        return item.category;
+        return (item as Skill).category;
       default:
         return '';
     }

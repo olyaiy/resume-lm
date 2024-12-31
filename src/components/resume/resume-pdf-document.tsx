@@ -21,7 +21,7 @@ function renderTextWithBold(text: string) {
   });
 }
 
-export const ResumePDFDocument = memo(function ResumePDFDocument({ resume, variant = 'base' }: ResumePDFDocumentProps) {
+export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: ResumePDFDocumentProps) {
   // PDF Styles Configuration
   const styles = StyleSheet.create({
     // Base page configuration

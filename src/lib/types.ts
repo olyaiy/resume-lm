@@ -13,7 +13,7 @@ export interface Education {
   field: string;
   location?: string;
   date: string;
-  gpa?: string;
+  gpa?: number | string;
   achievements?: string[];
 }
 

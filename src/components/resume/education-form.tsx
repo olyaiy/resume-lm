@@ -28,7 +28,7 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
     }, ...education]);
   };
 
-  const updateEducation = (index: number, field: keyof Education, value: any) => {
+  const updateEducation = (index: number, field: keyof Education, value: Education[keyof Education]) => {
     const updated = [...education];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -158,7 +158,7 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
 
               {/* Current Status Note */}
               <div className="flex items-center space-x-2 -mt-2">
-                <span className="text-[10px] text-gray-500">Use 'Present' in the date field for current education</span>
+                <span className="text-[10px] text-gray-500">Use &apos;Present&apos; in the date field for current education</span>
               </div>
 
               {/* GPA */}

@@ -253,7 +253,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
                     ))}
                     {project.description.length === 0 && (
                       <div className="text-xs text-gray-500 italic">
-                        Add points to describe your project's features and achievements
+                        Add points to describe your project&apos;s features and achievements
                       </div>
                     )}
                   </div>

@@ -18,7 +18,7 @@ interface ResumeEditorHeaderProps {
   hasUnsavedChanges: boolean;
   onSave: () => Promise<void>;
   onDelete: () => Promise<void>;
-  onResumeChange: (field: keyof Resume, value: any) => void;
+  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
 }
 
 export function ResumeEditorHeader({
@@ -166,6 +166,7 @@ export function ResumeEditorHeader({
                     description: "Your resume PDF is being downloaded.",
                   });
                 } catch (error) {
+                  console.error(error);
                   toast({
                     title: "Download failed",
                     description: "Unable to download your resume. Please try again.",
@@ -235,7 +236,7 @@ export function ResumeEditorHeader({
                 <AlertDialogHeader>
                   <AlertDialogTitle>Delete Resume</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Are you sure you want to delete "{resume.name}"? This action cannot be undone.
+                    Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

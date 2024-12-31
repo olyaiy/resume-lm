@@ -26,7 +26,7 @@ export function ProfileSkillsForm({ skills, onChange }: ProfileSkillsFormProps) 
     }]);
   };
 
-  const updateSkill = (index: number, field: keyof Skill, value: any) => {
+  const updateSkill = (index: number, field: keyof Skill, value: Skill[typeof field]) => {
     const updated = [...skills];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -44,7 +44,7 @@ export function ProfileSkillsForm({ skills, onChange }: ProfileSkillsFormProps) 
     setSkillInputs(Object.fromEntries(
       skills.map((s, i) => [i, s.items?.join(', ') || ''])
     ));
-  }, [skills.length]);
+  }, [skills]);
 
   return (
     <div className="space-y-3">

@@ -75,7 +75,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
     }, ...projects]);
   };
 
-  const updateProject = (index: number, field: keyof Project, value: any) => {
+  const updateProject = (index: number, field: keyof Project, value: Project[keyof Project]) => {
     const updated = [...projects];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -400,7 +400,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
 
                   {project.description.length === 0 && !aiSuggestions[index]?.length && (
                     <div className="text-[11px] text-gray-500 italic px-3 py-2 bg-gray-50/50 rounded-lg">
-                      Add points to describe your project's features and achievements
+                      Add points to describe your project&apos;s features and achievements
                     </div>
                   )}
                 </div>

@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Resume } from "@/lib/types";
+import { Resume, DocumentSettings } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 
 interface DocumentSettingsFormProps {
   resume: Resume;
-  onChange: (field: keyof Resume, value: any) => void;
+  onChange: (field: 'document_settings', value: DocumentSettings) => void;
 }
 
 export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormProps) {
@@ -69,6 +69,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           step={1}
           onValueChange={([value]) => 
             onChange('document_settings', {
+              ...defaultSettings,
               ...resume.document_settings,
               [`${section}_margin_top`]: value
             })
@@ -88,6 +89,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           step={1}
           onValueChange={([value]) => 
             onChange('document_settings', {
+              ...defaultSettings,
               ...resume.document_settings,
               [`${section}_margin_bottom`]: value
             })
@@ -107,6 +109,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           step={2}
           onValueChange={([value]) => 
             onChange('document_settings', {
+              ...defaultSettings,
               ...resume.document_settings,
               [`${section}_margin_horizontal`]: value
             })
@@ -126,6 +129,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           step={0.5}
           onValueChange={([value]) => 
             onChange('document_settings', {
+              ...defaultSettings,
               ...resume.document_settings,
               [`${section}_item_spacing`]: value
             })
@@ -172,6 +176,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={0.5}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       document_font_size: value
                     })
@@ -191,6 +196,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={0.1}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       document_line_height: value
                     })
@@ -210,6 +216,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={2}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       document_margin_vertical: value
                     })
@@ -229,6 +236,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={2}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       document_margin_horizontal: value
                     })
@@ -258,6 +266,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={1}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       header_name_size: value
                     })
@@ -277,6 +286,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
                   step={1}
                   onValueChange={([value]) => 
                     onChange('document_settings', {
+                      ...defaultSettings,
                       ...resume.document_settings,
                       header_name_bottom_spacing: value
                     })

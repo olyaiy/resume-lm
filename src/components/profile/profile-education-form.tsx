@@ -32,7 +32,7 @@ export function ProfileEducationForm({ education, onChange }: ProfileEducationFo
     }]);
   };
 
-  const updateEducation = (index: number, field: keyof Education, value: any) => {
+  const updateEducation = (index: number, field: keyof Education, value: Education[typeof field]) => {
     const updated = [...education];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);

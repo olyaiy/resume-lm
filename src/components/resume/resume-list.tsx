@@ -1,8 +1,6 @@
 import { Resume } from "@/lib/types";
-import { Card } from "@/components/ui/card";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { ArrowUpRight } from "lucide-react";
 import { format } from "date-fns";
 
 interface ResumeListProps {
@@ -22,7 +20,6 @@ interface ResumeListProps {
 
 export function ResumeList({
   resumes,
-  title,
   type,
   accentColor,
   emptyMessage,
