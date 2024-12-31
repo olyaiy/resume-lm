@@ -4,6 +4,7 @@ import { SignupForm } from "@/components/auth/signup-form";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Sparkles, Target, Zap, CheckCircle2, ChevronRight } from "lucide-react";
+import { MockResume } from "@/components/landing/mock-resume";
 
 export default async function LoginPage() {
   return (
@@ -154,6 +155,21 @@ export default async function LoginPage() {
                 </Tabs>
               </CardContent>
             </Card>
+          </div>
+        </div>
+
+        {/* Mock Resume Section */}
+        <div className="mb-20">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+              Create Beautiful, ATS-Optimized Resumes
+            </h2>
+            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+              Our AI-powered platform helps you create professional resumes that stand out to both recruiters and ATS systems.
+            </p>
+          </div>
+          <div className="flex justify-center transform hover:scale-[1.02] transition-transform duration-500">
+            <MockResume />
           </div>
         </div>
 
