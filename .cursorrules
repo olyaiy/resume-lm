@@ -44,6 +44,7 @@ Key Conventions
 Follow Next.js docs for Data Fetching, Rendering, and Routing.
 
 The Following is a next.js 15 project, react 19, typescript, shadcn ui, tailwind css project. It is an ai resume builder. 
+It is called "ResumeLM".
 
 
 Database Structure
