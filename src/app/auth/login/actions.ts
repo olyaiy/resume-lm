@@ -50,7 +50,18 @@ export async function signup(formData: FormData): Promise<AuthResult> {
 } 
 
 export async function logout() {
-    const supabase = await createClient();
-    await supabase.auth.signOut();
-    redirect('/auth/login');
-  } 
+  const supabase = await createClient();
+  
+  try {
+    const { error } = await supabase.auth.signOut();
+    if (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+  } catch (error) {
+    console.error('Logout error:', error);
+  }
+
+  // Always redirect to login, even if there was an error
+  redirect('/auth/login');
+} 
