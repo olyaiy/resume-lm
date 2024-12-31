@@ -7,11 +7,11 @@
 import OpenAI from "openai";
 import { openAiProfileSchema, openAiResumeSchema, openAiWorkExperienceBulletPointsSchema, openAiProjectSchema, openAiWorkExperienceSchema } from "@/lib/schemas";
 import { Job, Profile, Resume, WorkExperience } from "@/lib/types";
-import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_IMPORT_SYSTEM_MESSAGE, AI_ASSISTANT_SYSTEM_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE } from "@/lib/prompts";
+import { RESUME_FORMATTER_SYSTEM_MESSAGE, RESUME_IMPORTER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE, PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { openai as openaiVercel } from '@ai-sdk/openai';
 import { generateObject } from 'ai';
 import { z } from 'zod';
-import { resumeSchema, simplifiedJobSchema, simplifiedResumeSchema, textImportSchema } from "@/lib/zod-schemas";
+import { simplifiedJobSchema, simplifiedResumeSchema, textImportSchema } from "@/lib/zod-schemas";
 import { anthropic } from "@ai-sdk/anthropic";
 
 
@@ -32,7 +32,7 @@ export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCo
   
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Optimized model for resume formatting
+      model: "gpt-4o-mini",
       messages,
       response_format: {
         "type": "json_schema",
@@ -51,7 +51,7 @@ export async function formatProfileWithAI(userMessages: Array<OpenAI.Chat.ChatCo
 
     return response.choices[0].message.content;
   } catch (error) {
-    throw new Error('Failed to format profile information');
+    throw new Error('Failed to format profile information: ' + (error instanceof Error ? error.message : 'Unknown error'));
   }
 }
 
