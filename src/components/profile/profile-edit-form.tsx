@@ -1,12 +1,12 @@
 'use client';
 
-import { Profile, WorkExperience, Education, Skill, Project, Certification } from "@/lib/types";
+import { Profile, WorkExperience, Education, Project, Certification } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
-import { updateProfile, resetProfile, importResume } from "@/utils/actions";
+import { updateProfile, importResume } from "@/utils/actions";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -22,7 +22,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Trash2, Upload, ArrowLeft, Save } from "lucide-react";
-import { formatProfileWithAI, processTextImport } from "@/utils/ai";
+import { processTextImport } from "@/utils/ai";
 import {
   Dialog,
   DialogContent,
@@ -57,7 +57,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     setProfile(initialProfile);
   }, [initialProfile]);
 
-  const updateField = (field: keyof Profile, value: any) => {
+  const updateField = (field: keyof Profile, value: unknown) => {
     setProfile(prev => ({ ...prev, [field]: value }));
   };
 
@@ -103,12 +103,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         created_at: profile.created_at,
         updated_at: profile.updated_at
       });
-      toast.info("Profile reset - Don't forget to save your changes to make this permanent", {
+      toast.info("Profile reset - Don&apos;t forget to save your changes to make this permanent", {
         position: "bottom-right",
         className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
       });
-      // Remove server revalidation since we're only updating local state
-    } catch (error) {
+    } catch (error: unknown) {
       toast.error("Failed to reset profile. Please try again.", {
         position: "bottom-right",
       });
@@ -172,7 +171,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
               }))
             : [],
           skills: Array.isArray(parsedProfile.skills)
-            ? parsedProfile.skills.map((skill: any) => ({
+            ? parsedProfile.skills.map((skill: { category: string; skills?: string[]; items?: string[] }) => ({
                 category: skill.category || '',
                 items: Array.isArray(skill.skills) 
                   ? skill.skills 
@@ -211,14 +210,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           ...prev,
           ...cleanedProfile
         }));
-        toast.success("Content imported successfully - Don't forget to save your changes", {
+        toast.success("Content imported successfully - Don&apos;t forget to save your changes", {
           position: "bottom-right",
           className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
         });
         setIsDialogOpen(false);
         setResumeContent("");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       if (error instanceof Error) {
         toast.error("Failed to process content: " + error.message, {
           position: "bottom-right",
@@ -232,65 +231,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       setIsProcessingResume(false);
     }
   };
-
-  const resumeUploadButton = (
-    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <DialogTrigger asChild>
-        <Button
-          variant="outline"
-          className="w-full bg-violet-500/10 hover:bg-violet-500/20 border-violet-500/20 hover:border-violet-500/30 text-violet-600 transition-all duration-300"
-        >
-          <Upload className="h-4 w-4 mr-2" />
-          Upload from Resume
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-md border-white/40">
-        <DialogHeader>
-          <DialogTitle>Upload Resume Content</DialogTitle>
-          <DialogDescription asChild>
-            <div className="space-y-2">
-              <span className="block">Paste your resume content below. Our AI will analyze it and add new information to your existing profile.</span>
-              <span className="block text-sm text-muted-foreground">Note: This will append new entries to your profile without overriding existing information. To start fresh, use the "Reset Profile" option before uploading.</span>
-            </div>
-          </DialogDescription>
-        </DialogHeader>
-        <div className="grid gap-4 py-4">
-          <Textarea
-            value={resumeContent}
-            onChange={(e) => setResumeContent(e.target.value)}
-            placeholder="Paste your resume content here..."
-            className="min-h-[300px] bg-white/50 border-white/40"
-          />
-        </div>
-        <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={() => setIsDialogOpen(false)}
-            className="bg-white/50 hover:bg-white/60"
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={handleResumeUpload}
-            disabled={isProcessingResume || !resumeContent.trim()}
-            className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90"
-          >
-            {isProcessingResume ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Processing...
-              </>
-            ) : (
-              <>
-                <Upload className="mr-2 h-4 w-4" />
-                Upload to Profile with AI
-              </>
-            )}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
 
   return (
     <div className="relative mx-auto">

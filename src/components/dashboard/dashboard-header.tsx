@@ -35,7 +35,7 @@ export function DashboardHeader({ firstName }: DashboardHeaderProps) {
                 <div className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-purple-500 to-indigo-500 group-hover:w-full transition-all duration-500" />
               </div>
               <p className="text-sm sm:text-base text-purple-600/60 font-medium">
-                Here's what's happening with your resumes
+                Here&apos;s what&apos;s happening with your resumes
               </p>
             </div>
             <div className="flex items-center gap-4 self-end sm:self-auto">

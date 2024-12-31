@@ -104,11 +104,6 @@ export function JobListingsCard() {
     return workLocation.replace('_', ' ');
   };
 
-  const formatEmploymentType = (employmentType: Job['employment_type']) => {
-    if (!employmentType) return 'Not specified';
-    return employmentType.replace('_', ' ');
-  };
-
   const handleDeleteJob = async (jobId: string) => {
     try {
       await deleteJob(jobId);

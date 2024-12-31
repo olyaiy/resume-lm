@@ -161,12 +161,9 @@ export function ProfileEducationForm({ education, onChange }: ProfileEducationFo
                   </div>
                   <div className="relative group md:w-1/3">
                     <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      max="4.0"
+                      type="text"
                       value={edu.gpa || ''}
-                      onChange={(e) => updateEducation(index, 'gpa', e.target.value ? parseFloat(e.target.value) : undefined)}
+                      onChange={(e) => updateEducation(index, 'gpa', e.target.value || undefined)}
                       className="bg-white/50 border-gray-200 rounded-md h-8
                         focus:border-indigo-500/40 focus:ring-1 focus:ring-indigo-500/20
                         hover:border-indigo-500/30 hover:bg-white/60 transition-colors

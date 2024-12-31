@@ -12,7 +12,7 @@ export default async function EditProfilePage() {
   let data;
   try {
     data = await getDashboardData();
-  } catch (error) {
+  } catch (_error) {
     redirect("/auth/login");
   }
 

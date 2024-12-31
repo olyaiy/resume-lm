@@ -1,12 +1,10 @@
 'use client';
 
 import { Project } from "@/lib/types";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -29,7 +27,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
     setTechInputs(Object.fromEntries(
       projects.map((p, i) => [i, p.technologies?.join(', ') || ''])
     ));
-  }, [projects.length]);
+  }, [projects]);
 
   const addProject = () => {
     onChange([...projects, {
@@ -42,7 +40,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
     }]);
   };
 
-  const updateProject = (index: number, field: keyof Project, value: any) => {
+  const updateProject = (index: number, field: keyof Project, value: string | string[]) => {
     const updated = [...projects];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -196,7 +194,7 @@ export function ProfileProjectsForm({ projects, onChange }: ProfileProjectsFormP
                     className="w-full bg-white/50 border-gray-200 rounded-md h-8
                       focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20
                       hover:border-violet-500/30 hover:bg-white/60 transition-colors text-sm"
-                    placeholder="e.g., 'Jan 2023 - Present' or 'Summer 2023'"
+                    placeholder="e.g., &apos;Jan 2023 - Present&apos; or &apos;Summer 2023&apos;"
                   />
                   <div className="absolute -top-2.5 left-2 px-1 bg-white/80 text-[9px] font-medium text-violet-700">
                     DATE

@@ -2,7 +2,6 @@
 
 import { Certification } from "@/lib/types";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
 import {
@@ -30,7 +29,7 @@ export function ProfileCertificationsForm({ certifications, onChange }: ProfileC
     }]);
   };
 
-  const updateCertification = (index: number, field: keyof Certification, value: any) => {
+  const updateCertification = (index: number, field: keyof Certification, value: string) => {
     const updated = [...certifications];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);

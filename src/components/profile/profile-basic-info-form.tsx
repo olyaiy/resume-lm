@@ -3,9 +3,7 @@
 import { Profile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Mail, Phone, MapPin, Globe, Linkedin, Github, FileText, User } from "lucide-react";
+import { Mail, Phone, MapPin, Globe, Linkedin, Github, User } from "lucide-react";
 
 interface ProfileBasicInfoFormProps {
   profile: Profile;
