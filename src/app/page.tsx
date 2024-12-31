@@ -27,7 +27,7 @@ export default async function Home() {
   let data;
   try {
     data = await getDashboardData();
-  } catch (error) {
+  } catch {
     // Redirect to login if not authenticated or error occurs
     redirect("/auth/login");
   }
@@ -43,7 +43,7 @@ export default async function Home() {
             <User className="w-12 h-12 text-muted-foreground mx-auto" />
             <h2 className="text-2xl font-semibold text-gray-800">Profile Not Found</h2>
             <p className="text-muted-foreground">
-              We couldn't find your profile information. Please contact support for assistance.
+              We couldn&apos;t find your profile information. Please contact support for assistance.
             </p>
             <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
               Contact Support

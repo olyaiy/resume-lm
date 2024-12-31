@@ -2,15 +2,15 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus, FileText, CheckCircle2 } from "lucide-react";
+import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus, CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createBaseResume, createTailoredResume } from "@/utils/actions";
+import { createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { MiniResumePreview } from "./shared/mini-resume-preview";
 import { tailorResumeToJob } from "@/utils/ai";
@@ -113,10 +113,35 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const router = useRouter();
 
   const handleCreate = async () => {
+    // Validate required fields
+    if (!selectedBaseResume) {
+      setIsBaseResumeInvalid(true);
+      toast({
+        title: "Error",
+        description: "Please select a base resume",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!jobDescription.trim()) {
+      setIsJobDescriptionInvalid(true);
+      toast({
+        title: "Error",
+        description: "Please enter a job description",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setIsCreating(true);
       setCurrentStep('analyzing');
       
+      // Reset validation states
+      setIsBaseResumeInvalid(false);
+      setIsJobDescriptionInvalid(false);
+
       // 1. Format the job listing
       const formattedJobListing = await formatJobListing(jobDescription);
       console.log('1. Formatted Job Listing:', formattedJobListing);
@@ -155,10 +180,11 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
       router.push(`/resumes/${resume.id}`);
       setOpen(false);
-    } catch (error) {
+    } catch (error: unknown) {
+      console.error('Failed to create resume:', error);
       toast({
         title: "Error",
-        description: "Failed to create resume",
+        description: error instanceof Error ? error.message : "Failed to create resume",
         variant: "destructive",
       });
     } finally {
@@ -356,7 +382,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                   name="tailorOption"
                   value="ai"
                   checked={importOption === 'ai'}
-                  onChange={(e) => setImportOption('ai')}
+                  onChange={() => setImportOption('ai')}
                   className="sr-only peer"
                 />
                 <Label
@@ -389,7 +415,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                   name="tailorOption"
                   value="import-profile"
                   checked={importOption === 'import-profile'}
-                  onChange={(e) => setImportOption('import-profile')}
+                  onChange={() => setImportOption('import-profile')}
                   className="sr-only peer"
                 />
                 <div

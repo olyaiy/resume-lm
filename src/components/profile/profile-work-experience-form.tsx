@@ -1,11 +1,10 @@
 'use client';
 
 import { WorkExperience } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, ChevronDown } from "lucide-react";
+import { Plus, Trash2 } from "lucide-react";
 import {
   Accordion,
   AccordionContent,
@@ -31,7 +30,7 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
     }]);
   };
 
-  const updateExperience = (index: number, field: keyof WorkExperience, value: any) => {
+  const updateExperience = (index: number, field: keyof WorkExperience, value: string | string[]) => {
     const updated = [...experiences];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -49,7 +48,7 @@ export function ProfileWorkExperienceForm({ experiences, onChange }: ProfileWork
     setTechInputs(Object.fromEntries(
       experiences.map((exp, i) => [i, exp.technologies?.join(', ') || ''])
     ));
-  }, [experiences.length]);
+  }, [experiences]);
 
   return (
     <div className="space-y-3">
