@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Briefcase, Building2, MapPin, Clock, DollarSign, Trash2, Search, Filter } from "lucide-react";
+import { Briefcase, Building2, MapPin, Clock, DollarSign, Trash2} from "lucide-react";
 import { getJobListings, deleteJob } from "@/utils/actions";
 import { createClient } from "@/utils/supabase/client";
 import {

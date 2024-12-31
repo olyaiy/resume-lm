@@ -11,7 +11,7 @@ import { toast } from "@/hooks/use-toast";
 
 interface TextImportDialogProps {
   resume: Resume;
-  onResumeChange: (field: keyof Resume, value: any) => void;
+  onResumeChange: <K extends keyof Resume>(field: K, value: Resume[K]) => void;
   trigger?: React.ReactNode;
 }
 

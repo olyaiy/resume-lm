@@ -327,7 +327,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                 <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                   DATE
                 </div>
-                <span className="ml-2 text-[9px] md:text-[11px] text-gray-500">Use 'Present' in the date field for current positions</span>
+                <span className="ml-2 text-[9px] md:text-[11px] text-gray-500">Use &apos;Present&apos; in the date field for current positions</span>
               </div>
 
               {/* Description Section */}

@@ -12,7 +12,8 @@ export default async function EditProfilePage() {
   let data;
   try {
     data = await getDashboardData();
-  } catch (_error) {
+  } catch (error: unknown) {
+    void error
     redirect("/auth/login");
   }
 

@@ -23,7 +23,7 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
     }, ...skills]);
   };
 
-  const updateSkillCategory = (index: number, field: keyof Skill, value: any) => {
+  const updateSkillCategory = (index: number, field: keyof Skill, value: string | string[]) => {
     const updated = [...skills];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -140,7 +140,7 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
 
               {/* Helper Text */}
               <div className="text-[9px] text-gray-500 italic">
-                Pro tip: Add skills that are relevant to your target role and that you're confident discussing in interviews
+                Pro tip: Add skills that are relevant to your target role and that you&apos;re confident discussing in interviews
               </div>
             </div>
           </CardContent>

@@ -4,7 +4,7 @@ import { ResumePreview } from "@/components/resume/resume-preview";
 import { updateResume, deleteResume } from "@/utils/actions";
 import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { Resume, Profile } from "@/lib/types";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { EducationForm } from "./education-form";
 import { SkillsForm } from "./skills-form";
 import { ProjectsForm } from "./projects-form";
@@ -14,7 +14,7 @@ import { ScrollArea } from "../ui/scroll-area";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { BasicInfoForm } from "./basic-info-form";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "./document-settings-form";
@@ -33,7 +33,7 @@ export function ResumeEditorClient({
   profile,
 }: ResumeEditorClientProps) {
   // Convert initial resume data to use single date string format
-  const convertedInitialResume = {
+  const convertedInitialResume = useMemo(() => ({
     ...initialResume,
     work_experience: initialResume.work_experience?.map(exp => ({
       ...exp,
@@ -71,7 +71,7 @@ export function ResumeEditorClient({
       education_margin_horizontal: 0,
       education_item_spacing: 4
     }
-  };
+  }), [initialResume]);
 
   const [resume, setResume] = useState(convertedInitialResume);
   const [isSaving, setIsSaving] = useState(false);
@@ -82,7 +82,6 @@ export function ResumeEditorClient({
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const [generation, setGeneration] = useState<string>('');
 
   const debouncedResume = useDebouncedValue(resume, 500);
 
@@ -99,7 +98,7 @@ export function ResumeEditorClient({
     }
   }, []);
 
-  const updateField = (field: keyof Resume, value: any) => {
+  const updateField = <K extends keyof Resume>(field: K, value: Resume[K]) => {
     setResume(prev => ({ ...prev, [field]: value }));
   };
 
@@ -114,7 +113,7 @@ export function ResumeEditorClient({
     } catch (error) {
       toast({
         title: "Save failed",
-        description: "Unable to save your changes. Please try again.",
+        description: error instanceof Error ? error.message : "Unable to save your changes. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -277,16 +276,8 @@ export function ResumeEditorClient({
                       </TabsContent>
                     </Tabs>
                   </div>
-                  {/* AI Assistant Section */}
-                 
-                 
-
-                <div>{generation}</div>
-                  {/* <TestAssistant /> */}
                 </ScrollArea>
                 <ChatBot resume={resume} onResumeChange={updateField} />
-
-                
               </div>
             </ResizablePanel>
 

@@ -72,6 +72,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
       // Force a server revalidation
       router.refresh();
     } catch (error) {
+      void error;
       toast.error("Unable to save your changes. Please try again.", {
         position: "bottom-right",
       });
@@ -419,7 +420,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       <DialogDescription asChild>
                         <div className="space-y-2 text-base text-muted-foreground/80">
                           <span className="block">Let our AI analyze your resume and enhance your profile by adding new information.</span>
-                          <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data. Want to start fresh instead? Use the "Reset Profile" option before uploading.</span>
+                          <span className="block text-sm">Your existing profile information will be preserved. New entries will be added alongside your current data. Want to start fresh instead? Use the &quot;Reset Profile&quot; option before uploading.</span>
                         </div>
                       </DialogDescription>
                     </DialogHeader>

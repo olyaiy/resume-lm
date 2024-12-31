@@ -7,7 +7,7 @@ import { TextImportDialog } from "./text-import-dialog";
 
 interface TextImportProps {
   resume: Resume;
-  onResumeChange: (field: keyof Resume, value: any) => void;
+  onResumeChange: <K extends keyof Resume>(field: K, value: Resume[K]) => void;
 }
 
 export function TextImport({ resume, onResumeChange }: TextImportProps) {
