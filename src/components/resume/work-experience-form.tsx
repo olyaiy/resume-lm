@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles, Wand2, RotateCcw, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "./import-from-profile-dialog";
 import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/ai";
@@ -73,7 +73,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
     }, ...experiences]);
   };
 
-  const updateExperience = (index: number, field: keyof WorkExperience, value: any) => {
+  const updateExperience = (index: number, field: keyof WorkExperience, value: string | string[]) => {
     const updated = [...experiences];
     updated[index] = { ...updated[index], [field]: value };
     onChange(updated);
@@ -322,7 +322,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                     "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                     "hover:border-cyan-500/30 hover:bg-white/60 transition-colors"
                   )}
-                  placeholder="e.g., 'Jan 2023 - Present' or '2020 - 2022'"
+                  placeholder="e.g., &apos;Jan 2023 - Present&apos; or &apos;2020 - 2022&apos;"
                 />
                 <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
                   DATE

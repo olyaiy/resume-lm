@@ -1,4 +1,4 @@
-import { z } from "zod";
+
 
 // OpenAI function schema for resume parsing
 export const openAiProfileSchema = {

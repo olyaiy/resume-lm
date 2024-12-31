@@ -3,7 +3,6 @@ import { openai } from '@ai-sdk/openai';
 // import { openrouter } from "@openrouter/ai-sdk-provider";
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
-import { vertex } from '@ai-sdk/google-vertex';
 
 
 
@@ -24,7 +23,7 @@ interface ChatRequest {
 }
 
 export async function POST(req: Request) {
-  const { messages, model = 'gpt-4', target_role, resume }: ChatRequest = await req.json();
+  const { messages, model = 'gpt-4', target_role }: ChatRequest = await req.json();
 
   const modelConfig = {
     'gpt-4': openai("gpt-4o"),
