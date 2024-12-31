@@ -5,10 +5,13 @@ export function Footer() {
   return (
     <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center justify-between">
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-4">
           <p className="text-sm text-muted-foreground">
             ResumeLM © 2025
           </p>
+          <span className="text-sm text-muted-foreground">
+            Made with ❤️ in Vancouver, BC
+          </span>
         </div>
         <nav className="flex items-center gap-4">
           <Link
