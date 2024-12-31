@@ -20,10 +20,10 @@ export default async function LoginPage() {
       </div>
 
       {/* Enhanced Navigation with backdrop blur and border */}
-      <nav className="relative z-10 border-b border-white/20 backdrop-blur-md bg-white/5 sticky top-0">
+      <nav className="relative z-10 border-b border-white/40 backdrop-blur-xl bg-white/15 shadow-md sticky top-0">
         <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="flex items-center h-14">
-            <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+            <div className="text-2xl font-bold bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-blue-600 hover:via-violet-600 hover:to-blue-600 bg-clip-text text-transparent transition-all duration-700 bg-[length:200%_auto] hover:bg-[position:100%_0] cursor-pointer">
               ResumeLM
             </div>
           </div>
