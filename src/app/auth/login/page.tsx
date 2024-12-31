@@ -1,7 +1,9 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { LoginForm } from "@/components/auth/login-form";
+import { SignupForm } from "@/components/auth/signup-form";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -31,14 +33,25 @@ export default async function LoginPage() {
         <Card className="w-full max-w-md glass-card hover-card border-white/40 shadow-xl backdrop-blur-xl">
           <CardHeader className="space-y-4">
             <CardTitle className="text-3xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Welcome Back
+              Welcome
             </CardTitle>
             <CardDescription className="text-base text-muted-foreground">
               Sign in to your account or create a new one to start building your professional resume
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <LoginForm />
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
+                <TabsTrigger value="login">Login</TabsTrigger>
+                <TabsTrigger value="signup">Sign Up</TabsTrigger>
+              </TabsList>
+              <TabsContent value="login">
+                <LoginForm />
+              </TabsContent>
+              <TabsContent value="signup">
+                <SignupForm />
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

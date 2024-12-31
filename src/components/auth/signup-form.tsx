@@ -1,9 +1,8 @@
-"use client";
-
+'use client'
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { login } from "@/app/auth/login/actions";
+import { signup } from "@/app/auth/login/actions";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 
@@ -11,7 +10,7 @@ interface SubmitButtonProps {
   setError: (error: string) => void;
 }
 
-export function LoginForm() {
+export function SignupForm() {
   const [error, setError] = useState<string>();
 
   function SubmitButton({ setError }: SubmitButtonProps) {
@@ -24,21 +23,35 @@ export function LoginForm() {
           const form = e.currentTarget.form;
           if (!form) return;
           const formData = new FormData(form);
-          const result = await login(formData);
-          if (!result.success) {
-            setError("Invalid credentials");
+          if (formData.get("password") !== formData.get("confirmPassword")) {
+            setError("Passwords do not match");
+            return;
           }
-        }} 
+          const result = await signup(formData);
+          if (!result.success) {
+            setError("Email already exists or invalid credentials");
+          }
+        }}
         disabled={pending}
         className="w-full"
       >
-        Sign In
+        Create Account
       </Button>
     );
   }
 
   return (
     <form className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="name">Full Name</Label>
+        <Input
+          id="name"
+          name="name"
+          type="text"
+          placeholder="John Doe"
+          required
+        />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <Input
@@ -54,6 +67,16 @@ export function LoginForm() {
         <Input
           id="password"
           name="password"
+          type="password"
+          placeholder="••••••••"
+          required
+        />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
+        <Input
+          id="confirmPassword"
+          name="confirmPassword"
           type="password"
           placeholder="••••••••"
           required
