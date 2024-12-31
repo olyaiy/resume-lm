@@ -32,6 +32,12 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
+    options: {
+      data: {
+        full_name: formData.get('name') as string,
+      },
+      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`
+    }
   }
 
   const { error } = await supabase.auth.signUp(data)
@@ -40,7 +46,6 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     return { success: false, error: error.message }
   }
 
-  redirect('/')
   return { success: true }
 } 
 
