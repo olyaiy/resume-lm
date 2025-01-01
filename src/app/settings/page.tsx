@@ -6,12 +6,22 @@ import { SettingsHeader } from '@/components/settings/settings-header'
 import { SettingsContent } from '@/components/settings/settings-content'
 import { createClient } from '@/utils/supabase/server'
 import { getApiKeys } from '@/utils/actions'
+import { testApiKey } from './actions'
+
+
 
 
 export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   const apiKeys = await getApiKeys();
+
+  const result = await testApiKey();
+
+  console.log("THE RESULT IS", result);
+
+
+  console.log(apiKeys);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
