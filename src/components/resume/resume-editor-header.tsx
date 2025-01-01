@@ -2,7 +2,7 @@
 
 import { Resume } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Loader2, Save, Trash2 } from "lucide-react";
+import { Download, Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ResumePDFDocument } from './resume-pdf-document';
@@ -10,6 +10,7 @@ import { pdf } from '@react-pdf/renderer';
 import { useRouter } from "next/navigation";
 import { TextImport } from "./text-import";
 import { cn } from "@/lib/utils";
+import { Logo } from "@/components/ui/logo";
 
 interface ResumeEditorHeaderProps {
   resume: Resume;
@@ -36,10 +37,7 @@ export function ResumeEditorHeader({
   };
 
   const handleBackClick = () => {
-    if (hasUnsavedChanges) {
-      // TODO: Show exit dialog
-      router.push('/');
-    } else {
+    if (!hasUnsavedChanges) {
       router.push('/');
     }
   };
@@ -97,43 +95,65 @@ export function ResumeEditorHeader({
       
       {/* Content Container */}
       <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
-        {/* Left Section - Title and Back Button */}
-        <div className="flex flex-col justify-center gap-1">
-          {/* Back Button */}
-          <button 
-            onClick={handleBackClick}
-            className={cn(
-              "group flex items-center text-xs font-medium -mb-1 w-fit transition-all duration-300",
-              colors.textOpacity,
-              colors.hover
-            )}
-          >
-            <ArrowLeft className="h-3 w-3 mr-1 group-hover:-translate-x-1 transition-transform duration-300" />
-            Back
-          </button>
+        {/* Left Section - Logo, Title  */}
+        <div className="flex items-center gap-6">
+          {hasUnsavedChanges ? (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <div>
+                  <Logo className="text-xl cursor-pointer" asLink={false} />
+                </div>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => router.push('/')}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Leave
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          ) : (
+            <div onClick={handleBackClick}>
+              <Logo className="text-xl cursor-pointer" asLink={false} />
+            </div>
+          )}
+          <div className="h-8 w-px bg-purple-200/50 hidden sm:block" />
+          <div className="flex flex-col justify-center gap-1">
+          
 
-          {/* Resume Title Section */}
-          <div className="flex flex-col gap-0.5">
-            <h1 className="text-2xl font-semibold">
-              <span className={cn(
-                "bg-gradient-to-r bg-clip-text text-transparent",
-                colors.gradient
-              )}>
-                {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
-              </span>
-            </h1>
-            <div className={cn("flex items-center gap-2 text-sm", colors.textOpacity)}>
-              {resume.is_base_resume ? (
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
-                  <span className="font-medium">Base Resume</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2">
-                  <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-sm shadow-pink-500/20" />
-                  <span className="font-medium">Tailored Resume</span>
-                </div>
-              )}
+            {/* Resume Title Section */}
+            <div className="flex flex-col gap-0.5">
+              <h1 className="text-xl font-semibold">
+                <span className={cn(
+                  "bg-gradient-to-r bg-clip-text text-transparent",
+                  colors.gradient
+                )}>
+                  {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
+                </span>
+              </h1>
+              <div className={cn("flex items-center gap-2 text-sm", colors.textOpacity)}>
+                {resume.is_base_resume ? (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
+                    <span className="font-medium">Base Resume</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-sm shadow-pink-500/20" />
+                    <span className="font-medium">Tailored Resume</span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -175,17 +195,11 @@ export function ResumeEditorHeader({
                 }
               }}
               size="sm"
-              className={cn(
-                "text-white transition-all duration-500 shadow-md hover:shadow-lg h-9 px-4 relative overflow-hidden group",
-                "hover:-translate-y-0.5",
-                `bg-gradient-to-br ${colors.buttonGradient}`,
-                colors.buttonHover,
-                colors.buttonShadow
-              )}
+              className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-0.5 h-10 px-4 relative overflow-hidden group"
             >
               <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
               <Download className="mr-2 h-4 w-4" />
-              Download PDF
+              Download
             </Button>
 
             {/* Save Button */}

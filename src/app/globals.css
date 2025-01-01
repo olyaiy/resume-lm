@@ -124,3 +124,62 @@ body {
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
   background-color: #cbd5e1;
 }
+
+
+
+.buyButton {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  color: #ffffff;
+  background-color: #ff813f;
+  border-radius: 5px;
+  border: 1px solid transparent;
+  padding: 0.5rem;
+  font-size: 1rem;
+  letter-spacing: 0.6px;
+  box-shadow: 0px 1px 2px rgba(190, 190, 190, 0.5);
+  font-family: cursive;
+}
+.buyButton:hover,
+.buyButton:active,
+.buyButton:focus {
+  text-decoration: underline;
+  box-shadow: 0px 1px 2px 2px rgba(190, 190, 190, 0.5);
+  opacity: 0.85;
+  color: #ffffff;
+}
+
+.coffeeImage {
+  height: 2vh;
+  box-shadow: none;
+  border: none;
+  vertical-align: middle;
+}
+
+.coffeeButtonText {
+  margin-left: 15px;
+  font-size: 0.8rem;
+  vertical-align: middle;
+}
+
+/* Buy Me Coffee Button Styles */
+#bmc-wbtn {
+  position: fixed !important;
+  bottom: 1.5rem !important;
+  right: 1.5rem !important;
+  z-index: 50 !important;
+  transition: transform 0.2s ease-in-out !important;
+}
+
+#bmc-wbtn:hover {
+  transform: translateY(-2px) !important;
+}
+
+@media (max-width: 640px) {
+  #bmc-wbtn {
+    bottom: 1rem !important;
+    right: 1rem !important;
+    transform: scale(0.9) !important;
+  }
+}

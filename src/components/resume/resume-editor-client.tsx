@@ -22,6 +22,7 @@ import { DocumentSettingsForm } from "./document-settings-form";
 import ChatBot from "./assistant/chatbot";
 import { ResumeEditorHeader } from "./resume-editor-header";
 import { ResumeEditorTabs } from "./resume-editor-tabs";
+import { TailoredJobCard } from "@/components/resume/tailored-job-card";
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -224,6 +225,9 @@ export function ResumeEditorClient({
                       <ResumeEditorTabs />
 
                       <TabsContent value="basic" className="space-y-6 mt-6">
+                        {!resume.is_base_resume && (
+                          <TailoredJobCard jobId={resume.job_id || ''} />
+                        )}
                         <BasicInfoForm
                           resume={resume}
                           profile={profile}

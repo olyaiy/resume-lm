@@ -8,14 +8,10 @@ import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { VisuallyHidden } from "@/components/ui/visually-hidden";
+import { Logo } from "@/components/ui/logo";
 
 export function AuthDialog() {
   const [open, setOpen] = useState(false);
-
-  const switchTab = (tab: 'login' | 'signup') => {
-    const element = document.querySelector(`[value="${tab}"]`) as HTMLButtonElement;
-    element?.click();
-  };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -41,53 +37,67 @@ export function AuthDialog() {
               AI-Powered Resume Builder
             </span>
           </div>
-          <h2 className="text-2xl font-semibold tracking-tight mb-2">
-            Welcome to ResumeLM
-          </h2>
+          <Logo className="text-3xl mb-2" asLink={false} />
           <p className="text-muted-foreground text-sm">
-            Join thousands of job seekers who&apos;ve landed their dream jobs with our AI-powered resume builder.
+            Please Sign In or Sign Up to start your journey towards landing your dream job. 
           </p>
         </div>
 
         <Tabs defaultValue="login" className="w-full relative mt-6">
-          <TabsList className="w-full h-14 bg-white/50 border-b border-white/40 rounded-t-lg grid grid-cols-2 p-1">
+          <TabsList className="w-full h-16 bg-gradient-to-r from-white/30 via-white/40 to-white/30 border-b border-white/40 p-2 grid grid-cols-2 gap-3">
             <TabsTrigger 
               value="login"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/10 data-[state=active]:via-blue-500/10 data-[state=active]:to-violet-500/10 rounded-md transition-all duration-500"
+              className="relative overflow-hidden rounded-xl text-sm font-medium transition-all duration-500
+                data-[state=inactive]:text-muted-foreground/70
+                data-[state=active]:text-violet-600
+                data-[state=active]:bg-gradient-to-br
+                data-[state=active]:from-white/80
+                data-[state=active]:to-white/60
+                data-[state=active]:shadow-lg
+                data-[state=active]:shadow-violet-500/10
+                data-[state=active]:border
+                data-[state=active]:border-violet-200/50
+                data-[state=inactive]:hover:bg-white/50
+                data-[state=inactive]:hover:text-violet-600
+                group"
             >
-              Sign In
+              <div className="absolute inset-0 bg-gradient-to-br from-violet-500/5 via-blue-500/5 to-violet-500/5 opacity-0 data-[state=active]:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex items-center justify-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-violet-500 opacity-0 group-data-[state=active]:opacity-100 transition-all duration-500 group-data-[state=active]:scale-100 scale-0" />
+                <span>Sign In</span>
+              </div>
             </TabsTrigger>
             <TabsTrigger 
               value="signup"
-              className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/10 data-[state=active]:via-blue-500/10 data-[state=active]:to-violet-500/10 rounded-md transition-all duration-500"
+              className="relative overflow-hidden rounded-xl text-sm font-medium transition-all duration-500
+                data-[state=inactive]:text-muted-foreground/70
+                data-[state=active]:text-blue-600
+                data-[state=active]:bg-gradient-to-br
+                data-[state=active]:from-white/80
+                data-[state=active]:to-white/60
+                data-[state=active]:shadow-lg
+                data-[state=active]:shadow-blue-500/10
+                data-[state=active]:border
+                data-[state=active]:border-blue-200/50
+                data-[state=inactive]:hover:bg-white/50
+                data-[state=inactive]:hover:text-blue-600
+                group"
             >
-              Sign Up
+              <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-violet-500/5 to-blue-500/5 opacity-0 data-[state=active]:opacity-100 transition-opacity duration-500" />
+              <div className="relative z-10 flex items-center justify-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-500 opacity-0 group-data-[state=active]:opacity-100 transition-all duration-500 group-data-[state=active]:scale-100 scale-0" />
+                <span>Sign Up</span>
+              </div>
             </TabsTrigger>
           </TabsList>
           <div className="p-8 relative">
-            <div className="absolute top-1/2 left-1/4 w-[200px] h-[200px] bg-gradient-to-r from-violet-200/20 to-blue-200/20 rounded-full blur-3xl -z-10" />
-            <div className="absolute bottom-1/3 right-1/4 w-[150px] h-[150px] bg-gradient-to-r from-blue-200/20 to-indigo-200/20 rounded-full blur-3xl -z-10" />
+            <div className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-violet-200/20 via-blue-200/20 to-violet-200/20 rounded-full blur-3xl -z-10 animate-pulse duration-[4000ms]" />
+            <div className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] bg-gradient-to-br from-blue-200/20 via-violet-200/20 to-blue-200/20 rounded-full blur-3xl -z-10 animate-pulse duration-[5000ms]" />
             <TabsContent value="login">
               <LoginForm />
-              <div className="mt-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Don&apos;t have an account?{" "}
-                  <button onClick={() => switchTab('signup')} className="text-violet-600 hover:text-violet-500 font-medium">
-                    Create one now
-                  </button>
-                </p>
-              </div>
             </TabsContent>
             <TabsContent value="signup">
               <SignupForm />
-              <div className="mt-4 text-center">
-                <p className="text-sm text-muted-foreground">
-                  Already have an account?{" "}
-                  <button onClick={() => switchTab('login')} className="text-violet-600 hover:text-violet-500 font-medium">
-                    Sign in instead
-                  </button>
-                </p>
-              </div>
             </TabsContent>
           </div>
         </Tabs>

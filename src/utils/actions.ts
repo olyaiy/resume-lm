@@ -529,34 +529,53 @@ export async function deleteJob(jobId: string): Promise<void> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
   if (userError || !user) {
+    console.error('Auth error:', userError);
     throw new Error('User not authenticated');
   }
 
-  // Check if user is admin
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('is_admin')
-    .eq('user_id', user.id)
-    .single();
+  console.log('Attempting to delete job:', jobId);
+  console.log('User:', user.id);
 
-  if (profileError || !profile) {
-    throw new Error('Failed to fetch user profile');
+  // First, update any resumes that reference this job
+  const { error: updateError } = await supabase
+    .from('resumes')
+    .update({ job_id: null })
+    .eq('job_id', jobId);
+
+  if (updateError) {
+    console.error('Update error:', {
+      code: updateError.code,
+      message: updateError.message,
+      details: updateError.details,
+      hint: updateError.hint
+    });
+    throw new Error(`Failed to update resumes: ${updateError.message}`);
   }
 
-  if (!profile.is_admin) {
-    throw new Error('Unauthorized: Only admins can delete jobs');
-  }
+  console.log('Successfully removed job references from resumes');
 
-  const { error } = await supabase
+  // Now we can safely delete the job
+  const { error: deleteError } = await supabase
     .from('jobs')
     .delete()
     .eq('id', jobId);
 
-  if (error) {
-    throw new Error('Failed to delete job');
+  if (deleteError) {
+    console.error('Delete error:', {
+      code: deleteError.code,
+      message: deleteError.message,
+      details: deleteError.details,
+      hint: deleteError.hint
+    });
+    throw new Error(`Failed to delete job: ${deleteError.message}`);
   }
 
+  console.log('Successfully deleted job:', jobId);
+  
+  // Revalidate all necessary paths
   revalidatePath('/', 'layout');
+  revalidatePath('/resumes/[id]', 'page');
+  revalidatePath('/resumes', 'layout');
 }
 
 interface JobListingParams {
@@ -614,4 +633,19 @@ export async function getJobListings({
     currentPage: page,
     totalPages: Math.ceil((count ?? 0) / pageSize)
   };
+}
+
+export async function deleteTailoredJob(jobId: string): Promise<void> {
+  const supabase = await createClient();
+
+  const { error } = await supabase
+    .from('jobs')
+    .update({ is_active: false })
+    .eq('id', jobId);
+
+  if (error) {
+    throw new Error('Failed to delete job');
+  }
+
+  revalidatePath('/', 'layout');
 }

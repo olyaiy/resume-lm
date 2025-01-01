@@ -71,6 +71,7 @@ export interface SectionConfig {
 export interface Resume {
   id: string;
   user_id: string;
+  job_id?: string | null;
   name: string;
   target_role: string;
   is_base_resume: boolean;

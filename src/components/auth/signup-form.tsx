@@ -6,7 +6,7 @@ import { signup } from "@/app/auth/login/actions";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Mail, Lock, CheckCircle2 } from "lucide-react";
+import { User, Mail, Lock, CheckCircle2, Loader2 } from "lucide-react";
 
 interface SubmitButtonProps {
   disabled?: boolean;
@@ -24,7 +24,14 @@ export function SignupForm() {
         disabled={pending || disabled}
         className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
       >
-        {pending ? "Creating Account..." : "Create Account"}
+        {pending ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating Account...
+          </>
+        ) : (
+          "Create Account"
+        )}
       </Button>
     );
   }
