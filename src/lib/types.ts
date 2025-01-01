@@ -171,10 +171,25 @@ export const AI_PROVIDERS = {
 
 export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 
-export interface APIKey {
+export type ServiceName = 
+  | 'openai'
+  | 'azure'
+  | 'anthropic'
+  | 'bedrock'
+  | 'google'
+  | 'vertex'
+  | 'mistral'
+  | 'xai'
+  | 'together'
+  | 'cohere'
+  | 'fireworks'
+  | 'deepinfra'
+  | 'groq';
+
+export interface ApiKey {
   id: string;
   user_id: string;
-  service_name: AIProvider;
+  service_name: ServiceName;
   is_active: boolean;
   last_used_at: string | null;
   expires_at: string | null;

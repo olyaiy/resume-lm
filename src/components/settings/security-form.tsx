@@ -8,6 +8,7 @@ import { User } from "@supabase/supabase-js"
 import { useState } from "react"
 import { updateEmail, updatePassword } from "@/app/settings/actions"
 import { toast } from "sonner"
+import { testApiKey } from "@/app/settings/page"
 
 interface SecurityFormProps {
   user: User | null;
@@ -69,8 +70,20 @@ export function SecurityForm({ user }: SecurityFormProps) {
     }
   };
 
+  async function handleTestApiKey() {
+    try {
+      const result = await testApiKey();
+      console.log('API Test Result:', result);
+    } catch (error) {
+      console.error('Error:', error);
+    }
+  }
+
   return (
+    
     <div className="space-y-8">
+    <Button onClick={handleTestApiKey}>Test API Key</Button>
+    
       {/* Email Change Section */}
       <div className="space-y-4">
         <div className="space-y-2">

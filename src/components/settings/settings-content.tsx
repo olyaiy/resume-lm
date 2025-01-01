@@ -1,17 +1,21 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { SecurityForm } from "./security-form"
 import { ApiKeysForm } from "./api-keys-form"
 import { SubscriptionSection } from "./subscription-section"
 import { DangerZone } from "./danger-zone"
 import { User } from "@supabase/supabase-js"
+import { ApiKey } from "@/lib/types"
 
 interface SettingsContentProps {
   user: User | null;
+  apiKeys: ApiKey[];
 }
 
-export function SettingsContent({ user }: SettingsContentProps) {
+export function SettingsContent({ user, apiKeys }: SettingsContentProps) {
   return (
     <div className="space-y-8">
+        
 
       {/* Security Settings */}
       <Card className="border-white/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
@@ -31,7 +35,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
           <CardDescription>Manage your API keys for different AI providers</CardDescription>
         </CardHeader>
         <CardContent>
-          <ApiKeysForm />
+          <ApiKeysForm apiKeys={apiKeys} />
         </CardContent>
       </Card>
 

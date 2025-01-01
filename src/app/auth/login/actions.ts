@@ -8,6 +8,7 @@ interface AuthResult {
   error?: string;
 }
 
+// Login
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
@@ -26,6 +27,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
   return { success: true }
 }
 
+// Signup
 export async function signup(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
 
@@ -49,6 +51,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
   return { success: true }
 } 
 
+// Logout 
 export async function logout() {
   const supabase = await createClient();
   
