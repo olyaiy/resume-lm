@@ -1,4 +1,5 @@
 'use client'
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -8,60 +9,74 @@ import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Mail, Lock, CheckCircle2, Loader2 } from "lucide-react";
 
-interface SubmitButtonProps {
-  disabled?: boolean;
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  
+  return (
+    <Button 
+      type="submit" 
+      disabled={pending}
+      className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Creating Account...
+        </>
+      ) : (
+        "Create Account"
+      )}
+    </Button>
+  );
+}
+
+interface FormState {
+  error?: string;
+  success?: boolean;
 }
 
 export function SignupForm() {
-  const [error, setError] = useState<string>();
-  const [success, setSuccess] = useState(false);
-
-  function SubmitButton({ disabled }: SubmitButtonProps) {
-    const { pending } = useFormStatus();
-    return (
-      <Button 
-        type="submit" 
-        disabled={pending || disabled}
-        className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
-      >
-        {pending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creating Account...
-          </>
-        ) : (
-          "Create Account"
-        )}
-      </Button>
-    );
-  }
+  const [formState, setFormState] = useState<FormState>({});
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setError(undefined);
-    setSuccess(false);
+    setFormState({});
 
     const form = e.currentTarget;
     const formData = new FormData(form);
     
-    if (formData.get("password") !== formData.get("confirmPassword")) {
-      setError("Passwords do not match");
+    // Client-side validation
+    const password = formData.get("password") as string;
+    const confirmPassword = formData.get("confirmPassword") as string;
+    
+    if (password.length < 6) {
+      setFormState({ error: "Password must be at least 6 characters long" });
       return;
     }
 
-    const result = await signup(formData);
-    if (!result.success) {
-      setError(result.error || "Failed to create account");
+    if (password !== confirmPassword) {
+      setFormState({ error: "Passwords do not match" });
       return;
     }
 
-    setSuccess(true);
-    form.reset();
+    try {
+      const result = await signup(formData);
+      if (!result.success) {
+        setFormState({ error: result.error || "Failed to create account" });
+        return;
+      }
+
+      setFormState({ success: true });
+      form.reset();
+    } catch (error: unknown) {
+      console.error("Signup error:", error);
+      setFormState({ error: "An unexpected error occurred" });
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {success && (
+      {formState.success && (
         <Alert className="bg-emerald-50/50 text-emerald-900 border-emerald-200/50">
           <CheckCircle2 className="h-4 w-4 text-emerald-500" />
           <AlertDescription>
@@ -70,9 +85,9 @@ export function SignupForm() {
         </Alert>
       )}
 
-      {error && (
+      {formState.error && (
         <Alert variant="destructive" className="bg-red-50/50 text-red-900 border-red-200/50">
-          <AlertDescription>{error}</AlertDescription>
+          <AlertDescription>{formState.error}</AlertDescription>
         </Alert>
       )}
 
@@ -86,10 +101,13 @@ export function SignupForm() {
             type="text"
             placeholder="John Doe"
             required
+            minLength={2}
+            maxLength={50}
             className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
           />
         </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium">Email</Label>
         <div className="relative">
@@ -100,10 +118,12 @@ export function SignupForm() {
             type="email"
             placeholder="you@example.com"
             required
+            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
             className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
           />
         </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="password" className="text-sm font-medium">Password</Label>
         <div className="relative">
@@ -115,10 +135,12 @@ export function SignupForm() {
             placeholder="••••••••"
             required
             minLength={6}
+            maxLength={100}
             className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
           />
         </div>
       </div>
+
       <div className="space-y-2">
         <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
         <div className="relative">
@@ -130,12 +152,13 @@ export function SignupForm() {
             placeholder="••••••••"
             required
             minLength={6}
+            maxLength={100}
             className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
           />
         </div>
       </div>
 
-      <SubmitButton disabled={success} />
+      <SubmitButton />
     </form>
   );
 } 

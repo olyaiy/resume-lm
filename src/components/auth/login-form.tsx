@@ -9,45 +9,50 @@ import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Loader2 } from "lucide-react";
 
-interface SubmitButtonProps {
-  setError: (error: string) => void;
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  
+  return (
+    <Button 
+      type="submit" 
+      disabled={pending}
+      className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
+    >
+      {pending ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Signing in...
+        </>
+      ) : (
+        "Sign In"
+      )}
+    </Button>
+  );
 }
 
 export function LoginForm() {
   const [error, setError] = useState<string>();
 
-  function SubmitButton({ setError }: SubmitButtonProps) {
-    const { pending } = useFormStatus();
-    return (
-      <Button 
-        type="submit" 
-        onClick={async (e) => {
-          e.preventDefault();
-          const form = e.currentTarget.form;
-          if (!form) return;
-          const formData = new FormData(form);
-          const result = await login(formData);
-          if (!result.success) {
-            setError("Invalid credentials");
-          }
-        }} 
-        disabled={pending}
-        className="w-full bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 hover:from-violet-500 hover:via-blue-500 hover:to-violet-500 shadow-lg shadow-violet-500/25 transition-all duration-500 animate-gradient-x"
-      >
-        {pending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Signing in...
-          </>
-        ) : (
-          "Sign In"
-        )}
-      </Button>
-    );
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(undefined);
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const result = await login(formData);
+      if (!result.success) {
+        setError("Invalid credentials");
+      }
+    } catch (error: unknown) {
+      setError("An error occurred during login");
+      console.error("Login error:", error);
+    }
   }
 
   return (
-    <form className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
         <Label htmlFor="email" className="text-sm font-medium">Email</Label>
         <div className="relative">
@@ -72,6 +77,7 @@ export function LoginForm() {
             type="password"
             placeholder="••••••••"
             required
+            minLength={6}
             className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
           />
         </div>
@@ -81,7 +87,7 @@ export function LoginForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      <SubmitButton setError={setError} />
+      <SubmitButton />
     </form>
   );
 } 

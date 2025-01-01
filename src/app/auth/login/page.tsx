@@ -50,7 +50,7 @@ export const metadata: Metadata = {
 
 export default async function LoginPage() {
   return (
-    <main className="min-h-screen relative overflow-hidden selection:bg-violet-200/50">
+    <main className="h-[80vh] relative overflow-hidden selection:bg-violet-200/50">
       {/* Enhanced Gradient Background Elements */}
       <div className="fixed inset-0 z-0">
         {/* Primary gradient mesh with improved colors */}
