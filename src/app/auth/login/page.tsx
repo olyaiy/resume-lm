@@ -1,7 +1,52 @@
+import { Metadata } from "next";
 import { MockResume } from "@/components/landing/mock-resume";
 import { BenefitsList } from "@/components/landing/benefits-list";
 import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
+
+export const metadata: Metadata = {
+  title: "Login | ResumeLM - AI-Powered Resume Builder",
+  description: "Create tailored, ATS-optimized resumes powered by AI. ResumeLM helps you land your dream tech job with personalized resume optimization.",
+  keywords: ["resume builder", "AI resume", "ATS optimization", "tech jobs", "career tools", "job application"],
+  authors: [{ name: "ResumeLM" }],
+  openGraph: {
+    title: "ResumeLM - AI-Powered Resume Builder",
+    description: "Create tailored, ATS-optimized resumes powered by AI. Land your dream tech job with personalized resume optimization.",
+    url: "https://resumelm.com/auth/login",
+    siteName: "ResumeLM",
+    images: [
+      {
+        url: "/og.webp",
+        width: 1200,
+        height: 630,
+        alt: "ResumeLM - AI Resume Builder",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "ResumeLM - AI-Powered Resume Builder",
+    description: "Create tailored, ATS-optimized resumes powered by AI. Land your dream tech job with personalized resume optimization.",
+    images: ["/og.webp"],
+    creator: "@resumelm",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  verification: {
+    google: "google-site-verification-code", // Replace with actual verification code
+  },
+};
 
 export default async function LoginPage() {
   return (
