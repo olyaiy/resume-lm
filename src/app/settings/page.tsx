@@ -1,5 +1,5 @@
 // src/app/settings/page.tsx
-
+'use server'
 
 import { SettingsHeader } from '@/components/settings/settings-header'
 import { SettingsContent } from '@/components/settings/settings-content'
