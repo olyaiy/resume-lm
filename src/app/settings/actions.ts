@@ -2,6 +2,7 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import OpenAI from "openai";
 
 interface SecurityResult {
   success: boolean;
@@ -87,71 +88,43 @@ interface ApiTestResult {
     error?: string;
   }
   
-  export async function testApiKey(service: string): Promise<ApiTestResult> {
+  export async function testApiKey(): Promise<ApiTestResult> {
     try {
       const supabase = await createClient()
       
       // Get the API key from vault
       const { data: apiKey, error: keyError } = await supabase
         .rpc('get_api_key', {
-          p_service_name: service
+          p_service_name: 'openai'
         })
   
       if (keyError || !apiKey) {
-        console.error('Error fetching API key:', keyError)
         return { 
           success: false, 
-          error: `No API key found for ${service}` 
+          error: 'No API key found for OpenAI' 
         }
       }
   
-      // Test different services
-      switch (service) {
-        case 'openai': {
-          const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${apiKey.trim()}`  // Ensure clean key
-            },
-            body: JSON.stringify({
-              model: 'gpt-4o-mini',  // DO NOT CHANGE MODEL NAME
-              messages: [{ role: 'user', content: 'Say this is a test!' }],
-              temperature: 0.7
-            })
-          });
+      const openai = new OpenAI({
+        apiKey: apiKey.trim(),
+      });
   
-          const data = await response.json();
-
-          console.log(data);
-          console.dir(data);
-          
-          if (data.error) {
-            return { 
-              success: false, 
-              error: data.error.message || 'API request failed' 
-            }
-          }
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: 'user', content: 'Say this is a test!' }],
+        response_format: { type: "text" },
+        temperature: 1,
+        max_tokens: 2048,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0
+      });
   
-          return {
-            success: true,
-            message: data.choices?.[0]?.message?.content || 'API connection successful'
-          }
-        }
-  
-        case 'anthropic': {
-          // Add Anthropic test logic here
-          return { success: false, error: 'Anthropic testing not implemented yet' }
-        }
-  
-        // Add other service tests as needed
-  
-        default:
-          return { 
-            success: false, 
-            error: `Testing not implemented for ${service}` 
-          }
+      return {
+        success: true,
+        message: response.choices[0]?.message?.content || 'API connection successful'
       }
+  
     } catch (error) {
       console.error('Error testing API key:', error)
       return { 
