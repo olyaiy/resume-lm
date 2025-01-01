@@ -153,3 +153,32 @@ export interface Profile {
   updated_at: string;
 }
 
+export const AI_PROVIDERS = {
+  OPENAI: 'openai',
+  AZURE: 'azure',
+  ANTHROPIC: 'anthropic',
+  BEDROCK: 'bedrock',
+  GOOGLE: 'google',
+  VERTEX: 'vertex',
+  MISTRAL: 'mistral',
+  XAI: 'xai',
+  TOGETHER: 'together',
+  COHERE: 'cohere',
+  FIREWORKS: 'fireworks',
+  DEEPINFRA: 'deepinfra',
+  GROQ: 'groq'
+} as const;
+
+export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
+
+export interface APIKey {
+  id: string;
+  user_id: string;
+  service_name: AIProvider;
+  is_active: boolean;
+  last_used_at: string | null;
+  expires_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

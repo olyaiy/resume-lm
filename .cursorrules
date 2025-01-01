@@ -246,3 +246,46 @@ Implementation Notes:
 - Use try-catch blocks for key operations
 - Implement key rotation policies
 - Monitor key usage patterns
+
+
+AI Providers & Models
+- Using Supabase Vault for secure API key storage
+- Support for multiple AI providers through service_name enum:
+  - OpenAI (@ai-sdk/openai)
+  - Azure OpenAI (@ai-sdk/azure)
+  - Anthropic (@ai-sdk/anthropic)
+  - Amazon Bedrock (@ai-sdk/amazon-bedrock)
+  - Google Generative AI (@ai-sdk/google)
+  - Google Vertex (@ai-sdk/google-vertex)
+  - Mistral (@ai-sdk/mistral)
+  - xAI Grok (@ai-sdk/xai)
+  - Together.ai (@ai-sdk/togetherai)
+  - Cohere (@ai-sdk/cohere)
+  - Fireworks (@ai-sdk/fireworks)
+  - DeepInfra (@ai-sdk/deepinfra)
+  - Groq (@ai-sdk/groq)
+
+
+  sql
+    check (service_name in (
+    'openai',
+    'azure',
+    'anthropic',
+    'bedrock',
+    'google',
+    'vertex',
+    'mistral',
+    'xai',
+    'together',
+    'cohere',
+    'fireworks',
+    'deepinfra',
+    'groq'
+    ));
+
+
+  Key Management:
+- One active key per service per user
+- Keys stored encrypted in Vault
+- Service-specific validation and formatting
+- Server-side only operations
