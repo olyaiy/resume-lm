@@ -200,5 +200,25 @@ Use your tools strategically to deliver maximum value while respecting these gui
 
   return result.toDataStreamResponse({
     sendUsage: false,
+    getErrorMessage: error => {
+      if (error == null) {
+        console.log('Error:', error);
+        return 'unknown error';
+      }
+
+      if (typeof error === 'string') {
+        console.log('Error:', error);
+        return error;
+      }
+
+      if (error instanceof Error) {
+        console.log('Error:', error);
+        return error.message;
+      }
+
+      console.log('Error:', error);
+      return JSON.stringify(error);
+    },
+
   });
 }

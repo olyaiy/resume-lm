@@ -54,7 +54,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     apiKeys,
   };
   
-  const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
+  const { messages, error, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
     body: {
       target_role: resume.target_role,
@@ -352,6 +352,20 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                   })}
                 </React.Fragment>
               ))}
+            
+            {error && (
+              <div className={cn(
+                "mt-2 text-red-500 text-sm px-4",
+                "rounded-lg py-2",
+                "bg-red-50/50 border border-red-200/50"
+              )}>
+                {((error as Error)?.message?.includes('invalid x-api-key') || 
+                 JSON.stringify(error).includes('authentication_error'))
+                  ? "Your API key is invalid, please try updating it in settings and try again."
+                  : "An error occurred."}
+              </div>
+            )}
+
 
             </ScrollArea>
             
