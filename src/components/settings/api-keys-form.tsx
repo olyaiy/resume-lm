@@ -33,9 +33,9 @@ const PROVIDERS: { id: ServiceName; name: string }[] = [
 ]
 
 const AI_MODELS: AIModel[] = [
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet', provider: 'anthropic' },
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
+  { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Requires Anthropic API Key)', provider: 'anthropic' },
+  { id: 'gpt-4o', name: 'GPT-4o (Requires OpenAI API Key)', provider: 'openai' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Free)', provider: 'openai' },
 
   // FOR NOW, SIMPLY FOCUS ON OPENAI AND ANTHROPIC
   // WE WILL IMPLEMENT THESE LATER
@@ -128,6 +128,14 @@ export function ApiKeysForm() {
       delete updated[service]
       return updated
     })
+
+    // Check if current default model requires this API key
+    const currentModel = AI_MODELS.find(m => m.id === defaultModel)
+    if (currentModel && currentModel.provider === service && currentModel.id !== 'gpt-4o-mini') {
+      setDefaultModel('gpt-4o-mini')
+      toast.info('Default model reset to GPT-4o Mini (free model)')
+    }
+
     toast.success('API key removed successfully')
   }
 
@@ -135,8 +143,27 @@ export function ApiKeysForm() {
     apiKeys.find(k => k.service === service)
 
   const handleModelChange = (modelId: string) => {
+    const selectedModel = AI_MODELS.find(m => m.id === modelId)
+    if (!selectedModel) return
+
+    // Check if model requires API key
+    if (selectedModel.id !== 'gpt-4o-mini') {
+      const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
+      if (!hasRequiredKey) {
+        toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
+        return
+      }
+    }
+
     setDefaultModel(modelId)
     toast.success('Default model updated successfully')
+  }
+
+  const isModelSelectable = (modelId: string) => {
+    if (modelId === 'gpt-4o-mini') return true
+    const model = AI_MODELS.find(m => m.id === modelId)
+    if (!model) return false
+    return apiKeys.some(k => k.service === model.provider)
   }
 
   return (
@@ -148,15 +175,24 @@ export function ApiKeysForm() {
           These keys never touch our servers.
         </p>
       </div>
+
       <div className="p-3 rounded-lg bg-white/50 border border-gray-200">
         <Label className="text-sm font-medium">Default AI Model</Label>
+        <p className="text-xs text-muted-foreground mt-1 mb-2">
+          GPT-4o Mini is available for free. Other models require their respective API keys.
+        </p>
         <Select value={defaultModel} onValueChange={handleModelChange}>
           <SelectTrigger className="w-full mt-1">
             <SelectValue placeholder="Select a model" />
           </SelectTrigger>
           <SelectContent>
             {AI_MODELS.map((model) => (
-              <SelectItem key={model.id} value={model.id}>
+              <SelectItem 
+                key={model.id} 
+                value={model.id}
+                disabled={!isModelSelectable(model.id)}
+                className={!isModelSelectable(model.id) ? 'opacity-50' : ''}
+              >
                 {model.name}
               </SelectItem>
             ))}

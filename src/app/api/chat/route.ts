@@ -1,13 +1,7 @@
 import { ToolInvocation, smoothStream, streamText } from 'ai';
-import { openai } from '@ai-sdk/openai';
-// import { openrouter } from "@openrouter/ai-sdk-provider";
-import { anthropic } from '@ai-sdk/anthropic';
-import { google } from '@ai-sdk/google';
-
-
-
 import { Resume } from '@/lib/types';
 import { z } from 'zod';
+import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -18,22 +12,19 @@ interface Message {
 interface ChatRequest {
   messages: Message[];
   resume: Resume;
-  model: 'gpt-4' | 'claude' | 'gemini';
   target_role: string;
+  config?: AIConfig;
 }
 
 export async function POST(req: Request) {
-  const { messages, model = 'gpt-4', target_role }: ChatRequest = await req.json();
+  const { messages, target_role, config }: ChatRequest = await req.json();
 
-  const modelConfig = {
-    'gpt-4': openai("gpt-4o"),
-    'claude': anthropic("claude-3-5-sonnet-20241022"),
-    'gemini': google("gemini-1.5-pro"),
-    'gpt-4o-mini': openai("gpt-4o-mini"),
-  };
+  const aiClient = initializeAIClient(config);
+
+  console.log('Using AI Model:', config?.model || 'gpt-4o-mini (default)');
 
   const result = streamText({
-    model: modelConfig[model],
+    model: aiClient,
     system: `
 You are an expert technical resume consultant 
 specializing in computer science and software 

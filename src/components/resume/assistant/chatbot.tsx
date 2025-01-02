@@ -12,29 +12,54 @@ import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 import { Suggestion } from './suggestions';
 import { SuggestionSkeleton } from './suggestion-skeleton';
-import ChatInput, { AIModel } from './chat-input';
+import ChatInput from './chat-input';
 import { LoadingDots } from '@/components/ui/loading-dots';
-
+import { ApiKey } from '@/utils/ai-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
+const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
+const MODEL_STORAGE_KEY = 'resumelm-default-model';
 
 interface ChatBotProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: Resume[typeof field]) => void;
 }
 
-
-
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
-  const [selectedModel, setSelectedModel] = React.useState<AIModel>("gpt-4o-mini");
+  const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
+  const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
+  
+  // Load settings from local storage
+  useEffect(() => {
+    const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+    
+    if (storedKeys) {
+      try {
+        setApiKeys(JSON.parse(storedKeys));
+      } catch (error) {
+        console.error('Error loading API keys:', error);
+      }
+    }
+
+    if (storedModel) {
+      setDefaultModel(storedModel);
+    }
+  }, []);
+
+  const config = {
+    model: defaultModel,
+    apiKeys,
+  };
   
   const { messages, input, setInput, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
     body: {
-      model: selectedModel,
       target_role: resume.target_role,
       resume: resume,
+      config,
     },
     maxSteps: 10,
     async onToolCall({ toolCall }) {
@@ -126,7 +151,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
   return (
     <Card className={cn(
-      "flex flex-col w-full max-w-2xl mx-auto",
+      "flex flex-col w-full l mx-auto",
       "bg-gradient-to-br from-purple-50/95 via-purple-50/90 to-indigo-50/95",
       "border-2 border-purple-200/60",
       "shadow-lg shadow-purple-500/5",
@@ -341,8 +366,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         isLoading={isLoading}
         onSubmit={handleSubmit}
         onStop={stop}
-        model={selectedModel}
-        onModelChange={setSelectedModel}
       />
     </Card>
   );
