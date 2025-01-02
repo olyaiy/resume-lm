@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { ImportFromProfileDialog } from "./import-from-profile-dialog";
+import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
 interface SkillsFormProps {
   skills: Skill[];

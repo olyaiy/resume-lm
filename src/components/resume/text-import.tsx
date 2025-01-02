@@ -3,7 +3,8 @@
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { Resume } from "@/lib/types";
-import { TextImportDialog } from "./text-import-dialog";
+import { TextImportDialog } from "./management/dialogs/text-import-dialog";
+
 
 interface TextImportProps {
   resume: Resume;

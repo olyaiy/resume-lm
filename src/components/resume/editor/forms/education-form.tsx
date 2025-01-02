@@ -7,7 +7,8 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
-import { ImportFromProfileDialog } from "./import-from-profile-dialog";
+import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
+
 
 interface EducationFormProps {
   education: Education[];

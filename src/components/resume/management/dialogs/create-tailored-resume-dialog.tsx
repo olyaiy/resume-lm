@@ -12,12 +12,13 @@ import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus, CheckCircle2 } from "
 import { cn } from "@/lib/utils";
 import { createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
-import { MiniResumePreview } from "./shared/mini-resume-preview";
+
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
 import { createJob } from "@/utils/actions";
 import { Progress } from "@/components/ui/progress";
 import { LoadingDots } from "@/components/ui/loading-dots";
+import { MiniResumePreview } from "../../shared/mini-resume-preview";
 
 // Define the creation steps
 const CREATION_STEPS = [

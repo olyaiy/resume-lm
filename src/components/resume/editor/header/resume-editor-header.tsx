@@ -5,12 +5,14 @@ import { Button } from "@/components/ui/button";
 import { Download, Loader2, Save, Trash2 } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { ResumePDFDocument } from './resume-pdf-document';
+
 import { pdf } from '@react-pdf/renderer';
 import { useRouter } from "next/navigation";
-import { TextImport } from "./text-import";
+
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/ui/logo";
+import { TextImport } from "../../text-import";
+import { ResumePDFDocument } from "../preview/resume-pdf-document";
 
 interface ResumeEditorHeaderProps {
   resume: Resume;
@@ -163,7 +165,7 @@ export function ResumeEditorHeader({
           {/* Action Buttons Group */}
           <div className="flex items-center gap-2">
             {/* Text Import Button */}
-            <TextImport 
+            <TextImport
               resume={resume}
               onResumeChange={onResumeChange}
             />

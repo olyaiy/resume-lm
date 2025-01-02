@@ -7,19 +7,20 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ImportFromProfileDialog } from "./import-from-profile-dialog";
+import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { generateProjectPoints, improveProject } from "@/utils/ai";
 import { useState, useRef, useEffect } from "react";
-import { DescriptionPoint } from "./shared/description-point";
-import { AISuggestions } from "./shared/ai-suggestions";
-import { AIGenerationSettings } from "./shared/ai-generation-settings";
-import { TechnologiesInput } from "./shared/technologies-input";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { DescriptionPoint } from "../../shared/description-point";
+import { AISuggestions } from "../../shared/ai-suggestions";
+import { TechnologiesInput } from "../../shared/technologies-input";
+import { AIGenerationSettings } from "../../shared/ai-generation-settings";
 
 interface AISuggestion {
   id: string;

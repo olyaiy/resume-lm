@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { getResumeById } from "@/utils/actions";
-import { ResumeEditorClient } from "@/components/resume/resume-editor-client";
+import { ResumeEditorClient } from "@/components/resume/editor/resume-editor-client";
 
 
 export default async function Page({

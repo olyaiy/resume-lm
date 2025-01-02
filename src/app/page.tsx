@@ -18,7 +18,7 @@ import { User, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProfileCard } from "@/components/profile/profile-card";
-import { ResumeManagementCard } from "@/components/resume/resume-management-card";
+import { ResumeManagementCard } from "@/components/resume/management/cards/resume-management-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 // import { JobListingsCard } from "@/components/jobs/job-listings-card";
 

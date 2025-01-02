@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ImportFromProfileDialog } from "./import-from-profile-dialog";
+import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/ai";
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -17,7 +17,8 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import Tiptap from "../ui/tiptap";
+import Tiptap from "@/components/ui/tiptap";
+
 
 interface AISuggestion {
   id: string;
@@ -339,7 +340,7 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
                   {exp.description.map((desc, descIndex) => (
                     <div key={descIndex} className="flex gap-1 items-start group/item">
                       <div className="flex-1">
-                        <Tiptap 
+                        <Tiptap
                           content={desc} 
                           onChange={(newContent) => {
                             const updated = [...experiences];

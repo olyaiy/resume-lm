@@ -1,28 +1,30 @@
 'use client';
 
-import { ResumePreview } from "@/components/resume/resume-preview";
+
 import { updateResume, deleteResume } from "@/utils/actions";
-import { WorkExperienceForm } from "@/components/resume/work-experience-form";
 import { Resume, Profile } from "@/lib/types";
 import { useState, useRef, useEffect, useMemo } from "react";
-import { EducationForm } from "./education-form";
-import { SkillsForm } from "./skills-form";
-import { ProjectsForm } from "./projects-form";
-import { CertificationsForm } from "./certifications-form";
+import { WorkExperienceForm } from "@/components/resume/editor/forms/work-experience-form";
+import { EducationForm } from "@/components/resume/editor/forms/education-form";
+import { SkillsForm } from "@/components/resume/editor/forms/skills-form";
+import { ProjectsForm } from "@/components/resume/editor/forms/projects-form";
+import { CertificationsForm } from "@/components/resume/editor/forms/certifications-form";
 import { toast } from "@/hooks/use-toast";
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { BasicInfoForm } from "./basic-info-form";
+import { BasicInfoForm } from "@/components/resume/editor/forms/basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { DocumentSettingsForm } from "./document-settings-form";
+import { DocumentSettingsForm } from "@/components/resume/editor/forms/document-settings-form";
+import { ResumeEditorTabs } from "./header/resume-editor-tabs";
+import { TailoredJobCard } from "../management/cards/tailored-job-card";
+import { ResumeEditorHeader } from "./header/resume-editor-header";
+import ChatBot from "../assistant/chatbot";
+import { ResumePreview } from "./preview/resume-preview";
 
-import ChatBot from "./assistant/chatbot";
-import { ResumeEditorHeader } from "./resume-editor-header";
-import { ResumeEditorTabs } from "./resume-editor-tabs";
-import { TailoredJobCard } from "@/components/resume/tailored-job-card";
+
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
