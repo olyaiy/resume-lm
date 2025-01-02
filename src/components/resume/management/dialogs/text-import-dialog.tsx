@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import { Resume } from "@/lib/types";
-import { addTextToResume } from "@/utils/ai";
+
 import { toast } from "@/hooks/use-toast";
+import { addTextToResume } from "../../editor/ai/resume-modification-ai";
 
 interface TextImportDialogProps {
   resume: Resume;

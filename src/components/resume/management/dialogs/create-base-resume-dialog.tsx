@@ -11,11 +11,12 @@ import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Copy, Wand2, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createBaseResume } from "@/utils/actions";
-import { convertTextToResume } from "@/utils/ai";
+
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
+import { convertTextToResume } from "../ai/resume-management-ai";
 
 interface CreateBaseResumeDialogProps {
   children: React.ReactNode;

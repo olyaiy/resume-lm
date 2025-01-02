@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
-import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/ai";
+
 import { useState, useRef, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
@@ -18,6 +18,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import Tiptap from "@/components/ui/tiptap";
+import { generateWorkExperiencePoints, improveWorkExperience } from "../ai/resume-modification-ai";
 
 
 interface AISuggestion {

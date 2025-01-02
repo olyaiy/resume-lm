@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
-import { generateProjectPoints, improveProject } from "@/utils/ai";
+
 import { useState, useRef, useEffect } from "react";
 
 import {
@@ -21,6 +21,7 @@ import { DescriptionPoint } from "../../shared/description-point";
 import { AISuggestions } from "../../shared/ai-suggestions";
 import { TechnologiesInput } from "../../shared/technologies-input";
 import { AIGenerationSettings } from "../../shared/ai-generation-settings";
+import { generateProjectPoints, improveProject } from "../ai/resume-modification-ai";
 
 interface AISuggestion {
   id: string;
