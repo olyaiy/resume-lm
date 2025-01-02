@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload} from "lucide-react";
-import { formatProfileWithAI } from "@/utils/ai";
+import { formatProfileWithAI } from "@/components/profile/actions/ai";
 import {
   Dialog,
   DialogContent,
@@ -129,7 +129,24 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsProcessingResume(true);
       
-      const result = await formatProfileWithAI(resumeContent);
+      // Get model and API key from local storage
+      const MODEL_STORAGE_KEY = 'resumelm-default-model';
+      const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
+      
+      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY) || 'claude-3-sonnet-20240229';
+      const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let apiKeys = [];
+      
+      try {
+        apiKeys = storedKeys ? JSON.parse(storedKeys) : [];
+      } catch (error) {
+        console.error('Error parsing API keys:', error);
+      }
+      
+      const result = await formatProfileWithAI(resumeContent, {
+        model: selectedModel,
+        apiKeys
+      });
       
       if (result) {
         // Clean and transform the data to match our database schema

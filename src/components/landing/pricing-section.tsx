@@ -43,7 +43,7 @@ const tiers: PricingTier[] = [
       { text: "Unlimited tailored resumes", included: true },
       { text: "Support an independent student developer ❤️", included: true },
     ],
-    buttonText: "Upgrade to Pro",
+    buttonText: "Get Started",
   },
   {
     name: "BYOK",
