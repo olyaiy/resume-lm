@@ -93,12 +93,17 @@ ${userMessages}`,
       system: RESUME_FORMATTER_SYSTEM_MESSAGE.content as string,
     });
 
+    console.dir(object.content, { depth: null, colors: true });
+    
+
     return object.content;
   } catch (error) {
     throw error;
   }
 }
 
+
+// PROFILE -> RESUME
 export async function importProfileToResume(profile: Profile, targetRole: string) {
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
@@ -112,6 +117,7 @@ export async function importProfileToResume(profile: Profile, targetRole: string
   return object.content;
 }
 
+// WORK EXPERIENCE BULLET POINTS
 export async function generateWorkExperiencePoints(
   position: string,
   company: string,
@@ -136,6 +142,7 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
   return object.content;
 }
 
+// WORK EXPERIENCE BULLET POINTS IMPROVEMENT
 export async function improveWorkExperience(point: string, customPrompt?: string) {
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
@@ -149,6 +156,7 @@ export async function improveWorkExperience(point: string, customPrompt?: string
   return object.content;
 }
 
+// PROJECT BULLET POINTS IMPROVEMENT
 export async function improveProject(point: string, customPrompt?: string) {
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
@@ -162,6 +170,7 @@ export async function improveProject(point: string, customPrompt?: string) {
   return object.content;
 }
 
+// PROJECT BULLET POINTS
 export async function generateProjectPoints(
   projectName: string,
   technologies: string[],

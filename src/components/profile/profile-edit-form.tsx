@@ -75,7 +75,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsResetting(true);
       // Reset to empty profile locally
-      setProfile({
+      const resetProfile = {
         id: profile.id,
         user_id: profile.user_id,
         first_name: '',
@@ -93,11 +93,21 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         certifications: [],
         created_at: profile.created_at,
         updated_at: profile.updated_at
-      });
-      toast.info("Profile reset - Don&apos;t forget to save your changes to make this permanent", {
+      };
+      
+      // Update local state
+      setProfile(resetProfile);
+      
+      // Save to database
+      await updateProfile(resetProfile);
+      
+      toast.success("Profile reset successfully", {
         position: "bottom-right",
         className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
       });
+      
+      // Force a server revalidation
+      router.refresh();
     } catch (error: unknown) {
       toast.error("Failed to reset profile. Please try again.", {
         position: "bottom-right",
