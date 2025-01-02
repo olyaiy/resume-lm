@@ -27,17 +27,90 @@ import {
   TEXT_ANALYZER_SYSTEM_MESSAGE 
 } from "@/lib/prompts";
 
-export async function formatProfileWithAI(userMessages: string) {
-  const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
-    schema: z.object({
-      content: textImportSchema
-    }),
-    prompt: userMessages,
-    system: RESUME_FORMATTER_SYSTEM_MESSAGE.content as string,
-  });
 
-  return object.content;
+
+// RESUME -> PROFILE
+export async function formatProfileWithAI(userMessages: string) {
+  try {
+    console.log('Input userMessages:', userMessages);
+
+    const { object } = await generateObject({
+      model: openaiVercel("gpt-4o-mini"),
+      schema: z.object({
+        content: z.object({
+          first_name: z.string().optional(),
+          last_name: z.string().optional(),
+          email: z.string().optional(),
+          phone_number: z.string().optional(),
+          location: z.string().optional(),
+          website: z.string().optional(),
+          linkedin_url: z.string().optional(),
+          github_url: z.string().optional(),
+          work_experience: z.array(z.object({
+            company: z.string(),
+            position: z.string(),
+            date: z.string(),
+            location: z.string().optional(),
+            description: z.array(z.string()),
+            technologies: z.array(z.string()).optional()
+          })).optional(),
+          education: z.array(z.object({
+            school: z.string(),
+            degree: z.string(),
+            field: z.string(),
+            date: z.string(),
+            location: z.string().optional(),
+            gpa: z.string().optional(),
+            achievements: z.array(z.string()).optional()
+          })).optional(),
+          skills: z.array(z.object({
+            category: z.string(),
+            items: z.array(z.string())
+          })).optional(),
+          projects: z.array(z.object({
+            name: z.string(),
+            description: z.array(z.string()),
+            technologies: z.array(z.string()).optional(),
+            date: z.string().optional(),
+            url: z.string().optional(),
+            github_url: z.string().optional()
+          })).optional(),
+          certifications: z.array(z.object({
+            name: z.string(),
+            issuer: z.string(),
+            date_acquired: z.string().optional(),
+            expiry_date: z.string().optional(),
+            credential_id: z.string().optional(),
+            url: z.string().optional()
+          })).optional()
+        })
+      }),
+      prompt: `Please analyze this resume text and extract all relevant information into a structured profile format. 
+Include all sections (personal info, work experience, education, skills, projects, certifications) if present.
+Ensure all arrays (like description, technologies, achievements) are properly formatted as arrays.
+For any missing or unclear information, use optional fields rather than making assumptions.
+
+Resume Text:
+${userMessages}`,
+      system: `You are an expert resume parser. Your task is to:
+1. Extract all relevant information from the resume text
+2. Structure it according to the schema
+3. Ensure all dates, locations, and other details are preserved exactly as written
+4. Maintain original formatting and wording of descriptions
+5. Group skills into appropriate categories
+6. Keep all URLs in their original format
+7. Ensure all array fields (descriptions, technologies, achievements) are properly formatted as arrays
+Do not add, modify, or enhance any information. Extract only what is explicitly present in the text.`,
+    });
+
+    console.log('AI Response object:', object);
+    console.log('AI Response content:', object.content);
+
+    return object.content;
+  } catch (error) {
+    console.error('Error in formatProfileWithAI:', error);
+    throw error;
+  }
 }
 
 export async function importProfileToResume(profile: Profile, targetRole: string) {
@@ -125,6 +198,7 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
   return object.content;
 }
 
+// Text Import for profile
 export async function processTextImport(text: string) {
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),

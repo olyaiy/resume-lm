@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload} from "lucide-react";
-import { processTextImport } from "@/utils/ai";
+import { formatProfileWithAI, processTextImport } from "@/utils/ai";
 import {
   Dialog,
   DialogContent,
@@ -119,23 +119,21 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     try {
       setIsProcessingResume(true);
       
-      const result = await processTextImport(resumeContent);
+      const result = await formatProfileWithAI(resumeContent);
       
       if (result) {
-        const parsedProfile = JSON.parse(result);
-        
         // Clean and transform the data to match our database schema
         const cleanedProfile: Partial<Profile> = {
-          first_name: parsedProfile.first_name || null,
-          last_name: parsedProfile.last_name || null,
-          email: parsedProfile.email || null,
-          phone_number: parsedProfile.phone_number || null,
-          location: parsedProfile.location || null,
-          website: parsedProfile.website || null,
-          linkedin_url: parsedProfile.linkedin_url || null,
-          github_url: parsedProfile.github_url || null,
-          work_experience: Array.isArray(parsedProfile.work_experience) 
-            ? parsedProfile.work_experience.map((exp: Partial<WorkExperience>) => ({
+          first_name: result.first_name || null,
+          last_name: result.last_name || null,
+          email: result.email || null,
+          phone_number: result.phone_number || null,
+          location: result.location || null,
+          website: result.website || null,
+          linkedin_url: result.linkedin_url || null,
+          github_url: result.github_url || null,
+          work_experience: Array.isArray(result.work_experience) 
+            ? result.work_experience.map((exp: Partial<WorkExperience>) => ({
                 company: exp.company || '',
                 position: exp.position || '',
                 location: exp.location || '',
@@ -148,8 +146,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   : []
               }))
             : [],
-          education: Array.isArray(parsedProfile.education)
-            ? parsedProfile.education.map((edu: Partial<Education>) => ({
+          education: Array.isArray(result.education)
+            ? result.education.map((edu: Partial<Education>) => ({
                 school: edu.school || '',
                 degree: edu.degree || '',
                 field: edu.field || '',
@@ -161,8 +159,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                   : []
               }))
             : [],
-          skills: Array.isArray(parsedProfile.skills)
-            ? parsedProfile.skills.map((skill: { category: string; skills?: string[]; items?: string[] }) => ({
+          skills: Array.isArray(result.skills)
+            ? result.skills.map((skill: { category: string; skills?: string[]; items?: string[] }) => ({
                 category: skill.category || '',
                 items: Array.isArray(skill.skills) 
                   ? skill.skills 
@@ -171,10 +169,12 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     : []
               }))
             : [],
-          projects: Array.isArray(parsedProfile.projects)
-            ? parsedProfile.projects.map((proj: Partial<Project>) => ({
+          projects: Array.isArray(result.projects)
+            ? result.projects.map((proj: Partial<Project>) => ({
                 name: proj.name || '',
-                description: proj.description || '',
+                description: Array.isArray(proj.description) 
+                  ? proj.description 
+                  : [proj.description || ''],
                 technologies: Array.isArray(proj.technologies) 
                   ? proj.technologies 
                   : [],
@@ -183,8 +183,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 date: proj.date || ''
               }))
             : [],
-          certifications: Array.isArray(parsedProfile.certifications)
-            ? parsedProfile.certifications.map((cert: Partial<Certification>) => ({
+          certifications: Array.isArray(result.certifications)
+            ? result.certifications.map((cert: Partial<Certification>) => ({
                 name: cert.name || '',
                 issuer: cert.issuer || '',
                 date_acquired: cert.date_acquired || '',
@@ -201,7 +201,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           ...prev,
           ...cleanedProfile
         }));
-        toast.success("Content imported successfully - Don&apos;t forget to save your changes", {
+        toast.success("Content imported successfully - Don't forget to save your changes", {
           position: "bottom-right",
           className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
         });
@@ -209,6 +209,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         setResumeContent("");
       }
     } catch (error: unknown) {
+      console.error('Resume upload error:', error);
       if (error instanceof Error) {
         toast.error("Failed to process content: " + error.message, {
           position: "bottom-right",
