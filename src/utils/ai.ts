@@ -27,13 +27,15 @@ import {
   TEXT_ANALYZER_SYSTEM_MESSAGE 
 } from "@/lib/prompts";
 
-
+// Model declarations
+const defaultModel = openaiVercel("gpt-4o-mini");
+const tailoringModel = anthropic("claude-3-5-sonnet-20240620");
 
 // RESUME -> PROFILE
 export async function formatProfileWithAI(userMessages: string) {
   try {
     const { object } = await generateObject({
-      model: openaiVercel("gpt-4o-mini"),
+      model: defaultModel,
       schema: z.object({
         content: z.object({
           first_name: z.string().optional(),
@@ -106,7 +108,7 @@ ${userMessages}`,
 // PROFILE -> RESUME
 export async function importProfileToResume(profile: Profile, targetRole: string) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: simplifiedResumeSchema
     }),
@@ -127,7 +129,7 @@ export async function generateWorkExperiencePoints(
   customPrompt: string = ''
 ) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: workExperienceBulletPointsSchema
     }),
@@ -145,7 +147,7 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
 // WORK EXPERIENCE BULLET POINTS IMPROVEMENT
 export async function improveWorkExperience(point: string, customPrompt?: string) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: z.string().describe("The improved work experience bullet point")
     }),
@@ -159,7 +161,7 @@ export async function improveWorkExperience(point: string, customPrompt?: string
 // PROJECT BULLET POINTS IMPROVEMENT
 export async function improveProject(point: string, customPrompt?: string) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: z.string().describe("The improved project bullet point")
     }),
@@ -179,7 +181,7 @@ export async function generateProjectPoints(
   customPrompt: string = ''
 ) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: projectAnalysisSchema
     }),
@@ -196,7 +198,7 @@ Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}`
 // Text Import for profile
 export async function processTextImport(text: string) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: textImportSchema
     }),
@@ -212,7 +214,7 @@ export async function modifyWorkExperience(
   prompt: string
 ) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: workExperienceItemsSchema
     }),
@@ -228,7 +230,7 @@ export async function modifyWorkExperience(
 
 export async function addTextToResume(prompt: string, existingResume: Resume) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: textImportSchema
     }),
@@ -260,7 +262,7 @@ export async function addTextToResume(prompt: string, existingResume: Resume) {
 
 export async function convertTextToResume(prompt: string, existingResume: Resume) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: textImportSchema
     }),
@@ -291,7 +293,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
 
 export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<typeof simplifiedJobSchema>) {
   const { object } = await generateObject({
-    model: anthropic("claude-3-5-sonnet-20240620"),
+    model: tailoringModel,
     schema: z.object({
       content: simplifiedResumeSchema,
     }),
@@ -316,7 +318,7 @@ export async function tailorResumeToJob(resume: Resume, jobListing: z.infer<type
 
 export async function formatJobListing(jobListing: string) {
   const { object } = await generateObject({
-    model: openaiVercel("gpt-4o-mini"),
+    model: defaultModel,
     schema: z.object({
       content: simplifiedJobSchema
     }),
