@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume, WorkExperience, Education, Skill, Project, ApiKey, ServiceName } from "@/lib/types";
+import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
@@ -650,51 +650,3 @@ export async function deleteTailoredJob(jobId: string): Promise<void> {
   revalidatePath('/', 'layout');
 }
 
-export async function getApiKeys(): Promise<ApiKey[]> {
-  const supabase = await createClient();
-  
-  const { data: apiKeys, error } = await supabase
-    .from('api_keys')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false });
-
-  if (error) throw error;
-  return apiKeys as ApiKey[];
-}
-
-export async function addApiKey(serviceName: ServiceName, apiKey: string) {
-  const supabase = await createClient();
-  
-  // First deactivate any existing active keys for this service
-  await supabase
-    .from('api_keys')
-    .update({ is_active: false })
-    .eq('service_name', serviceName)
-    .eq('is_active', true);
-
-  // Store the new key in vault and get reference
-  const { data: vaultData, error: vaultError } = await supabase
-    .rpc('store_api_key', {
-      p_service_name: serviceName,
-      p_api_key: apiKey
-    });
-
-  if (vaultError) throw vaultError;
-
-  revalidatePath('/settings');
-  return vaultData;
-}
-
-export async function removeApiKey(keyId: string) {
-  const supabase = await createClient();
-  
-  const { error } = await supabase
-    .from('api_keys')
-    .update({ is_active: false })
-    .eq('id', keyId);
-
-  if (error) throw error;
-  
-  revalidatePath('/settings');
-}

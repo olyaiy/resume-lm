@@ -226,4 +226,39 @@ export const simplifiedResumeSchema = z.object({
 
 // Add type inference helper
 export type Job = z.infer<typeof jobSchema>;
-export type SalaryRange = z.infer<typeof salaryRangeSchema>; 
+export type SalaryRange = z.infer<typeof salaryRangeSchema>;
+
+// Work Experience Bullet Points Analysis Schema
+export const workExperienceBulletPointsSchema = z.object({
+  points: z.array(z.string().describe("A bullet point describing a work achievement or responsibility")),
+  analysis: z.object({
+    impact_score: z.number().min(1).max(10).describe("Score indicating the overall impact of these achievements (1-10)"),
+    improvement_suggestions: z.array(z.string().describe("A suggestion for improvement"))
+  })
+});
+
+// Project Analysis Schema
+export const projectAnalysisSchema = z.object({
+  points: z.array(z.string().describe("A bullet point describing a project achievement or feature")),
+  analysis: z.object({
+    impact_score: z.number().min(1).max(10).describe("Score indicating the overall impact of these achievements (1-10)"),
+    improvement_suggestions: z.array(z.string().describe("A suggestion for improvement"))
+  })
+});
+
+// Work Experience Items Schema
+export const workExperienceItemsSchema = z.object({
+  work_experience_items: z.array(z.object({
+    company: z.string().describe("The name of the company where the work experience took place"),
+    position: z.string().describe("The job title or position held during the work experience"),
+    location: z.string().describe("The location of the company"),
+    date: z.string().describe("The date or period during which the work experience occurred"),
+    description: z.array(z.string()).describe("A list of responsibilities and achievements during the work experience"),
+    technologies: z.array(z.string()).describe("A list of technologies used during the work experience")
+  }))
+});
+
+// Add type inference helpers for new schemas
+export type WorkExperienceBulletPoints = z.infer<typeof workExperienceBulletPointsSchema>;
+export type ProjectAnalysis = z.infer<typeof projectAnalysisSchema>;
+export type WorkExperienceItems = z.infer<typeof workExperienceItemsSchema>; 
