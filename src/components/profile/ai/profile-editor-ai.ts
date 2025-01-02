@@ -1,41 +1,8 @@
 'use server';
-import { createOpenAI } from '@ai-sdk/openai';
-import { createAnthropic } from '@ai-sdk/anthropic';
 import { generateObject } from 'ai';
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
-
-type ApiKey = {
-  service: string;
-  key: string;
-  addedAt: string;
-};
-
-type AIConfig = {
-  model: string;
-  apiKeys: Array<ApiKey>;
-};
-
-// Initialize AI client based on model and API keys
-function initializeAIClient(config?: AIConfig) {
-  if (!config) {
-    return createOpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })('gpt-4o-mini');
-  }
-
-  const { model, apiKeys } = config;
-  
-  // Determine which service to use based on model name
-  if (model.startsWith('claude')) {
-    const anthropicKey = apiKeys.find(k => k.service === 'anthropic')?.key;
-    if (!anthropicKey) throw new Error('Anthropic API key not found');
-    return createAnthropic({ apiKey: anthropicKey })(model);
-  } 
-  
-  // Default to OpenAI
-  const openaiKey = apiKeys.find(k => k.service === 'openai')?.key;
-  if (!openaiKey) throw new Error('OpenAI API key not found');
-  return createOpenAI({ apiKey: openaiKey })(model);
-}
+import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
 // RESUME -> PROFILE
 export async function formatProfileWithAI(

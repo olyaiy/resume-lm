@@ -16,10 +16,9 @@ import {
   projectAnalysisSchema,
   workExperienceItemsSchema
 } from "@/lib/zod-schemas";
-import { Job, Profile, Resume, WorkExperience } from "@/lib/types";
+import { Job, Resume, WorkExperience } from "@/lib/types";
 import { 
   // RESUME_FORMATTER_SYSTEM_MESSAGE, 
-  RESUME_IMPORTER_SYSTEM_MESSAGE, 
   WORK_EXPERIENCE_GENERATOR_MESSAGE, 
   WORK_EXPERIENCE_IMPROVER_MESSAGE, 
   PROJECT_GENERATOR_MESSAGE, 
@@ -34,19 +33,7 @@ const tailoringModel = anthropic("claude-3-5-sonnet-20240620");
 
 
 
-// PROFILE -> RESUME
-export async function importProfileToResume(profile: Profile, targetRole: string) {
-  const { object } = await generateObject({
-    model: defaultModel,
-    schema: z.object({
-      content: simplifiedResumeSchema
-    }),
-    prompt: `Please analyze my profile and recommend which experiences and skills would be most relevant for a resume targeting the role of "${targetRole}". Here's my complete profile: ${JSON.stringify(profile, null, 2)}`,
-    system: RESUME_IMPORTER_SYSTEM_MESSAGE.content as string,
-  });
 
-  return object.content;
-}
 
 // WORK EXPERIENCE BULLET POINTS
 export async function generateWorkExperiencePoints(

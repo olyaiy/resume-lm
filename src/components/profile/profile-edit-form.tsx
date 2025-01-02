@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload} from "lucide-react";
-import { formatProfileWithAI } from "@/components/profile/actions/ai";
+
 import {
   Dialog,
   DialogContent,
@@ -28,6 +28,7 @@ import { ProfileProjectsForm } from "@/components/profile/profile-projects-form"
 import { ProfileEducationForm } from "@/components/profile/profile-education-form";
 import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 import { ProfileEditorHeader } from "./profile-editor-header";
+import { formatProfileWithAI } from "./ai/profile-editor-ai";
 
 interface ProfileEditFormProps {
   profile: Profile;
