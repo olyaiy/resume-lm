@@ -5,14 +5,14 @@ import { ApiKeysForm } from "./api-keys-form"
 import { SubscriptionSection } from "./subscription-section"
 import { DangerZone } from "./danger-zone"
 import { User } from "@supabase/supabase-js"
-import { ApiKey } from "@/lib/types"
+
 
 interface SettingsContentProps {
   user: User | null;
-  apiKeys: ApiKey[];
+
 }
 
-export function SettingsContent({ user, apiKeys }: SettingsContentProps) {
+export function SettingsContent({ user }: SettingsContentProps) {
   return (
     <div className="space-y-8">
         
@@ -35,7 +35,7 @@ export function SettingsContent({ user, apiKeys }: SettingsContentProps) {
           <CardDescription>Manage your API keys for different AI providers</CardDescription>
         </CardHeader>
         <CardContent>
-          <ApiKeysForm apiKeys={apiKeys} />
+          <ApiKeysForm />
         </CardContent>
       </Card>
 
