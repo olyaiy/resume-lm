@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload} from "lucide-react";
-import { formatProfileWithAI, processTextImport } from "@/utils/ai";
+import { formatProfileWithAI } from "@/utils/ai";
 import {
   Dialog,
   DialogContent,
@@ -209,8 +209,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         setResumeContent("");
       }
     } catch (error: unknown) {
-      console.error('Resume upload error:', error);
       if (error instanceof Error) {
+        console.error('Resume upload error:', error);
         toast.error("Failed to process content: " + error.message, {
           position: "bottom-right",
         });

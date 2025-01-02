@@ -32,8 +32,6 @@ import {
 // RESUME -> PROFILE
 export async function formatProfileWithAI(userMessages: string) {
   try {
-    console.log('Input userMessages:', userMessages);
-
     const { object } = await generateObject({
       model: openaiVercel("gpt-4o-mini"),
       schema: z.object({
@@ -86,29 +84,17 @@ export async function formatProfileWithAI(userMessages: string) {
         })
       }),
       prompt: `Please analyze this resume text and extract all relevant information into a structured profile format. 
-Include all sections (personal info, work experience, education, skills, projects, certifications) if present.
-Ensure all arrays (like description, technologies, achievements) are properly formatted as arrays.
-For any missing or unclear information, use optional fields rather than making assumptions.
+              Include all sections (personal info, work experience, education, skills, projects, certifications) if present.
+              Ensure all arrays (like description, technologies, achievements) are properly formatted as arrays.
+              For any missing or unclear information, use optional fields rather than making assumptions.
 
-Resume Text:
+              Resume Text:
 ${userMessages}`,
-      system: `You are an expert resume parser. Your task is to:
-1. Extract all relevant information from the resume text
-2. Structure it according to the schema
-3. Ensure all dates, locations, and other details are preserved exactly as written
-4. Maintain original formatting and wording of descriptions
-5. Group skills into appropriate categories
-6. Keep all URLs in their original format
-7. Ensure all array fields (descriptions, technologies, achievements) are properly formatted as arrays
-Do not add, modify, or enhance any information. Extract only what is explicitly present in the text.`,
+      system: RESUME_FORMATTER_SYSTEM_MESSAGE.content as string,
     });
-
-    console.log('AI Response object:', object);
-    console.log('AI Response content:', object.content);
 
     return object.content;
   } catch (error) {
-    console.error('Error in formatProfileWithAI:', error);
     throw error;
   }
 }
