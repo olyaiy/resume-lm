@@ -361,8 +361,11 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
               )}>
                 {((error as Error)?.message?.includes('invalid x-api-key') || 
                  JSON.stringify(error).includes('authentication_error'))
-                  ? "Your API key is invalid, please try updating it in settings and try again."
-                  : "An error occurred."}
+                  ? "Your Anthropic API key is invalid, please try updating it in settings and try again."
+                  : ((error as Error)?.message?.includes('Incorrect API key provided') ||
+                     JSON.stringify(error).includes('invalid_api_key'))
+                    ? "Your OpenAI API key is invalid, please try updating it in settings and try again."
+                    : "An error occurred."}
               </div>
             )}
 

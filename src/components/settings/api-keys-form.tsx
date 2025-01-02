@@ -49,7 +49,20 @@ const AI_MODELS: AIModel[] = [
 ]
 
 export function ApiKeysForm() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>(() => {
+    if (typeof window !== 'undefined') {
+      const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
+      if (storedKeys) {
+        try {
+          return JSON.parse(storedKeys)
+        } catch (error) {
+          console.error('Error loading API keys:', error)
+          return []
+        }
+      }
+    }
+    return []
+  })
   const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>(() => {
     const initialState: Partial<Record<ServiceName, boolean>> = {}
     return initialState as Record<ServiceName, boolean>
@@ -58,29 +71,13 @@ export function ApiKeysForm() {
     const initialState: Partial<Record<ServiceName, string>> = {}
     return initialState as Record<ServiceName, string>
   })
-  const [defaultModel, setDefaultModel] = useState<string>(USER_SELECTED_MODEL)
-
-  // Load API keys from local storage on mount
-  useEffect(() => {
-    const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
-    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
-    
-    if (storedKeys) {
-      try {
-        setApiKeys(JSON.parse(storedKeys))
-      } catch (error) {
-        console.error('Error loading API keys:', error)
-        toast.error('Failed to load API keys')
-      }
+  const [defaultModel, setDefaultModel] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
+      return storedModel || USER_SELECTED_MODEL
     }
-
-    if (storedModel) {
-      setDefaultModel(storedModel)
-    } else {
-      setDefaultModel(USER_SELECTED_MODEL)
-      localStorage.setItem(MODEL_STORAGE_KEY, USER_SELECTED_MODEL)
-    }
-  }, [])
+    return USER_SELECTED_MODEL
+  })
 
   // Save API keys to local storage whenever they change
   useEffect(() => {
