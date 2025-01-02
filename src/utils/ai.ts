@@ -81,30 +81,26 @@ export async function improveWorkExperience(point: string, customPrompt?: string
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
     schema: z.object({
-      content: z.object({
-        improved_point: z.string()
-      })
+      content: z.string().describe("The improved work experience bullet point")
     }),
     prompt: `Please improve this work experience bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
     system: WORK_EXPERIENCE_IMPROVER_MESSAGE.content as string,
   });
 
-  return object.content.improved_point;
+  return object.content;
 }
 
 export async function improveProject(point: string, customPrompt?: string) {
   const { object } = await generateObject({
     model: openaiVercel("gpt-4o-mini"),
     schema: z.object({
-      content: z.object({
-        improved_point: z.string()
-      })
+      content: z.string().describe("The improved project bullet point")
     }),
     prompt: `Please improve this project bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
     system: PROJECT_IMPROVER_MESSAGE.content as string,
   });
 
-  return object.content.improved_point;
+  return object.content;
 }
 
 export async function generateProjectPoints(
