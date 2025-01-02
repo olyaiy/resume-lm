@@ -3,6 +3,7 @@ import { MockResume } from "@/components/landing/mock-resume";
 import { BenefitsList } from "@/components/landing/benefits-list";
 import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
+import { PricingSection } from "@/components/landing/pricing-section";
 
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
@@ -50,7 +51,7 @@ export const metadata: Metadata = {
 
 export default async function LoginPage() {
   return (
-    <main className="h-[80vh] relative overflow-hidden selection:bg-violet-200/50">
+    <main className=" relative overflow-hidden selection:bg-violet-200/50">
       {/* Enhanced Gradient Background Elements */}
       <div className="fixed inset-0 z-0">
         {/* Primary gradient mesh with improved colors */}
@@ -77,7 +78,7 @@ export default async function LoginPage() {
       {/* Enhanced Content with better spacing and animations */}
       <div className="relative z-10">
         {/* Hero Section with Split Layout */}
-        <div className="min-h-[calc(100vh-3.5rem)] max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 py-8 lg:py-16">
             {/* Left Column - Content */}
             <div className="flex flex-col gap-6 lg:gap-10 lg:pr-12">
@@ -141,6 +142,9 @@ export default async function LoginPage() {
             </div>
           </div>
         </div>
+
+        {/* Pricing Section */}
+        <PricingSection />
       </div>
     </main>
   );

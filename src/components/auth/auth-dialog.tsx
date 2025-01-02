@@ -21,6 +21,10 @@ interface TabButtonProps {
   children: React.ReactNode;
 }
 
+interface AuthDialogProps {
+  children?: React.ReactNode;
+}
+
 function TabButton({ value, children }: TabButtonProps) {
   const colors = value === "login" 
     ? { active: "violet", hover: "violet" }
@@ -54,21 +58,23 @@ function TabButton({ value, children }: TabButtonProps) {
   );
 }
 
-export function AuthDialog() {
+export function AuthDialog({ children }: AuthDialogProps) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button 
-          size="lg" 
-          className={`${gradientClasses.base} ${gradientClasses.hover} ${gradientClasses.shadow} px-8 ${gradientClasses.animation} group`}
-          aria-label="Open authentication dialog"
-        >
-          Customize Now
-          <ArrowRight className="ml-2.5 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-        </Button>
+        {children || (
+          <Button 
+            size="lg" 
+            className={`${gradientClasses.base} ${gradientClasses.hover} ${gradientClasses.shadow} px-8 ${gradientClasses.animation} group`}
+            aria-label="Open authentication dialog"
+          >
+            Customize Now
+            <ArrowRight className="ml-2.5 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+          </Button>
+        )}
       </DialogTrigger>
 
       <DialogContent 
