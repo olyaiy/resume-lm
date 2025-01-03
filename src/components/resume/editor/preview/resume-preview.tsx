@@ -10,7 +10,7 @@
 
 import { Resume } from "@/lib/types";
 import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect, memo } from 'react';
+import { useState, useEffect, memo, useMemo } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -24,6 +24,62 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
   'pdfjs-dist/build/pdf.worker.min.mjs',
   import.meta.url,
 ).toString();
+
+// Cache for storing generated PDFs
+const pdfCache = new Map<string, { url: string; timestamp: number }>();
+
+// Cache cleanup interval (5 minutes)
+const CACHE_CLEANUP_INTERVAL = 5 * 60 * 1000;
+
+// Cache expiration time (30 minutes)
+const CACHE_EXPIRATION_TIME = 30 * 60 * 1000;
+
+/**
+ * Generate a simple hash from the resume content
+ * This is used as a cache key for PDF generation
+ */
+function generateResumeHash(resume: Resume): string {
+  const content = JSON.stringify({
+    basic: {
+      name: `${resume.first_name} ${resume.last_name}`,
+      contact: [resume.email, resume.phone_number, resume.location, resume.website, resume.linkedin_url, resume.github_url],
+    },
+    sections: {
+      skills: resume.skills,
+      experience: resume.work_experience,
+      projects: resume.projects,
+      education: resume.education,
+    },
+    settings: resume.document_settings,
+  });
+  
+  // Simple hash function
+  let hash = 0;
+  for (let i = 0; i < content.length; i++) {
+    const char = content.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash;
+  }
+  return hash.toString(36);
+}
+
+/**
+ * Cleanup expired cache entries
+ */
+function cleanupCache() {
+  const now = Date.now();
+  for (const [hash, { url, timestamp }] of pdfCache.entries()) {
+    if (now - timestamp > CACHE_EXPIRATION_TIME) {
+      URL.revokeObjectURL(url);
+      pdfCache.delete(hash);
+    }
+  }
+}
+
+// Setup cache cleanup interval
+if (typeof window !== 'undefined') {
+  setInterval(cleanupCache, CACHE_CLEANUP_INTERVAL);
+}
 
 // Add custom styles for PDF annotations to ensure links are clickable
 const customStyles = `
@@ -57,6 +113,9 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
 
+  // Generate resume hash for caching
+  const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
+
   // Add styles to document head
   useEffect(() => {
     const styleElement = document.createElement('style');
@@ -67,16 +126,48 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
     };
   }, []);
 
-  // Generate PDF when resume data changes
+  // Generate or retrieve PDF from cache
   useEffect(() => {
+    let currentUrl: string | null = null;
+
     async function generatePDF() {
+      // Check cache first
+      const cached = pdfCache.get(resumeHash);
+      if (cached) {
+        currentUrl = cached.url;
+        setUrl(cached.url);
+        return;
+      }
+
+      // Generate new PDF if not in cache
       const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} />).toBlob();
-      const url = URL.createObjectURL(blob);
-      setUrl(url);
-      return () => URL.revokeObjectURL(url);
+      const newUrl = URL.createObjectURL(blob);
+      currentUrl = newUrl;
+      
+      // Store in cache with timestamp
+      pdfCache.set(resumeHash, { url: newUrl, timestamp: Date.now() });
+      setUrl(newUrl);
     }
+
     generatePDF();
-  }, [resume, variant]);
+
+    // Cleanup function
+    return () => {
+      if (currentUrl && !pdfCache.has(resumeHash)) {
+        URL.revokeObjectURL(currentUrl);
+      }
+    };
+  }, [resumeHash, variant, resume]);
+
+  // Cleanup on component unmount
+  useEffect(() => {
+    return () => {
+      // Final cleanup of this component's URL if not in cache
+      if (url && !pdfCache.has(resumeHash)) {
+        URL.revokeObjectURL(url);
+      }
+    };
+  }, [resumeHash, url]);
 
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);

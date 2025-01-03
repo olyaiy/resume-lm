@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
+import { memo } from 'react';
 
 
 interface EducationFormProps {
@@ -16,7 +17,21 @@ interface EducationFormProps {
   profile: Profile;
 }
 
-export function EducationForm({ education, onChange, profile }: EducationFormProps) {
+function areEducationPropsEqual(
+  prevProps: EducationFormProps,
+  nextProps: EducationFormProps
+) {
+  return (
+    JSON.stringify(prevProps.education) === JSON.stringify(nextProps.education) &&
+    prevProps.profile.id === nextProps.profile.id
+  );
+}
+
+export const EducationForm = memo(function EducationFormComponent({
+  education,
+  onChange,
+  profile
+}: EducationFormProps) {
   const addEducation = () => {
     onChange([{
       school: "",
@@ -206,4 +221,4 @@ export function EducationForm({ education, onChange, profile }: EducationFormPro
       ))}
     </div>
   );
-} 
+}, areEducationPropsEqual); 

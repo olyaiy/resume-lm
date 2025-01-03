@@ -9,7 +9,7 @@ import { Plus, Trash2, GripVertical } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 
 import {
   Tooltip,
@@ -42,10 +42,23 @@ interface ProjectsFormProps {
   projects: Project[];
   onChange: (projects: Project[]) => void;
   profile: Profile;
-  targetRole?: string;
 }
 
-export function ProjectsForm({ projects, onChange, profile, targetRole = "Software Engineer" }: ProjectsFormProps) {
+function areProjectsPropsEqual(
+  prevProps: ProjectsFormProps,
+  nextProps: ProjectsFormProps
+) {
+  return (
+    JSON.stringify(prevProps.projects) === JSON.stringify(nextProps.projects) &&
+    prevProps.profile.id === nextProps.profile.id
+  );
+}
+
+export const ProjectsForm = memo(function ProjectsFormComponent({
+  projects,
+  onChange,
+  profile
+}: ProjectsFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
   const [loadingPointAI, setLoadingPointAI] = useState<{ [key: number]: { [key: number]: boolean } }>({});
@@ -118,7 +131,7 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
       const result = await generateProjectPoints(
         project.name,
         project.technologies || [],
-        targetRole,
+        "Software Engineer",
         config.numPoints,
         config.customPrompt,
         {
@@ -581,4 +594,4 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
       </AlertDialog>
     </>
   );
-} 
+}, areProjectsPropsEqual); 

@@ -1,5 +1,8 @@
+
 'use client';
 
+
+import React from 'react';
 
 import { updateResume, deleteResume } from "@/utils/actions";
 import { Resume, Profile } from "@/lib/types";

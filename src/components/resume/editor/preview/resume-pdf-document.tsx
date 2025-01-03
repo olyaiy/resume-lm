@@ -2,7 +2,8 @@
 
 import { Resume } from "@/lib/types";
 import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
-import { memo, useMemo } from 'react';
+import { memo, useMemo, useCallback } from 'react';
+import type { ReactNode } from 'react';
 
 // Base styles that don't depend on resume settings
 const baseStyles = {
@@ -20,15 +21,32 @@ const baseStyles = {
   },
 } as const;
 
-// Utility function to parse bold text
-function renderTextWithBold(text: string) {
-  const parts = text.split(/(\*\*.*?\*\*)/g);
-  return parts.map((part, index) => {
-    if (part.startsWith('**') && part.endsWith('**')) {
-      return <Text key={index} style={{ fontFamily: 'Helvetica-Bold' }}>{part.slice(2, -2)}</Text>;
+// Create a cache outside of components to persist between renders
+const textProcessingCache = new Map<string, ReactNode[]>();
+
+// Memoized text processing function
+function useTextProcessor() {
+  const processText = useCallback((text: string) => {
+    // Check cache first
+    if (textProcessingCache.has(text)) {
+      return textProcessingCache.get(text);
     }
-    return <Text key={index}>{part}</Text>;
-  });
+
+    // Process text if not in cache
+    const parts = text.split(/(\*\*.*?\*\*)/g);
+    const processed = parts.map((part, index) => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return <Text key={index} style={{ fontFamily: 'Helvetica-Bold' }}>{part.slice(2, -2)}</Text>;
+      }
+      return <Text key={index}>{part}</Text>;
+    });
+
+    // Store in cache
+    textProcessingCache.set(text, processed);
+    return processed;
+  }, []);
+
+  return processText;
 }
 
 // Memoized section components
@@ -126,6 +144,7 @@ const ExperienceSection = memo(function ExperienceSection({
   experiences: Resume['work_experience']; 
   styles: ReturnType<typeof createResumeStyles>;
 }) {
+  const processText = useTextProcessor();
   if (!experiences?.length) return null;
 
   return (
@@ -145,7 +164,7 @@ const ExperienceSection = memo(function ExperienceSection({
               <Text style={styles.bulletDot}>•</Text>
               <View style={styles.bulletText}>
                 <Text style={styles.bulletTextContent}>
-                  {renderTextWithBold(bullet)}
+                  {processText(bullet)}
                 </Text>
               </View>
             </View>
@@ -163,6 +182,7 @@ const ProjectsSection = memo(function ProjectsSection({
   projects: Resume['projects']; 
   styles: ReturnType<typeof createResumeStyles>;
 }) {
+  const processText = useTextProcessor();
   if (!projects?.length) return null;
 
   return (
@@ -206,7 +226,7 @@ const ProjectsSection = memo(function ProjectsSection({
               <Text style={styles.bulletDot}>•</Text>
               <View style={styles.bulletText}>
                 <Text style={styles.bulletTextContent}>
-                  {renderTextWithBold(bullet)}
+                  {processText(bullet)}
                 </Text>
               </View>
             </View>
@@ -224,6 +244,7 @@ const EducationSection = memo(function EducationSection({
   education: Resume['education']; 
   styles: ReturnType<typeof createResumeStyles>;
 }) {
+  const processText = useTextProcessor();
   if (!education?.length) return null;
 
   return (
@@ -242,7 +263,7 @@ const EducationSection = memo(function EducationSection({
             <View key={bulletIndex} style={styles.bulletPoint}>
               <Text style={styles.bulletDot}>•</Text>
               <View style={styles.bulletText}>
-                {renderTextWithBold(achievement)}
+                {processText(achievement)}
               </View>
             </View>
           ))}

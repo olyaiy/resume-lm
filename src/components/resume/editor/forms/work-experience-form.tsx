@@ -9,7 +9,7 @@ import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, memo } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import {
   Tooltip,
@@ -43,7 +43,25 @@ interface ImprovementConfig {
   [key: number]: { [key: number]: string }; // expIndex -> pointIndex -> prompt
 }
 
-export function WorkExperienceForm({ experiences, onChange, profile, targetRole = "Software Engineer" }: WorkExperienceFormProps) {
+// Create a comparison function
+function areWorkExperiencePropsEqual(
+  prevProps: WorkExperienceFormProps,
+  nextProps: WorkExperienceFormProps
+) {
+  return (
+    prevProps.targetRole === nextProps.targetRole &&
+    JSON.stringify(prevProps.experiences) === JSON.stringify(nextProps.experiences) &&
+    prevProps.profile.id === nextProps.profile.id
+  );
+}
+
+// Export the memoized component
+export const WorkExperienceForm = memo(function WorkExperienceFormComponent({ 
+  experiences, 
+  onChange, 
+  profile, 
+  targetRole = "Software Engineer" 
+}: WorkExperienceFormProps) {
   const [aiSuggestions, setAiSuggestions] = useState<{ [key: number]: AISuggestion[] }>({});
   const [loadingAI, setLoadingAI] = useState<{ [key: number]: boolean }>({});
   const [loadingPointAI, setLoadingPointAI] = useState<{ [key: number]: { [key: number]: boolean } }>({});
@@ -862,4 +880,4 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
       </AlertDialog>
     </>
   );
-} 
+}, areWorkExperiencePropsEqual); 

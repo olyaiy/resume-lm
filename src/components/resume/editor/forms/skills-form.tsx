@@ -8,6 +8,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
+import { memo } from 'react';
 
 interface SkillsFormProps {
   skills: Skill[];
@@ -15,7 +16,21 @@ interface SkillsFormProps {
   profile: Profile;
 }
 
-export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
+function areSkillsPropsEqual(
+  prevProps: SkillsFormProps,
+  nextProps: SkillsFormProps
+) {
+  return (
+    JSON.stringify(prevProps.skills) === JSON.stringify(nextProps.skills) &&
+    prevProps.profile.id === nextProps.profile.id
+  );
+}
+
+export const SkillsForm = memo(function SkillsFormComponent({
+  skills,
+  onChange,
+  profile
+}: SkillsFormProps) {
   const addSkillCategory = () => {
     onChange([{
       category: "",
@@ -148,4 +163,4 @@ export function SkillsForm({ skills, onChange, profile }: SkillsFormProps) {
       ))}
     </div>
   );
-} 
+}, areSkillsPropsEqual); 
