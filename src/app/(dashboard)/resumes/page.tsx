@@ -10,12 +10,13 @@ import type { SortOption, SortDirection } from "@/components/resume/management/r
 
 const RESUMES_PER_PAGE = 12;
 
-interface SearchParams {
-  [key: string]: string | string[] | undefined
-}
-
 interface PageProps {
-  searchParams: SearchParams
+  searchParams: {
+    page?: string
+    sort?: string
+    direction?: string
+    [key: string]: string | undefined
+  }
 }
 
 export default async function ResumesPage({ 

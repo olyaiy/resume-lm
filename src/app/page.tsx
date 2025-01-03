@@ -58,56 +58,55 @@ export default async function Home() {
   }
 
   return (
-    <main className="min-h-screen relative">
-      {/* Background Layer */}
-      <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-gradient-to-r from-pink-200/20 to-violet-200/20 rounded-full blur-3xl animate-float" />
-        <div className="absolute bottom-1/4 right-1/3 w-[400px] h-[400px] bg-gradient-to-r from-blue-200/20 to-teal-200/20 rounded-full blur-3xl animate-float-delayed" />
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px]" />
-      </div>
+    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
+      <DashboardHeader />
+      
+      <div className="container max-w-7xl mx-auto p-6 space-y-8">
+        {/* Header Section */}
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+              Dashboard
+            </h1>
+            <p className="text-muted-foreground">
+              Manage your resumes and profile
+            </p>
+          </div>
+        </div>
 
-      {/* Main Content Layer */}
-      <div className="relative z-10 flex flex-col min-h-screen">
-        <DashboardHeader/>
+        {/* Main Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Profile Card - Left Column */}
+          <div className="lg:col-span-1">
+            <ProfileCard profile={profile} />
+          </div>
 
-        {/* Main Dashboard Content */}
-        <div className="flex-1 px-4 md:px-6 lg:px-8 py-6 md:py-8">
-          <div className="relative max-w-[1800px] mx-auto space-y-6 md:space-y-8">
-            {/* Main Row - Profile and Base Resumes side by side */}
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 md:gap-8">
-              {/* Profile Card */}
-              <div className="lg:col-span-3 h-full">
-                <div className=" h-full">
-                  <ProfileCard profile={profile} />
-                </div>
-              </div>
-
-              {/* Base Resumes */}
-              <div className="lg:col-span-9">
-                <ResumeManagementCard
-                  type="base"
-                  resumes={baseResumes}
-                  profile={profile}
-                  icon={<FileText className="h-5 w-5" />}
-                  title="Base Resumes"
-                  description="Your resume templates"
-                  emptyTitle="No base resumes yet"
-                  emptyDescription="Create your first resume template to get started"
-                  gradientFrom="purple-600"
-                  gradientTo="indigo-600"
-                  accentColor={{
-                    bg: "purple-50",
-                    border: "purple-200",
-                    hover: "purple-300",
-                    text: "purple-600"
-                  }}
-                />
-              </div>
+          {/* Resumes Section - Right Column */}
+          <div className="lg:col-span-3 space-y-6">
+            {/* Base Resumes Card */}
+            <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl">
+              <ResumeManagementCard
+                type="base"
+                resumes={baseResumes}
+                profile={profile}
+                icon={<FileText className="h-5 w-5" />}
+                title="Base Resumes"
+                description="Your resume templates"
+                emptyTitle="No base resumes yet"
+                emptyDescription="Create your first resume template to get started"
+                gradientFrom="purple-600"
+                gradientTo="indigo-600"
+                accentColor={{
+                  bg: "purple-50",
+                  border: "purple-200",
+                  hover: "purple-300",
+                  text: "purple-600"
+                }}
+              />
             </div>
 
-            {/* Tailored Resumes */}
-            <div className="max-h-[20%]">
+            {/* Tailored Resumes Card */}
+            <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-pink-200/50 shadow-xl">
               <ResumeManagementCard
                 type="tailored"
                 resumes={tailoredResumes}
@@ -128,14 +127,9 @@ export default async function Home() {
                 }}
               />
             </div>
-
-            {/* Job Listings */}
-            {/* <div className="mt-6">
-              <JobListingsCard />
-            </div> */}
           </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }
