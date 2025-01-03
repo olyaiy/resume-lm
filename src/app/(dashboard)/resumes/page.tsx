@@ -12,18 +12,20 @@ const RESUMES_PER_PAGE = 12;
 
 interface PageProps {
   searchParams: {
-    page?: string;
-    sort?: SortOption;
-    direction?: SortDirection;
+    [key: string]: string | string[] | undefined
   }
 }
 
-export default async function ResumesPage({ searchParams }: PageProps) {
+export default async function ResumesPage({ 
+  searchParams 
+}: {
+  searchParams: PageProps['searchParams']
+}) {
   const { baseResumes, tailoredResumes } = await getDashboardData();
   
   // Combine and sort resumes
   const allResumes = [...baseResumes, ...tailoredResumes];
-  const currentPage = Number(searchParams.page) || 1;
+  const currentPage = Number(searchParams.page as string) || 1;
   const sort = (searchParams.sort as SortOption) || 'updatedAt';
   const direction = (searchParams.direction as SortDirection) || 'desc';
 

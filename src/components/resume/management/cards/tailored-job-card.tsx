@@ -2,22 +2,26 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2 } from "lucide-react";
+import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Job } from "@/lib/types";
 import { createClient } from "@/utils/supabase/client";
-import { deleteJob } from "@/utils/actions";
+import { deleteJob, createEmptyJob } from "@/utils/actions";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 interface TailoredJobCardProps {
   jobId: string | null;
+  onJobCreate?: (jobId: string) => void;
 }
 
-export function TailoredJobCard({ jobId }: TailoredJobCardProps) {
+export function TailoredJobCard({ jobId, onJobCreate }: TailoredJobCardProps) {
+  const router = useRouter();
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     async function fetchJob() {
@@ -79,16 +83,46 @@ export function TailoredJobCard({ jobId }: TailoredJobCardProps) {
     }
   };
 
+  const handleCreateJob = async () => {
+    try {
+      setIsCreating(true);
+      const newJob = await createEmptyJob();
+      router.refresh();
+      onJobCreate?.(newJob.id);
+    } catch (error) {
+      console.error('Error creating job:', error);
+    } finally {
+      setIsCreating(false);
+    }
+  };
+
   if (!jobId) {
     return (
       <Card className="relative p-6 bg-gradient-to-br from-pink-50/50 to-rose-50/50 border-pink-200/40 rounded-2xl overflow-hidden">
-        <div className="flex flex-col items-center justify-center space-y-2 text-center">
+        <div className="flex flex-col items-center justify-center space-y-4 text-center">
           <h3 className="text-lg font-semibold text-gray-800">
             No job currently linked to this resume
           </h3>
-          <p className="text-sm text-gray-500">
-            The ability to add jobs to existing resumes will be available soon. For now, please create a new tailored resume.
+          <p className="text-sm text-gray-500 mb-4">
+            Create a new job listing to track the position you&apos;re applying for.
           </p>
+          <Button
+            onClick={handleCreateJob}
+            disabled={isCreating}
+            className="bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+          >
+            {isCreating ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Creating...
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Job Listing
+              </>
+            )}
+          </Button>
         </div>
       </Card>
     );

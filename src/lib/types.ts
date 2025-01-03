@@ -48,6 +48,7 @@ export interface SalaryRange {
 
 export interface Job {
   id: string;
+  user_id: string;
   company_name: string;
   position_title: string;
   job_url: string | null;

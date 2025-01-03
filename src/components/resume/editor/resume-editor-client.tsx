@@ -1,4 +1,3 @@
-
 'use client';
 
 
@@ -172,6 +171,25 @@ export function ResumeEditorClient({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.hasUnsavedChanges]);
 
+  const handleJobCreate = (jobId: string) => {
+    // Update the resume with the new job ID
+    const updatedResume = {
+      ...state.resume,
+      job_id: jobId
+    };
+    dispatch({ type: 'UPDATE_FIELD', field: 'job_id', value: jobId });
+    
+    // Save the changes to the database
+    updateResume(state.resume.id, updatedResume).catch(error => {
+      console.error('Error updating resume with new job:', error);
+      toast({
+        title: "Update failed",
+        description: "Failed to link the new job to your resume.",
+        variant: "destructive",
+      });
+    });
+  };
+
   return (
     <ResumeContext.Provider value={{ state, dispatch }}>
       <main className="relative min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
@@ -236,7 +254,10 @@ export function ResumeEditorClient({
 
                         <TabsContent value="basic" className="space-y-6 mt-6">
                           {!state.resume.is_base_resume && (
-                            <TailoredJobCard jobId={state.resume.job_id || ''} />
+                            <TailoredJobCard 
+                              jobId={state.resume.job_id || null} 
+                              onJobCreate={handleJobCreate}
+                            />
                           )}
                           <BasicInfoForm
                             profile={profile}

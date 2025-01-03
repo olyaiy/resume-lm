@@ -1,7 +1,7 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
+import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
@@ -510,7 +510,14 @@ export async function createTailoredResume(
 export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
   const supabase = await createClient();
 
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
   const jobData = {
+    user_id: user.id,
     company_name: jobListing.company_name,
     position_title: jobListing.position_title,
     job_url: jobListing.job_url,
@@ -658,5 +665,43 @@ export async function deleteTailoredJob(jobId: string): Promise<void> {
   }
 
   revalidatePath('/', 'layout');
+}
+
+export async function createEmptyJob(): Promise<Job> {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const emptyJob: Partial<Job> = {
+    user_id: user.id,
+    company_name: 'New Company',
+    position_title: 'New Position',
+    job_url: null,
+    description: null,
+    location: null,
+    salary_range: null,
+    keywords: [],
+    work_location: null,
+    employment_type: null,
+    is_active: true
+  };
+
+  const { data, error } = await supabase
+    .from('jobs')
+    .insert([emptyJob])
+    .select()
+    .single();
+
+  if (error) {
+    console.error('Error creating job:', error);
+    throw new Error('Failed to create job');
+  }
+
+  revalidatePath('/', 'layout');
+  return data;
 }
 
