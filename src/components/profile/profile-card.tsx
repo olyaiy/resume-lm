@@ -113,7 +113,7 @@ export function ProfileCard({ profile }: ProfileCardProps) {
               </div>
             </div>
 
-            <Link href="/profile/edit">
+            <Link href="/profile">
               <Button 
                 size="sm"
                 variant="outline" 

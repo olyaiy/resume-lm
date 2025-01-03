@@ -481,8 +481,8 @@ export async function createTailoredResume(
     section_configs: baseResume.section_configs,
     section_order: baseResume.section_order,
     // Add metadata
-    resume_title: `Tailored Resume for ${jobTitle} at ${companyName}`,
-    name: `Tailored Resume for ${jobTitle} at ${companyName}`,
+    resume_title: `${jobTitle} at ${companyName}`,
+    name: `${jobTitle} at ${companyName}`,
     created_at: new Date().toISOString(),
     updated_at: new Date().toISOString(),
   };

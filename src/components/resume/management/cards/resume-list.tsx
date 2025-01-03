@@ -49,15 +49,13 @@ export function ResumeList({
           <div className="absolute inset-0 p-1.5">
             {/* Resume Header */}
             <div className="border-b border-gray-200/70 pb-1 mb-1">
-              <div className="text-[8px] font-medium text-gray-800 truncate">
+              <div className="text-[12px] font-medium text-gray-800">
                 {type === 'base' ? resume.target_role : resume.name}
               </div>
-              <div className="text-[6px] text-muted-foreground truncate mb-0.5 flex items-center gap-0.5">
-                {type === 'base' ? (
-                  <span className={`text-${accentColor.text}`}>Base Resume</span>
-                ) : (
-                  resume.target_role
-                )}
+              <div className="text-[10px] text-muted-foreground truncate mb-1 flex items-center gap-0.5">
+                <span className={`text-${accentColor.text} font-bold`}>
+                  {type === 'base' ? 'Base Resume' : 'Tailored Resume'}
+                </span>
               </div>
               <div className="h-1 w-12 bg-gray-200/70 rounded-full" />
             </div>
@@ -97,7 +95,7 @@ export function ResumeList({
 
             {/* Date at bottom left */}
             <div className="absolute bottom-0 left-0 p-0.5">
-              <p className="text-[6px] text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 Updated {format(new Date(resume.updated_at), 'MMM d, yyyy')}
               </p>
             </div>

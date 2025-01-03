@@ -134,7 +134,7 @@ export function ResumeEditorHeader({
           
 
             {/* Resume Title Section */}
-            <div className="flex flex-col gap-0.5">
+            <div className="flex flex-col ">
               <h1 className="text-xl font-semibold">
                 <span className={cn(
                   "bg-gradient-to-r bg-clip-text text-transparent",
@@ -143,16 +143,14 @@ export function ResumeEditorHeader({
                   {resume.is_base_resume ? capitalizeWords(resume.target_role) : resume.name}
                 </span>
               </h1>
-              <div className={cn("flex items-center gap-2 text-sm", colors.textOpacity)}>
+              <div className={cn("flex  text-sm", colors.textOpacity)}>
                 {resume.is_base_resume ? (
-                  <div className="flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
-                    <span className="font-medium">Base Resume</span>
+                  <div className="flex items-center">
+                    <span className="text-xs font-medium">Base Resume</span>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
-                    <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-rose-500 shadow-sm shadow-pink-500/20" />
-                    <span className="font-medium">Tailored Resume</span>
+                    <span className="text-xs font-medium">Tailored Resume</span>
                   </div>
                 )}
               </div>

@@ -148,7 +148,7 @@ export function ResumeManagementCard({
               </Button>
             </CreateResumeDialog>
             <Link 
-              href={`/resumes/${type}`}
+              href={`/resumes`}
               className={cn(
                 "text-xs font-medium transition-colors duration-300 flex items-center gap-1",
                 `text-${accentColor.text}/80 hover:text-${accentColor.text}`,
