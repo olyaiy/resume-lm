@@ -18,8 +18,10 @@ import { User, FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProfileCard } from "@/components/profile/profile-card";
-import { ResumeManagementCard } from "@/components/resume/management/cards/resume-management-card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
+import Link from "next/link";
+import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
 // import { JobListingsCard } from "@/components/jobs/job-listings-card";
 
 export default async function Home() {
@@ -58,78 +60,109 @@ export default async function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
+    <main className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
       <DashboardHeader />
       
       <div className="container max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header Section */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
-              Dashboard
-            </h1>
-            <p className="text-muted-foreground">
-              Manage your resumes and profile
-            </p>
-          </div>
+        {/* Profile Card - Made compact */}
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl p-4">
+          <ProfileCard profile={profile} />
         </div>
 
-        {/* Main Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          {/* Profile Card - Left Column */}
-          <div className="lg:col-span-1">
-            <ProfileCard profile={profile} />
+        {/* Resume Bookshelf */}
+        <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl">
+          {/* Base Resumes Section */}
+          <div className="relative space-y-2">
+            {/* Purple Glow Effect */}
+            <div className="absolute inset-0">
+              <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-purple-500/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-purple-500/10 to-transparent" />
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-purple-500/10 to-transparent" />
+              <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-purple-500/10 to-transparent" />
+            </div>
+            
+            <div className="relative flex items-center justify-between px-6 pt-6">
+              <h2 className="text-2xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                Base Resumes
+              </h2>
+            </div>
+            
+            <div className="relative px-6 pb-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {baseResumes.map((resume) => (
+                  <Link href={`/resumes/${resume.id}`} key={resume.id}>
+                    <MiniResumePreview
+                      name={resume.name}
+                      type="base"
+                      target_role={resume.target_role}
+                      updatedAt={resume.updated_at}
+                      className="hover:-translate-y-1 transition-transform duration-300"
+                    />
+                  </Link>
+                ))}
+                <CreateResumeDialog type="base" profile={profile}>
+                  <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
+                    <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <FileText className="h-4 w-4 text-purple-600" />
+                    </div>
+                    <span className="text-sm font-medium text-purple-600">Create Base Resume</span>
+                  </button>
+                </CreateResumeDialog>
+                {baseResumes.length === 0 && baseResumes.length + 1 < 4 && (
+                  <div className="col-span-2 md:col-span-1" />
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Resumes Section - Right Column */}
-          <div className="lg:col-span-3 space-y-6">
-            {/* Base Resumes Card */}
-            <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl">
-              <ResumeManagementCard
-                type="base"
-                resumes={baseResumes}
-                profile={profile}
-                icon={<FileText className="h-5 w-5" />}
-                title="Base Resumes"
-                description="Your resume templates"
-                emptyTitle="No base resumes yet"
-                emptyDescription="Create your first resume template to get started"
-                gradientFrom="purple-600"
-                gradientTo="indigo-600"
-                accentColor={{
-                  bg: "purple-50",
-                  border: "purple-200",
-                  hover: "purple-300",
-                  text: "purple-600"
-                }}
-              />
+          {/* Thin Divider */}
+          <div className="border-t border-purple-200/30" />
+
+          {/* Tailored Resumes Section */}
+          <div className="relative space-y-2">
+            {/* Pink/Red Glow Effect */}
+            <div className="absolute inset-0">
+              <div className="absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-pink-500/10 to-transparent" />
+              <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-pink-500/10 to-transparent" />
+              <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-pink-500/10 to-transparent" />
+              <div className="absolute inset-y-0 right-0 w-32 bg-gradient-to-l from-pink-500/10 to-transparent" />
+            </div>
+            
+            <div className="relative flex items-center justify-between px-6 pt-4">
+              <h2 className="text-2xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                Tailored Resumes
+              </h2>
             </div>
 
-            {/* Tailored Resumes Card */}
-            <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-pink-200/50 shadow-xl">
-              <ResumeManagementCard
-                type="tailored"
-                resumes={tailoredResumes}
-                baseResumes={baseResumes}
-                profile={profile}
-                icon={<Sparkles className="h-5 w-5" />}
-                title="Tailored Resumes"
-                description="Job-specific resumes"
-                emptyTitle="No tailored resumes yet"
-                emptyDescription="Create a tailored resume for a specific job"
-                gradientFrom="pink-600"
-                gradientTo="rose-600"
-                accentColor={{
-                  bg: "pink-50",
-                  border: "pink-200",
-                  hover: "pink-300",
-                  text: "pink-600"
-                }}
-              />
+            <div className="relative px-6 pb-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                {tailoredResumes.map((resume) => (
+                  <Link href={`/resumes/${resume.id}`} key={resume.id}>
+                    <MiniResumePreview
+                      name={resume.name}
+                      type="tailored"
+                      target_role={resume.target_role}
+                      updatedAt={resume.updated_at}
+                      className="hover:-translate-y-1 transition-transform duration-300"
+                    />
+                  </Link>
+                ))}
+                <CreateResumeDialog type="tailored" baseResumes={baseResumes} profile={profile}>
+                  <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-pink-300 bg-pink-50/50 hover:bg-pink-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
+                    <div className="h-8 w-8 rounded-full bg-pink-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <Sparkles className="h-4 w-4 text-pink-600" />
+                    </div>
+                    <span className="text-sm font-medium text-pink-600">Create Tailored Resume</span>
+                  </button>
+                </CreateResumeDialog>
+                {tailoredResumes.length === 0 && tailoredResumes.length + 1 < 4 && (
+                  <div className="col-span-2 md:col-span-1" />
+                )}
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }
