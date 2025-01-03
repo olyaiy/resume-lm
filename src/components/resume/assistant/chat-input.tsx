@@ -1,25 +1,32 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send } from "lucide-react";
+import { Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { X } from "lucide-react";
-import React from "react";
+import React, { useState, useCallback } from "react";
+
+interface ChatInputProps {
+  isLoading: boolean;
+  onSubmit: (message: string) => void;
+  onStop: () => void;
+}
 
 export default function ChatInput({ 
-    input, 
-    setInput, 
     isLoading, 
     onSubmit,
     onStop,
-  }: {
-    input: string;
-    setInput: (value: string) => void;
-    isLoading: boolean;
-    onSubmit: (e: React.FormEvent) => void;
-    onStop: () => void;
-  }) {
+  }: ChatInputProps) {
+    const [inputValue, setInputValue] = useState("");
+
+    const handleSubmit = useCallback((e: React.FormEvent) => {
+      e.preventDefault();
+      if (inputValue.trim()) {
+        onSubmit(inputValue.trim());
+        setInputValue("");
+      }
+    }, [inputValue, onSubmit]);
+
     return (
-      <form onSubmit={onSubmit} className={cn(
+      <form onSubmit={handleSubmit} className={cn(
         "relative z-10",
         "p-2 border-t border-purple-200/60",
         "bg-white/40",
@@ -27,8 +34,8 @@ export default function ChatInput({
         "flex gap-1.5"
       )}>
         <Input
-          value={input}
-          onChange={(event) => setInput(event.target.value)}
+          value={inputValue}
+          onChange={(event) => setInputValue(event.target.value)}
           placeholder="Ask me anything about your resume..."
           className={cn(
             "flex-1",

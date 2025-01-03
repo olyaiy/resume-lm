@@ -1,8 +1,7 @@
+'use client';
 import { scan } from 'react-scan'; // import this BEFORE react
 
-'use client';
-
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
@@ -67,7 +66,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     apiKeys,
   };
   
-  const { messages, error, input, setInput, append, isLoading, addToolResult, stop } = useChat({
+  const { messages, error, append, isLoading, addToolResult, stop } = useChat({
     api: '/api/chat',
     body: {
       target_role: resume.target_role,
@@ -129,7 +128,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       }
     },
     onFinish() {
-      console.log('messages:', '\n', messages);
+
       // setIsStreaming(false);
     },
     // onResponse(response) {
@@ -152,20 +151,16 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     scrollToBottom();
   }, [messages, isLoading]);
 
-  // Handle form submission
-  const handleSubmit = (event: React.FormEvent) => {
-    event.preventDefault();
-    if (input.trim()) {
-      setAccordionValue("chat"); // Expand the accordion when sending a message
-      append({ content: input, role: 'user' });
-      setInput('');
-    }
-  };
+  // Memoize the submit handler
+  const handleSubmit = useCallback((message: string) => {
+    append({ content: message, role: 'user' });
+    setAccordionValue("chat");
+  }, [append]);
 
   return (
     <Card className={cn(
       "flex flex-col w-full l mx-auto",
-      "bg-gradient-to-br from-purple-50/95 via-purple-50/90 to-indigo-50/95",
+      "bg-gradient-to-br from-purple-400/20 via-purple-400/50 to-indigo-400/50",
       "border-2 border-purple-200/60",
       "shadow-lg shadow-purple-500/5",
       "transition-all duration-500",
@@ -238,14 +233,14 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
           {/* Accordion Content */}
           <AccordionContent className="space-y-4">
-            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4">
+            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4 ">
 
               {/* Messages */}
               {messages.map((m: Message, index) => (
                 <React.Fragment key={index}>
                   {/* Regular Message Content */}
                   {m.content && (
-                    <div className="mt-2">
+                    <div className="my-4">
                       <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                         <div className={cn(
                           "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
@@ -266,30 +261,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                       </div>
                     </div>
                   )}
-
-                  {/* Loading Dots Message */}
-                  {isLoading && index === messages.length - 1 && m.role === 'assistant' && (
-                    <div className="mt-2">
-                      <div className="flex justify-start">
-                        <div className={cn(
-                          "rounded-2xl px-4 py-2.5 min-w-[60px]",
-                          "bg-white/60",
-                          "border border-purple-200/60",
-                          "shadow-sm",
-                          "backdrop-blur-sm"
-                        )}>
-                          <LoadingDots className="text-purple-600" />
-                        </div>
-                      </div>
-                    </div>
-                  )}
-
                   {/* Tool Invocations as Separate Bubbles */}
                   {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                     const { toolName, toolCallId, state, args } = toolInvocation;
-
                     // Show loading state for non-result states
-                    console.log('state:', state);
                     if (state !== 'result') {
                       return (
                         <div key={toolCallId} className="mt-2 max-w-[90%]">
@@ -299,7 +274,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         </div>
                       );
                     }
-
                     // Handle getResume tool separately
                     if (toolName === 'getResume') {
                       return (
@@ -317,7 +291,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         </div>
                       );
                     }
-
                     // Map tool names to resume sections and handle suggestions
                     const toolConfig = {
                       suggest_work_experience_improvement: {
@@ -346,8 +319,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     if (!config) return null;
 
                     return (
-                      <div key={toolCallId} className="mt-2">
-                        <div className="flex justify-start">
+                      <div key={toolCallId} className="mt-2 w-[90%]">
+                        <div className="">
                           <Suggestion
                             type={config.type}
                             content={args[config.content]}
@@ -363,6 +336,24 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                       </div>
                     );
                   })}
+
+
+                  {/* Loading Dots Message */}
+                  {isLoading && index === messages.length - 1 && m.role === 'assistant' && (
+                    <div className="mt-2">
+                      <div className="flex justify-start">
+                        <div className={cn(
+                          "rounded-2xl px-4 py-2.5 min-w-[60px]",
+                          "bg-white/60",
+                          "border border-purple-200/60",
+                          "shadow-sm",
+                          "backdrop-blur-sm"
+                        )}>
+                          <LoadingDots className="text-purple-600" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </React.Fragment>
               ))}
             
@@ -415,8 +406,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
       {/* Input Bar */}
       <ChatInput
-        input={input}
-        setInput={setInput}
         isLoading={isLoading}
         onSubmit={handleSubmit}
         onStop={stop}

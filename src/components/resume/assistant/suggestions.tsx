@@ -84,7 +84,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
     switch (status) {
       case 'accepted':
         return {
-          card: "bg-gradient-to-br from-emerald-50/95 via-emerald-50/90 to-green-50/95 border-emerald-200/60",
+          card: "bg-gradient-to-br from-emerald-200/95 via-emerald-200/90 to-green-200/95 border-emerald-200/60",
           icon: "from-emerald-100/90 to-green-100/90",
           iconColor: "text-emerald-600",
           label: "text-emerald-600",
@@ -285,7 +285,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
         const education = content as Education;
         const currentEducation = currentContent as Education | null;
         return (
-          <div className="space-y-2">
+          <div className="space-y-2 w-full">
             <div className="flex justify-between items-start">
               <div>
                 <h3 className={cn(
@@ -310,17 +310,37 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
             </div>
             {education.achievements && (
               <div className="space-y-1.5">
-                {education.achievements.map((achievement, index) => (
-                  <p 
-                    key={index} 
-                    className={cn(
-                      "text-sm text-gray-800",
-                      !currentEducation || isNewItem(currentEducation.achievements, education.achievements, achievement) && DIFF_HIGHLIGHT_CLASSES
-                    )}
-                  >
-                    {achievement}
-                  </p>
-                ))}
+                {education.achievements.map((achievement, index) => {
+                  const currentAchievement = currentEducation?.achievements?.[index];
+                  const comparedWords = currentAchievement
+                    ? compareDescriptions(currentAchievement, achievement)
+                    : [{ text: achievement, isNew: true, isBold: false, isStart: true, isEnd: true }];
+
+                  return (
+                    <div key={index} className="flex items-start gap-1.5">
+                      <span className="text-gray-800 mt-0.5 text-xs">•</span>
+                      <p className="text-xs text-gray-800 flex-1">
+                        {comparedWords.map((word, wordIndex) => (
+                          <span
+                            key={wordIndex}
+                            className={cn(
+                              word.isNew && "bg-green-300",
+                              word.isStart && "rounded-l-sm pl-1",
+                              word.isEnd && "rounded-r-sm pr-1"
+                            )}
+                          >
+                            {word.isBold ? (
+                              <strong>{word.text.slice(2, -2)}</strong>
+                            ) : (
+                              word.text
+                            )}
+                            {' '}
+                          </span>
+                        ))}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             )}
           </div>
@@ -331,7 +351,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
   return (
     <Card className={cn(
       "group relative overflow-hidden",
-      "p-4",
+      "border ",
       statusStyles.card,
       "shadow-xl shadow-purple-500/10",
       "transition-all duration-500 ease-in-out",
@@ -339,18 +359,16 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
       "backdrop-blur-xl"
     )}>
       {/* Enhanced Background Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_14px] [mask-image:radial-gradient(ellipse_at_center,white,transparent_70%)] opacity-[0.15]" />
+      <div className="absolute inset-0  opacity-[0.15]" />
       
       {/* Improved Floating Gradient Orbs */}
-      <div className="absolute -top-1/2 -right-1/2 w-[150%] h-[150%] rounded-full bg-gradient-to-br from-purple-200/20 via-indigo-200/20 to-transparent blur-3xl animate-float opacity-60" />
-      <div className="absolute -bottom-1/2 -left-1/2 w-[150%] h-[150%] rounded-full bg-gradient-to-br from-indigo-200/20 via-purple-200/20 to-transparent blur-3xl animate-float-delayed opacity-60" />
 
       {/* Content */}
-      <div className="relative space-y-3">
+      <div className="relative ">
         {/* Header */}
         <div className="flex items-center">
           <div className="flex items-center gap-2">
-            <div className={cn("p-1.5 rounded-lg bg-gradient-to-br shadow-sm", statusStyles.icon)}>
+            <div className={cn("p-1.5 rounded-lg  shadow-sm", statusStyles.icon)}>
               <Sparkles className={cn("h-3.5 w-3.5", statusStyles.iconColor)} />
             </div>
             <span className={cn("font-semibold text-sm", statusStyles.label)}>{statusStyles.text}</span>
@@ -358,7 +376,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
         </div>
 
         {/* Main Content */}
-        <div className="bg-gradient-to-br from-white/80 to-white/60 rounded-lg p-3 backdrop-blur-md border border-white/60 shadow-sm">
+        <div className="bg-white from-white/80 to-white/60 rounded-lg p-3 backdrop-blur-md border border-white/60 shadow-sm">
           {renderContent()}
         </div>
 
