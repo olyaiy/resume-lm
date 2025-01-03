@@ -159,9 +159,6 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       } catch (error) {
         console.error('Error parsing API keys:', error);
       }
-
-      console.log('used model:', selectedModel);
-      console.log('used api keys:', apiKeys);
       // 1. Format the job listing
       let formattedJobListing;
       try {
@@ -232,7 +229,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         return;
       }
 
-      console.log('4. Tailored Content:', tailoredContent );
+
       setCurrentStep('finalizing');
 
       

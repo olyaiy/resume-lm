@@ -17,6 +17,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import { convertTextToResume } from "../ai/resume-management-ai";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 interface CreateBaseResumeDialogProps {
   children: React.ReactNode;
@@ -42,6 +43,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
   });
   const [resumeText, setResumeText] = useState('');
   const router = useRouter();
+  const [showErrorDialog, setShowErrorDialog] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<{ title: string; description: string }>({
+    title: "",
+    description: ""
+  });
 
   const getItemId = (type: keyof typeof selectedItems, item: WorkExperience | Education | Skill | Project): string => {
     switch (type) {
@@ -104,16 +110,8 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
 
       if (importOption === 'import-resume') {
         if (!resumeText.trim()) {
-          toast({
-            title: "Required Field Missing",
-            description: "Please paste your resume text.",
-            variant: "destructive",
-          });
           return;
         }
-
-        console.log('Starting import-resume flow');
-        console.log('Resume Text:', resumeText);
 
         // Create an empty resume to pass to convertTextToResume
         const emptyResume: Resume = {
@@ -134,44 +132,76 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           updated_at: new Date().toISOString(),
         };
 
-        console.log('Empty Resume Template:', emptyResume);
+        // Get model and API key from local storage
+        const MODEL_STORAGE_KEY = 'resumelm-default-model';
+        const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
+        const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+        const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+        let apiKeys = [];
+        try {
+          apiKeys = storedKeys ? JSON.parse(storedKeys) : [];
+        } catch (error) {
+          console.error('Error parsing API keys:', error);
+        }
 
         // Convert the text to resume format
-        console.log('Converting text to resume format...');
-        const convertedResume = await convertTextToResume(resumeText, emptyResume);
-        console.log('Converted Resume:', convertedResume);
+        try {
+          const convertedResume = await convertTextToResume(resumeText, emptyResume, {
+            model: selectedModel || '',
+            apiKeys
+          });
+          
+          // Create the base resume with the converted content
+          console.log('Creating base resume with converted content...');
+          console.log('Target Role:', targetRole);
+          console.log('Import Option:', 'import-resume');
+          
+          // Extract just the content sections needed for createBaseResume
+          const selectedContent = {
+            work_experience: convertedResume.work_experience || [],
+            education: convertedResume.education || [],
+            skills: convertedResume.skills || [],
+            projects: convertedResume.projects || [],
+          };
+          
+          console.log('Selected Content:', selectedContent);
+          
+          const resume = await createBaseResume(
+            targetRole,
+            'import-resume',
+            selectedContent
+          );
+          
 
-        // Create the base resume with the converted content
-        console.log('Creating base resume with converted content...');
-        console.log('Target Role:', targetRole);
-        console.log('Import Option:', 'import-resume');
-        
-        // Extract just the content sections needed for createBaseResume
-        const selectedContent = {
-          work_experience: convertedResume.work_experience || [],
-          education: convertedResume.education || [],
-          skills: convertedResume.skills || [],
-          projects: convertedResume.projects || [],
-        };
-        
-        console.log('Selected Content:', selectedContent);
-        
-        const resume = await createBaseResume(
-          targetRole,
-          'import-resume',
-          selectedContent
-        );
-        
-        console.log('Created Resume:', resume);
+          toast({
+            title: "Success",
+            description: "Resume created successfully",
+          });
 
-        toast({
-          title: "Success",
-          description: "Resume created successfully",
-        });
-
-        router.push(`/resumes/${resume.id}`);
-        setOpen(false);
-        return;
+          router.push(`/resumes/${resume.id}`);
+          setOpen(false);
+          return;
+        } catch (error: Error | unknown) {
+          if (error instanceof Error && (
+            error.message.toLowerCase().includes('api key') || 
+            error.message.toLowerCase().includes('unauthorized') ||
+            error.message.toLowerCase().includes('invalid key') ||
+            error.message.toLowerCase().includes('invalid x-api-key')
+          )) {
+            setErrorMessage({
+              title: "API Key Error",
+              description: "There was an issue with your API key. Please check your settings and try again."
+            });
+          } else {
+            setErrorMessage({
+              title: "Error",
+              description: "Failed to convert resume text. Please try again."
+            });
+          }
+          setShowErrorDialog(true);
+          setIsCreating(false);
+          return;
+        }
       }
 
       const selectedContent = {
@@ -189,10 +219,6 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         ),
       };
 
-      console.log('Creating base resume with selected content...');
-      console.log('Target Role:', targetRole);
-      console.log('Import Option:', importOption === 'scratch' ? 'fresh' : importOption);
-      console.log('Selected Content:', selectedContent);
 
       const resume = await createBaseResume(
         targetRole, 
@@ -200,7 +226,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         selectedContent
       );
 
-      console.log('Created Resume:', resume);
+
 
       toast({
         title: "Success",
@@ -211,11 +237,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       setOpen(false);
     } catch (error) {
       console.error('Create resume error:', error);
-      toast({
+      setErrorMessage({
         title: "Error",
-        description: "Failed to create resume",
-        variant: "destructive",
+        description: "Failed to create resume. Please try again."
       });
+      setShowErrorDialog(true);
     } finally {
       setIsCreating(false);
     }
@@ -677,6 +703,23 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
             </div>
           </div>
         </div>
+
+        {/* Error Dialog */}
+        <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{errorMessage.title}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {errorMessage.description}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
+                OK
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
 
         {/* Footer Section */}
         <div className={cn(
