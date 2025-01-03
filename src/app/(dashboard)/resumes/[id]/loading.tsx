@@ -1,8 +1,6 @@
 import { Skeleton } from "@/components/ui/skeleton";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, Download, Save, Trash2 } from "lucide-react";
 
 export default function Loading() {
   return (
@@ -15,53 +13,7 @@ export default function Loading() {
       </div>
 
       {/* Top Bar */}
-      <div className="h-20 border-b border-purple-200/50 bg-gradient-to-r from-purple-50/95 via-white/95 to-purple-50/95 backdrop-blur-xl fixed left-0 right-0 z-40 shadow-lg shadow-purple-500/10">
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f3e8ff30_0%,#ffffff40_50%,#f3e8ff30_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_800px_at_50%_-40%,#f3e8ff30_0%,transparent_100%)] pointer-events-none" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_600px_at_100%_100%,#f3e8ff20_0%,transparent_100%)] pointer-events-none" />
-        
-        {/* Content Container */}
-        <div className="max-w-[2000px] mx-auto h-full px-6 flex items-center justify-between relative">
-          {/* Left Section */}
-          <div className="flex items-center gap-6">
-            {/* Back Button */}
-            <button 
-              disabled
-              className="group flex items-center text-sm font-medium text-purple-600/70 px-3 py-2 rounded-lg bg-purple-100/30"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Dashboard
-            </button>
-
-            {/* Separator */}
-            <div className="h-8 w-px bg-gradient-to-b from-transparent via-purple-200/40 to-transparent" />
-
-            {/* Resume Title Section */}
-            <div className="flex flex-col gap-1">
-              <Skeleton className="h-7 w-48" />
-              <Skeleton className="h-5 w-24" />
-            </div>
-          </div>
-
-          {/* Right Section - Action Buttons */}
-          <div className="flex items-center gap-3">
-            <Button disabled size="sm" className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white h-10 px-5">
-              <Download className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
-            <Button disabled size="sm" className="bg-gradient-to-r from-purple-600 to-indigo-600 text-white h-10 px-5">
-              <Save className="mr-2 h-4 w-4" />
-              Save Changes
-            </Button>
-            <Button disabled size="sm" variant="destructive" className="bg-gradient-to-r from-red-600 to-rose-600 text-white h-10">
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete Resume
-            </Button>
-          </div>
-        </div>
-      </div>
-
+    
       {/* Main Content */}
       <div className="relative min-h-screen pt-24 px-6 md:px-8 lg:px-10 pb-10">
         <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">

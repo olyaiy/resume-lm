@@ -1,3 +1,5 @@
+import { scan } from 'react-scan'; // import this BEFORE react
+
 'use client';
 
 import React, { useEffect, useRef } from 'react';
@@ -16,6 +18,16 @@ import ChatInput from './chat-input';
 import { LoadingDots } from '@/components/ui/loading-dots';
 import { ApiKey } from '@/utils/ai-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+
+if (typeof window !== 'undefined') {
+  scan({
+    enabled: true,
+    log: true, // logs render info to console (default: false)
+  });
+}
+
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 const MODEL_STORAGE_KEY = 'resumelm-default-model';
@@ -26,6 +38,7 @@ interface ChatBotProps {
 }
 
 export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
+  const router = useRouter();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
@@ -355,17 +368,41 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
             
             {error && (
               <div className={cn(
-                "mt-2 text-red-500 text-sm px-4",
+                "mt-2 text-sm px-4",
                 "rounded-lg py-2",
-                "bg-red-50/50 border border-red-200/50"
+                "bg-red-50/50 border border-red-200/50",
+                "flex flex-col gap-2"
               )}>
-                {((error as Error)?.message?.includes('invalid x-api-key') || 
-                 JSON.stringify(error).includes('authentication_error'))
-                  ? "Your Anthropic API key is invalid, please try updating it in settings and try again."
-                  : ((error as Error)?.message?.includes('Incorrect API key provided') ||
-                     JSON.stringify(error).includes('invalid_api_key'))
-                    ? "Your OpenAI API key is invalid, please try updating it in settings and try again."
-                    : "An error occurred."}
+                <div className="text-red-500">
+                  {typeof error === 'string' 
+                    ? error
+                    : ((error as Error)?.message?.includes('OpenAI API key not found') ||
+                       JSON.stringify(error).includes('OpenAI API key not found'))
+                      ? "OpenAI API key not found. Please set your API key in settings to continue."
+                      : ((error as Error)?.message?.includes('invalid x-api-key') || 
+                         JSON.stringify(error).includes('authentication_error'))
+                        ? "Your Anthropic API key is invalid, please try updating it in settings and try again."
+                        : ((error as Error)?.message?.includes('Incorrect API key provided') ||
+                           JSON.stringify(error).includes('invalid_api_key'))
+                            ? "Your OpenAI API key is invalid, please try updating it in settings and try again."
+                            : "An error occurred. Please try again or check your settings."}
+                </div>
+                {(error.toString().toLowerCase().includes('api key') || 
+                  error.toString().toLowerCase().includes('authentication')) && (
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    className={cn(
+                      "w-fit",
+                      "bg-white/60 hover:bg-white/80",
+                      "border-red-200 hover:border-red-300",
+                      "text-red-600 hover:text-red-700"
+                    )}
+                    onClick={() => router.push('/settings')}
+                  >
+                    Go to Settings
+                  </Button>
+                )}
               </div>
             )}
 
