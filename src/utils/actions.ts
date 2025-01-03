@@ -550,48 +550,30 @@ export async function deleteJob(jobId: string): Promise<void> {
     throw new Error('User not authenticated');
   }
 
-  console.log('Attempting to delete job:', jobId);
-  console.log('User:', user.id);
-
-  // First, update any resumes that reference this job
-  const { error: updateError } = await supabase
+  // First, get all resumes that reference this job
+  const { data: affectedResumes } = await supabase
     .from('resumes')
-    .update({ job_id: null })
+    .select('id')
     .eq('job_id', jobId);
 
-  if (updateError) {
-    console.error('Update error:', {
-      code: updateError.code,
-      message: updateError.message,
-      details: updateError.details,
-      hint: updateError.hint
-    });
-    throw new Error(`Failed to update resumes: ${updateError.message}`);
-  }
-
-  console.log('Successfully removed job references from resumes');
-
-  // Now we can safely delete the job
+  // Delete the job
   const { error: deleteError } = await supabase
     .from('jobs')
     .delete()
     .eq('id', jobId);
 
   if (deleteError) {
-    console.error('Delete error:', {
-      code: deleteError.code,
-      message: deleteError.message,
-      details: deleteError.details,
-      hint: deleteError.hint
-    });
-    throw new Error(`Failed to delete job: ${deleteError.message}`);
+    console.error('Delete error:', deleteError);
+    throw new Error('Failed to delete job');
   }
 
-  console.log('Successfully deleted job:', jobId);
+  // Revalidate all affected resume paths
+  affectedResumes?.forEach(resume => {
+    revalidatePath(`/resumes/${resume.id}`);
+  });
   
-  // Revalidate all necessary paths
+  // Also revalidate the general paths
   revalidatePath('/', 'layout');
-  revalidatePath('/resumes/[id]', 'page');
   revalidatePath('/resumes', 'layout');
 }
 

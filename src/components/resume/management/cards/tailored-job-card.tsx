@@ -14,10 +14,12 @@ import { useRouter } from "next/navigation";
 interface TailoredJobCardProps {
   jobId: string | null;
   onJobCreate?: (jobId: string) => void;
+  onJobDelete?: () => void;
 }
 
-export function TailoredJobCard({ jobId, onJobCreate }: TailoredJobCardProps) {
+export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJobCardProps) {
   const router = useRouter();
+
   const [job, setJob] = useState<Job | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,10 +41,20 @@ export function TailoredJobCard({ jobId, onJobCreate }: TailoredJobCardProps) {
           .eq('id', jobId)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          if (error.code !== 'PGRST116') {
+            throw error;
+          }
+          setJob(null);
+          return;
+        }
+        
         setJob(jobData);
       } catch (error) {
         console.error('Error fetching job:', error);
+        if (error instanceof Error && error.message !== 'No rows returned') {
+          setJob(null);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -76,8 +88,32 @@ export function TailoredJobCard({ jobId, onJobCreate }: TailoredJobCardProps) {
     try {
       setIsDeleting(true);
       await deleteJob(jobId);
+      
+      onJobDelete?.();
+      
+      router.refresh();
+      
+      const supabase = createClient();
+      const { data: jobData, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('id', jobId)
+        .single();
+
+      if (error) {
+        if (error.code !== 'PGRST116') {
+          throw error;
+        }
+        setJob(null);
+        return;
+      }
+      
+      setJob(jobData);
     } catch (error) {
       console.error('Error deleting job:', error);
+      if (error instanceof Error && error.message !== 'No rows returned') {
+        setJob(null);
+      }
     } finally {
       setIsDeleting(false);
     }
@@ -235,8 +271,8 @@ export function TailoredJobCard({ jobId, onJobCreate }: TailoredJobCardProps) {
           </div>
         </motion.div>
       ) : (
-        <div className="text-center text-gray-500">
-          Failed to load job details
+        <div className="text-center text-gray-500 py-4">
+          This job listing is no longer available
         </div>
       )}
     </Card>
