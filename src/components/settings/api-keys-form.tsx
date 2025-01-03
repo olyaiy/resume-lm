@@ -26,15 +26,15 @@ const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
 const USER_SELECTED_MODEL = 'gpt-4o-mini' 
 
-const PROVIDERS: { id: ServiceName; name: string }[] = [
+const PROVIDERS: { id: ServiceName; name: string; recommended?: boolean }[] = [
+  { id: 'anthropic', name: 'Anthropic', recommended: true },
   { id: 'openai', name: 'OpenAI' },
-  { id: 'anthropic', name: 'Anthropic' },
   // { id: 'google', name: 'Google AI' },
   // { id: 'vertex', name: 'Google Vertex' },
 ]
 
 const AI_MODELS: AIModel[] = [
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Requires Anthropic API Key)', provider: 'anthropic' },
+  { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o (Requires OpenAI API Key)', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Free)', provider: 'openai' },
 
@@ -214,10 +214,27 @@ export function ApiKeysForm() {
             return (
               <div 
                 key={provider.id}
-                className="p-4 rounded-lg bg-white/30 border border-white/40 transition-all hover:bg-white/40"
+                className={cn(
+                  "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40",
+                  provider.recommended 
+                    ? "border-purple-200 bg-purple-50/30" 
+                    : "border-white/40"
+                )}
               >
                 <div className="flex items-center justify-between mb-2">
-                  <Label className="text-sm font-medium text-gray-800">{provider.name}</Label>
+                  <div className="flex items-center gap-2">
+                    <Label className="text-sm font-medium text-gray-800">{provider.name}</Label>
+                    {provider.recommended && (
+                      <>
+                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-600">
+                          Recommended
+                        </span>
+                        <p className="text-xs text-purple-600 mt-1">
+                          In our testing, Claude 3.5 Sonnet is the smartest and gives the best results.
+                        </p>
+                      </>
+                    )}
+                  </div>
                   {existingKey && (
                     <div className="flex items-center gap-1">
                       <Button
