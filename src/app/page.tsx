@@ -69,7 +69,7 @@ export default async function Home() {
 
       {/* Main Content Layer */}
       <div className="relative z-10 flex flex-col min-h-screen">
-        <DashboardHeader firstName={profile.first_name} />
+        <DashboardHeader/>
 
         {/* Main Dashboard Content */}
         <div className="flex-1 px-4 md:px-6 lg:px-8 py-6 md:py-8">

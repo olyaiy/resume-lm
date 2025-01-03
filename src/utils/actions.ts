@@ -88,10 +88,20 @@ export async function getDashboardData(): Promise<DashboardData> {
   const baseResumes = resumes?.filter(resume => resume.is_base_resume) ?? [];
   const tailoredResumes = resumes?.filter(resume => !resume.is_base_resume) ?? [];
 
+  const baseResumesData = baseResumes.map(resume => ({
+    ...resume,
+    type: 'base' as const
+  }));
+
+  const tailoredResumesData = tailoredResumes.map(resume => ({
+    ...resume,
+    type: 'tailored' as const
+  }));
+
   return {
     profile,
-    baseResumes,
-    tailoredResumes
+    baseResumes: baseResumesData,
+    tailoredResumes: tailoredResumesData
   };
 }
 
