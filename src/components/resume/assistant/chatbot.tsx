@@ -20,6 +20,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
+import { WholeResumeSuggestion } from './suggestions';
 
 
 
@@ -37,6 +38,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
   const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
+  const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   
   // Load settings from local storage
   useEffect(() => {
@@ -120,6 +122,71 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
       if (toolCall.toolName === 'suggest_education_improvement') {
         return toolCall.args;
+      }
+
+      if (toolCall.toolName === 'modifyWholeResume') {
+        const updates = toolCall.args as {
+          basic_info?: Partial<{
+            first_name: string;
+            last_name: string;
+            email: string;
+            phone_number: string;
+            location: string;
+            website: string;
+            linkedin_url: string;
+            github_url: string;
+          }>;
+          work_experience?: WorkExperience[];
+          education?: Education[];
+          skills?: Skill[];
+          projects?: Project[];
+        };
+        
+        // Store the current resume state before applying updates
+        setOriginalResume({ ...resume });
+        
+        // Apply updates as before
+        if (updates.basic_info) {
+          Object.entries(updates.basic_info).forEach(([key, value]) => {
+            if (value !== undefined) {
+              onResumeChange(key as keyof Resume, value);
+            }
+          });
+        }
+
+        const sections = {
+          work_experience: updates.work_experience,
+          education: updates.education,
+          skills: updates.skills,
+          projects: updates.projects,
+        };
+
+        Object.entries(sections).forEach(([key, value]) => {
+          if (value !== undefined) {
+            onResumeChange(key as keyof Resume, value);
+          }
+        });
+
+        return (
+          <div key={toolCall.toolCallId} className="mt-2 w-[90%]">
+            <WholeResumeSuggestion
+              onReject={() => {
+                // Restore the original resume state
+                if (originalResume) {
+                  // Restore basic info
+                  Object.keys(originalResume).forEach((key) => {
+                    if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+                      onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
+                    }
+                  });
+                  
+                  // Clear the stored original state
+                  setOriginalResume(null);
+                }
+              }}
+            />
+          </div>
+        );
       }
     },
     onFinish() {
@@ -291,10 +358,59 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         field: 'education',
                         content: 'improved_education',
                       },
+                      modifyWholeResume: {
+                        type: 'whole_resume',
+                        field: 'all',
+                        content: null,
+                      },
                     } as const;
 
                     const config = toolConfig[toolName as keyof typeof toolConfig];
                     if (!config) return null;
+
+                    if (config.type === 'whole_resume') {
+                      const updates = args as {
+                        basic_info?: Partial<{
+                          first_name: string;
+                          last_name: string;
+                          email: string;
+                          phone_number: string;
+                          location: string;
+                          website: string;
+                          linkedin_url: string;
+                          github_url: string;
+                        }>;
+                        work_experience?: WorkExperience[];
+                        education?: Education[];
+                        skills?: Skill[];
+                        projects?: Project[];
+                      };
+
+                      // Store original state before applying updates
+                      if (!originalResume) {
+                        setOriginalResume({ ...resume });
+                      }
+
+                      return (
+                        <div key={toolCallId} className="mt-2 w-[90%]">
+                          <WholeResumeSuggestion
+                            onReject={() => {
+                              if (originalResume) {
+                                // Restore all fields except metadata
+                                Object.keys(originalResume).forEach((key) => {
+                                  if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+                                    onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
+                                  }
+                                });
+                                
+                                // Clear the stored original state
+                                setOriginalResume(null);
+                              }
+                            }}
+                          />
+                        </div>
+                      );
+                    }
 
                     return (
                       <div key={toolCallId} className="mt-2 w-[90%]">

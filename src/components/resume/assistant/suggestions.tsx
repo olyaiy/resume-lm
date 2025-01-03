@@ -19,6 +19,9 @@ interface SuggestionProps {
   onReject: () => void;
 }
 
+interface WholeResumeSuggestionProps {
+  onReject: () => void;
+}
 
 function compareDescriptions(current: string, suggested: string): {
   text: string;
@@ -441,6 +444,123 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
           </div>
         )}
       </div>
+    </Card>
+  );
+}
+
+export function WholeResumeSuggestion({ onReject }: WholeResumeSuggestionProps) {
+  const [status, setStatus] = useState<'pending' | 'accepted' | 'rejected'>('pending');
+
+  const handleAccept = () => {
+    setStatus('accepted');
+    // No need to do anything as changes are already applied
+  };
+
+  const handleReject = () => {
+    setStatus('rejected');
+    onReject();
+  };
+
+  const statusStyles = {
+    pending: {
+      card: "bg-gradient-to-br from-white/95 via-purple-50/30 to-indigo-50/40 border-white/60",
+      icon: "from-purple-100/90 to-indigo-100/90",
+      iconColor: "text-purple-600",
+      label: "text-gray-900",
+      text: "Modified Resume"
+    },
+    accepted: {
+      card: "bg-gradient-to-br from-emerald-200/95 via-emerald-200/90 to-green-200/95 border-emerald-200/60",
+      icon: "from-emerald-100/90 to-green-100/90",
+      iconColor: "text-emerald-600",
+      label: "text-emerald-600",
+      text: "Changes Accepted"
+    },
+    rejected: {
+      card: "bg-gradient-to-br from-rose-200/95 via-rose-200/90 to-red-200/95 border-rose-200/60",
+      icon: "from-rose-100/90 to-red-100/90",
+      iconColor: "text-rose-600",
+      label: "text-rose-600",
+      text: "Changes Rejected"
+    }
+  }[status];
+
+  return (
+    <Card className={cn(
+      "group relative overflow-hidden p-4",
+      "border",
+      statusStyles.card,
+      "shadow-xl shadow-purple-500/10",
+      "transition-all duration-500 ease-in-out",
+      "hover:shadow-2xl hover:shadow-purple-500/20",
+      "backdrop-blur-xl"
+    )}>
+      <div className="flex items-center gap-2 mb-2">
+        <div className={cn("p-1.5 rounded-lg shadow-sm", statusStyles.icon)}>
+          <Sparkles className={cn("h-3.5 w-3.5", statusStyles.iconColor)} />
+        </div>
+        <span className={cn("font-semibold text-sm", statusStyles.label)}>
+          {statusStyles.text}
+        </span>
+      </div>
+
+      {status === 'pending' && (
+        <div className="flex justify-end gap-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleReject}
+            className={cn(
+              "relative group/button overflow-hidden",
+              "h-8 px-4 text-xs",
+              "bg-gradient-to-br from-rose-50 to-rose-100/90",
+              "text-rose-700",
+              "border border-rose-200/60",
+              "shadow-sm",
+              "transition-all duration-500",
+              "hover:shadow-md hover:shadow-rose-500/10",
+              "hover:border-rose-300/80",
+              "hover:-translate-y-0.5",
+              "active:translate-y-0"
+            )}
+          >
+            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-rose-100 to-rose-200/90 
+              opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative flex items-center justify-center gap-1.5">
+              <X className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:rotate-90" />
+              <span className="font-medium">Undo Changes</span>
+            </div>
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleAccept}
+            className={cn(
+              "relative group/button overflow-hidden",
+              "h-8 px-4 text-xs",
+              "bg-gradient-to-br from-emerald-50 to-emerald-100/90",
+              "text-emerald-700",
+              "border border-emerald-200/60",
+              "shadow-sm",
+              "transition-all duration-500",
+              "hover:shadow-md hover:shadow-emerald-500/10",
+              "hover:border-emerald-300/80",
+              "hover:-translate-y-0.5",
+              "active:translate-y-0"
+            )}
+          >
+            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-100 to-emerald-200/90 
+              opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
+            
+            <div className="relative flex items-center justify-center gap-1.5">
+              <Check className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:scale-110" />
+              <span className="font-medium">Keep Changes</span>
+            </div>
+          </Button>
+        </div>
+      )}
     </Card>
   );
 }
