@@ -369,23 +369,6 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     if (!config) return null;
 
                     if (config.type === 'whole_resume') {
-                      const updates = args as {
-                        basic_info?: Partial<{
-                          first_name: string;
-                          last_name: string;
-                          email: string;
-                          phone_number: string;
-                          location: string;
-                          website: string;
-                          linkedin_url: string;
-                          github_url: string;
-                        }>;
-                        work_experience?: WorkExperience[];
-                        education?: Education[];
-                        skills?: Skill[];
-                        projects?: Project[];
-                      };
-
                       // Store original state before applying updates
                       if (!originalResume) {
                         setOriginalResume({ ...resume });

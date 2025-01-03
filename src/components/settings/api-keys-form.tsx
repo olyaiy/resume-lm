@@ -24,7 +24,6 @@ interface AIModel {
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
-const USER_SELECTED_MODEL = 'gpt-4o-mini' 
 
 const PROVIDERS: { id: ServiceName; name: string; recommended?: boolean }[] = [
   { id: 'anthropic', name: 'Anthropic', recommended: true },
@@ -35,8 +34,8 @@ const PROVIDERS: { id: ServiceName; name: string; recommended?: boolean }[] = [
 
 const AI_MODELS: AIModel[] = [
   { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
-  { id: 'gpt-4o', name: 'GPT-4o (Requires OpenAI API Key)', provider: 'openai' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini (Free)', provider: 'openai' },
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
 
   // FOR NOW, SIMPLY FOCUS ON OPENAI AND ANTHROPIC
   // WE WILL IMPLEMENT THESE LATER
@@ -74,9 +73,9 @@ export function ApiKeysForm() {
   const [defaultModel, setDefaultModel] = useState<string>(() => {
     if (typeof window !== 'undefined') {
       const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
-      return storedModel || USER_SELECTED_MODEL
+      return storedModel || ''
     }
-    return USER_SELECTED_MODEL
+    return ''
   })
 
   // Save API keys to local storage whenever they change
@@ -144,13 +143,10 @@ export function ApiKeysForm() {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
     if (!selectedModel) return
 
-    // Check if model requires API key
-    if (selectedModel.id !== 'gpt-4o-mini') {
-      const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
-      if (!hasRequiredKey) {
-        toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
-        return
-      }
+    const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
+    if (!hasRequiredKey) {
+      toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
+      return
     }
 
     setDefaultModel(modelId)
@@ -158,7 +154,6 @@ export function ApiKeysForm() {
   }
 
   const isModelSelectable = (modelId: string) => {
-    if (modelId === 'gpt-4o-mini') return true
     const model = AI_MODELS.find(m => m.id === modelId)
     if (!model) return false
     return apiKeys.some(k => k.service === model.provider)
@@ -172,11 +167,11 @@ export function ApiKeysForm() {
           Default AI Model
         </Label>
         <p className="text-sm text-muted-foreground mt-2 mb-3">
-          This model will be used for all AI operations throughout the application. GPT-4o Mini is available for free. Other models require their respective API keys.
+          This model will be used for all AI operations throughout the application. All models require their respective API keys.
         </p>
         <Select value={defaultModel} onValueChange={handleModelChange}>
           <SelectTrigger className="w-full mt-1 bg-white/50 border-purple-600/60 hover:border-purple-600/80 focus:border-purple-600/40 transition-colors">
-            <SelectValue placeholder="Select a model" />
+            <SelectValue placeholder="Select an AI model" />
           </SelectTrigger>
           <SelectContent>
             {AI_MODELS.map((model) => (
