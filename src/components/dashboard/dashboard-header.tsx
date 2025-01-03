@@ -2,6 +2,8 @@ import { LogoutButton } from "@/components/auth/logout-button";
 import { SettingsButton } from "@/components/settings/settings-button";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { User } from "lucide-react";
 
 export function DashboardHeader() {
   return (
@@ -38,13 +40,17 @@ export function DashboardHeader() {
             "bg-gradient-to-br from-purple-500/10 to-indigo-500/10",
             "border border-purple-200/50 backdrop-blur-md",
             "shadow-md hover:shadow-lg transition-all duration-500",
-            "hover:shadow-purple-500/20 hover:-translate-y-0.5",
-            "relative overflow-hidden group"
+            "hover:shadow-purple-500/20",
+            "relative overflow-hidden"
           )}>
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            <LogoutButton />
-            <div className="w-px h-6 bg-purple-200/50" />
+            <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">
+              <User className="h-4 w-4" />
+              Profile
+            </Link>
+            <div className="w-px h-6 bg-purple-300" />
             <SettingsButton />
+            <div className="w-px h-6 bg-purple-300" />
+            <LogoutButton />
           </div>
         </div>
       </div>

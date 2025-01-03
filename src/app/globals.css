@@ -101,6 +101,15 @@ body {
   .animate-float-delayed {
     animation: float-delayed 9s ease-in-out infinite;
   }
+
+  .bg-radial-glow-purple {
+    background: radial-gradient(
+      circle at center,
+      theme('colors.purple.500/0.15') 0%,
+      theme('colors.purple.500/0.05') 45%,
+      transparent 70%
+    );
+  }
 }
 
 .custom-scrollbar {
