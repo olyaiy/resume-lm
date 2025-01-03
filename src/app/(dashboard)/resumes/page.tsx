@@ -11,24 +11,26 @@ import type { SortOption, SortDirection } from "@/components/resume/management/r
 const RESUMES_PER_PAGE = 12;
 
 interface PageProps {
-  searchParams: {
+  searchParams: Promise<{
     page?: string
     sort?: string
     direction?: string
     [key: string]: string | undefined
-  }
+  }>
 }
 
 export default async function ResumesPage({ 
   searchParams 
 }: PageProps) {
+  const params = await searchParams;
+  
   const { baseResumes, tailoredResumes } = await getDashboardData();
   
   // Combine and sort resumes
   const allResumes = [...baseResumes, ...tailoredResumes];
-  const currentPage = Number(searchParams.page as string) || 1;
-  const sort = (searchParams.sort as SortOption) || 'updatedAt';
-  const direction = (searchParams.direction as SortDirection) || 'desc';
+  const currentPage = Number(params.page) || 1;
+  const sort = (params.sort as SortOption) || 'updatedAt';
+  const direction = (params.direction as SortDirection) || 'desc';
 
   // Sort resumes
   const sortedResumes = allResumes.sort((a, b) => {

@@ -22,19 +22,20 @@ const tiers: PricingTier[] = [
   {
     name: "Free",
     price: "$0",
-    description: "Perfect for trying out ResumeLM",
+    description: "Self-host or use with your own API keys",
     gradient: "from-violet-600/80 to-indigo-600/80",
     features: [
-      { text: "Access to basic AI models", included: true },
+      { text: "Use your own API keys", included: true },
       { text: "2 base resumes", included: true },
-      { text: "5 tailored resumes ", included: true },
+      { text: "5 tailored resumes", included: true },
+      { text: "Self-host option available", included: true },
     ],
     buttonText: "Get Started",
   },
   {
     name: "Pro",
     price: "$20",
-    description: "Enhanced features for serious job seekers",
+    description: "Enhanced features for serious job seekers (Coming Soon)",
     gradient: "from-pink-600/80 to-rose-600/80",
     popular: true,
     features: [
@@ -43,19 +44,7 @@ const tiers: PricingTier[] = [
       { text: "Unlimited tailored resumes", included: true },
       { text: "Support an independent student developer ❤️", included: true },
     ],
-    buttonText: "Get Started",
-  },
-  {
-    name: "BYOK",
-    price: "$0",
-    description: "For users with their own API keys",
-    gradient: "from-teal-600/80 to-cyan-600/80",
-    features: [
-      { text: "Use your own API keys", included: true },
-      { text: "2 base resumes", included: true },
-      { text: "5 tailored resumes ", included: true },
-    ],
-    buttonText: "Get Started",
+    buttonText: "Coming Soon",
   },
 ];
 
@@ -74,21 +63,20 @@ export function PricingSection() {
           <h2 className="text-4xl font-bold tracking-tight sm:text-5xl bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent pb-3">
             Pricing
           </h2>
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-600/10 to-blue-600/10 border border-violet-600/20 shadow-lg shadow-violet-600/5">
-                <span className="text-sm font-medium bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
-                ⭐️ ResumeLM is open source and free to self-host
-                </span>
+          <div className="flex flex-col items-center gap-3 mb-12">
+            <div className="flex flex-col items-center px-6 py-2.5 rounded-full bg-gradient-to-r from-violet-600/10 to-blue-600/10 border border-violet-600/20 shadow-lg shadow-violet-600/5">
+              <span className="text-sm font-medium bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+                ⭐️ Free to use with your own API keys
+              </span>
             </div>
-            <p className="mt-3 inline-block text-sm text-muted-foreground hover:text-violet-600 transition-colors duration-300">
-              I&apos;d love to make this app completely free, but AI costs add up quickly. Feel free to self-host using your own API keys, or choose from our plans below.
+            <p className="text-sm text-muted-foreground hover:text-violet-600 transition-colors duration-300">
+              ResumeLM is open source and free to use. Pro version with managed API keys coming soon!
             </p>
-          
-        </div>
+          </div>
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+        <div className="grid md:grid-cols-2 gap-8 lg:gap-12 max-w-4xl mx-auto">
           {tiers.map((tier) => (
             <div
               key={tier.name}
@@ -99,7 +87,7 @@ export function PricingSection() {
             >
               {tier.popular && (
                 <div className="absolute -top-6 left-0 right-0 mx-auto w-36 rounded-full bg-gradient-to-r from-pink-600 to-rose-600 px-4 py-1.5 text-sm text-white text-center font-medium shadow-lg">
-                  Most Popular
+                  Coming Soon
                 </div>
               )}
 

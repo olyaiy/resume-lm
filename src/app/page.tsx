@@ -76,7 +76,7 @@ export default async function Home() {
           {/* Resume Bookshelf */}
           <div className="relative  rounded-2xl border border-purple-400/50 shadow-2xl p-6 bg-white">
             {/* Base Resumes Section */}
-            <div className="relative rounded-xl bg-gradient-to-br from-purple-50/50 to-indigo-50/50 ">
+            <div className="relative rounded-xl bg-gradient-to-br from-purple-50/50 to-indigo-50/50">
               <div className="relative flex items-center justify-between pb-4">
                 <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                   Base Resumes
