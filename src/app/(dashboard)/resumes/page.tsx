@@ -10,17 +10,17 @@ import type { SortOption, SortDirection } from "@/components/resume/management/r
 
 const RESUMES_PER_PAGE = 12;
 
+interface SearchParams {
+  [key: string]: string | string[] | undefined
+}
+
 interface PageProps {
-  searchParams: {
-    [key: string]: string | string[] | undefined
-  }
+  searchParams: SearchParams
 }
 
 export default async function ResumesPage({ 
   searchParams 
-}: {
-  searchParams: PageProps['searchParams']
-}) {
+}: PageProps) {
   const { baseResumes, tailoredResumes } = await getDashboardData();
   
   // Combine and sort resumes
