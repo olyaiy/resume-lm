@@ -15,10 +15,10 @@ export async function tailorResumeToJob(
   config?: AIConfig
 ) {
   const aiClient = initializeAIClient(config);
-
-  const { object } = await generateObject({
-    model: aiClient,
-    schema: z.object({
+  try {
+    const { object } = await generateObject({
+      model: aiClient,
+      schema: z.object({
       content: simplifiedResumeSchema,
     }),
     prompt: `
@@ -37,15 +37,19 @@ export async function tailorResumeToJob(
     `,
   });
 
-  return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
+    return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
+  } catch (error) {
+    console.error('Error tailoring resume:', error);
+    throw error;
+  }
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const aiClient = initializeAIClient(config);
-
-  const { object } = await generateObject({
-    model: aiClient,
-    schema: z.object({
+  try {
+    const { object } = await generateObject({
+      model: aiClient,
+      schema: z.object({
       content: simplifiedJobSchema
     }),
     prompt: `Analyze this job listing carefully and extract structured information.
@@ -77,4 +81,8 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
   });
 
   return object.content satisfies Partial<Job>;
+  } catch (error) {
+    console.error('Error formatting job listing:', error);
+    throw error;
+  }
 }

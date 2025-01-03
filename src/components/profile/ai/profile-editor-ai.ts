@@ -4,7 +4,7 @@ import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
-// RESUME -> PROFILE
+// TEXT RESUME -> PROFILE
 export async function formatProfileWithAI(
   userMessages: string,
   config?: AIConfig
@@ -12,9 +12,6 @@ export async function formatProfileWithAI(
     try {
       const aiClient = initializeAIClient(config);
       
-      // Log the model being used
-      console.log('Using AI Model:', config?.model || 'gpt-4o-mini (default)');
-
       const { object } = await generateObject({
         model: aiClient,
         schema: z.object({
