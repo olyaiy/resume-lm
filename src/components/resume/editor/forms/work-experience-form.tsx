@@ -306,7 +306,6 @@ export function WorkExperienceForm({ experiences, onChange, profile, targetRole 
               "relative group transition-all duration-300",
               "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
               "backdrop-blur-md border-2 border-cyan-500/30",
-              "hover:border-cyan-500/40 hover:shadow-lg hover:scale-[1.002]",
               "shadow-sm"
             )}
           >

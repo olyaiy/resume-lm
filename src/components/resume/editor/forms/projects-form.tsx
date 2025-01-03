@@ -307,7 +307,6 @@ export function ProjectsForm({ projects, onChange, profile, targetRole = "Softwa
               "relative group transition-all duration-300",
               "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
               "backdrop-blur-md border-2 border-violet-500/30",
-              "hover:border-violet-500/40 hover:shadow-lg hover:scale-[1.002]",
               "shadow-sm"
             )}
           >

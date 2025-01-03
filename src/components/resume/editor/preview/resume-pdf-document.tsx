@@ -2,72 +2,339 @@
 
 import { Resume } from "@/lib/types";
 import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 
-interface ResumePDFDocumentProps {
-  resume: Resume;
-  variant?: 'base' | 'tailored';
-}
+// Base styles that don't depend on resume settings
+const baseStyles = {
+  link: {
+    color: '#2563eb',
+    textDecoration: 'none',
+  },
+  bulletSeparator: {
+    color: '#4b5563',
+    marginHorizontal: 2,
+  },
+  bulletDot: {
+    width: 8,
+    marginRight: 4,
+  },
+} as const;
 
-// Add utility function to parse bold text
+// Utility function to parse bold text
 function renderTextWithBold(text: string) {
   const parts = text.split(/(\*\*.*?\*\*)/g);
   return parts.map((part, index) => {
     if (part.startsWith('**') && part.endsWith('**')) {
-      // Remove the ** markers and render as bold
       return <Text key={index} style={{ fontFamily: 'Helvetica-Bold' }}>{part.slice(2, -2)}</Text>;
     }
     return <Text key={index}>{part}</Text>;
   });
 }
 
-export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: ResumePDFDocumentProps) {
-  // PDF Styles Configuration
-  const styles = StyleSheet.create({
+// Memoized section components
+const HeaderSection = memo(function HeaderSection({ 
+  resume, 
+  styles 
+}: { 
+  resume: Resume; 
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  return (
+    <View style={styles.header}>
+      <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
+      <View style={styles.contactInfo}>
+        {resume.location && (
+          <>
+            <Text>{resume.location}</Text>
+            {(resume.email || resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
+              <Text style={styles.bulletSeparator}>•</Text>
+            )}
+          </>
+        )}
+        {resume.email && (
+          <>
+            <Link src={`mailto:${resume.email}`}><Text style={styles.link}>{resume.email}</Text></Link>
+            {(resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
+              <Text style={styles.bulletSeparator}>•</Text>
+            )}
+          </>
+        )}
+        {resume.phone_number && (
+          <>
+            <Text>{resume.phone_number}</Text>
+            {(resume.website || resume.linkedin_url || resume.github_url) && (
+              <Text style={styles.bulletSeparator}>•</Text>
+            )}
+          </>
+        )}
+        {resume.website && (
+          <>
+            <Link src={resume.website.startsWith('http') ? resume.website : `https://${resume.website}`}>
+              <Text style={styles.link}>{resume.website}</Text>
+            </Link>
+            {(resume.linkedin_url || resume.github_url) && (
+              <Text style={styles.bulletSeparator}>•</Text>
+            )}
+          </>
+        )}
+        {resume.linkedin_url && (
+          <>
+            <Link src={resume.linkedin_url.startsWith('http') ? resume.linkedin_url : `https://${resume.linkedin_url}`}>
+              <Text style={styles.link}>{resume.linkedin_url}</Text>
+            </Link>
+            {resume.github_url && <Text style={styles.bulletSeparator}>•</Text>}
+          </>
+        )}
+        {resume.github_url && (
+          <Link src={resume.github_url.startsWith('http') ? resume.github_url : `https://${resume.github_url}`}>
+            <Text style={styles.link}>{resume.github_url}</Text>
+          </Link>
+        )}
+      </View>
+    </View>
+  );
+});
+
+const SkillsSection = memo(function SkillsSection({ 
+  skills, 
+  styles 
+}: { 
+  skills: Resume['skills']; 
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  if (!skills?.length) return null;
+  
+  return (
+    <View style={styles.skillsSection}>
+      <Text style={styles.sectionTitle}>Skills</Text>
+      <View style={styles.skillsGrid}>
+        {skills.map((skillCategory, index) => (
+          <View key={index} style={styles.skillCategory}>
+            <Text style={styles.skillCategoryTitle}>{skillCategory.category}:</Text>
+            <Text style={styles.skillItem}>{skillCategory.items.join(', ')}</Text>
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+});
+
+const ExperienceSection = memo(function ExperienceSection({ 
+  experiences, 
+  styles 
+}: { 
+  experiences: Resume['work_experience']; 
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  if (!experiences?.length) return null;
+
+  return (
+    <View style={styles.experienceSection}>
+      <Text style={styles.sectionTitle}>Experience</Text>
+      {experiences.map((experience, index) => (
+        <View key={index} style={styles.experienceItem}>
+          <View style={styles.experienceHeader}>
+            <View>
+              <Text style={styles.companyName}>{experience.position}</Text>
+              <Text style={styles.jobTitle}>{experience.company}</Text>
+            </View>
+            <Text style={styles.dateRange}>{experience.date}</Text>
+          </View>
+          {experience.description.map((bullet, bulletIndex) => (
+            <View key={bulletIndex} style={styles.bulletPoint}>
+              <Text style={styles.bulletDot}>•</Text>
+              <View style={styles.bulletText}>
+                <Text style={styles.bulletTextContent}>
+                  {renderTextWithBold(bullet)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+});
+
+const ProjectsSection = memo(function ProjectsSection({ 
+  projects, 
+  styles 
+}: { 
+  projects: Resume['projects']; 
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  if (!projects?.length) return null;
+
+  return (
+    <View style={styles.projectsSection}>
+      <Text style={styles.sectionTitle}>Projects</Text>
+      {projects.map((project, index) => (
+        <View key={index} style={styles.projectItem}>
+          <View style={styles.projectHeader}>
+            <View style={styles.projectHeaderTop}>
+              <View>
+                <Text style={styles.projectTitle}>{project.name}</Text>
+                {project.technologies && (
+                  <Text style={styles.projectTechnologies}>
+                    {project.technologies.join(', ')}
+                  </Text>
+                )}
+              </View>
+              <View style={styles.projectHeaderRight}>
+                {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
+                {(project.url || project.github_url) && (
+                  <Text style={styles.projectLinks}>
+                    {project.url && (
+                      <Link src={project.url.startsWith('http') ? project.url : `https://${project.url}`}>
+                        <Text style={styles.link}>{project.url}</Text>
+                      </Link>
+                    )}
+                    {project.url && project.github_url && ' | '}
+                    {project.github_url && (
+                      <Link src={project.github_url.startsWith('http') ? project.github_url : `https://${project.github_url}`}>
+                        <Text style={styles.link}>{project.github_url}</Text>
+                      </Link>
+                    )}
+                  </Text>
+                )}
+              </View>
+            </View>
+          </View>
+          
+          {project.description.map((bullet, bulletIndex) => (
+            <View key={bulletIndex} style={styles.bulletPoint}>
+              <Text style={styles.bulletDot}>•</Text>
+              <View style={styles.bulletText}>
+                <Text style={styles.bulletTextContent}>
+                  {renderTextWithBold(bullet)}
+                </Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+});
+
+const EducationSection = memo(function EducationSection({ 
+  education, 
+  styles 
+}: { 
+  education: Resume['education']; 
+  styles: ReturnType<typeof createResumeStyles>;
+}) {
+  if (!education?.length) return null;
+
+  return (
+    <View style={styles.educationSection}>
+      <Text style={styles.sectionTitle}>Education</Text>
+      {education.map((edu, index) => (
+        <View key={index} style={styles.educationItem}>
+          <View style={styles.educationHeader}>
+            <View>
+              <Text style={styles.schoolName}>{edu.school}</Text>
+              <Text style={styles.degree}>{edu.degree} in {edu.field}</Text>
+            </View>
+            <Text style={styles.dateRange}>{edu.date}</Text>
+          </View>
+          {edu.achievements && edu.achievements.map((achievement, bulletIndex) => (
+            <View key={bulletIndex} style={styles.bulletPoint}>
+              <Text style={styles.bulletDot}>•</Text>
+              <View style={styles.bulletText}>
+                {renderTextWithBold(achievement)}
+              </View>
+            </View>
+          ))}
+        </View>
+      ))}
+    </View>
+  );
+});
+
+// Style factory function
+function createResumeStyles(settings: Resume['document_settings'] = {
+  document_font_size: 10,
+  document_line_height: 1.5,
+  document_margin_vertical: 36,
+  document_margin_horizontal: 36,
+  header_name_size: 24,
+  header_name_bottom_spacing: 24,
+  skills_margin_top: 2,
+  skills_margin_bottom: 2,
+  skills_margin_horizontal: 0,
+  skills_item_spacing: 2,
+  experience_margin_top: 2,
+  experience_margin_bottom: 2,
+  experience_margin_horizontal: 0,
+  experience_item_spacing: 4,
+  projects_margin_top: 2,
+  projects_margin_bottom: 2,
+  projects_margin_horizontal: 0,
+  projects_item_spacing: 4,
+  education_margin_top: 2,
+  education_margin_bottom: 2,
+  education_margin_horizontal: 0,
+  education_item_spacing: 4,
+}) {
+  const {
+    document_font_size = 10,
+    document_line_height = 1.5,
+    document_margin_vertical = 36,
+    document_margin_horizontal = 36,
+    header_name_size = 24,
+    header_name_bottom_spacing = 24,
+    skills_margin_top = 2,
+    skills_margin_bottom = 2,
+    skills_margin_horizontal = 0,
+    skills_item_spacing = 2,
+    experience_margin_top = 2,
+    experience_margin_bottom = 2,
+    experience_margin_horizontal = 0,
+    experience_item_spacing = 4,
+    projects_margin_top = 2,
+    projects_margin_bottom = 2,
+    projects_margin_horizontal = 0,
+    projects_item_spacing = 4,
+    education_margin_top = 2,
+    education_margin_bottom = 2,
+    education_margin_horizontal = 0,
+    education_item_spacing = 4,
+  } = settings;
+
+  return StyleSheet.create({
+    ...baseStyles,
     // Base page configuration
     page: {
-      paddingTop: resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36,
-      paddingBottom: resume.document_settings?.document_margin_vertical !== undefined ? resume.document_settings.document_margin_vertical : 36,
-      paddingLeft: resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36,
-      paddingRight: resume.document_settings?.document_margin_horizontal !== undefined ? resume.document_settings.document_margin_horizontal : 36,
+      paddingTop: document_margin_vertical,
+      paddingBottom: document_margin_vertical,
+      paddingLeft: document_margin_horizontal,
+      paddingRight: document_margin_horizontal,
       fontFamily: 'Helvetica',
       color: '#1f2937',
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
-      lineHeight: resume.document_settings?.document_line_height !== undefined ? resume.document_settings.document_line_height : 1.5,
+      fontSize: document_font_size,
+      lineHeight: document_line_height,
     },
-    // Header section
     header: {
       alignItems: 'center',
     },
-    // Name display
     name: {
-      fontSize: resume.document_settings?.header_name_size !== undefined ? resume.document_settings.header_name_size : 24,
+      fontSize: header_name_size,
       fontFamily: 'Helvetica-Bold',
-      marginBottom: resume.document_settings?.header_name_bottom_spacing !== undefined ? resume.document_settings.header_name_bottom_spacing : 24,
+      marginBottom: header_name_bottom_spacing,
       color: '#111827',
       textAlign: 'center',
     },
-    // Contact information layout
     contactInfo: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
       flexDirection: 'row',
       justifyContent: 'center',
       flexWrap: 'wrap',
       gap: 4,
     },
-    // Links
-    link: {
-      color: '#2563eb',
-      textDecoration: 'none',
-    },
-    bulletSeparator: {
-      color: '#4b5563',
-      marginHorizontal: 2,
-    },
-    // Section titles
     sectionTitle: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       marginBottom: 4,
       color: '#111827',
@@ -77,38 +344,38 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: Resu
     },
     // Skills section
     skillsSection: {
-      marginTop: resume.document_settings?.skills_margin_top !== undefined ? resume.document_settings.skills_margin_top : 2,
-      marginBottom: resume.document_settings?.skills_margin_bottom !== undefined ? resume.document_settings.skills_margin_bottom : 2,
-      marginLeft: resume.document_settings?.skills_margin_horizontal !== undefined ? resume.document_settings.skills_margin_horizontal : 0,
-      marginRight: resume.document_settings?.skills_margin_horizontal !== undefined ? resume.document_settings.skills_margin_horizontal : 0,
+      marginTop: skills_margin_top,
+      marginBottom: skills_margin_bottom,
+      marginLeft: skills_margin_horizontal,
+      marginRight: skills_margin_horizontal,
     },
     skillsGrid: {
       flexDirection: 'column',
-      gap: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
+      gap: skills_item_spacing,
     },
     skillCategory: {
-      marginBottom: resume.document_settings?.skills_item_spacing !== undefined ? resume.document_settings.skills_item_spacing : 4,
+      marginBottom: skills_item_spacing,
       flexDirection: 'row',
     },
     skillCategoryTitle: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
       marginRight: 4,
     },
     skillItem: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
     },
     // Experience section
     experienceSection: {
-      marginTop: resume.document_settings?.experience_margin_top !== undefined ? resume.document_settings.experience_margin_top : 2,
-      marginBottom: resume.document_settings?.experience_margin_bottom !== undefined ? resume.document_settings.experience_margin_bottom : 2,
-      marginLeft: resume.document_settings?.experience_margin_horizontal !== undefined ? resume.document_settings.experience_margin_horizontal : 0,
-      marginRight: resume.document_settings?.experience_margin_horizontal !== undefined ? resume.document_settings.experience_margin_horizontal : 0,
+      marginTop: experience_margin_top,
+      marginBottom: experience_margin_bottom,
+      marginLeft: experience_margin_horizontal,
+      marginRight: experience_margin_horizontal,
     },
     experienceItem: {
-      marginBottom: resume.document_settings?.experience_item_spacing || 4,
+      marginBottom: experience_item_spacing,
     },
     experienceHeader: {
       flexDirection: 'row',
@@ -117,22 +384,22 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: Resu
       marginBottom: 4,
     },
     companyName: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     jobTitle: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
     },
     dateRange: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#6b7280',
       textAlign: 'right',
     },
     bulletPoint: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
-      marginBottom: resume.document_settings?.experience_item_spacing || 4,
+      fontSize: document_font_size,
+      marginBottom: experience_item_spacing,
       color: '#374151',
       marginLeft: 8,
       paddingLeft: 8,
@@ -144,22 +411,18 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: Resu
       flexWrap: 'wrap',
       display: 'flex',
     },
-    bulletDot: {
-      width: 8,
-      marginRight: 4,
-    },
     bulletTextContent: {
       flex: 1,
     },
     // Projects section
     projectsSection: {
-      marginTop: resume.document_settings?.projects_margin_top !== undefined ? resume.document_settings.projects_margin_top : 2,
-      marginBottom: resume.document_settings?.projects_margin_bottom !== undefined ? resume.document_settings.projects_margin_bottom : 2,
-      marginLeft: resume.document_settings?.projects_margin_horizontal !== undefined ? resume.document_settings.projects_margin_horizontal : 0,
-      marginRight: resume.document_settings?.projects_margin_horizontal !== undefined ? resume.document_settings.projects_margin_horizontal : 0,
+      marginTop: projects_margin_top,
+      marginBottom: projects_margin_bottom,
+      marginLeft: projects_margin_horizontal,
+      marginRight: projects_margin_horizontal,
     },
     projectItem: {
-      marginBottom: resume.document_settings?.projects_item_spacing || 4,
+      marginBottom: projects_item_spacing,
     },
     projectHeader: {
       flexDirection: 'column',
@@ -175,33 +438,33 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: Resu
       alignItems: 'flex-end',
     },
     projectTitle: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     projectTechnologies: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
       fontFamily: 'Helvetica-Bold',
     },
     projectDescription: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#374151',
     },
     projectLinks: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
       textAlign: 'right',
     },
     // Education section
     educationSection: {
-      marginTop: resume.document_settings?.education_margin_top !== undefined ? resume.document_settings.education_margin_top : 2,
-      marginBottom: resume.document_settings?.education_margin_bottom !== undefined ? resume.document_settings.education_margin_bottom : 2,
-      marginLeft: resume.document_settings?.education_margin_horizontal !== undefined ? resume.document_settings.education_margin_horizontal : 0,
-      marginRight: resume.document_settings?.education_margin_horizontal !== undefined ? resume.document_settings.education_margin_horizontal : 0,
+      marginTop: education_margin_top,
+      marginBottom: education_margin_bottom,
+      marginLeft: education_margin_horizontal,
+      marginRight: education_margin_horizontal,
     },
     educationItem: {
-      marginBottom: resume.document_settings?.education_item_spacing || 4,
+      marginBottom: education_item_spacing,
     },
     educationHeader: {
       flexDirection: 'row',
@@ -210,193 +473,34 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume}: Resu
       marginBottom: 4,
     },
     schoolName: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
     },
     degree: {
-      fontSize: resume.document_settings?.document_font_size !== undefined ? resume.document_settings.document_font_size : 10,
+      fontSize: document_font_size,
       color: '#4b5563',
     },
   });
+}
+
+interface ResumePDFDocumentProps {
+  resume: Resume;
+  variant?: 'base' | 'tailored';
+}
+
+export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: ResumePDFDocumentProps) {
+  // Memoize styles based on document settings
+  const styles = useMemo(() => createResumeStyles(resume.document_settings), [resume.document_settings]);
 
   return (
     <PDFDocument>
       <PDFPage size="LETTER" style={styles.page}>
-        {/* Header Section - Name and Contact Information */}
-        <View style={styles.header}>
-          <Text style={styles.name}>{resume.first_name} {resume.last_name}</Text>
-          <View style={styles.contactInfo}>
-            {resume.location && (
-              <>
-                <Text>{resume.location}</Text>
-                {(resume.email || resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
-                  <Text style={styles.bulletSeparator}>•</Text>
-                )}
-              </>
-            )}
-            {resume.email && (
-              <>
-                <Link src={`mailto:${resume.email}`}><Text style={styles.link}>{resume.email}</Text></Link>
-                {(resume.phone_number || resume.website || resume.linkedin_url || resume.github_url) && (
-                  <Text style={styles.bulletSeparator}>•</Text>
-                )}
-              </>
-            )}
-            {resume.phone_number && (
-              <>
-                <Text>{resume.phone_number}</Text>
-                {(resume.website || resume.linkedin_url || resume.github_url) && (
-                  <Text style={styles.bulletSeparator}>•</Text>
-                )}
-              </>
-            )}
-            {resume.website && (
-              <>
-                <Link src={resume.website.startsWith('http') ? resume.website : `https://${resume.website}`}>
-                  <Text style={styles.link}>{resume.website}</Text>
-                </Link>
-                {(resume.linkedin_url || resume.github_url) && (
-                  <Text style={styles.bulletSeparator}>•</Text>
-                )}
-              </>
-            )}
-            {resume.linkedin_url && (
-              <>
-                <Link src={resume.linkedin_url.startsWith('http') ? resume.linkedin_url : `https://${resume.linkedin_url}`}>
-                  <Text style={styles.link}>{resume.linkedin_url}</Text>
-                </Link>
-                {resume.github_url && <Text style={styles.bulletSeparator}>•</Text>}
-              </>
-            )}
-            {resume.github_url && (
-              <Link src={resume.github_url.startsWith('http') ? resume.github_url : `https://${resume.github_url}`}>
-                <Text style={styles.link}>{resume.github_url}</Text>
-              </Link>
-            )}
-          </View>
-        </View>
-
-        {/* Skills Section */}
-        {resume.skills && resume.skills.length > 0 && (
-          <View style={styles.skillsSection}>
-            <Text style={styles.sectionTitle}>Skills</Text>
-            <View style={styles.skillsGrid}>
-              {resume.skills.map((skillCategory, index) => (
-                <View key={index} style={styles.skillCategory}>
-                  <Text style={styles.skillCategoryTitle}>{skillCategory.category}:</Text>
-                  <Text style={styles.skillItem}>{skillCategory.items.join(', ')}</Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
-
-        {/* Experience Section */}
-        {resume.work_experience && resume.work_experience.length > 0 && (
-          <View style={styles.experienceSection}>
-            <Text style={styles.sectionTitle}>Experience</Text>
-            {resume.work_experience.map((experience, index) => (
-              <View key={index} style={styles.experienceItem}>
-                <View style={styles.experienceHeader}>
-                  <View>
-                    <Text style={styles.companyName}>{experience.position}</Text>
-                    <Text style={styles.jobTitle}>{experience.company}</Text>
-                  </View>
-                  <Text style={styles.dateRange}>{experience.date}</Text>
-                </View>
-                {experience.description.map((bullet, bulletIndex) => (
-                  <View key={bulletIndex} style={styles.bulletPoint}>
-                    <Text style={styles.bulletDot}>•</Text>
-                    <View style={styles.bulletText}>
-                      <Text style={styles.bulletTextContent}>
-                        {renderTextWithBold(bullet)}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Projects Section */}
-        {resume.projects && resume.projects.length > 0 && (
-          <View style={styles.projectsSection}>
-            <Text style={styles.sectionTitle}>Projects</Text>
-            {resume.projects.map((project, index) => (
-              <View key={index} style={styles.projectItem}>
-                <View style={styles.projectHeader}>
-                  <View style={styles.projectHeaderTop}>
-                    <View>
-                      <Text style={styles.projectTitle}>{project.name}</Text>
-                      {project.technologies && (
-                        <Text style={styles.projectTechnologies}>
-                          {project.technologies.join(', ')}
-                        </Text>
-                      )}
-                    </View>
-                    <View style={styles.projectHeaderRight}>
-                      {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
-                      {(project.url || project.github_url) && (
-                        <Text style={styles.projectLinks}>
-                          {project.url && (
-                            <Link src={project.url.startsWith('http') ? project.url : `https://${project.url}`}>
-                              <Text style={styles.link}>{project.url}</Text>
-                            </Link>
-                          )}
-                          {project.url && project.github_url && ' | '}
-                          {project.github_url && (
-                            <Link src={project.github_url.startsWith('http') ? project.github_url : `https://${project.github_url}`}>
-                              <Text style={styles.link}>{project.github_url}</Text>
-                            </Link>
-                          )}
-                        </Text>
-                      )}
-                    </View>
-                  </View>
-                </View>
-                
-                {project.description.map((bullet, bulletIndex) => (
-                  <View key={bulletIndex} style={styles.bulletPoint}>
-                    <Text style={styles.bulletDot}>•</Text>
-                    <View style={styles.bulletText}>
-                      <Text style={styles.bulletTextContent}>
-                        {renderTextWithBold(bullet)}
-                      </Text>
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
-
-        {/* Education Section */}
-        {resume.education && resume.education.length > 0 && (
-          <View style={styles.educationSection}>
-            <Text style={styles.sectionTitle}>Education</Text>
-            {resume.education.map((edu, index) => (
-              <View key={index} style={styles.educationItem}>
-                <View style={styles.educationHeader}>
-                  <View>
-                    <Text style={styles.schoolName}>{edu.school}</Text>
-                    <Text style={styles.degree}>{edu.degree} in {edu.field}</Text>
-                  </View>
-                  <Text style={styles.dateRange}>{edu.date}</Text>
-                </View>
-                {edu.achievements && edu.achievements.map((achievement, bulletIndex) => (
-                  <View key={bulletIndex} style={styles.bulletPoint}>
-                    <Text style={styles.bulletDot}>•</Text>
-                    <View style={styles.bulletText}>
-                      {renderTextWithBold(achievement)}
-                    </View>
-                  </View>
-                ))}
-              </View>
-            ))}
-          </View>
-        )}
+        <HeaderSection resume={resume} styles={styles} />
+        <SkillsSection skills={resume.skills} styles={styles} />
+        <ExperienceSection experiences={resume.work_experience} styles={styles} />
+        <ProjectsSection projects={resume.projects} styles={styles} />
+        <EducationSection education={resume.education} styles={styles} />
       </PDFPage>
     </PDFDocument>
   );
