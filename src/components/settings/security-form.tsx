@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Loader2 } from "lucide-react"
 import { User } from "@supabase/supabase-js"
 import { useState } from "react"
-import { updateEmail, updatePassword } from "@/app/settings/actions"
+import { updateEmail, updatePassword } from "@/app/(dashboard)/settings/actions"
 import { toast } from "sonner"
 // import { testApiKey } from "@/app/settings/page"
 
