@@ -1,5 +1,5 @@
 'use client';
-import { scan } from 'react-scan'; // import this BEFORE react
+
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import { useChat } from 'ai/react';
@@ -19,13 +19,8 @@ import { ApiKey } from '@/utils/ai-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Logo } from "@/components/ui/logo";
 
-if (typeof window !== 'undefined') {
-  scan({
-    enabled: true,
-    log: true, // logs render info to console (default: false)
-  });
-}
 
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
@@ -209,24 +204,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                 <Bot className="h-3.5 w-3.5" />
               </div>
               <div className="flex items-center gap-2">
-                <span className={cn(
-                  "text-sm font-medium text-purple-600",
-                  "group-hover:text-purple-700",
-                  "transition-colors duration-300"
-                )}>
-                  AI Assistant
-                </span>
-                {messages.length > 0 && (
-                  <span className={cn(
-                    "px-1.5 py-0.5 text-[10px] rounded-full",
-                    "bg-purple-100/80 text-purple-600",
-                    "group-hover:bg-purple-200/80",
-                    "transition-colors duration-300",
-                    "group-data-[state=closed]:bg-white/60"
-                  )}>
-                    {messages.length}
-                  </span>
-                )}
+                <Logo className="text-sm" asLink={false} />
               </div>
             </div>
           </AccordionTrigger>

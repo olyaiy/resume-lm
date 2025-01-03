@@ -92,7 +92,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
         };
       case 'rejected':
         return {
-          card: "bg-gradient-to-br from-rose-50/95 via-rose-50/90 to-red-50/95 border-rose-200/60",
+          card: "bg-gradient-to-br from-rose-200/95 via-rose-200/90 to-red-200/95 border-rose-200/60",
           icon: "from-rose-100/90 to-red-100/90",
           iconColor: "text-rose-600",
           label: "text-rose-600",
@@ -388,36 +388,55 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
               size="sm"
               onClick={handleReject}
               className={cn(
-                "h-8 px-3 text-xs",
-                "bg-gradient-to-br from-rose-50/90 to-rose-100/90",
-                "text-gray-900",
-                "border border-rose-200/40 hover:border-rose-300/60",
-                "shadow-sm hover:shadow",
-                "transition-all duration-300",
-                "hover:scale-[1.02] hover:-translate-y-0.5",
-                "font-medium"
+                "relative group/button overflow-hidden",
+                "h-8 px-4 text-xs",
+                "bg-gradient-to-br from-rose-50 to-rose-100/90",
+                "text-rose-700",
+                "border border-rose-200/60",
+                "shadow-sm",
+                "transition-all duration-500",
+                "hover:shadow-md hover:shadow-rose-500/10",
+                "hover:border-rose-300/80",
+                "hover:-translate-y-0.5",
+                "active:translate-y-0"
               )}
             >
-              <X className="h-3.5 w-3.5 mr-1.5" />
-              Reject
+              {/* Animated background on hover */}
+              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-rose-100 to-rose-200/90 
+                opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative flex items-center justify-center gap-1.5">
+                <X className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:rotate-90" />
+                <span className="font-medium">Reject</span>
+              </div>
             </Button>
+
             <Button
               variant="ghost"
               size="sm"
               onClick={handleAccept}
               className={cn(
-                "h-8 px-3 text-xs",
-                "bg-gradient-to-br from-emerald-50/90 to-emerald-100/90",
-                "text-gray-900",
-                "border border-emerald-200/40 hover:border-emerald-300/60",
-                "shadow-sm hover:shadow",
-                "transition-all duration-300",
-                "hover:scale-[1.02] hover:-translate-y-0.5",
-                "font-medium"
+                "relative group/button overflow-hidden",
+                "h-8 px-4 text-xs",
+                "bg-gradient-to-br from-emerald-50 to-emerald-100/90",
+                "text-emerald-700",
+                "border border-emerald-200/60",
+                "shadow-sm",
+                "transition-all duration-500",
+                "hover:shadow-md hover:shadow-emerald-500/10",
+                "hover:border-emerald-300/80",
+                "hover:-translate-y-0.5",
+                "active:translate-y-0"
               )}
             >
-              <Check className="h-3.5 w-3.5 mr-1.5" />
-              Accept
+              {/* Animated background on hover */}
+              <div className="absolute inset-0 -z-10 bg-gradient-to-br from-emerald-100 to-emerald-200/90 
+                opacity-0 group-hover/button:opacity-100 transition-opacity duration-500" />
+              
+              <div className="relative flex items-center justify-center gap-1.5">
+                <Check className="h-3.5 w-3.5 transition-transform duration-500 group-hover/button:scale-110" />
+                <span className="font-medium">Accept</span>
+              </div>
             </Button>
           </div>
         )}
