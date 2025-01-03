@@ -2,14 +2,24 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus } from "lucide-react";
+import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Job } from "@/lib/types";
 import { createClient } from "@/utils/supabase/client";
-import { deleteJob, createEmptyJob } from "@/utils/actions";
+import { createJob, deleteJob } from "@/utils/actions";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { formatJobListing } from "@/utils/ai";
+import { toast } from "@/hooks/use-toast";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 interface TailoredJobCardProps {
   jobId: string | null;
@@ -24,6 +34,9 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
   const [isLoading, setIsLoading] = useState(true);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [jobDescription, setJobDescription] = useState('');
+  const [isFormatting, setIsFormatting] = useState(false);
 
   useEffect(() => {
     async function fetchJob() {
@@ -119,16 +132,59 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
     }
   };
 
-  const handleCreateJob = async () => {
+  const handleCreateJobWithAI = async () => {
+    if (!jobDescription.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter a job description",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
+      setIsFormatting(true);
+
+      // Get model and API key from local storage
+      const MODEL_STORAGE_KEY = 'resumelm-default-model';
+      const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
+
+      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+      let apiKeys = [];
+
+      try {
+        apiKeys = storedKeys ? JSON.parse(storedKeys) : [];
+      } catch (error) {
+        console.error('Error parsing API keys:', error);
+      }
+
+      // Format job listing using AI
+      const formattedJob = await formatJobListing(jobDescription, {
+        model: selectedModel || '',
+        apiKeys
+      });
+
+      // Create job in database
       setIsCreating(true);
-      const newJob = await createEmptyJob();
+      const newJob = await createJob(formattedJob);
+      
+      // Close dialog and refresh
+      setCreateDialogOpen(false);
       router.refresh();
       onJobCreate?.(newJob.id);
+
     } catch (error) {
       console.error('Error creating job:', error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to create job",
+        variant: "destructive",
+      });
     } finally {
+      setIsFormatting(false);
       setIsCreating(false);
+      setJobDescription('');
     }
   };
 
@@ -142,23 +198,65 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
           <p className="text-sm text-gray-500 mb-4">
             Create a new job listing to track the position you&apos;re applying for.
           </p>
-          <Button
-            onClick={handleCreateJob}
-            disabled={isCreating}
-            className="bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
+          <Dialog open={createDialogOpen} onOpenChange={setCreateDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                className="bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+              >
                 <Plus className="w-4 h-4 mr-2" />
                 Create Job Listing
-              </>
-            )}
-          </Button>
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-pink-200/40">
+              <DialogTitle className="text-xl font-semibold text-pink-950">
+                Create New Job Listing
+              </DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Paste the job description below. Our AI will format it automatically.
+              </DialogDescription>
+
+              <div className="space-y-4 mt-4">
+                <Textarea
+                  placeholder="Paste the job description here..."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  className="min-h-[200px] bg-white/80 border-gray-200 focus:border-pink-500 focus:ring-pink-500/20"
+                />
+
+                <div className="flex justify-end gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCreateDialogOpen(false)}
+                    className="border-gray-200 hover:bg-gray-50"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleCreateJobWithAI}
+                    disabled={isFormatting || isCreating}
+                    className="bg-gradient-to-r from-pink-500 to-rose-500 text-white hover:from-pink-600 hover:to-rose-600 transition-all duration-300"
+                  >
+                    {isFormatting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Formatting...
+                      </>
+                    ) : isCreating ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4 mr-2" />
+                        Create with AI
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </Card>
     );
@@ -242,13 +340,39 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
 
           <div className="space-y-2">
             {job.description && (
-              <div className="relative mb-2">
-                <p className="text-sm text-gray-600 line-clamp-3 group-hover:text-pink-600/80 transition-colors duration-300">
-                  {job.description}
-                </p>
-                <div className="absolute bottom-0 right-0 bg-gradient-to-l from-white via-white/90 to-transparent w-16 h-full" />
-              </div>
+              <Accordion type="single" collapsible className="w-full">
+                <AccordionItem value="details" className="border-none">
+                  <AccordionTrigger className="flex items-center justify-between py-2 hover:no-underline">
+                    <div className="flex-1">
+                      <p className="text-sm text-gray-600 line-clamp-2 text-left group-hover:text-pink-600/80 transition-colors duration-300">
+                        {job.description}
+                      </p>
+                    </div>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-pink-500 transition-transform duration-200" />
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="pt-2 pb-4 space-y-4">
+                      <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                        {job.description}
+                      </p>
+                      
+                      <div className="flex flex-wrap gap-1.5">
+                        {job.keywords?.map((keyword, index) => (
+                          <Badge 
+                            key={index} 
+                            variant="secondary" 
+                            className="text-xs py-0.5 bg-gradient-to-r from-pink-50/50 to-rose-50/50 text-pink-700 hover:from-pink-100/50 hover:to-rose-100/50 transition-all duration-300 border border-pink-100/20"
+                          >
+                            {keyword}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
             )}
+            
             <div className="flex flex-wrap gap-1.5">
               {job.keywords?.slice(0, 5).map((keyword, index) => (
                 <Badge 
