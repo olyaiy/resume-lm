@@ -14,7 +14,7 @@
 import { redirect } from "next/navigation";
 
 import { getDashboardData } from "../utils/actions";
-import { FileText, Sparkles, Pencil, ExternalLink, Github, Linkedin, User } from "lucide-react";
+import { FileText, Sparkles, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -90,122 +90,90 @@ export default async function Home() {
                   {getGreeting()}, {profile.first_name}
                 </h1>
                 <p className="text-sm text-muted-foreground mt-0.5">
-                  Welcome to your professional dashboard
+                  Welcome to your resume dashboard
                 </p>
               </div>
-              <Button
-                variant="outline"
-                className="bg-white/50 hover:bg-white/70 border-teal-200 hover:border-teal-300 text-teal-700"
-                size="sm"
-              >
-                <Pencil className="h-4 w-4 mr-2" />
-                Edit Profile
-              </Button>
             </div>
 
             {/* Profile Row Component */}
             <ProfileRow profile={profile} />
 
-            {/* Social Links */}
-            {(profile.website || profile.linkedin_url || profile.github_url) && (
-              <div className="mt-4 flex gap-3">
-                {profile.website && (
-                  <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
-                    <ExternalLink className="h-4 w-4 mr-1.5" />
-                    Website
-                  </Button>
-                )}
-                {profile.linkedin_url && (
-                  <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
-                    <Linkedin className="h-4 w-4 mr-1.5" />
-                    LinkedIn
-                  </Button>
-                )}
-                {profile.github_url && (
-                  <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
-                    <Github className="h-4 w-4 mr-1.5" />
-                    GitHub
-                  </Button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Resume Bookshelf */}
-          <div className="">
-            {/* Base Resumes Section */}
-            <div className="relative">
-              <div className="relative flex items-center justify-between pb-4">
-                <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  Base Resumes
-                </h2>
-              </div>
-              
-              <div className="relative pb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {baseResumes.map((resume) => (
-                    <Link href={`/resumes/${resume.id}`} key={resume.id}>
-                      <MiniResumePreview
-                        name={resume.name}
-                        type="base"
-                        target_role={resume.target_role}
-                        updatedAt={resume.updated_at}
-                        className="hover:-translate-y-1 transition-transform duration-300"
-                      />
-                    </Link>
-                  ))}
-                  <CreateResumeDialog type="base" profile={profile}>
-                    <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
-                      <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <FileText className="h-4 w-4 text-purple-600" />
-                      </div>
-                      <span className="text-sm font-medium text-purple-600">Create Base Resume</span>
-                    </button>
-                  </CreateResumeDialog>
-                  {baseResumes.length === 0 && baseResumes.length + 1 < 4 && (
-                    <div className="col-span-2 md:col-span-1" />
-                  )}
+            {/* Resume Bookshelf */}
+            <div className="">
+              {/* Base Resumes Section */}
+              <div className="relative">
+                <div className="relative flex items-center justify-between pb-4">
+                  <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    Base Resumes
+                  </h2>
+                </div>
+                
+                <div className="relative pb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {baseResumes.map((resume) => (
+                      <Link href={`/resumes/${resume.id}`} key={resume.id}>
+                        <MiniResumePreview
+                          name={resume.name}
+                          type="base"
+                          target_role={resume.target_role}
+                          updatedAt={resume.updated_at}
+                          className="hover:-translate-y-1 transition-transform duration-300"
+                        />
+                      </Link>
+                    ))}
+                    <CreateResumeDialog type="base" profile={profile}>
+                      <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
+                        <div className="h-8 w-8 rounded-full bg-purple-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <FileText className="h-4 w-4 text-purple-600" />
+                        </div>
+                        <span className="text-sm font-medium text-purple-600">Create Base Resume</span>
+                      </button>
+                    </CreateResumeDialog>
+                    {baseResumes.length === 0 && baseResumes.length + 1 < 4 && (
+                      <div className="col-span-2 md:col-span-1" />
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Thin Divider */}
-            <div className="relative py-2">
-              <div className="h-px bg-gradient-to-r from-transparent via-purple-300/30 to-transparent" />
-            </div>
-
-            {/* Tailored Resumes Section */}
-            <div className="relative rounded-xl bg-gradient-to-br from-pink-50/50 to-rose-50/50 ">
-              <div className="relative flex items-center justify-between pb-4">
-                <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
-                  Tailored Resumes
-                </h2>
+              {/* Thin Divider */}
+              <div className="relative py-2">
+                <div className="h-px bg-gradient-to-r from-transparent via-purple-300/30 to-transparent" />
               </div>
 
-              <div className="relative pb-6">
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                  {tailoredResumes.map((resume) => (
-                    <Link href={`/resumes/${resume.id}`} key={resume.id}>
-                      <MiniResumePreview
-                        name={resume.name}
-                        type="tailored"
-                        target_role={resume.target_role}
-                        updatedAt={resume.updated_at}
-                        className="hover:-translate-y-1 transition-transform duration-300"
-                      />
-                    </Link>
-                  ))}
-                  <CreateResumeDialog type="tailored" baseResumes={baseResumes} profile={profile}>
-                    <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-pink-300 bg-pink-50/50 hover:bg-pink-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
-                      <div className="h-8 w-8 rounded-full bg-pink-100 flex items-center justify-center group-hover:scale-110 transition-transform">
-                        <Sparkles className="h-4 w-4 text-pink-600" />
-                      </div>
-                      <span className="text-sm font-medium text-pink-600">Create Tailored Resume</span>
-                    </button>
-                  </CreateResumeDialog>
-                  {tailoredResumes.length === 0 && tailoredResumes.length + 1 < 4 && (
-                    <div className="col-span-2 md:col-span-1" />
-                  )}
+              {/* Tailored Resumes Section */}
+              <div className="relative rounded-xl bg-gradient-to-br from-pink-50/50 to-rose-50/50 ">
+                <div className="relative flex items-center justify-between pb-4">
+                  <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+                    Tailored Resumes
+                  </h2>
+                </div>
+
+                <div className="relative pb-6">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {tailoredResumes.map((resume) => (
+                      <Link href={`/resumes/${resume.id}`} key={resume.id}>
+                        <MiniResumePreview
+                          name={resume.name}
+                          type="tailored"
+                          target_role={resume.target_role}
+                          updatedAt={resume.updated_at}
+                          className="hover:-translate-y-1 transition-transform duration-300"
+                        />
+                      </Link>
+                    ))}
+                    <CreateResumeDialog type="tailored" baseResumes={baseResumes} profile={profile}>
+                      <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-pink-300 bg-pink-50/50 hover:bg-pink-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
+                        <div className="h-8 w-8 rounded-full bg-pink-100 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <Sparkles className="h-4 w-4 text-pink-600" />
+                        </div>
+                        <span className="text-sm font-medium text-pink-600">Create Tailored Resume</span>
+                      </button>
+                    </CreateResumeDialog>
+                    {tailoredResumes.length === 0 && tailoredResumes.length + 1 < 4 && (
+                      <div className="col-span-2 md:col-span-1" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
