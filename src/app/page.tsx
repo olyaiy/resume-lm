@@ -14,13 +14,20 @@
 import { redirect } from "next/navigation";
 
 import { getDashboardData } from "../utils/actions";
-import { FileText, Sparkles, User } from "lucide-react";
+import { FileText, Sparkles, User, MapPin, Mail, Phone, Pencil, ExternalLink, Github, Linkedin, Briefcase, GraduationCap, Code, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
 import Link from "next/link";
 import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
+
+function getGreeting() {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
 export default async function Home() {
   // Fetch dashboard data and handle authentication
@@ -72,11 +79,155 @@ export default async function Home() {
       <div className="relative z-10">
         <DashboardHeader />
         
-        <div className="container max-w-7xl mx-auto p-6 space-y-8">
+        <div className="container max-w-7xl mx-auto p-6">
+          {/* Profile Overview */}
+          <div className="mb-6 space-y-4">
+            {/* Greeting & Edit Button */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                  {getGreeting()}, {profile.first_name}
+                </h1>
+                <p className="text-sm text-muted-foreground mt-0.5">
+                  Welcome to your professional dashboard
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="bg-white/50 hover:bg-white/70 border-teal-200 hover:border-teal-300 text-teal-700"
+                size="sm"
+              >
+                <Pencil className="h-4 w-4 mr-2" />
+                Edit Profile
+              </Button>
+            </div>
+
+            {/* Profile Card */}
+            <div className="rounded-xl bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-md border border-white/40 shadow-xl">
+              {/* Top Banner */}
+              <div className="h-16 rounded-t-xl bg-gradient-to-r from-teal-600/10 via-cyan-600/10 to-teal-600/10 border-b border-teal-200/20" />
+              
+              {/* Profile Content */}
+              <div className="px-6 pb-4 -mt-8">
+                {/* Avatar Circle */}
+                <div className="h-16 w-16 rounded-full bg-gradient-to-br from-teal-600 to-cyan-600 p-[2px] shadow-xl">
+                  <div className="h-full w-full rounded-full bg-white flex items-center justify-center">
+                    <User className="h-6 w-6 text-teal-600" />
+                  </div>
+                </div>
+
+                {/* Profile Grid */}
+                <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Basic Info */}
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-teal-600">Full Name</p>
+                    <p className="font-medium">{profile.first_name} {profile.last_name}</p>
+                  </div>
+
+                  {profile.location && (
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-teal-600">Location</p>
+                      <div className="flex items-center gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{profile.location}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.email && (
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-teal-600">Email</p>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{profile.email}</p>
+                      </div>
+                    </div>
+                  )}
+
+                  {profile.phone_number && (
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium text-teal-600">Phone</p>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-muted-foreground" />
+                        <p className="font-medium">{profile.phone_number}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Stats Row */}
+                <div className="mt-4 pt-4 border-t border-teal-100/30">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-teal-50/50 flex items-center justify-center">
+                        <Briefcase className="h-4 w-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Experience</p>
+                        <p className="font-medium">{profile.work_experience.length} entries</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-teal-50/50 flex items-center justify-center">
+                        <GraduationCap className="h-4 w-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Education</p>
+                        <p className="font-medium">{profile.education.length} entries</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-teal-50/50 flex items-center justify-center">
+                        <Code className="h-4 w-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Projects</p>
+                        <p className="font-medium">{profile.projects.length} entries</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-8 rounded-full bg-teal-50/50 flex items-center justify-center">
+                        <Award className="h-4 w-4 text-teal-600" />
+                      </div>
+                      <div>
+                        <p className="text-sm text-muted-foreground">Certifications</p>
+                        <p className="font-medium">{profile.certifications.length} entries</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Social Links */}
+                {(profile.website || profile.linkedin_url || profile.github_url) && (
+                  <div className="mt-4 flex gap-3">
+                    {profile.website && (
+                      <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
+                        <ExternalLink className="h-4 w-4 mr-1.5" />
+                        Website
+                      </Button>
+                    )}
+                    {profile.linkedin_url && (
+                      <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
+                        <Linkedin className="h-4 w-4 mr-1.5" />
+                        LinkedIn
+                      </Button>
+                    )}
+                    {profile.github_url && (
+                      <Button variant="ghost" size="sm" className="h-7 text-muted-foreground hover:text-teal-600">
+                        <Github className="h-4 w-4 mr-1.5" />
+                        GitHub
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
           {/* Resume Bookshelf */}
-          <div className="relative  rounded-2xl border border-purple-400/50 shadow-2xl p-6 bg-white">
+          <div className="">
             {/* Base Resumes Section */}
-            <div className="relative rounded-xl bg-gradient-to-br from-purple-50/50 to-indigo-50/50">
+            <div className="relative">
               <div className="relative flex items-center justify-between pb-4">
                 <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                   Base Resumes
@@ -112,8 +263,8 @@ export default async function Home() {
             </div>
 
             {/* Thin Divider */}
-            <div className="my-8">
-              <div className="h-[2px] bg-gradient-to-r from-purple-300/70 via-pink-300/70 to-rose-300/70 shadow-sm" />
+            <div className="relative py-2">
+              <div className="h-px bg-gradient-to-r from-transparent via-purple-300/30 to-transparent" />
             </div>
 
             {/* Tailored Resumes Section */}

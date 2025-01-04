@@ -318,15 +318,30 @@ export async function deleteResume(resumeId: string): Promise<void> {
 
   try {
     // First verify the resume exists and belongs to the user
+    // Also fetch job_id and is_base_resume to check if it's a tailored resume
     const { data: resume, error: fetchError } = await supabase
       .from('resumes')
-      .select('id, name')
+      .select('id, name, job_id, is_base_resume')
       .eq('id', resumeId)
       .eq('user_id', user.id)
       .single();
 
     if (fetchError || !resume) {
       throw new Error('Resume not found or access denied');
+    }
+
+    // If it's a tailored resume with a job_id, delete the associated job first
+    if (!resume.is_base_resume && resume.job_id) {
+      const { error: jobDeleteError } = await supabase
+        .from('jobs')
+        .delete()
+        .eq('id', resume.job_id)
+        .eq('user_id', user.id);
+
+      if (jobDeleteError) {
+        console.error('Failed to delete associated job:', jobDeleteError);
+        // Continue with resume deletion even if job deletion fails
+      }
     }
 
     // Then delete the resume
@@ -340,12 +355,13 @@ export async function deleteResume(resumeId: string): Promise<void> {
       throw new Error('Failed to delete resume');
     }
 
-    // Revalidate all routes that might display resumes
+    // Revalidate all routes that might display resumes or jobs
     revalidatePath('/', 'layout');
     revalidatePath('/resumes', 'layout');
     revalidatePath('/dashboard', 'layout');
     revalidatePath('/resumes/base', 'layout');
     revalidatePath('/resumes/tailored', 'layout');
+    revalidatePath('/jobs', 'layout'); // Add jobs path revalidation
 
   } catch (error) {
     throw error instanceof Error ? error : new Error('Failed to delete resume');

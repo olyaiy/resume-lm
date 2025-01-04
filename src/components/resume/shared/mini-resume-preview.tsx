@@ -47,11 +47,6 @@ export function MiniResumePreview({
           <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2">
             {name}
           </h3>
-          {type === 'tailored' && target_role && (
-            <div className="text-xs text-gray-600 font-medium mb-1.5">
-              {target_role}
-            </div>
-          )}
           <div className={cn(
             "inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium",
             `bg-${accentBg} text-${accentText}`
