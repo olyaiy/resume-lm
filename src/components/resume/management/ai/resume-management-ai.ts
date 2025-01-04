@@ -53,8 +53,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
     schema: z.object({
       content: textImportSchema
     }),
-    prompt: `Extract relevant resume information from the following text, including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
     system: TEXT_ANALYZER_SYSTEM_MESSAGE.content as string,
+    prompt: `Extract relevant resume information from the following text, including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
+    
   });
   
   const updatedResume = {

@@ -52,34 +52,44 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
       schema: z.object({
       content: simplifiedJobSchema
     }),
+
+    system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
+              and must adhere to it strictly. When processing the given job listing, follow these steps:
+              IMPORTANT: For any missing or uncertain information, you must return an empty string ("") - never return "<UNKNOWN>" or similar placeholders.
+
+            Read the entire job listing thoroughly to understand context, responsibilities, requirements, and any other relevant details.
+            Perform the analysis as described in each TASK below.
+            Return your final output in a structured format (e.g., JSON or the prescribed schema), using the exact field names you have been given.
+            Do not guess or fabricate information that is not present in the listing; instead, return an empty string for missing fields.
+            Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.`,
+  
     prompt: `Analyze this job listing carefully and extract structured information.
-        
-    TASK 1 - ESSENTIAL INFORMATION:
-    Extract the basic details (company, position, URL, location, salary).
 
-    TASK 2 - KEYWORD ANALYSIS:
-    1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
-    2. Soft Skills: Extract interpersonal and professional competencies
-    3. Industry Knowledge: Capture domain-specific knowledge requirements
-    4. Required Qualifications: List education, certifications, and experience levels
-    5. Responsibilities: Key job functions and deliverables
+              TASK 1 - ESSENTIAL INFORMATION:
+              Extract the basic details (company, position, URL, location, salary).
 
-    Format the output according to the schema, ensuring:
-    - Keywords are normalized (e.g., "React.js" → "React")
-    - Skills are deduplicated and categorized
-    - Required vs. preferred skills are distinguished
-    - Seniority level is inferred from context
-    Job Listing Text:${jobListing}`,    
-    system: `You are an expert ATS (Applicant Tracking System) analyzer with deep knowledge of technical roles and industry requirements.
-  Your task is to:
-  1. Parse job listings with high precision
-  2. Extract and categorize keywords that match modern ATS systems
-  3. Identify both explicit and implicit requirements
-  4. Maintain context-awareness for industry-specific terminology
-  5. Recognize variations of the same skill (e.g., "AWS" = "Amazon Web Services")
-    Focus on accuracy and relevance. Do not infer or add information not present in the original text.`,
-  });
+              TASK 2 - KEYWORD ANALYSIS:
+              1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
+              2. Soft Skills: Extract interpersonal and professional competencies
+              3. Industry Knowledge: Capture domain-specific knowledge requirements
+              4. Required Qualifications: List education, certifications, and experience levels
+              5. Responsibilities: Key job functions and deliverables
 
+              Format the output according to the schema, ensuring:
+              - Keywords as they are (e.g., "React.js" → "React.js")
+              - Skills are deduplicated and categorized
+              - Seniority level is inferred from context
+              Usage Notes:
+
+              - If certain details (like salary or location) are missing, return "" (an empty string).
+              - Adhere to the schema you have been provided, and format your response accordingly (e.g., JSON fields must match exactly).
+              - Avoid exposing your internal reasoning.
+              - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
+              Job Listing Text: ${jobListing}`,});
+  console.log("FIRST TEST");
+  console.log(object.content);
+  console.log("SECOND TEST");
+  console.log(object.content satisfies Partial<Job>);
   return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);

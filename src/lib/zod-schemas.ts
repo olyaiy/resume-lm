@@ -176,11 +176,7 @@ export type DocumentSettings = z.infer<typeof documentSettingsSchema>;
 export type SectionConfig = z.infer<typeof sectionConfigSchema>;
 
 // Salary range schema
-export const salaryRangeSchema = z.object({
-  min: z.number().optional(),
-  max: z.number().optional(),
-  currency: z.string().optional(),
-});
+export const salaryRangeSchema = z.string().nullable();
 
 // Jobs schema
 export const jobSchema = z.object({
@@ -202,14 +198,10 @@ export const jobSchema = z.object({
 export const simplifiedJobSchema = z.object({
     company_name: z.string().optional(),
     position_title: z.string().optional(),
-    job_url: z.string().url().nullable().optional(),
+    job_url: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     location: z.string().nullable().optional(),
-    salary_range: z.object({
-      min: z.number().optional(),
-      max: z.number().optional(),
-      currency: z.string().optional(),
-    }).nullable().optional(),
+    salary_range: z.string().nullable().optional(),
     keywords: z.array(z.string()).default([]).optional(),
     work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable().optional(),
     employment_type: z.enum(['full_time', 'part_time', 'co_op', 'internship']).nullable().optional(),

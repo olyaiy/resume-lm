@@ -13,7 +13,6 @@ export function MiniResumePreview({
   name,
   type,
   updatedAt,
-  target_role,
   className
 }: MiniResumePreviewProps) {
 
