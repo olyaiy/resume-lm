@@ -78,8 +78,8 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
 
   const formatSalary = (salaryRange: Job['salary_range']) => {
     if (!salaryRange) return 'Salary not specified';
-    const { min, max, currency = 'USD' } = salaryRange;
-    return `${currency} ${min?.toLocaleString()} - ${max?.toLocaleString()}`;
+    const string = salaryRange;
+    return string;
   };
 
   const formatDate = (dateString: string) => {
