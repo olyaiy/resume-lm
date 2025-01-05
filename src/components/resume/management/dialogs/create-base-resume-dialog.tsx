@@ -452,7 +452,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                             checked={isSectionSelected('work_experience')}
                             onCheckedChange={(checked) => handleSectionSelection('work_experience', checked as boolean)}
                             className={cn(
-                              "mt-0.5",
+                              "mt-0.5 ml-2",
                               isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
                             )}
                           />
@@ -480,7 +480,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                                     id={id}
                                     checked={selectedItems.work_experience.includes(id)}
                                     onCheckedChange={() => handleItemSelection('work_experience', id)}
-                                    className="mt-0.5"
+                                    className="mt-0.5 ml-2"
                                   />
                                   <div 
                                     className="flex-1 cursor-pointer"
@@ -507,7 +507,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                             checked={isSectionSelected('skills')}
                             onCheckedChange={(checked) => handleSectionSelection('skills', checked as boolean)}
                             className={cn(
-                              "mt-0.5",
+                              "mt-0.5 ml-2",
                               isSectionPartiallySelected('skills') && "data-[state=checked]:bg-purple-600/50"
                             )}
                           />
@@ -535,7 +535,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                                     id={id}
                                     checked={selectedItems.skills.includes(id)}
                                     onCheckedChange={() => handleItemSelection('skills', id)}
-                                    className="mt-0.5"
+                                    className="mt-0.5 ml-2"
                                   />
                                   <div 
                                     className="flex-1 cursor-pointer"
@@ -574,7 +574,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                             checked={isSectionSelected('projects')}
                             onCheckedChange={(checked) => handleSectionSelection('projects', checked as boolean)}
                             className={cn(
-                              "mt-0.5",
+                              "mt-0.5 ml-2",
                               isSectionPartiallySelected('projects') && "data-[state=checked]:bg-purple-600/50"
                             )}
                           />
@@ -602,7 +602,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                                     id={id}
                                     checked={selectedItems.projects.includes(id)}
                                     onCheckedChange={() => handleItemSelection('projects', id)}
-                                    className="mt-0.5"
+                                    className="mt-0.5 ml-2"
                                   />
                                   <div 
                                     className="flex-1 cursor-pointer"
@@ -635,7 +635,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                             checked={isSectionSelected('education')}
                             onCheckedChange={(checked) => handleSectionSelection('education', checked as boolean)}
                             className={cn(
-                              "mt-0.5",
+                              "mt-0.5 ml-2",
                               isSectionPartiallySelected('education') && "data-[state=checked]:bg-purple-600/50"
                             )}
                           />
@@ -663,7 +663,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                                     id={id}
                                     checked={selectedItems.education.includes(id)}
                                     onCheckedChange={() => handleItemSelection('education', id)}
-                                    className="mt-0.5"
+                                    className="mt-0.5 ml-2"
                                   />
                                   <div 
                                     className="flex-1 cursor-pointer"
