@@ -44,7 +44,16 @@ const MemoizedMarkdownBlock = memo(
           components={{
             // Ensure lists are properly styled
             ul: ({ children }) => <ul className="list-disc ml-3">{children}</ul>,
-            ol: ({ children }) => <ol className="list-decimal ml-3">{children}</ol>,
+            ol: ({ start, children }) => (
+              <ol className="list-decimal ml-3" start={start}>
+                {children}
+              </ol>
+            ),
+            li: ({ ordered, index, children }) => (
+              <li value={ordered ? index + 1 : undefined}>
+                {children}
+              </li>
+            ),
             // Proper heading styles
             h1: ({ children }) => <h1 className="text-lg font-bold mt-3 mb-1.5">{children}</h1>,
             h2: ({ children }) => <h2 className="text-base font-bold mt-2 mb-1">{children}</h2>,
