@@ -8,7 +8,7 @@ import { Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
-import { memo } from 'react';
+import { useState, KeyboardEvent } from 'react';
 
 interface SkillsFormProps {
   skills: Skill[];
@@ -16,21 +16,13 @@ interface SkillsFormProps {
   profile: Profile;
 }
 
-function areSkillsPropsEqual(
-  prevProps: SkillsFormProps,
-  nextProps: SkillsFormProps
-) {
-  return (
-    JSON.stringify(prevProps.skills) === JSON.stringify(nextProps.skills) &&
-    prevProps.profile.id === nextProps.profile.id
-  );
-}
-
-export const SkillsForm = memo(function SkillsFormComponent({
+export function SkillsForm({
   skills,
   onChange,
   profile
 }: SkillsFormProps) {
+  const [newSkills, setNewSkills] = useState<{ [key: number]: string }>({});
+
   const addSkillCategory = () => {
     onChange([{
       category: "",
@@ -48,14 +40,39 @@ export const SkillsForm = memo(function SkillsFormComponent({
     onChange(skills.filter((_, i) => i !== index));
   };
 
-  const handleSkillInput = (index: number, value: string) => {
-    const skills = value.split(',').map(skill => skill.trim()).filter(Boolean);
-    updateSkillCategory(index, 'items', skills);
+  const addSkill = (categoryIndex: number) => {
+    const skillToAdd = newSkills[categoryIndex]?.trim();
+    if (!skillToAdd) return;
+
+    const updated = [...skills];
+    const currentItems = updated[categoryIndex].items || [];
+    if (!currentItems.includes(skillToAdd)) {
+      updated[categoryIndex] = {
+        ...updated[categoryIndex],
+        items: [...currentItems, skillToAdd]
+      };
+      onChange(updated);
+    }
+    setNewSkills({ ...newSkills, [categoryIndex]: '' });
+  };
+
+  const handleKeyPress = (e: KeyboardEvent<HTMLInputElement>, categoryIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addSkill(categoryIndex);
+    }
   };
 
   const removeSkill = (categoryIndex: number, skillIndex: number) => {
-    const updated = [...skills];
-    updated[categoryIndex].items = updated[categoryIndex].items.filter((_, i) => i !== skillIndex);
+    const updated = skills.map((skill, idx) => {
+      if (idx === categoryIndex) {
+        return {
+          ...skill,
+          items: skill.items.filter((_, i) => i !== skillIndex)
+        };
+      }
+      return skill;
+    });
     onChange(updated);
   };
 
@@ -113,24 +130,8 @@ export const SkillsForm = memo(function SkillsFormComponent({
                 </Button>
               </div>
 
-              {/* Skills Input */}
+              {/* Skills Display */}
               <div className="space-y-2">
-                <div className="relative group">
-                  <Input
-                    value={skill.items.join(', ')}
-                    onChange={(e) => handleSkillInput(index, e.target.value)}
-                    className="h-8 bg-white/50 border-gray-200 rounded-lg
-                      focus:border-rose-500/40 focus:ring-2 focus:ring-rose-500/20
-                      hover:border-rose-500/30 hover:bg-white/60 transition-colors
-                      placeholder:text-gray-400"
-                    placeholder="Enter skills separated by commas (e.g., JavaScript, React, Node.js)"
-                  />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-rose-700">
-                    SKILLS
-                  </div>
-                </div>
-
-                {/* Skills Display */}
                 <div className="flex flex-wrap gap-1.5">
                   {skill.items.map((item, skillIndex) => (
                     <Badge
@@ -151,6 +152,31 @@ export const SkillsForm = memo(function SkillsFormComponent({
                     </Badge>
                   ))}
                 </div>
+
+                {/* New Skill Input */}
+                <div className="relative group flex gap-2">
+                  <Input
+                    value={newSkills[index] || ''}
+                    onChange={(e) => setNewSkills({ ...newSkills, [index]: e.target.value })}
+                    onKeyPress={(e) => handleKeyPress(e, index)}
+                    className="h-8 bg-white/50 border-gray-200 rounded-lg
+                      focus:border-rose-500/40 focus:ring-2 focus:ring-rose-500/20
+                      hover:border-rose-500/30 hover:bg-white/60 transition-colors
+                      placeholder:text-gray-400"
+                    placeholder="Type a skill and press Enter or click +"
+                  />
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => addSkill(index)}
+                    className="h-8 px-2 bg-white/50 hover:bg-white/60"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                  </Button>
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-rose-700">
+                    ADD SKILL
+                  </div>
+                </div>
               </div>
 
               {/* Helper Text */}
@@ -163,4 +189,4 @@ export const SkillsForm = memo(function SkillsFormComponent({
       ))}
     </div>
   );
-}, areSkillsPropsEqual); 
+} 
