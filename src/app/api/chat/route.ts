@@ -78,7 +78,7 @@ export async function POST(req: Request) {
               date: z.string(),
               description: z.array(z.string()),
               technologies: z.array(z.string()).optional(),
-            }).describe('Improved version of the work experience entry'),
+            }).describe('Improved version of the work experience entry.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
           }),
         },
         suggest_project_improvement: {
@@ -92,7 +92,7 @@ export async function POST(req: Request) {
               technologies: z.array(z.string()).optional(),
               url: z.string().optional(),
               github_url: z.string().optional(),
-            }).describe('Improved version of the project entry'),
+            }).describe('Improved version of the project entry. For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
           }),
         },
         suggest_skill_improvement: {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
             improved_skill: z.object({
               category: z.string(),
               items: z.array(z.string()),
-            }).describe('Improved version of the skill category'),
+            }).describe('Improved version of the skill category.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
           }),
         },
         suggest_education_improvement: {
@@ -117,11 +117,11 @@ export async function POST(req: Request) {
               date: z.string(),
               gpa: z.string().optional(),
               achievements: z.array(z.string()).optional(),
-            }).describe('Improved version of the education entry'),
+            }).describe('Improved version of the education entry.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
           }),
         },
         modifyWholeResume: {
-          description: 'Modify multiple sections of the resume at once',
+          description: 'Modify multiple sections of the resume at once.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.',
           parameters: z.object({
             basic_info: z.object({
               first_name: z.string().optional(),
