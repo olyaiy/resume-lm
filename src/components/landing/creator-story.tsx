@@ -2,7 +2,7 @@ import Image from "next/image";
 
 export function CreatorStory() {
   return (
-    <div className="w-full py-8 backdrop-blur-sm border-y border-white/40">
+    <div className=" py-8 border-y border-white/40">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid md:grid-cols-[400px_1fr] gap-8 items-center">
           {/* Image Area */}
@@ -18,7 +18,7 @@ export function CreatorStory() {
 
           {/* Story Content */}
           <div className="space-y-6">
-            <h2 className="text-4xl font-bold tracking-tight sm:text-5xl bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent pb-3">
+            <h2 className="text-4xl font-bold tracking-tight sm:text-uxl bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent">
               Why I Built ResumeLM
             </h2>
             

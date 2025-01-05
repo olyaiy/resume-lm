@@ -6,6 +6,7 @@ import { Logo } from "@/components/ui/logo";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
 import { CreatorStory } from "@/components/landing/creator-story";
+import { HowItWorks } from "@/components/landing/how-it-works";
 
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
@@ -144,7 +145,7 @@ export default async function LoginPage({
                   <div className="absolute -right-6 top-2 opacity-80 blur-[0.5px] scale-[0.985] rotate-[-4deg] origin-bottom-right">
                     <MockResume />
                   </div>
-                  
+
                   {/* Front Resume - Main Layer */}
                   <div className="relative">
                     <MockResume />
@@ -158,7 +159,10 @@ export default async function LoginPage({
         {/* Pricing Section */}
         <PricingSection />
 
-        {/* Creator Story moved below pricing */}
+        {/* How It Works Section */}
+        <HowItWorks />
+
+        {/* Creator Story */}
         <CreatorStory />
       </div>
     </main>
