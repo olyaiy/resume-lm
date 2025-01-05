@@ -730,7 +730,8 @@ export async function copyResume(resumeId: string): Promise<Resume> {
   console.log('Source resume found:', sourceResume.id);
 
   // Create a new resume with copied data, excluding the id field
-  const { id: _, created_at: __, updated_at: ___, ...resumeDataToCopy } = sourceResume;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id, created_at, updated_at, ...resumeDataToCopy } = sourceResume;
   
   const newResume = {
     ...resumeDataToCopy,
