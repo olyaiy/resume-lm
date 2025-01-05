@@ -17,7 +17,6 @@ interface WelcomeDialogProps {
 export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  // Set initial state when the prop changes
   useEffect(() => {
     setIsOpen(initialIsOpen);
   }, [initialIsOpen]);
@@ -34,19 +33,34 @@ export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
           </DialogTitle>
         </DialogHeader>
         
-        <div className="pt-4 space-y-4">
+        <div className="pt-4 space-y-6">
           <h3 className="font-medium text-foreground">Here&apos;s how to get started:</h3>
-          <ol className="list-decimal list-inside space-y-2 text-muted-foreground">
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5">Fill out your profile with your work experience, education, and skills</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5">Create base resumes for different types of roles you&apos;re interested in</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="mt-0.5">Use your base resumes to create tailored versions for specific job applications</span>
-            </li>
-          </ol>
+          <div className="space-y-4">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center">
+                <span className="text-sm font-semibold bg-gradient-to-br from-teal-600 to-cyan-600 bg-clip-text text-transparent">1</span>
+              </div>
+              <div className="flex-1 pt-1">
+                <p className="text-muted-foreground">Fill out your profile with your work experience, education, and skills</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
+                <span className="text-sm font-semibold bg-gradient-to-br from-purple-600 to-indigo-600 bg-clip-text text-transparent">2</span>
+              </div>
+              <div className="flex-1 pt-1">
+                <p className="text-muted-foreground">Create base resumes for different types of roles you&apos;re interested in</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
+                <span className="text-sm font-semibold bg-gradient-to-br from-pink-600 to-rose-600 bg-clip-text text-transparent">3</span>
+              </div>
+              <div className="flex-1 pt-1">
+                <p className="text-muted-foreground">Use your base resumes to create tailored versions for specific job applications</p>
+              </div>
+            </div>
+          </div>
           <div className="pt-2 space-y-2">
             <Link href="/profile">
               <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white">

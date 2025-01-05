@@ -23,6 +23,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // redirect the user to an error page with some instructions
-  redirect('/error')
+  // redirect to login page with error parameter
+  redirect('/auth/login?error=email_confirmation')
 }

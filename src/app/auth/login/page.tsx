@@ -4,6 +4,7 @@ import { BenefitsList } from "@/components/landing/benefits-list";
 import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
 import { PricingSection } from "@/components/landing/pricing-section";
+import { ErrorDialog } from "@/components/auth/error-dialog";
 
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
@@ -49,9 +50,18 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function LoginPage() {
+export default async function LoginPage({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) {
+  const showErrorDialog = searchParams?.error === 'email_confirmation';
+
   return (
-    <main className=" relative overflow-hidden selection:bg-violet-200/50">
+    <main className="relative overflow-hidden selection:bg-violet-200/50">
+      {/* Error Dialog */}
+      <ErrorDialog isOpen={!!showErrorDialog} />
+
       {/* Enhanced Gradient Background Elements */}
       <div className="fixed inset-0 z-0">
         {/* Primary gradient mesh with improved colors */}
