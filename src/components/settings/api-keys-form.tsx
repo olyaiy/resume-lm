@@ -25,11 +25,23 @@ interface AIModel {
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
 
-const PROVIDERS: { id: ServiceName; name: string; recommended?: boolean }[] = [
-  { id: 'anthropic', name: 'Anthropic', recommended: true },
-  { id: 'openai', name: 'OpenAI' },
-  // { id: 'google', name: 'Google AI' },
-  // { id: 'vertex', name: 'Google Vertex' },
+const PROVIDERS: { 
+  id: ServiceName; 
+  name: string; 
+  recommended?: boolean;
+  apiLink: string;
+}[] = [
+  { 
+    id: 'anthropic', 
+    name: 'Anthropic', 
+    recommended: true,
+    apiLink: 'https://console.anthropic.com/'
+  },
+  { 
+    id: 'openai', 
+    name: 'OpenAI',
+    apiLink: 'https://platform.openai.com/api-keys'
+  },
 ]
 
 const AI_MODELS: AIModel[] = [
@@ -271,35 +283,45 @@ export function ApiKeysForm() {
                     )}
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    <Input
-                      type={isVisible ? "text" : "password"}
-                      placeholder="Enter API key"
-                      value={newKeyValues[provider.id] || ''}
-                      onChange={(e) => setNewKeyValues(prev => ({
-                        ...prev,
-                        [provider.id]: e.target.value
-                      }))}
-                      className="bg-white/50 flex-1 h-9 text-sm border-black/20 focus:border-black/30 hover:border-black/25 transition-colors"
-                    />
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => setVisibleKeys(prev => ({
-                        ...prev,
-                        [provider.id]: !prev[provider.id]
-                      }))}
-                      className="bg-white/50 h-9 w-9 hover:bg-white/60 transition-colors"
+                  <>
+                    <div className="flex gap-2">
+                      <Input
+                        type={isVisible ? "text" : "password"}
+                        placeholder="Enter API key"
+                        value={newKeyValues[provider.id] || ''}
+                        onChange={(e) => setNewKeyValues(prev => ({
+                          ...prev,
+                          [provider.id]: e.target.value
+                        }))}
+                        className="bg-white/50 flex-1 h-9 text-sm border-black/20 focus:border-black/30 hover:border-black/25 transition-colors"
+                      />
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setVisibleKeys(prev => ({
+                          ...prev,
+                          [provider.id]: !prev[provider.id]
+                        }))}
+                        className="bg-white/50 h-9 w-9 hover:bg-white/60 transition-colors"
+                      >
+                        {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                      </Button>
+                      <Button 
+                        className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 h-9 px-4 text-sm transition-colors"
+                        onClick={() => handleUpdateKey(provider.id)}
+                      >
+                        Save
+                      </Button>
+                    </div>
+                    <a 
+                      href={provider.apiLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
                     >
-                      {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                    </Button>
-                    <Button 
-                      className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 h-9 px-4 text-sm transition-colors"
-                      onClick={() => handleUpdateKey(provider.id)}
-                    >
-                      Save
-                    </Button>
-                  </div>
+                      Get your {provider.name} API key →
+                    </a>
+                  </>
                 )}
 
                 {providerModels.length > 0 && (

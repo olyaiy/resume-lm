@@ -25,6 +25,7 @@ import { CreateResumeDialog } from "@/components/resume/management/dialogs/creat
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
+import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -97,6 +98,9 @@ export default async function Home({
         <div className="container max-w-7xl mx-auto p-6">
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
+
+            {/* API Key Alert */}
+            <ApiKeyAlert />
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
               <div>
