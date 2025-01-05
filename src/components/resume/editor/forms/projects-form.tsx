@@ -19,10 +19,11 @@ import {
 } from "@/components/ui/tooltip";
 import { DescriptionPoint } from "../../shared/description-point";
 import { AISuggestions } from "../../shared/ai-suggestions";
-import { TechnologiesInput } from "../../shared/technologies-input";
 import { AIGenerationSettings } from "../../shared/ai-generation-settings";
 import { generateProjectPoints, improveProject } from "../ai/resume-modification-ai";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { KeyboardEvent } from "react";
 
 interface AISuggestion {
   id: string;
@@ -69,6 +70,7 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState({ title: '', description: '' });
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
+  const [newTechnologies, setNewTechnologies] = useState<{ [key: number]: string }>({});
 
   // Effect to focus textarea when popover opens
   useEffect(() => {
@@ -282,6 +284,37 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
         return newState;
       });
     }
+  };
+
+  const addTechnology = (projectIndex: number) => {
+    const techToAdd = newTechnologies[projectIndex]?.trim();
+    if (!techToAdd) return;
+
+    const updated = [...projects];
+    const currentTechnologies = updated[projectIndex].technologies || [];
+    
+    if (!currentTechnologies.includes(techToAdd)) {
+      updated[projectIndex] = {
+        ...updated[projectIndex],
+        technologies: [...currentTechnologies, techToAdd]
+      };
+      onChange(updated);
+    }
+    setNewTechnologies({ ...newTechnologies, [projectIndex]: '' });
+  };
+
+  const handleTechKeyPress = (e: KeyboardEvent<HTMLInputElement>, projectIndex: number) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addTechnology(projectIndex);
+    }
+  };
+
+  const removeTechnology = (projectIndex: number, techIndex: number) => {
+    const updated = [...projects];
+    updated[projectIndex].technologies = (updated[projectIndex].technologies || [])
+      .filter((_, i) => i !== techIndex);
+    onChange(updated);
   };
 
   return (
@@ -556,11 +589,60 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                 </div>
 
                 {/* Technologies Section */}
-                <TechnologiesInput
-                  value={project.technologies || []}
-                  onChange={(technologies) => updateProject(index, 'technologies', technologies)}
-                  label="Technologies & Tools Used"
-                />
+                <div className="space-y-2">
+                  <Label className="text-[11px] font-medium text-violet-700">
+                    Technologies & Tools Used
+                  </Label>
+                  
+                  <div className="space-y-2">
+                    {/* Technologies Display */}
+                    <div className="flex flex-wrap gap-1.5">
+                      {(project.technologies || []).map((tech, techIndex) => (
+                        <Badge
+                          key={techIndex}
+                          variant="secondary"
+                          className={cn(
+                            "bg-white/60 hover:bg-white/80 text-violet-700 border border-violet-200 py-0.5",
+                            "transition-all duration-300 group/badge cursor-default text-xs"
+                          )}
+                        >
+                          {tech}
+                          <button
+                            onClick={() => removeTechnology(index, techIndex)}
+                            className="ml-1.5 hover:text-red-500 opacity-50 hover:opacity-100 transition-opacity"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
+
+                    {/* New Technology Input */}
+                    <div className="relative group flex gap-2">
+                      <Input
+                        value={newTechnologies[index] || ''}
+                        onChange={(e) => setNewTechnologies({ ...newTechnologies, [index]: e.target.value })}
+                        onKeyPress={(e) => handleTechKeyPress(e, index)}
+                        className="h-8 bg-white/50 border-gray-200 rounded-lg
+                          focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
+                          hover:border-violet-500/30 hover:bg-white/60 transition-colors
+                          placeholder:text-gray-400"
+                        placeholder="Type a technology and press Enter or click +"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => addTechnology(index)}
+                        className="h-8 px-2 bg-white/50 hover:bg-white/60"
+                      >
+                        <Plus className="h-3.5 w-3.5" />
+                      </Button>
+                      <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-violet-700">
+                        ADD TECHNOLOGY
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
