@@ -445,7 +445,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                   <div className="space-y-4">
                     <Accordion type="single" collapsible className="space-y-4">
                       {/* Work Experience */}
-                      <AccordionItem value="work-experience" className="border-none">
+                      <AccordionItem value="work-experience" className="shadow-2xl border-b border-black/30">
                         <div className="flex items-center w-full gap-2">
                           <Checkbox
                             id="work-experience-section"
@@ -456,7 +456,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                               isSectionPartiallySelected('work_experience') && "data-[state=checked]:bg-purple-600/50"
                             )}
                           />
-                          <AccordionTrigger className="w-full py-2 hover:no-underline group">
+                          <AccordionTrigger className="w-full py-2 hover:no-underline group ">
                             <div className="flex flex-col items-start w-full">
                               <span className="text-sm font-semibold text-purple-950 group-hover:text-purple-950">
                                 Work Experience
@@ -500,7 +500,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       </AccordionItem>
 
                       {/* Skills */}
-                      <AccordionItem value="skills" className="border-none">
+                      <AccordionItem value="skills" className="shadow-2xl border-b border-black/30">
                         <div className="flex items-center w-full gap-2">
                           <Checkbox
                             id="skills-section"
@@ -567,7 +567,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                   <div className="space-y-4">
                     <Accordion type="single" collapsible className="space-y-4">
                       {/* Projects */}
-                      <AccordionItem value="projects" className="border-none">
+                      <AccordionItem value="projects" className="shadow-2xl border-b border-black/30">
                         <div className="flex items-center w-full gap-2">
                           <Checkbox
                             id="projects-section"
@@ -628,7 +628,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
                       </AccordionItem>
 
                       {/* Education */}
-                      <AccordionItem value="education" className="border-none">
+                      <AccordionItem value="education" className="shadow-2xl border-b border-black/30">
                         <div className="flex items-center w-full gap-2">
                           <Checkbox
                             id="education-section"
