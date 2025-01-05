@@ -201,14 +201,7 @@ const ProjectsSection = memo(function ProjectsSection({
         <View key={index} style={styles.projectItem}>
           <View style={styles.projectHeader}>
             <View style={styles.projectHeaderTop}>
-              <View>
-                <Text style={styles.projectTitle}>{processText(project.name, true)}</Text>
-                {project.technologies && (
-                  <Text style={styles.projectTechnologies}>
-                    {project.technologies.join(', ')}
-                  </Text>
-                )}
-              </View>
+              <Text style={styles.projectTitle}>{processText(project.name, true)}</Text>
               <View style={styles.projectHeaderRight}>
                 {project.date && <Text style={styles.dateRange}>{project.date}</Text>}
                 {(project.url || project.github_url) && (
@@ -228,6 +221,11 @@ const ProjectsSection = memo(function ProjectsSection({
                 )}
               </View>
             </View>
+            {project.technologies && (
+              <Text style={styles.projectTechnologies}>
+                {project.technologies.join(', ')}
+              </Text>
+            )}
           </View>
           
           {project.description.map((bullet, bulletIndex) => (
@@ -456,7 +454,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     projectHeader: {
       flexDirection: 'column',
-      marginBottom: 0,
+      marginBottom: 4,
     },
     projectHeaderTop: {
       flexDirection: 'row',
@@ -465,7 +463,8 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       marginBottom: 2,
     },
     projectHeaderRight: {
-      alignItems: 'flex-end',
+      flexDirection: 'row',
+      gap: 8,
     },
     projectTitle: {
       fontSize: document_font_size,
@@ -476,6 +475,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       fontSize: document_font_size,
       color: '#4b5563',
       fontFamily: 'Helvetica-Bold',
+      marginBottom: 0,
     },
     projectDescription: {
       fontSize: document_font_size,
