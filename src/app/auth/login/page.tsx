@@ -5,6 +5,7 @@ import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
+import { CreatorStory } from "@/components/landing/creator-story";
 
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
@@ -156,6 +157,9 @@ export default async function LoginPage({
 
         {/* Pricing Section */}
         <PricingSection />
+
+        {/* Creator Story moved below pricing */}
+        <CreatorStory />
       </div>
     </main>
   );
