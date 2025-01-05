@@ -26,10 +26,19 @@ const textProcessingCache = new Map<string, ReactNode[]>();
 
 // Memoized text processing function
 function useTextProcessor() {
-  const processText = useCallback((text: string) => {
+  const processText = useCallback((text: string, ignoreMarkdown = false) => {
     // Check cache first
-    if (textProcessingCache.has(text)) {
-      return textProcessingCache.get(text);
+    const cacheKey = `${text}-${ignoreMarkdown}`;
+    if (textProcessingCache.has(cacheKey)) {
+      return textProcessingCache.get(cacheKey);
+    }
+
+    // If ignoring markdown, extract content between asterisks or return plain text
+    if (ignoreMarkdown) {
+      const content = text.match(/\*\*(.*?)\*\*/)?.[1] || text;
+      const processed = [<Text key={0}>{content}</Text>];
+      textProcessingCache.set(cacheKey, processed);
+      return processed;
     }
 
     // Process text if not in cache
@@ -42,7 +51,7 @@ function useTextProcessor() {
     });
 
     // Store in cache
-    textProcessingCache.set(text, processed);
+    textProcessingCache.set(cacheKey, processed);
     return processed;
   }, []);
 
@@ -154,8 +163,8 @@ const ExperienceSection = memo(function ExperienceSection({
         <View key={index} style={styles.experienceItem}>
           <View style={styles.experienceHeader}>
             <View>
-              <Text style={styles.companyName}>{experience.position}</Text>
-              <Text style={styles.jobTitle}>{experience.company}</Text>
+              <Text style={styles.companyName}>{processText(experience.position, true)}</Text>
+              <Text style={styles.jobTitle}>{processText(experience.company, true)}</Text>
             </View>
             <Text style={styles.dateRange}>{experience.date}</Text>
           </View>
@@ -193,7 +202,7 @@ const ProjectsSection = memo(function ProjectsSection({
           <View style={styles.projectHeader}>
             <View style={styles.projectHeaderTop}>
               <View>
-                <Text style={styles.projectTitle}>{project.name}</Text>
+                <Text style={styles.projectTitle}>{processText(project.name, true)}</Text>
                 {project.technologies && (
                   <Text style={styles.projectTechnologies}>
                     {project.technologies.join(', ')}
