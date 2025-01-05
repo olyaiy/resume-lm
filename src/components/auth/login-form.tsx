@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -68,7 +69,15 @@ export function LoginForm() {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+          <Link 
+            href="/auth/reset-password"
+            className="text-sm text-muted-foreground hover:text-violet-600 transition-colors"
+          >
+            Forgot password?
+          </Link>
+        </div>
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
           <Input

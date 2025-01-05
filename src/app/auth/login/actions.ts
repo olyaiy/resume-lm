@@ -68,3 +68,20 @@ export async function logout() {
   // Always redirect to login, even if there was an error
   redirect('/auth/login');
 } 
+
+// Password Reset
+export async function resetPasswordForEmail(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient();
+
+  const email = formData.get('email') as string;
+
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/update-password`,
+  });
+
+  if (error) {
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+} 
