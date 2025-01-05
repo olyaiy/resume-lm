@@ -34,10 +34,11 @@ function getGreeting() {
 export default async function Home({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   // Check if user is coming from confirmation
-  const isNewSignup = searchParams?.type === 'signup' && searchParams?.token_hash;
+  const params = await searchParams;
+  const isNewSignup = params?.type === 'signup' && params?.token_hash;
 
   // Fetch dashboard data and handle authentication
   let data;

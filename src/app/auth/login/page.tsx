@@ -53,9 +53,10 @@ export const metadata: Metadata = {
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: { [key: string]: string | undefined };
+  searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const showErrorDialog = searchParams?.error === 'email_confirmation';
+  const params = await searchParams;
+  const showErrorDialog = params?.error === 'email_confirmation';
 
   return (
     <main className="relative overflow-hidden selection:bg-violet-200/50">

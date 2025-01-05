@@ -52,7 +52,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
                 Try Logging In Again
               </Button>
             </Link>
-            <Link href="mailto:support@resumelm.com">
+            <Link href="https://x.com/alexfromvan" target="_blank" rel="noopener noreferrer">
               <Button 
                 variant="outline" 
                 className="w-full"
