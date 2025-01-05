@@ -2,7 +2,6 @@
 
 import Tiptap from "@/components/ui/tiptap";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { Sparkles, Loader2, Trash2, Check, X } from "lucide-react";
 import {
@@ -11,6 +10,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { AIImprovementPrompt } from "./ai-improvement-prompt";
 
 interface DescriptionPointProps {
   value: string;
@@ -164,29 +164,13 @@ export function DescriptionPoint({
                       "rounded-lg"
                     )}
                   >
-                    <div className="space-y-2">
-                      <div>
-                        <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
-                        <Tiptap
-                          content={improvementPrompt}
-                          onChange={onImprovementPromptChange}
-                          editorProps={{
-                            attributes: {
-                              placeholder: improvementPromptPlaceholder,
-                              class: cn(
-                                "h-14 mt-0.5 text-xs",
-                                "bg-white",
-                                "border-purple-200",
-                                "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
-                                "hover:bg-white",
-                                "resize-none",
-                                "text-purple-900 placeholder:text-purple-400"
-                              )
-                            }
-                          }}
-                        />
-                      </div>
-                    </div>
+                    <AIImprovementPrompt
+                      value={improvementPrompt}
+                      onChange={onImprovementPromptChange}
+                      placeholder={improvementPromptPlaceholder}
+                      onSubmit={onImprove}
+                      isLoading={isLoading}
+                    />
                   </TooltipContent>
                 )}
               </Tooltip>

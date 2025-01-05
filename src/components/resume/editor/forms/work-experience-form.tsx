@@ -20,6 +20,7 @@ import {
 import Tiptap from "@/components/ui/tiptap";
 import { generateWorkExperiencePoints, improveWorkExperience } from "../ai/resume-modification-ai";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 
 
 interface AISuggestion {
@@ -577,31 +578,18 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                                       "rounded-lg"
                                     )}
                                   >
-                                    <div className="space-y-2">
-                                      <div>
-                                        <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
-                                        <Textarea
-                                          value={improvementConfig[index]?.[descIndex] || ''}
-                                          onChange={(e) => setImprovementConfig(prev => ({
-                                            ...prev,
-                                            [index]: {
-                                              ...(prev[index] || {}),
-                                              [descIndex]: e.target.value
-                                            }
-                                          }))}
-                                          placeholder="e.g., Make it more impactful and quantifiable"
-                                          className={cn(
-                                            "h-14 mt-0.5 text-xs",
-                                            "bg-white",
-                                            "border-purple-200",
-                                            "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
-                                            "hover:bg-white",
-                                            "resize-none",
-                                            "text-purple-900 placeholder:text-purple-400"
-                                          )}
-                                        />
-                                      </div>
-                                    </div>
+                                    <AIImprovementPrompt
+                                      value={improvementConfig[index]?.[descIndex] || ''}
+                                      onChange={(value) => setImprovementConfig(prev => ({
+                                        ...prev,
+                                        [index]: {
+                                          ...(prev[index] || {}),
+                                          [descIndex]: value
+                                        }
+                                      }))}
+                                      onSubmit={() => rewritePoint(index, descIndex)}
+                                      isLoading={loadingPointAI[index]?.[descIndex]}
+                                    />
                                   </TooltipContent>
                                 </Tooltip>
                               </TooltipProvider>
