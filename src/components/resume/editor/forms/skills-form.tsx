@@ -179,10 +179,6 @@ export function SkillsForm({
                 </div>
               </div>
 
-              {/* Helper Text */}
-              <div className="text-[9px] text-gray-500 italic">
-                Pro tip: Add skills that are relevant to your target role and that you&apos;re confident discussing in interviews
-              </div>
             </div>
           </CardContent>
         </Card>

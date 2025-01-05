@@ -75,7 +75,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       // setIsStreaming(false);
       
       if (toolCall.toolName === 'getResume') {
-        const params = toolCall.args as { sections: 'all' | string[] };
+        const params = toolCall.args as { sections: string[] };
         
         const personalInfo = {
           first_name: resume.first_name,
@@ -97,7 +97,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
           certifications: resume.certifications,
         };
 
-        const result = params.sections === 'all' 
+        const result = params.sections.includes('all')
           ? { ...sectionMap, target_role: resume.target_role }
           : params.sections.reduce((acc, section) => ({
               ...acc,

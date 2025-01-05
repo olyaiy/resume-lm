@@ -47,6 +47,9 @@ export async function POST(req: Request) {
       the entire resume, such as tailoring to a specific role, improving the overall wording, structure, etc. 
 
 
+      - IF at any point, you need to bold keywords and phrases in the resume, put two asterisks around the keyword or phrase.
+
+
 
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
 
@@ -61,17 +64,15 @@ export async function POST(req: Request) {
         getResume: {
           description: 'Get the user Resume. Can request specific sections or "all" for the entire resume.',
           parameters: z.object({
-            sections: z.union([
-              z.literal('all'),
-              z.array(z.enum([
-                'personal_info',
-                'work_experience',
-                'education',
-                'skills',
-                'projects',
-                'certifications'
-              ]))
-            ]).describe('Specify "all" for full resume or an array of specific sections'),
+            sections: z.array(z.enum([
+              'all',
+              'personal_info',
+              'work_experience',
+              'education',
+              'skills',
+              'projects',
+              'certifications'
+            ])),
           }),
         },
         suggest_work_experience_improvement: {

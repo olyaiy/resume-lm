@@ -50,14 +50,21 @@ const MemoizedMarkdownBlock = memo(
             h2: ({ children }) => <h2 className="text-base font-bold mt-2 mb-1">{children}</h2>,
             h3: ({ children }) => <h3 className="text-sm font-bold mt-1.5 mb-1">{children}</h3>,
             // Code block styling
-            code: ({ inline, children }) => 
-              inline ? (
-                <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>
-              ) : (
-                <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs">
-                  <code>{children}</code>
-                </pre>
-              ),
+            code: ({ inline, className, children }) => {
+              // If it's an inline code block
+              if (inline) {
+                return <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>;
+              }
+              
+              // For code blocks, we return a div wrapper instead of pre directly
+              return (
+                <div className="not-prose">
+                  <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs">
+                    <code className={className}>{children}</code>
+                  </pre>
+                </div>
+              );
+            },
             // Proper blockquote styling
             blockquote: ({ children }) => (
               <blockquote className="border-l-4 border-muted pl-3 italic text-sm">{children}</blockquote>
