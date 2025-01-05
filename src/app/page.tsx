@@ -13,8 +13,8 @@
 
 import { redirect } from "next/navigation";
 
-import { getDashboardData } from "../utils/actions";
-import { FileText, Sparkles, User } from "lucide-react";
+import { getDashboardData, deleteResume, copyResume } from "../utils/actions";
+import { FileText, Sparkles, User, Trash2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
@@ -23,6 +23,8 @@ import { ProfileRow } from "@/components/dashboard/profile-row";
 import Link from "next/link";
 import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { cn } from "@/lib/utils";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -123,15 +125,85 @@ export default async function Home({
                 <div className="relative pb-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {baseResumes.map((resume) => (
-                      <Link href={`/resumes/${resume.id}`} key={resume.id}>
-                        <MiniResumePreview
-                          name={resume.name}
-                          type="base"
-                          target_role={resume.target_role}
-                          updatedAt={resume.updated_at}
-                          className="hover:-translate-y-1 transition-transform duration-300"
-                        />
-                      </Link>
+                      <div key={resume.id} className="group relative">
+                        <AlertDialog>
+                          <div className="relative">
+                            <Link href={`/resumes/${resume.id}`}>
+                              <MiniResumePreview
+                                name={resume.name}
+                                type="base"
+                                target_role={resume.target_role}
+                                updatedAt={resume.updated_at}
+                                className="hover:-translate-y-1 transition-transform duration-300"
+                              />
+                            </Link>
+                            <div className="absolute bottom-2 left-2 flex gap-2">
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className={cn(
+                                    "h-8 w-8 rounded-lg",
+                                    "bg-rose-50/80 hover:bg-rose-100/80",
+                                    "text-rose-600 hover:text-rose-700",
+                                    "border border-rose-200/60",
+                                    "shadow-sm",
+                                    "transition-all duration-300",
+                                    "hover:scale-105 hover:shadow-md",
+                                    "hover:-translate-y-0.5"
+                                  )}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <form action={async () => {
+                                'use server';
+                                await copyResume(resume.id);
+                              }}>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  type="submit"
+                                  className={cn(
+                                    "h-8 w-8 rounded-lg",
+                                    "bg-teal-50/80 hover:bg-teal-100/80",
+                                    "text-teal-600 hover:text-teal-700",
+                                    "border border-teal-200/60",
+                                    "shadow-sm",
+                                    "transition-all duration-300",
+                                    "hover:scale-105 hover:shadow-md",
+                                    "hover:-translate-y-0.5"
+                                  )}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </form>
+                            </div>
+                          </div>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <form action={async () => {
+                                'use server';
+                                await deleteResume(resume.id);
+                              }}>
+                                <AlertDialogAction
+                                  type="submit"
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </form>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     ))}
                     <CreateResumeDialog type="base" profile={profile}>
                       <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-purple-300 bg-purple-50/50 hover:bg-purple-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">
@@ -164,15 +236,85 @@ export default async function Home({
                 <div className="relative pb-6">
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {tailoredResumes.map((resume) => (
-                      <Link href={`/resumes/${resume.id}`} key={resume.id}>
-                        <MiniResumePreview
-                          name={resume.name}
-                          type="tailored"
-                          target_role={resume.target_role}
-                          updatedAt={resume.updated_at}
-                          className="hover:-translate-y-1 transition-transform duration-300"
-                        />
-                      </Link>
+                      <div key={resume.id} className="group relative">
+                        <AlertDialog>
+                          <div className="relative">
+                            <Link href={`/resumes/${resume.id}`}>
+                              <MiniResumePreview
+                                name={resume.name}
+                                type="tailored"
+                                target_role={resume.target_role}
+                                updatedAt={resume.updated_at}
+                                className="hover:-translate-y-1 transition-transform duration-300"
+                              />
+                            </Link>
+                            <div className="absolute bottom-2 left-2 flex gap-2">
+                              <AlertDialogTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className={cn(
+                                    "h-8 w-8 rounded-lg",
+                                    "bg-rose-50/80 hover:bg-rose-100/80",
+                                    "text-rose-600 hover:text-rose-700",
+                                    "border border-rose-200/60",
+                                    "shadow-sm",
+                                    "transition-all duration-300",
+                                    "hover:scale-105 hover:shadow-md",
+                                    "hover:-translate-y-0.5"
+                                  )}
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <form action={async () => {
+                                'use server';
+                                await copyResume(resume.id);
+                              }}>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  type="submit"
+                                  className={cn(
+                                    "h-8 w-8 rounded-lg",
+                                    "bg-teal-50/80 hover:bg-teal-100/80",
+                                    "text-teal-600 hover:text-teal-700",
+                                    "border border-teal-200/60",
+                                    "shadow-sm",
+                                    "transition-all duration-300",
+                                    "hover:scale-105 hover:shadow-md",
+                                    "hover:-translate-y-0.5"
+                                  )}
+                                >
+                                  <Copy className="h-4 w-4" />
+                                </Button>
+                              </form>
+                            </div>
+                          </div>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <form action={async () => {
+                                'use server';
+                                await deleteResume(resume.id);
+                              }}>
+                                <AlertDialogAction
+                                  type="submit"
+                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                >
+                                  Delete
+                                </AlertDialogAction>
+                              </form>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
                     ))}
                     <CreateResumeDialog type="tailored" baseResumes={baseResumes} profile={profile}>
                       <button className="aspect-[8.5/11] rounded-lg border-2 border-dashed border-pink-300 bg-pink-50/50 hover:bg-pink-100/50 transition-colors flex flex-col items-center justify-center gap-2 group">

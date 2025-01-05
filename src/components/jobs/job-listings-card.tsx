@@ -27,7 +27,7 @@ interface Job {
   location: string | null;
   work_location: WorkLocationType | null;
   employment_type: EmploymentType | null;
-  salary_range: { min: number; max: number; currency: string } | null;
+  salary_range: string | null;
   created_at: string;
   keywords: string[] | null;
 }
@@ -85,11 +85,7 @@ export function JobListingsCard() {
     fetchJobs();
   }, [fetchJobs]);
 
-  const formatSalary = (salaryRange: Job['salary_range']) => {
-    if (!salaryRange) return 'Salary not specified';
-    const { min, max, currency = 'USD' } = salaryRange;
-    return `${currency} ${min.toLocaleString()} - ${max.toLocaleString()}`;
-  };
+
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -245,7 +241,7 @@ export function JobListingsCard() {
                     </div>
                     <div className="flex items-center gap-2 group-hover:text-rose-600 transition-colors duration-300">
                       <DollarSign className="w-4 h-4" />
-                      <span>{formatSalary(job.salary_range)}</span>
+                      <span>{job.salary_range}</span>
                     </div>
                     <div className="flex items-center gap-2 group-hover:text-teal-600 transition-colors duration-300">
                       <Clock className="w-4 h-4" />

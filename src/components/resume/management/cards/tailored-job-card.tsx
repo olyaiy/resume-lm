@@ -76,11 +76,6 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
     fetchJob();
   }, [jobId]);
 
-  const formatSalary = (salaryRange: Job['salary_range']) => {
-    if (!salaryRange) return 'Salary not specified';
-    const string = salaryRange;
-    return string;
-  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -328,7 +323,7 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
             </div>
             <div className="flex items-center gap-1.5 group-hover:text-pink-600 transition-colors duration-300">
               <DollarSign className="w-3.5 h-3.5" />
-              <span className="truncate">{formatSalary(job.salary_range)}</span>
+              {/* <span className="">{job.salary_range}</span> */}
             </div>
             {job.employment_type && (
               <div className="flex items-center gap-1.5 group-hover:text-rose-600 transition-colors duration-300">

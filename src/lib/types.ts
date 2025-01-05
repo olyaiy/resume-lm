@@ -49,7 +49,11 @@ export interface Job {
   job_url: string | null;
   description: string | null;
   location: string | null;
-  salary_range?: string | null;
+  salary_range?: {
+    min: number;
+    max: number;
+    currency: string;
+  } | null;
   keywords: string[];
   work_location: 'remote' | 'in_person' | 'hybrid' | null;
   employment_type: 'full_time' | 'part_time' | 'co_op' | 'internship' | null;

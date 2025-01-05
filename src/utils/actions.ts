@@ -703,3 +703,75 @@ export async function createEmptyJob(): Promise<Job> {
   return data;
 }
 
+export async function copyResume(resumeId: string): Promise<Resume> {
+  const supabase = await createClient();
+  console.log('Starting copy resume process for ID:', resumeId);
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    console.error('Authentication error:', userError);
+    throw new Error('User not authenticated');
+  }
+  console.log('User authenticated:', user.id);
+
+  // First, fetch the resume to copy
+  const { data: sourceResume, error: fetchError } = await supabase
+    .from('resumes')
+    .select('*')
+    .eq('id', resumeId)
+    .eq('user_id', user.id)
+    .single();
+
+  if (fetchError || !sourceResume) {
+    console.error('Error fetching source resume:', fetchError);
+    throw new Error('Resume not found or access denied');
+  }
+  console.log('Source resume found:', sourceResume.id);
+
+  // Create a new resume with copied data, excluding the id field
+  const { id: _, created_at: __, updated_at: ___, ...resumeDataToCopy } = sourceResume;
+  
+  const newResume = {
+    ...resumeDataToCopy,
+    name: `${sourceResume.name} (Copy)`,
+    user_id: user.id,
+  };
+  
+  console.log('Prepared new resume data:', { 
+    name: newResume.name,
+    user_id: newResume.user_id
+  });
+
+  const { data: copiedResume, error: createError } = await supabase
+    .from('resumes')
+    .insert([newResume])
+    .select()
+    .single();
+
+  if (createError) {
+    console.error('Error creating copy:', {
+      code: createError.code,
+      message: createError.message,
+      details: createError.details,
+      hint: createError.hint
+    });
+    throw new Error(`Failed to copy resume: ${createError.message}`);
+  }
+
+  if (!copiedResume) {
+    console.error('No resume data returned after insert');
+    throw new Error('Resume creation failed: No data returned');
+  }
+  console.log('Successfully created copy with ID:', copiedResume.id);
+
+  // Revalidate all routes that might display resumes
+  revalidatePath('/', 'layout');
+  revalidatePath('/resumes', 'layout');
+  revalidatePath('/dashboard', 'layout');
+  revalidatePath('/resumes/base', 'layout');
+  revalidatePath('/resumes/tailored', 'layout');
+
+  return copiedResume;
+}
+

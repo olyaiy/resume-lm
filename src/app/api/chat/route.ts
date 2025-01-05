@@ -33,21 +33,6 @@ export async function POST(req: Request) {
       optimization, technical writing, and industry best 
       practices for tech job applications.
 
-      TOOLS:
-      
-      - getResume: Get the user Resume. Can request specific sections or "all" for the entire resume.
-        Use getResume generously, anytime you need it.
-        
-      - suggest_work_experience_improvement: Suggest improvements for a specific, or several work experience entries.
-      - suggest_project_improvement: Suggest improvements for a specific, or several project entries.
-      - suggest_skill_improvement: Suggest improvements for a specific, or several skill categories.
-      - suggest_education_improvement: Suggest improvements for a specific, or several education entries.
-      
-      - modifyWholeResume: Modify the entire resume, use this tool only if the user asks you to do tasks involving
-      the entire resume, such as tailoring to a specific role, improving the overall wording, structure, etc. 
-      IMPORTANT: Only use modifyWholeResume when explicitly requested by the user. Otherwise, provide suggestions
-      using the suggest_* tools.
-
       - IF at any point, you need to bold keywords and phrases in the resume, put two asterisks around the keyword or phrase.
 
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
