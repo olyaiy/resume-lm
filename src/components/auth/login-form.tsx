@@ -63,7 +63,7 @@ export function LoginForm() {
             type="email"
             placeholder="you@example.com"
             required
-            className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+            className="pl-10"
           />
         </div>
       </div>

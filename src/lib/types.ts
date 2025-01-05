@@ -40,7 +40,6 @@ export interface Certification {
   url?: string;
 }
 
-export type SalaryRange = string;
 
 export interface Job {
   id: string;
@@ -50,7 +49,7 @@ export interface Job {
   job_url: string | null;
   description: string | null;
   location: string | null;
-  salary_range?: SalaryRange | null;
+  salary_range?: string | null;
   keywords: string[];
   work_location: 'remote' | 'in_person' | 'hybrid' | null;
   employment_type: 'full_time' | 'part_time' | 'co_op' | 'internship' | null;

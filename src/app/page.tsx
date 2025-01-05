@@ -22,6 +22,7 @@ import { MiniResumePreview } from "@/components/resume/shared/mini-resume-previe
 import { ProfileRow } from "@/components/dashboard/profile-row";
 import Link from "next/link";
 import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
+import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -30,7 +31,14 @@ function getGreeting() {
   return "Good evening";
 }
 
-export default async function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: { [key: string]: string | undefined };
+}) {
+  // Check if user is coming from confirmation
+  const isNewSignup = searchParams?.type === 'signup' && searchParams?.token_hash;
+
   // Fetch dashboard data and handle authentication
   let data;
   try {
@@ -67,6 +75,9 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen relative">
+      {/* Welcome Dialog for New Signups */}
+      <WelcomeDialog isOpen={!!isNewSignup} />
+
       {/* Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />

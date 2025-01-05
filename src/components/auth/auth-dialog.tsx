@@ -78,10 +78,8 @@ export function AuthDialog({ children }: AuthDialogProps) {
       </DialogTrigger>
 
       <DialogContent 
-        className="sm:max-w-[425px] p-0 bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl animate-in fade-in-0 zoom-in-95"
+        className="sm:max-w-[425px] p-0 bg-white/95 border-white/40 shadow-2xl animate-in fade-in-0 zoom-in-95 relative z-50"
       >
-        <div className="absolute inset-0 bg-gradient-to-br from-violet-50/60 via-blue-50/60 to-indigo-50/60 rounded-lg opacity-50" />
-        
         <DialogTitle className="px-8 pt-8 text-center relative">
           <div className="inline-flex items-center justify-center space-x-2 mb-2">
             <Sparkles className="w-5 h-5 text-violet-500" aria-hidden="true" />
@@ -105,20 +103,20 @@ export function AuthDialog({ children }: AuthDialogProps) {
             <TabButton value="signup">Sign Up</TabButton>
           </TabsList>
 
-          <div className="p-8 relative">
+          <div className="p-8 relative bg-white/50">
             <div 
-              className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-violet-200/20 via-blue-200/20 to-violet-200/20 rounded-full blur-3xl -z-10 animate-pulse duration-[4000ms]" 
+              className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-violet-200/5 via-blue-200/5 to-violet-200/5 rounded-full blur-xl -z-10 animate-pulse duration-[4000ms]" 
               aria-hidden="true"
             />
             <div 
-              className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] bg-gradient-to-br from-blue-200/20 via-violet-200/20 to-blue-200/20 rounded-full blur-3xl -z-10 animate-pulse duration-[5000ms]" 
+              className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] bg-gradient-to-br from-blue-200/5 via-violet-200/5 to-blue-200/5 rounded-full blur-xl -z-10 animate-pulse duration-[5000ms]" 
               aria-hidden="true"
             />
             
-            <TabsContent value="login">
+            <TabsContent value="login" className="relative z-20">
               <LoginForm />
             </TabsContent>
-            <TabsContent value="signup">
+            <TabsContent value="signup" className="relative z-20">
               <SignupForm />
             </TabsContent>
           </div>
