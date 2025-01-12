@@ -12,11 +12,15 @@ import { addTextToResume } from "../../editor/ai/resume-modification-ai";
 
 interface TextImportDialogProps {
   resume: Resume;
-  onResumeChange: <K extends keyof Resume>(field: K, value: Resume[K]) => void;
-  trigger?: React.ReactNode;
+  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
+  trigger: React.ReactNode;
 }
 
-export function TextImportDialog({ resume, onResumeChange, trigger }: TextImportDialogProps) {
+export function TextImportDialog({
+  resume,
+  onResumeChange,
+  trigger
+}: TextImportDialogProps) {
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
@@ -61,15 +65,7 @@ export function TextImportDialog({ resume, onResumeChange, trigger }: TextImport
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        {trigger || (
-          <Button
-            variant="outline"
-            className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-0.5 h-10 px-5 relative overflow-hidden group"
-          >
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-            Import Text
-          </Button>
-        )}
+        {trigger}
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
         <DialogHeader>

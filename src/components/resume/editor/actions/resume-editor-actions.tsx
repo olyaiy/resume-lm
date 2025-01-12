@@ -28,21 +28,25 @@ export function ResumeEditorActions({
 }: ResumeEditorActionsProps) {
   // Dynamic color classes based on resume type
   const colors = resume.is_base_resume ? {
-    buttonGradient: "from-purple-500 to-indigo-600",
-    buttonHover: "hover:from-purple-600 hover:to-indigo-700",
-    buttonShadow: "shadow-purple-500/20"
+    gradient: "from-purple-600 to-indigo-600",
+    hover: "hover:from-purple-700 hover:to-indigo-700",
+    shadow: "shadow-purple-500/20"
   } : {
-    buttonGradient: "from-pink-500 to-rose-600",
-    buttonHover: "hover:from-pink-600 hover:to-rose-700",
-    buttonShadow: "shadow-pink-500/20"
+    gradient: "from-pink-600 to-rose-600",
+    hover: "hover:from-pink-700 hover:to-rose-700",
+    shadow: "shadow-pink-500/20"
   };
 
+  const buttonBaseClasses = "w-[25%] transition-all duration-500 shadow-md hover:shadow-lg hover:-translate-y-0.5 h-8 px-3 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0";
+  const buttonShineOverlay = "absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000";
+
   return (
-    <div className="flex items-center justify-end gap-2 mb-6">
+    <div className="flex items-center justify-between gap-2 mb-6 w-full">
       {/* Text Import Button */}
       <TextImport
         resume={resume}
         onResumeChange={onResumeChange}
+        className={`${buttonBaseClasses} bg-gradient-to-r ${colors.gradient} text-white ${colors.hover}`}
       />
 
       {/* Download Button */}
@@ -72,9 +76,9 @@ export function ResumeEditorActions({
           }
         }}
         size="sm"
-        className="bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 transition-all duration-500 shadow-md hover:shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-0.5 h-10 px-4 relative overflow-hidden group"
+        className={`${buttonBaseClasses} bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-indigo-700 hover:to-violet-700 hover:shadow-indigo-500/20`}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <div className={buttonShineOverlay} />
         <Download className="mr-2 h-4 w-4" />
         Download
       </Button>
@@ -84,9 +88,9 @@ export function ResumeEditorActions({
         onClick={onSave} 
         disabled={isSaving}
         size="sm"
-        className="bg-gradient-to-br from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 hover:-translate-y-0.5 h-9 px-4 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+        className={`${buttonBaseClasses} bg-gradient-to-r from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 hover:shadow-teal-500/20`}
       >
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+        <div className={buttonShineOverlay} />
         {isSaving ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -106,10 +110,10 @@ export function ResumeEditorActions({
           <Button
             size="sm"
             variant="destructive"
-            className="bg-gradient-to-br from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-rose-500/20 hover:-translate-y-0.5 h-9 px-4 relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+            className={`${buttonBaseClasses} bg-gradient-to-r from-red-500 to-rose-600 text-white hover:from-red-600 hover:to-rose-700 hover:shadow-rose-500/20`}
             disabled={isDeleting}
           >
-            <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+            <div className={buttonShineOverlay} />
             {isDeleting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

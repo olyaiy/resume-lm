@@ -229,12 +229,7 @@ export function ResumeEditorClient({
 
         <ResumeEditorHeader
           resume={state.resume}
-          isSaving={state.isSaving}
-          isDeleting={state.isDeleting}
           hasUnsavedChanges={state.hasUnsavedChanges}
-          onSave={handleSave}
-          onDelete={handleDelete}
-          onResumeChange={updateField}
         />
 
         {/* Main Content */}
@@ -245,20 +240,20 @@ export function ResumeEditorClient({
               className="h-full rounded-lg"
             >
               {/* Editor Panel */}
-              <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+              <ResizablePanel defaultSize={40} minSize={30} maxSize={70}>
                 <div className="flex flex-col h-full mr-4">
                   {/* Main Editor Area */}
-                  <ScrollArea className="flex-1">
-                    <div className="space-y-6 pr-4 pb-6">
-                      <ResumeEditorActions
+                  <ScrollArea className="">
+                    <div className="  pb-6">
+                      {/* <ResumeEditorActions
                         resume={state.resume}
                         isSaving={state.isSaving}
                         isDeleting={state.isDeleting}
                         onSave={handleSave}
                         onDelete={handleDelete}
                         onResumeChange={updateField}
-                      />
-                      <Tabs defaultValue="basic" className="w-full">
+                      /> */}
+                      <Tabs defaultValue="basic" className="">
                         <ResumeEditorTabs />
 
                         <TabsContent value="basic" className="space-y-6 mt-6">
@@ -327,7 +322,7 @@ export function ResumeEditorClient({
               <ResizableHandle withHandle />
 
               {/* Preview Panel */}
-              <ResizablePanel defaultSize={50} minSize={30} maxSize={70}>
+              <ResizablePanel defaultSize={60} minSize={30} maxSize={70}>
                 <ScrollArea className="h-full pr-4">
                   <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
                     <div className="absolute inset-0">

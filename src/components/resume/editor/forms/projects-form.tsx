@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
@@ -319,31 +319,40 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
 
   return (
     <>
-      <div className="space-y-3">
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={addProject}
-            className={cn(
-              "flex-1 h-8",
-              "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
-              "hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10",
-              "border-2 border-dashed border-violet-500/30 hover:border-violet-500/40",
-              "text-violet-700 hover:text-violet-800",
-              "transition-all duration-300",
-              "rounded-xl"
-            )}
-          >
-            <Plus className="h-3.5 w-3.5 mr-1.5" />
-            Add Project
-          </Button>
+      <div className="space-y-2 sm:space-y-3">
+        <div className="@container">
+          <div className={cn(
+            "flex flex-col @[400px]:flex-row gap-2",
+            "transition-all duration-300 ease-in-out"
+          )}>
+            <Button 
+              variant="outline" 
+              onClick={addProject}
+              className={cn(
+                "flex-1 h-9 min-w-[120px]",
+                "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
+                "hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10",
+                "border-2 border-dashed border-violet-500/30 hover:border-violet-500/40",
+                "text-violet-700 hover:text-violet-800",
+                "transition-all duration-300",
+                "rounded-xl",
+                "whitespace-nowrap text-[11px] @[300px]:text-sm"
+              )}
+            >
+              <Plus className="h-4 w-4 mr-2 shrink-0" />
+              Add Project
+            </Button>
 
-          <ImportFromProfileDialog<Project>
-            profile={profile}
-            onImport={handleImportFromProfile}
-            type="projects"
-            buttonClassName="flex-1 mb-0 h-8"
-          />
+            <ImportFromProfileDialog<Project>
+              profile={profile}
+              onImport={handleImportFromProfile}
+              type="projects"
+              buttonClassName={cn(
+                "flex-1 mb-0 h-9 min-w-[120px]",
+                "whitespace-nowrap text-[11px] @[300px]:text-sm"
+              )}
+            />
+          </div>
         </div>
 
         {projects.map((project, index) => (
@@ -356,31 +365,31 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
               "shadow-sm"
             )}
           >
-            <div className="absolute -left-2.5 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              <div className="bg-violet-100/80 rounded-lg p-1 cursor-move shadow-sm">
-                <GripVertical className="h-3.5 w-3.5 text-violet-600" />
+            <div className="absolute -left-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="bg-violet-100/80 rounded-lg p-1.5 cursor-move shadow-sm">
+                <GripVertical className="h-4 w-4 text-violet-600" />
               </div>
             </div>
             
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
               {/* Header with Delete Button */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {/* Project Name - Full Width */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 sm:gap-3">
                   <div className="relative flex-1">
                     <Input
                       value={project.name}
                       onChange={(e) => updateProject(index, 'name', e.target.value)}
                       className={cn(
-                        "text-sm font-semibold tracking-tight h-8 py-1",
+                        "text-sm font-semibold tracking-tight h-9",
                         "bg-white/50 border-gray-200 rounded-lg",
-                        "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                        "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
                         "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                         "placeholder:text-gray-400"
                       )}
                       placeholder="Project Name"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-violet-700">
                       PROJECT NAME
                     </div>
                   </div>
@@ -388,27 +397,27 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                     variant="ghost" 
                     size="icon"
                     onClick={() => removeProject(index)}
-                    className="text-gray-400 hover:text-red-500 transition-colors duration-300 h-8 w-8"
+                    className="text-gray-400 hover:text-red-500 transition-colors duration-300"
                   >
-                    <Trash2 className="h-3.5 w-3.5" />
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
 
                 {/* URLs Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   <div className="relative">
                     <Input
                       value={project.url || ''}
                       onChange={(e) => updateProject(index, 'url', e.target.value)}
                       className={cn(
-                        "text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-8 py-1",
-                        "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                        "text-sm font-medium bg-white/50 border-gray-200 rounded-lg h-9",
+                        "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
                         "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                         "placeholder:text-gray-400"
                       )}
                       placeholder="Live URL"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-violet-700">
                       LIVE URL
                     </div>
                   </div>
@@ -417,38 +426,40 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                       value={project.github_url || ''}
                       onChange={(e) => updateProject(index, 'github_url', e.target.value)}
                       className={cn(
-                        "h-8 py-1 bg-white/50 border-gray-200 rounded-lg",
-                        "focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20",
+                        "h-9 bg-white/50 border-gray-200 rounded-lg",
+                        "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
                         "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
                         "placeholder:text-gray-400"
                       )}
                       placeholder="GitHub URL"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-violet-700">
                       GITHUB URL
                     </div>
                   </div>
                 </div>
 
                 {/* Date */}
-                <div className="relative">
+                <div className="relative group">
                   <Input
                     type="text"
                     value={project.date || ''}
                     onChange={(e) => updateProject(index, 'date', e.target.value)}
-                    className="w-full h-8 py-1 bg-white/50 border-gray-200 rounded-lg
-                      focus:border-violet-500/40 focus:ring-1 focus:ring-violet-500/20
-                      hover:border-violet-500/30 hover:bg-white/60 transition-colors"
-                    placeholder="e.g., 'Jan 2023 - Present' or '2020 - 2022'"
+                    className={cn(
+                      "w-full bg-white/50 border-gray-200 rounded-lg h-9",
+                      "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
+                      "hover:border-violet-500/30 hover:bg-white/60 transition-colors"
+                    )}
+                    placeholder="e.g., &apos;Jan 2023 - Present&apos; or &apos;2020 - 2022&apos;"
                   />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] font-medium text-violet-700">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-violet-700">
                     DATE
                   </div>
                 </div>
 
                 {/* Description Section */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-medium text-violet-700">
+                <div className="space-y-2 sm:space-y-3">
+                  <Label className="text-[10px] sm:text-xs font-medium text-violet-700">
                     Key Features & Technical Achievements
                   </Label>
                   <div className="space-y-2 pl-0">
@@ -461,7 +472,6 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                           updated[index].description[descIndex] = value;
                           onChange(updated);
                           
-                          // Clear improvement state when manually edited
                           if (improvedPoints[index]?.[descIndex]) {
                             setImprovedPoints(prev => {
                               const newState = { ...prev };
@@ -517,13 +527,13 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                     />
 
                     {project.description.length === 0 && !aiSuggestions[index]?.length && (
-                      <div className="text-[11px] text-gray-500 italic px-3 py-2 bg-gray-50/50 rounded-lg">
+                      <div className="text-[10px] sm:text-xs text-gray-500 italic px-4 py-3 bg-gray-50/50 rounded-lg">
                         Add points to describe your project&apos;s features and achievements
                       </div>
                     )}
                   </div>
 
-                  <div className="flex gap-2 w-full">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                     <Button
                       variant="outline"
                       size="sm"
@@ -533,11 +543,11 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                         onChange(updated);
                       }}
                       className={cn(
-                        "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[11px] h-7",
+                        "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[10px] sm:text-xs",
                         "border-violet-200 hover:border-violet-300 hover:bg-violet-50/50"
                       )}
                     >
-                      <Plus className="h-3.5 w-3.5 mr-1" />
+                      <Plus className="h-4 w-4 mr-1" />
                       Add Point
                     </Button>
 
@@ -550,11 +560,16 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                             onClick={() => generateAIPoints(index)}
                             disabled={loadingAI[index]}
                             className={cn(
-                              "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[11px] h-7",
+                              "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[10px] sm:text-xs",
                               "border-violet-200 hover:border-violet-300 hover:bg-violet-50/50"
                             )}
                           >
-                            Write points with AI
+                            {loadingAI[index] ? (
+                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+                            ) : (
+                              <Sparkles className="h-4 w-4 mr-1" />
+                            )}
+                            {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent 
@@ -562,7 +577,7 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                           align="start"
                           sideOffset={2}
                           className={cn(
-                            "w-72 p-3",
+                            "w-72 p-3.5",
                             "bg-violet-50",
                             "border-2 border-violet-300",
                             "shadow-lg shadow-violet-100/50",
@@ -589,8 +604,8 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                 </div>
 
                 {/* Technologies Section */}
-                <div className="space-y-2">
-                  <Label className="text-[11px] font-medium text-violet-700">
+                <div className="space-y-2 sm:space-y-3">
+                  <Label className="text-[10px] sm:text-xs font-medium text-violet-700">
                     Technologies & Tools Used
                   </Label>
                   
@@ -603,7 +618,7 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                           variant="secondary"
                           className={cn(
                             "bg-white/60 hover:bg-white/80 text-violet-700 border border-violet-200 py-0.5",
-                            "transition-all duration-300 group/badge cursor-default text-xs"
+                            "transition-all duration-300 group/badge cursor-default text-[10px] sm:text-xs"
                           )}
                         >
                           {tech}
@@ -623,21 +638,24 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                         value={newTechnologies[index] || ''}
                         onChange={(e) => setNewTechnologies({ ...newTechnologies, [index]: e.target.value })}
                         onKeyPress={(e) => handleTechKeyPress(e, index)}
-                        className="h-8 bg-white/50 border-gray-200 rounded-lg
-                          focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20
-                          hover:border-violet-500/30 hover:bg-white/60 transition-colors
-                          placeholder:text-gray-400"
+                        className={cn(
+                          "h-9 bg-white/50 border-gray-200 rounded-lg",
+                          "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
+                          "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
+                          "placeholder:text-gray-400",
+                          "text-[10px] sm:text-xs"
+                        )}
                         placeholder="Type a technology and press Enter or click +"
                       />
                       <Button
                         variant="outline"
                         size="sm"
                         onClick={() => addTechnology(index)}
-                        className="h-8 px-2 bg-white/50 hover:bg-white/60"
+                        className="h-9 px-2 bg-white/50 hover:bg-white/60"
                       >
-                        <Plus className="h-3.5 w-3.5" />
+                        <Plus className="h-4 w-4" />
                       </Button>
-                      <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[9px] font-medium text-violet-700">
+                      <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-violet-700">
                         ADD TECHNOLOGY
                       </div>
                     </div>

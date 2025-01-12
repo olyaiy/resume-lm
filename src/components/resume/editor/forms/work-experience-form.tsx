@@ -291,31 +291,40 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
 
   return (
     <>
-      <div className="space-y-3">
-        <div className="flex gap-3">
-          <Button 
-            variant="outline" 
-            onClick={addExperience}
-            className={cn(
-              "flex-1 h-9",
-              "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
-              "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
-              "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
-              "text-cyan-700 hover:text-cyan-800",
-              "transition-all duration-300",
-              "rounded-xl"
-            )}
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Work Experience
-          </Button>
+      <div className="space-y-2 sm:space-y-3">
+        <div className="@container">
+          <div className={cn(
+            "flex flex-col @[400px]:flex-row gap-2",
+            "transition-all duration-300 ease-in-out"
+          )}>
+            <Button 
+              variant="outline" 
+              onClick={addExperience}
+              className={cn(
+                "flex-1 h-9 min-w-[120px]",
+                "bg-gradient-to-r from-cyan-500/5 via-cyan-500/10 to-blue-500/5",
+                "hover:from-cyan-500/10 hover:via-cyan-500/15 hover:to-blue-500/10",
+                "border-2 border-dashed border-cyan-500/30 hover:border-cyan-500/40",
+                "text-cyan-700 hover:text-cyan-800",
+                "transition-all duration-300",
+                "rounded-xl",
+                "whitespace-nowrap text-[11px] @[300px]:text-sm"
+              )}
+            >
+              <Plus className="h-4 w-4 mr-2 shrink-0" />
+              Add Work Experience
+            </Button>
 
-          <ImportFromProfileDialog<WorkExperience>
-            profile={profile}
-            onImport={handleImportFromProfile}
-            type="work_experience"
-            buttonClassName="flex-1 mb-0 h-9"
-          />
+            <ImportFromProfileDialog<WorkExperience>
+              profile={profile}
+              onImport={handleImportFromProfile}
+              type="work_experience"
+              buttonClassName={cn(
+                "flex-1 mb-0 h-9 min-w-[120px]",
+                "whitespace-nowrap text-[11px] @[300px]:text-sm"
+              )}
+            />
+          </div>
         </div>
 
         {experiences.map((exp, index) => (
@@ -334,17 +343,17 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
               </div>
             </div>
             
-            <CardContent className="p-4 space-y-4">
+            <CardContent className="p-3 sm:p-4 space-y-3 sm:space-y-4">
               {/* Header with Delete Button */}
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {/* Position Title - Full Width */}
-                <div className="flex items-start gap-3">
+                <div className="flex items-start gap-2 sm:gap-3">
                   <div className="relative flex-1">
                     <Input
                       value={exp.position}
                       onChange={(e) => updateExperience(index, 'position', e.target.value)}
                       className={cn(
-                        "text-sm md:text-base font-semibold tracking-tight h-9",
+                        "text-sm font-semibold tracking-tight h-9",
                         "bg-white/50 border-gray-200 rounded-lg",
                         "focus:border-cyan-500/40 focus:ring-2 focus:ring-cyan-500/20",
                         "hover:border-cyan-500/30 hover:bg-white/60 transition-colors",
@@ -352,7 +361,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                       )}
                       placeholder="Position Title"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-gray-500">
                       POSITION
                     </div>
                   </div>
@@ -367,7 +376,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                 </div>
 
                 {/* Company and Location Row */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
                   <div className="relative">
                     <Input
                       value={exp.company}
@@ -380,7 +389,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                       )}
                       placeholder="Company Name"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-gray-500">
                       COMPANY
                     </div>
                   </div>
@@ -396,7 +405,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                       )}
                       placeholder="Location"
                     />
-                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                    <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-gray-500">
                       LOCATION
                     </div>
                   </div>
@@ -415,10 +424,10 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                     )}
                     placeholder="e.g., &apos;Jan 2023 - Present&apos; or &apos;2020 - 2022&apos;"
                   />
-                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] md:text-[9px] font-medium text-gray-500">
+                  <div className="absolute -top-2 left-2 px-1 bg-white/80 text-[7px] sm:text-[9px] font-medium text-gray-500">
                     DATE
                   </div>
-                  <span className="ml-2 text-[9px] md:text-[11px] text-gray-500">Use &apos;Present&apos; in the date field for current positions</span>
+                  <span className="ml-2 text-[8px] sm:text-[10px] text-gray-500">Use &apos;Present&apos; in the date field for current positions</span>
                 </div>
 
                 {/* Description Section */}
@@ -705,7 +714,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                       </div>
                     )}
                   </div>
-                  <div className="flex gap-2 w-full">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full">
                     <Button
                       variant="outline"
                       size="sm"
@@ -715,7 +724,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                         onChange(updated);
                       }}
                       className={cn(
-                        "flex-1 text-cyan-600 hover:text-cyan-700 transition-colors text-[11px] md:text-xs",
+                        "flex-1 text-cyan-600 hover:text-cyan-700 transition-colors text-[10px] sm:text-xs",
                         "border-cyan-200 hover:border-cyan-300 hover:bg-cyan-50/50"
                       )}
                     >
@@ -731,7 +740,7 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                             onClick={() => generateAIPoints(index)}
                             disabled={loadingAI[index]}
                             className={cn(
-                              "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[11px] md:text-xs",
+                              "flex-1 text-purple-600 hover:text-purple-700 transition-colors text-[10px] sm:text-xs",
                               "border-purple-200 hover:border-purple-300 hover:bg-purple-50/50"
                             )}
                           >
@@ -761,12 +770,12 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                               <div className="p-1 rounded-md bg-purple-100 text-purple-600">
                                 <Sparkles className="h-3 w-3" />
                               </div>
-                              <span className="text-xs font-medium text-purple-700">AI Generation Settings</span>
+                              <span className="text-[10px] sm:text-xs font-medium text-purple-700">AI Generation Settings</span>
                             </div>
 
                             {/* Number of Suggestions */}
                             <div>
-                              <Label className="text-[11px] font-medium text-purple-700">Points to Generate</Label>
+                              <Label className="text-[10px] sm:text-xs font-medium text-purple-700">Points to Generate</Label>
                               <Input
                                 type="number"
                                 min={1}
@@ -782,14 +791,14 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                                   "border-purple-200",
                                   "focus:border-purple-400 focus:ring-1 focus:ring-purple-300",
                                   "hover:bg-white",
-                                  "text-purple-900 text-xs"
+                                  "text-purple-900 text-[10px] sm:text-xs"
                                 )}
                               />
                             </div>
 
                             {/* Custom Focus */}
                             <div>
-                              <Label className="text-[11px] font-medium text-purple-700">Prompt for AI (Optional)</Label>
+                              <Label className="text-[10px] sm:text-xs font-medium text-purple-700">Prompt for AI (Optional)</Label>
                               <Textarea
                                 value={aiConfig[index]?.customPrompt || ''}
                                 onChange={(e) => setAiConfig(prev => ({
