@@ -22,11 +22,11 @@ import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { DocumentSettingsForm } from "@/components/resume/editor/forms/document-settings-form";
 import { ResumeEditorTabs } from "./header/resume-editor-tabs";
 import { TailoredJobCard } from "../management/cards/tailored-job-card";
-import { ResumeEditorHeader } from "./header/resume-editor-header";
 import ChatBot from "../assistant/chatbot";
 import { ResumePreview } from "./preview/resume-preview";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { ResumeEditorActions } from './actions/resume-editor-actions';
+import { AppHeader } from '@/components/layout/app-header';
 
 
 
@@ -227,13 +227,10 @@ export function ResumeEditorClient({
           <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
         </div>
 
-        <ResumeEditorHeader
-          resume={state.resume}
-          hasUnsavedChanges={state.hasUnsavedChanges}
-        />
+        <AppHeader />
 
         {/* Main Content */}
-        <div className="relative min-h-screen pt-24 px-6 md:px-8 lg:px-12 mx-auto ">
+        <div className="relative min-h-screen pt-4 px-6 md:px-8 lg:px-12 mx-auto ">
           <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">
             <ResizablePanelGroup
               direction="horizontal"
