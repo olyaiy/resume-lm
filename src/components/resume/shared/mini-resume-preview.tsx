@@ -73,8 +73,12 @@ export function MiniResumePreview({
               {[...Array(3)].map((_, i) => (
                 <div
                   key={`summary-${i}`}
-                  className="h-1 rounded-full bg-gray-200"
-                  style={{ width: `${85 + Math.random() * 15}%` }}
+                  className={cn(
+                    "h-1 rounded-full bg-gray-200",
+                    i === 0 && "w-[95%]",
+                    i === 1 && "w-[85%]",
+                    i === 2 && "w-[90%]"
+                  )}
                 />
               ))}
             </div>
@@ -92,8 +96,13 @@ export function MiniResumePreview({
                 {[...Array(2)].map((_, i) => (
                   <div
                     key={`exp-${groupIndex}-${i}`}
-                    className="h-1 rounded-full bg-gray-200"
-                    style={{ width: `${75 + Math.random() * 25}%` }}
+                    className={cn(
+                      "h-1 rounded-full bg-gray-200",
+                      groupIndex === 0 && i === 0 && "w-[85%]",
+                      groupIndex === 0 && i === 1 && "w-[90%]",
+                      groupIndex === 1 && i === 0 && "w-[95%]",
+                      groupIndex === 1 && i === 1 && "w-[80%]"
+                    )}
                   />
                 ))}
               </div>
