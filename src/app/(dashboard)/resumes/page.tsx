@@ -2,11 +2,12 @@ import { getDashboardData } from "@/utils/actions";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
+
 import { cn } from "@/lib/utils";
 import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
 import { ResumeSortControls } from "@/components/resume/management/resume-sort-controls";
 import type { SortOption, SortDirection } from "@/components/resume/management/resume-sort-controls";
+import { AppHeader } from "@/components/layout/app-header";
 
 const RESUMES_PER_PAGE = 12;
 
@@ -50,7 +51,7 @@ export default async function ResumesPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
-      <DashboardHeader />
+      <AppHeader />
       
       <div className="container max-w-7xl mx-auto p-6 space-y-8">
         {/* Header with controls */}

@@ -25,6 +25,7 @@ import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
+import { AppHeader } from "@/components/layout/app-header";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -77,10 +78,12 @@ export default async function Home({
   }
 
   return (
+    
     <main className="min-h-screen relative">
+      <AppHeader />
       {/* Welcome Dialog for New Signups */}
       <WelcomeDialog isOpen={!!isNewSignup} />
-
+      
       {/* Gradient Background */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />

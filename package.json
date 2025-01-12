@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.6",
+    "@ai-sdk/deepseek": "^0.0.4",
     "@ai-sdk/google": "^1.0.12",
     "@ai-sdk/google-vertex": "^2.0.12",
     "@ai-sdk/openai": "^1.0.12",
