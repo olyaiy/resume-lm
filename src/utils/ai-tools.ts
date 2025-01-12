@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createDeepSeek } from '@ai-sdk/deepseek';
 
 export type ApiKey = {
   service: string;
@@ -19,7 +20,7 @@ export type AIConfig = {
 export function initializeAIClient(config?: AIConfig) {
   // If no config provided, use default OpenAI with environment variable
   if (!config) {
-    return createOpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })('gpt-4o-mini');
+    return createOpenAI({ apiKey: process.env.OPENAI_API_KEY || '' })('gpt-4-turbo-preview');
   }
 
   const { model, apiKeys } = config;
@@ -30,6 +31,13 @@ export function initializeAIClient(config?: AIConfig) {
     if (!anthropicKey) throw new Error('Anthropic API key not found');
     return createAnthropic({ apiKey: anthropicKey })(model);
   } 
+
+  // Check for DeepSeek models
+  if (model.startsWith('deepseek')) {
+    const deepseekKey = apiKeys.find(k => k.service === 'deepseek')?.key || process.env.DEEPSEEK_API_KEY;
+    if (!deepseekKey) throw new Error('DeepSeek API key not found');
+    return createDeepSeek({ apiKey: deepseekKey })(model);
+  }
   
   // Default to OpenAI
   const openaiKey = apiKeys.find(k => k.service === 'openai')?.key || process.env.OPENAI_API_KEY;

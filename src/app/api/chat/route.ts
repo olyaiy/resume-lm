@@ -48,7 +48,7 @@ export async function POST(req: Request) {
       TARGET ROLE: ${target_role}
       `,
       messages,
-      maxSteps: 10,
+      maxSteps: 5,
       tools: {
         getResume: {
           description: 'Get the user Resume. Can request specific sections or "all" for the entire resume.',
@@ -78,7 +78,7 @@ export async function POST(req: Request) {
               date: z.string(),
               description: z.array(z.string()),
               technologies: z.array(z.string()).optional(),
-            }).describe('Improved version of the work experience entry.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
+            }).describe('Improved version of the work experience entry. For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
           }),
         },
         suggest_project_improvement: {
@@ -102,7 +102,7 @@ export async function POST(req: Request) {
             improved_skill: z.object({
               category: z.string(),
               items: z.array(z.string()),
-            }).describe('Improved version of the skill category.  For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),
+            }).describe('Improved version of the skill category. Do not bold any keywords or phrases while using this suggest_skill_improvement tool.'),
           }),
         },
         suggest_education_improvement: {

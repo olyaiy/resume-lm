@@ -42,21 +42,22 @@ const PROVIDERS: {
     name: 'OpenAI',
     apiLink: 'https://platform.openai.com/api-keys'
   },
+  {
+    id: 'deepseek',
+    name: 'DeepSeek',
+    apiLink: 'https://platform.deepseek.com/'
+  }
 ]
 
 const AI_MODELS: AIModel[] = [
   { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
 
   // FOR NOW, SIMPLY FOCUS ON OPENAI AND ANTHROPIC
   // WE WILL IMPLEMENT THESE LATER
   // { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Exp', provider: 'google' },
-  // { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash', provider: 'google' },
-  // { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro', provider: 'google' },
-  // { id: 'vertex-gemini-2.0-flash-exp', name: 'Vertex Gemini 2.0 Flash Exp', provider: 'vertex' },
-  // { id: 'vertex-gemini-1.5-flash', name: 'Vertex Gemini 1.5 Flash', provider: 'vertex' },
-  // { id: 'vertex-gemini-1.5-pro', name: 'Vertex Gemini 1.5 Pro', provider: 'vertex' },
 ]
 
 export function ApiKeysForm() {

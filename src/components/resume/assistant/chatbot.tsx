@@ -70,7 +70,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       resume: resume,
       config,
     },
-    maxSteps: 10,
+    maxSteps: 5,
     async onToolCall({ toolCall }) {
       // setIsStreaming(false);
       

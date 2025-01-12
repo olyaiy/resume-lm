@@ -184,6 +184,7 @@ export type ServiceName =
   | 'cohere'
   | 'fireworks'
   | 'deepinfra'
-  | 'groq';
+  | 'groq'
+  | 'deepseek';
 
 
