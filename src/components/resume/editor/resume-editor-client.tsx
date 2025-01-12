@@ -243,16 +243,16 @@ export function ResumeEditorClient({
               <ResizablePanel defaultSize={40} minSize={30} maxSize={70}>
                 <div className="flex flex-col h-full mr-4">
                   {/* Main Editor Area */}
-                  <ScrollArea className="">
+                  <ScrollArea className="pr-2">
                     <div className="  pb-6">
-                      {/* <ResumeEditorActions
+                      <ResumeEditorActions
                         resume={state.resume}
                         isSaving={state.isSaving}
                         isDeleting={state.isDeleting}
                         onSave={handleSave}
                         onDelete={handleDelete}
                         onResumeChange={updateField}
-                      /> */}
+                      />
                       <Tabs defaultValue="basic" className="">
                         <ResumeEditorTabs />
 

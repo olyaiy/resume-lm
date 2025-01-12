@@ -349,6 +349,12 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
               type="projects"
               buttonClassName={cn(
                 "flex-1 mb-0 h-9 min-w-[120px]",
+                "bg-gradient-to-r from-violet-500/5 via-violet-500/10 to-purple-500/5",
+                "hover:from-violet-500/10 hover:via-violet-500/15 hover:to-purple-500/10",
+                "border-2 border-dashed border-violet-500/30 hover:border-violet-500/40",
+                "text-violet-700 hover:text-violet-800",
+                "transition-all duration-300",
+                "rounded-xl",
                 "whitespace-nowrap text-[11px] @[300px]:text-sm"
               )}
             />
