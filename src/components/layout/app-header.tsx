@@ -5,7 +5,12 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { User } from "lucide-react";
 
-export function DashboardHeader() {
+interface AppHeaderProps {
+  title?: string;
+  children?: React.ReactNode;
+}
+
+export function AppHeader({ title = "Dashboard", children }: AppHeaderProps) {
   return (
     <header className="h-20 border-b backdrop-blur-xl sticky top-0 left-0 right-0 z-40 shadow-lg border-purple-200/50">
       {/* Gradient backdrop with blur */}
@@ -26,7 +31,7 @@ export function DashboardHeader() {
             <div className="flex flex-col">
               <h1 className="text-xl font-semibold">
                 <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-                  Dashboard
+                  {title}
                 </span>
               </h1>
             </div>
@@ -35,23 +40,27 @@ export function DashboardHeader() {
 
         {/* Right Section - Action Buttons */}
         <div className="flex items-center gap-2">
-          <div className={cn(
-            "flex items-center gap-3 px-4 py-2 rounded-full",
-            "bg-gradient-to-br from-purple-500/10 to-indigo-500/10",
-            "border border-purple-200/50 backdrop-blur-md",
-            "shadow-md hover:shadow-lg transition-all duration-500",
-            "hover:shadow-purple-500/20",
-            "relative overflow-hidden"
-          )}>
-            <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">
-              <User className="h-4 w-4" />
-              Profile
-            </Link>
-            <div className="w-px h-6 bg-purple-300" />
-            <SettingsButton />
-            <div className="w-px h-6 bg-purple-300" />
-            <LogoutButton />
-          </div>
+          {children ? (
+            children
+          ) : (
+            <div className={cn(
+              "flex items-center gap-3 px-4 py-2 rounded-full",
+              "bg-gradient-to-br from-purple-500/10 to-indigo-500/10",
+              "border border-purple-200/50 backdrop-blur-md",
+              "shadow-md hover:shadow-lg transition-all duration-500",
+              "hover:shadow-purple-500/20",
+              "relative overflow-hidden"
+            )}>
+              <Link href="/profile" className="flex items-center gap-2 text-sm font-medium text-purple-600 hover:text-purple-700 transition-colors">
+                <User className="h-4 w-4" />
+                Profile
+              </Link>
+              <div className="w-px h-6 bg-purple-300" />
+              <SettingsButton />
+              <div className="w-px h-6 bg-purple-300" />
+              <LogoutButton />
+            </div>
+          )}
         </div>
       </div>
     </header>

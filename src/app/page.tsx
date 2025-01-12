@@ -17,7 +17,6 @@ import { getDashboardData, deleteResume, copyResume } from "../utils/actions";
 import { FileText, Sparkles, User, Trash2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
 import { ProfileRow } from "@/components/dashboard/profile-row";
 import Link from "next/link";
@@ -93,14 +92,12 @@ export default async function Home({
 
       {/* Content */}
       <div className="relative z-10">
-        <DashboardHeader />
-        
         <div className="container max-w-7xl mx-auto p-6">
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
-
             {/* API Key Alert */}
             <ApiKeyAlert />
+            
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
               <div>

@@ -41,7 +41,7 @@ export function ResumeEditorActions({
   const buttonBaseClasses = cn(
     "transition-all duration-500 shadow-md hover:shadow-lg hover:-translate-y-0.5",
     "relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0",
-    "h-8 px-3 text-[11px] @[300px]:text-sm"
+    "h-8 px-3 text-[10px] @[300px]:text-[13px]"
   );
 
   const buttonShineOverlay = "absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000";
@@ -50,7 +50,7 @@ export function ResumeEditorActions({
     <div className="@container">
       <div className={cn(
         "grid grid-cols-2 @[400px]:grid-cols-4 gap-2",
-        "transition-all duration-300 ease-in-out"
+        "transition-all duration-300 ease-in-out mb-2"
       )}>
         {/* Text Import Button */}
         <TextImport
@@ -100,7 +100,7 @@ export function ResumeEditorActions({
           )}
         >
           <div className={buttonShineOverlay} />
-          <Download className="mr-2 h-4 w-4" />
+          <Download className=" h-3 w-3" />
           Download
         </Button>
 
@@ -119,12 +119,12 @@ export function ResumeEditorActions({
           <div className={buttonShineOverlay} />
           {isSaving ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
               Saving...
             </>
           ) : (
             <>
-              <Save className="mr-2 h-4 w-4" />
+              <Save className="mr-1.5 h-4 w-4" />
               Save
             </>
           )}
@@ -147,12 +147,12 @@ export function ResumeEditorActions({
               <div className={buttonShineOverlay} />
               {isDeleting ? (
                 <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
                   Deleting...
                 </>
               ) : (
                 <>
-                  <Trash2 className="mr-2 h-4 w-4" />
+                  <Trash2 className="mr-1.5 h-4 w-4" />
                   Delete
                 </>
               )}

@@ -28,7 +28,7 @@ export function TextImport({
         >
           <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
           <FileText className="mr-2 h-4 w-4" />
-          Text Import
+          Import
         </Button>
       }
     />
