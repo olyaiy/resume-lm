@@ -26,6 +26,7 @@ import { ResumeEditorHeader } from "./header/resume-editor-header";
 import ChatBot from "../assistant/chatbot";
 import { ResumePreview } from "./preview/resume-preview";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
+import { ResumeEditorActions } from './actions/resume-editor-actions';
 
 
 
@@ -249,6 +250,14 @@ export function ResumeEditorClient({
                   {/* Main Editor Area */}
                   <ScrollArea className="flex-1">
                     <div className="space-y-6 pr-4 pb-6">
+                      <ResumeEditorActions
+                        resume={state.resume}
+                        isSaving={state.isSaving}
+                        isDeleting={state.isDeleting}
+                        onSave={handleSave}
+                        onDelete={handleDelete}
+                        onResumeChange={updateField}
+                      />
                       <Tabs defaultValue="basic" className="w-full">
                         <ResumeEditorTabs />
 
