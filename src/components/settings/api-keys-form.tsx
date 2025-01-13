@@ -118,7 +118,6 @@ export function ApiKeysForm() {
       addedAt: new Date().toISOString(),
     }
 
-    console.log('Updating API key:', newKey)
     setApiKeys(prev => {
       const exists = prev.findIndex(k => k.service === service)
       if (exists >= 0) {

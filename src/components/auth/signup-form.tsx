@@ -41,7 +41,6 @@ export function SignupForm() {
   const { 
     formData, 
     setFormData, 
-    isLoading, 
     setFieldLoading, 
     validations, 
     validateField,
