@@ -372,6 +372,17 @@ export async function createBaseResume(
   name: string, 
   importOption: 'import-profile' | 'fresh' | 'import-resume' = 'import-profile',
   selectedContent?: {
+    // Basic Info
+    first_name?: string;
+    last_name?: string;
+    email?: string;
+    phone_number?: string;
+    location?: string;
+    website?: string;
+    linkedin_url?: string;
+    github_url?: string;
+    
+    // Content Sections
     work_experience: WorkExperience[];
     education: Education[];
     skills: Skill[];
@@ -391,7 +402,6 @@ export async function createBaseResume(
   // Get user's profile for initial data if not starting fresh
   let profile = null;
   if (importOption !== 'fresh') {
-
     const { data, error: profileError } = await supabase
       .from('profiles')
       .select('*')
@@ -409,15 +419,16 @@ export async function createBaseResume(
     name,
     target_role: name,
     is_base_resume: true,
-    first_name: importOption === 'fresh' ? '' : profile?.first_name || '',
-    last_name: importOption === 'fresh' ? '' : profile?.last_name || '',
-    email: importOption === 'fresh' ? '' : profile?.email || '',
-    phone_number: importOption === 'fresh' ? '' : profile?.phone_number || '',
-    location: importOption === 'fresh' ? '' : profile?.location || '',
-    website: importOption === 'fresh' ? '' : profile?.website || '',
-    linkedin_url: importOption === 'fresh' ? '' : profile?.linkedin_url || '',
-    github_url: importOption === 'fresh' ? '' : profile?.github_url || '',
-    // For import-profile, use only the selected content. For fresh, use empty arrays
+    // Use selectedContent basic info for import-resume, otherwise use profile data
+    first_name: importOption === 'import-resume' ? selectedContent?.first_name || '' : importOption === 'fresh' ? '' : profile?.first_name || '',
+    last_name: importOption === 'import-resume' ? selectedContent?.last_name || '' : importOption === 'fresh' ? '' : profile?.last_name || '',
+    email: importOption === 'import-resume' ? selectedContent?.email || '' : importOption === 'fresh' ? '' : profile?.email || '',
+    phone_number: importOption === 'import-resume' ? selectedContent?.phone_number || '' : importOption === 'fresh' ? '' : profile?.phone_number || '',
+    location: importOption === 'import-resume' ? selectedContent?.location || '' : importOption === 'fresh' ? '' : profile?.location || '',
+    website: importOption === 'import-resume' ? selectedContent?.website || '' : importOption === 'fresh' ? '' : profile?.website || '',
+    linkedin_url: importOption === 'import-resume' ? selectedContent?.linkedin_url || '' : importOption === 'fresh' ? '' : profile?.linkedin_url || '',
+    github_url: importOption === 'import-resume' ? selectedContent?.github_url || '' : importOption === 'fresh' ? '' : profile?.github_url || '',
+    // For import-profile or import-resume, use the selected content. For fresh, use empty arrays
     work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent 
       ? selectedContent.work_experience
       : [],

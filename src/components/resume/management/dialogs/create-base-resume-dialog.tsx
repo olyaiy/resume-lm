@@ -151,20 +151,24 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
             apiKeys
           });
           
-          // Create the base resume with the converted content
-          console.log('Creating base resume with converted content...');
-          console.log('Target Role:', targetRole);
-          console.log('Import Option:', 'import-resume');
-          
-          // Extract just the content sections needed for createBaseResume
+          // Extract content sections and basic info for createBaseResume
           const selectedContent = {
+            // Basic Info
+            first_name: convertedResume.first_name || '',
+            last_name: convertedResume.last_name || '',
+            email: convertedResume.email || '',
+            phone_number: convertedResume.phone_number,
+            location: convertedResume.location,
+            website: convertedResume.website,
+            linkedin_url: convertedResume.linkedin_url,
+            github_url: convertedResume.github_url,
+            
+            // Content Sections
             work_experience: convertedResume.work_experience || [],
             education: convertedResume.education || [],
             skills: convertedResume.skills || [],
             projects: convertedResume.projects || [],
           };
-          
-          console.log('Selected Content:', selectedContent);
           
           const resume = await createBaseResume(
             targetRole,
@@ -172,7 +176,6 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
             selectedContent
           );
           
-
           toast({
             title: "Success",
             description: "Resume created successfully",
