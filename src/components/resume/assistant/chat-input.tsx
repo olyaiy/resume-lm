@@ -28,7 +28,7 @@ export default function ChatInput({
     return (
       <form onSubmit={handleSubmit} className={cn(
         "relative z-10",
-        "p-2 border-t border-purple-200/60",
+        "p-1 border-t border-purple-200/60",
         "bg-white/40",
         "backdrop-blur-sm",
         "flex gap-1.5"
