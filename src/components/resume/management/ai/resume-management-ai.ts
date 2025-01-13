@@ -57,7 +57,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
     including basic information (name, contact details, etc) and professional experience. 
     Mark keywords in work experience descriptions and achievements, project experiences and achievements, 
     and education and achievements as bold using two asterisks around them, like this: **keyword**. 
-    Do not include any other formatting. Do not mark title sections or anything in skills sections as bold. 
+    Do not include any other formatting. Do not mark title sections as bold.  
     Format them according to the schema:\n\n${prompt}
     
     
