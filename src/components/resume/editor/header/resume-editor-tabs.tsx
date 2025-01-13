@@ -1,6 +1,6 @@
 'use client';
 
-import { User, Briefcase, FolderGit2, GraduationCap, Wrench, Settings } from "lucide-react";
+import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate } from "lucide-react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export function ResumeEditorTabs() {
@@ -100,10 +100,10 @@ export function ResumeEditorTabs() {
           data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
       >
         <div className="p-1 rounded-md bg-gray-100/80 transition-transform duration-300 group-data-[state=active]:scale-105 group-data-[state=active]:bg-gray-100">
-          <Settings className="h-3.5 w-3.5 text-gray-600 transition-colors group-data-[state=inactive]:text-gray-500/70" />
+          <LayoutTemplate className="h-3.5 w-3.5 text-gray-600 transition-colors group-data-[state=inactive]:text-gray-500/70" />
         </div>
         <span className="relative text-xs whitespace-nowrap">
-          Settings
+          Layout
           <div className="absolute -bottom-0.5 left-0 right-0 h-0.5 rounded-full bg-gray-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
         </span>
       </TabsTrigger>

@@ -242,75 +242,77 @@ export function ResumeEditorClient({
                   {/* Main Editor Area */}
                   <div className="flex-1 overflow-hidden flex flex-col h-full">
                     <ScrollArea className="flex-1 pr-2">
-                      <div className="pb-4">
-                        <ResumeEditorActions
-                          resume={state.resume}
-                          isSaving={state.isSaving}
-                          isDeleting={state.isDeleting}
-                          onSave={handleSave}
-                          onDelete={handleDelete}
-                          onResumeChange={updateField}
-                        />
-                        <Tabs defaultValue="basic" className="">
+                      <Tabs defaultValue="basic" className="relative">
+                        {/* Make the actions and tabs sticky */}
+                        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm ">
+                          <ResumeEditorActions
+                            resume={state.resume}
+                            isSaving={state.isSaving}
+                            isDeleting={state.isDeleting}
+                            onSave={handleSave}
+                            onDelete={handleDelete}
+                            onResumeChange={updateField}
+                          />
                           <ResumeEditorTabs />
+                        </div>
 
-                          <TabsContent value="basic" className="space-y-6 mt-6">
-                            {!state.resume.is_base_resume && (
-                              <TailoredJobCard 
-                                jobId={state.resume.job_id || null} 
-                                onJobCreate={handleJobCreate}
-                              />
-                            )}
-                            <BasicInfoForm
-                              profile={profile}
+                        {/* Tab content below */}
+                        <TabsContent value="basic" className="space-y-6 mt-6">
+                          {!state.resume.is_base_resume && (
+                            <TailoredJobCard 
+                              jobId={state.resume.job_id || null} 
+                              onJobCreate={handleJobCreate}
                             />
-                          </TabsContent>
+                          )}
+                          <BasicInfoForm
+                            profile={profile}
+                          />
+                        </TabsContent>
 
-                          <TabsContent value="work" className="space-y-6 mt-6">
-                            <WorkExperienceForm
-                              experiences={state.resume.work_experience}
-                              onChange={(experiences) => updateField('work_experience', experiences)}
-                              profile={profile}
-                              targetRole={state.resume.target_role}
-                            />
-                          </TabsContent>
+                        <TabsContent value="work" className="space-y-6 mt-6">
+                          <WorkExperienceForm
+                            experiences={state.resume.work_experience}
+                            onChange={(experiences) => updateField('work_experience', experiences)}
+                            profile={profile}
+                            targetRole={state.resume.target_role}
+                          />
+                        </TabsContent>
 
-                          <TabsContent value="projects" className="space-y-6 mt-6">
-                            <ProjectsForm
-                              projects={state.resume.projects}
-                              onChange={(projects) => updateField('projects', projects)}
-                              profile={profile}
-                            />
-                          </TabsContent>
+                        <TabsContent value="projects" className="space-y-6 mt-6">
+                          <ProjectsForm
+                            projects={state.resume.projects}
+                            onChange={(projects) => updateField('projects', projects)}
+                            profile={profile}
+                          />
+                        </TabsContent>
 
-                          <TabsContent value="education" className="space-y-6 mt-6">
-                            <EducationForm
-                              education={state.resume.education}
-                              onChange={(education) => updateField('education', education)}
-                              profile={profile}
-                            />
-                            <CertificationsForm
-                              certifications={state.resume.certifications}
-                              onChange={(certifications) => updateField('certifications', certifications)}
-                            />
-                          </TabsContent>
+                        <TabsContent value="education" className="space-y-6 mt-6">
+                          <EducationForm
+                            education={state.resume.education}
+                            onChange={(education) => updateField('education', education)}
+                            profile={profile}
+                          />
+                          <CertificationsForm
+                            certifications={state.resume.certifications}
+                            onChange={(certifications) => updateField('certifications', certifications)}
+                          />
+                        </TabsContent>
 
-                          <TabsContent value="skills" className="space-y-6 mt-6">
-                            <SkillsForm
-                              skills={state.resume.skills}
-                              onChange={(skills) => updateField('skills', skills)}
-                              profile={profile}
-                            />
-                          </TabsContent>
+                        <TabsContent value="skills" className="space-y-6 mt-6">
+                          <SkillsForm
+                            skills={state.resume.skills}
+                            onChange={(skills) => updateField('skills', skills)}
+                            profile={profile}
+                          />
+                        </TabsContent>
 
-                          <TabsContent value="settings" className="space-y-6 mt-6">
-                            <DocumentSettingsForm
-                              resume={state.resume}
-                              onChange={updateField}
-                            />
-                          </TabsContent>
-                        </Tabs>
-                      </div>
+                        <TabsContent value="settings" className="space-y-6 mt-6">
+                          <DocumentSettingsForm
+                            resume={state.resume}
+                            onChange={updateField}
+                          />
+                        </TabsContent>
+                      </Tabs>
                     </ScrollArea>
                   </div>
                   {/* Fixed ChatBot at bottom */}
