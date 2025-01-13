@@ -61,44 +61,44 @@ const AI_MODELS: AIModel[] = [
 ]
 
 export function ApiKeysForm() {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>(() => {
-    if (typeof window !== 'undefined') {
-      const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
-      if (storedKeys) {
-        try {
-          return JSON.parse(storedKeys)
-        } catch (error) {
-          console.error('Error loading API keys:', error)
-          return []
-        }
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>({} as Record<ServiceName, boolean>)
+  const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
+  const [defaultModel, setDefaultModel] = useState<string>('')
+
+  // Load stored data on mount
+  useEffect(() => {
+    // Load API keys
+    const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
+    if (storedKeys) {
+      try {
+        setApiKeys(JSON.parse(storedKeys))
+      } catch (error) {
+        console.error('Error loading API keys:', error)
       }
     }
-    return []
-  })
-  const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>(() => {
-    const initialState: Partial<Record<ServiceName, boolean>> = {}
-    return initialState as Record<ServiceName, boolean>
-  })
-  const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>(() => {
-    const initialState: Partial<Record<ServiceName, string>> = {}
-    return initialState as Record<ServiceName, string>
-  })
-  const [defaultModel, setDefaultModel] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
-      return storedModel || ''
+
+    // Load default model
+    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
+    if (storedModel) {
+      setDefaultModel(storedModel)
     }
-    return ''
-  })
+  }, [])
 
   // Save API keys to local storage whenever they change
   useEffect(() => {
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(apiKeys))
+    // Only save if we have keys (prevents overwriting on initial mount)
+    if (apiKeys.length > 0) {
+      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(apiKeys))
+    }
   }, [apiKeys])
 
   // Save default model to local storage whenever it changes
   useEffect(() => {
-    localStorage.setItem(MODEL_STORAGE_KEY, defaultModel)
+    // Only save if we have a model (prevents overwriting on initial mount)
+    if (defaultModel) {
+      localStorage.setItem(MODEL_STORAGE_KEY, defaultModel)
+    }
   }, [defaultModel])
 
   const handleUpdateKey = (service: ServiceName) => {
@@ -114,6 +114,7 @@ export function ApiKeysForm() {
       addedAt: new Date().toISOString(),
     }
 
+    console.log('Updating API key:', newKey)
     setApiKeys(prev => {
       const exists = prev.findIndex(k => k.service === service)
       if (exists >= 0) {
@@ -209,9 +210,15 @@ export function ApiKeysForm() {
         <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
           API Keys
         </Label>
-        <p className="text-sm text-muted-foreground mt-2 mb-4">
-          Add your API keys to use premium AI models. Your keys are stored securely in your browser.
-        </p>
+        <div className="mt-2 mb-4 space-y-2">
+          <p className="text-sm text-muted-foreground">
+            Add your API keys to use premium AI models. Your keys are stored securely in your browser.
+          </p>
+          <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200/50 text-amber-900 text-sm">
+            <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
+            <p className="mt-1">For enhanced security, consider <a href="/pricing" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
+          </div>
+        </div>
 
         <div className="space-y-4">
           {PROVIDERS.map(provider => {
