@@ -145,8 +145,9 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         }
 
         // Convert the text to resume format
+        console.log('THE Target Role IS:', targetRole);
         try {
-          const convertedResume = await convertTextToResume(resumeText, emptyResume, {
+          const convertedResume = await convertTextToResume(resumeText, emptyResume, targetRole, {
             model: selectedModel || '',
             apiKeys
           });

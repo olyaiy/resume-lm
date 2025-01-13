@@ -44,7 +44,7 @@ import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 // }
 
 // TEXT CONTENT -> RESUME
-export async function convertTextToResume(prompt: string, existingResume: Resume, config?: AIConfig) {
+export async function convertTextToResume(prompt: string, existingResume: Resume, targetRole: string, config?: AIConfig) {
   const aiClient = initializeAIClient(config);
   
   const { object } = await generateObject({
@@ -54,7 +54,15 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
     }),
     system: RESUME_IMPORTER_SYSTEM_MESSAGE.content as string,
     prompt: `Extract relevant resume information from the following text, 
-    including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
+    including basic information (name, contact details, etc) and professional experience. 
+    Mark keywords in work experience descriptions and achievements, project experiences and achievements, 
+    and education and achievements as bold using two asterisks around them, like this: **keyword**. 
+    Do not include any other formatting. Do not mark title sections or anything in skills sections as bold. 
+    Format them according to the schema:\n\n${prompt}
+    
+    
+    and optimize it for this target role: ${targetRole}
+    `,
     
   });
   
