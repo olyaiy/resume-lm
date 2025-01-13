@@ -17,7 +17,6 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import { DescriptionPoint } from "../../shared/description-point";
 import { AISuggestions } from "../../shared/ai-suggestions";
 import { AIGenerationSettings } from "../../shared/ai-generation-settings";
 import { generateProjectPoints, improveProject } from "../ai/resume-modification-ai";
@@ -238,8 +237,24 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
       const updated = [...projects];
       updated[projectIndex].description[pointIndex] = improvedPoint;
       onChange(updated);
-    } catch (error) {
-      // ... error handling
+    } catch (error: unknown) {
+      if (error instanceof Error && (
+        error.message.toLowerCase().includes('api key') || 
+        error.message.toLowerCase().includes('unauthorized') ||
+        error.message.toLowerCase().includes('invalid key') ||
+        error.message.toLowerCase().includes('invalid x-api-key'))
+      ) {
+        setErrorMessage({
+          title: "API Key Error",
+          description: "There was an issue with your API key. Please check your settings and try again."
+        });
+      } else {
+        setErrorMessage({
+          title: "Error",
+          description: "Failed to improve point. Please try again."
+        });
+      }
+      setShowErrorDialog(true);
     } finally {
       setLoadingPointAI(prev => ({
         ...prev,
