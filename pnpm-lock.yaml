@@ -209,6 +209,9 @@ importers:
       remark-toc:
         specifier: ^9.0.0
         version: 9.0.0
+      replace-special-characters:
+        specifier: ^1.2.7
+        version: 1.2.7
       rich-textarea:
         specifier: ^0.26.4
         version: 0.26.4(react@19.0.0)
@@ -4072,6 +4075,9 @@ packages:
 
   remark-toc@9.0.0:
     resolution: {integrity: sha512-KJ9txbo33GjDAV1baHFze7ij4G8c7SGYoY8Kzsm2gzFpbhL/bSoVpMMzGa3vrNDSWASNd/3ppAqL7cP2zD6JIA==}
+
+  replace-special-characters@1.2.7:
+    resolution: {integrity: sha512-LI6wLSQIAaajYAKpsb5bz5QyttOSRd3Dy41BvBFAuZKkH9VjFVit0Rr3i63+Jw5TkMCJv+4bkGwZdJ/CXjKpqg==}
 
   require-from-string@2.0.2:
     resolution: {integrity: sha512-Xf0nWe6RseziFMu+Ap9biiUbmplq6S9/p+7w7YXP/JBHhrUDDUhwa+vANyubuqfZWTveU//DYVGsDG7RKL/vEw==}
@@ -9118,6 +9124,8 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       mdast-util-toc: 7.1.0
+
+  replace-special-characters@1.2.7: {}
 
   require-from-string@2.0.2: {}
 

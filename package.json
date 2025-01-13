@@ -76,6 +76,7 @@
     "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
     "remark-toc": "^9.0.0",
+    "replace-special-characters": "^1.2.7",
     "rich-textarea": "^0.26.4",
     "sonner": "^1.7.1",
     "stripe": "^17.5.0",

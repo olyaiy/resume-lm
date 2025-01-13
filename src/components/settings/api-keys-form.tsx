@@ -9,6 +9,7 @@ import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
+import replaceSpecialCharacters from 'replace-special-characters'
 
 interface ApiKey {
   service: ServiceName
@@ -108,9 +109,12 @@ export function ApiKeysForm() {
       return
     }
 
+    // Normalize the API key by replacing special characters
+    const normalizedKey = replaceSpecialCharacters(keyValue.trim())
+
     const newKey: ApiKey = {
       service,
-      key: keyValue.trim(),
+      key: normalizedKey,
       addedAt: new Date().toISOString(),
     }
 
@@ -124,6 +128,26 @@ export function ApiKeysForm() {
       }
       return [...prev, newKey]
     })
+
+    // Automatically set the default model based on the provider
+    const autoSelectModel = () => {
+      switch (service) {
+        case 'anthropic':
+          return 'claude-3-sonnet-20240229'
+        case 'openai':
+          return 'gpt-4o'
+        case 'deepseek':
+          return 'deepseek-chat'
+        default:
+          return defaultModel
+      }
+    }
+
+    const newModel = autoSelectModel()
+    if (newModel !== defaultModel) {
+      setDefaultModel(newModel)
+      toast.success(`Default model automatically set to ${AI_MODELS.find(m => m.id === newModel)?.name}`)
+    }
 
     setNewKeyValues(prev => ({
       ...prev,
