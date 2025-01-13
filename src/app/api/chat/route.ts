@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const aiClient = initializeAIClient(config);
 
-    console.log('Using AI Model:', config?.model || 'gpt-4o-mini (default)');
+    // console.log('Using AI Model:', config?.model || 'gpt-4o-mini (default)');
 
     const result = streamText({
       model: aiClient,

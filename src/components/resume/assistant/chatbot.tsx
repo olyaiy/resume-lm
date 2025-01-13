@@ -228,14 +228,24 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       "transition-all duration-500",
       "hover:shadow-xl hover:shadow-purple-500/10",
       "overflow-hidden",
-      "relative"
+      "relative",
+      "data-[state=closed]:shadow-md data-[state=closed]:border data-[state=closed]:border-purple-200/40"
     )}>
       {/* Animated Background Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-10" />
+      <div className={cn(
+        "absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-10",
+        "data-[state=closed]:bg-[size:16px_16px]"
+      )} />
       
       {/* Floating Gradient Orbs */}
-      <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70" />
-      <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70" />
+      <div className={cn(
+        "absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-float opacity-70",
+        "data-[state=closed]:opacity-40"
+      )} />
+      <div className={cn(
+        "absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-indigo-200/20 to-purple-200/20 blur-3xl animate-float-delayed opacity-70",
+        "data-[state=closed]:opacity-40"
+      )} />
 
       <Accordion
         type="single"
@@ -244,34 +254,36 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
         onValueChange={setAccordionValue}
         className="relative z-10"
       >
-        <AccordionItem value="chat" className="border-none  py-0 my-0 ">
+        <AccordionItem value="chat" className="border-none py-0 my-0">
 
           {/* Accordion Trigger */}
           <AccordionTrigger className={cn(
-            "px-3 py-1.5",
+            "px-2 py-1",
             "hover:no-underline",
             "group",
             "transition-all duration-300",
             "data-[state=open]:border-b border-purple-200/60",
-            "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100"
+            "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100",
+            "data-[state=closed]:py-0.5"
           )}>
             <div className={cn(
-              "flex items-center gap-2 w-full",
+              "flex items-center gap-1.5 w-full",
               "transition-transform duration-300",
               "group-hover:scale-[0.99]",
               "group-data-[state=closed]:scale-95"
             )}>
               <div className={cn(
-                "p-1.5 rounded-lg",
+                "p-1 rounded-lg",
                 "bg-purple-100/80 text-purple-600",
                 "group-hover:bg-purple-200/80",
                 "transition-colors duration-300",
-                "group-data-[state=closed]:bg-white/60"
+                "group-data-[state=closed]:bg-white/60",
+                "group-data-[state=closed]:p-0.5"
               )}>
-                <Bot className="h-3.5 w-3.5" />
+                <Bot className="h-3 w-3" />
               </div>
-              <div className="flex items-center gap-2">
-                <Logo className="text-sm" asLink={false} />
+              <div className="flex items-center gap-1.5">
+                <Logo className="text-xs" asLink={false} />
               </div>
             </div>
           </AccordionTrigger>
