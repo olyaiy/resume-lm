@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { User, Mail, Lock, CheckCircle2, Loader2 } from "lucide-react";
+import { useAuth } from "./auth-context";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -37,42 +38,69 @@ interface FormState {
 
 export function SignupForm() {
   const [formState, setFormState] = useState<FormState>({});
+  const { 
+    formData, 
+    setFormData, 
+    isLoading, 
+    setFieldLoading, 
+    validations, 
+    validateField,
+    touchedFields,
+    setFieldTouched 
+  } = useAuth();
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setFormState({});
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
-    
-    // Client-side validation
-    const password = formData.get("password") as string;
-    const confirmPassword = formData.get("confirmPassword") as string;
-    
-    if (password.length < 6) {
-      setFormState({ error: "Password must be at least 6 characters long" });
-      return;
-    }
+    // Mark all fields as touched on submit
+    const fields = ['email', 'password', 'name', 'confirmPassword'] as const;
+    fields.forEach(field => setFieldTouched(field));
 
-    if (password !== confirmPassword) {
-      setFormState({ error: "Passwords do not match" });
+    // Validate all fields
+    Object.entries(formData).forEach(([field, value]) => {
+      validateField(field as keyof typeof formData, value);
+    });
+
+    // Check if all required fields are valid
+    const isValid = fields.every(field => validations[field]?.isValid);
+
+    if (!isValid) {
+      setFormState({ error: "Please fix the validation errors before submitting" });
       return;
     }
 
     try {
-      const result = await signup(formData);
+      setFieldLoading('submit', true);
+      const formDataToSend = new FormData();
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      formDataToSend.append('name', formData.name || '');
+      
+      const result = await signup(formDataToSend);
       if (!result.success) {
         setFormState({ error: result.error || "Failed to create account" });
         return;
       }
 
       setFormState({ success: true });
-      form.reset();
     } catch (error: unknown) {
       console.error("Signup error:", error);
       setFormState({ error: "An unexpected error occurred" });
+    } finally {
+      setFieldLoading('submit', false);
     }
   }
+
+  const handleInputChange = (field: keyof typeof formData, value: string) => {
+    setFormData({ [field]: value });
+    validateField(field, value);
+    setFieldLoading(field, true);
+    const timer = setTimeout(() => {
+      setFieldLoading(field, false);
+    }, 500);
+    return () => clearTimeout(timer);
+  };
 
   return (
     <>
@@ -99,11 +127,17 @@ export function SignupForm() {
                 id="name"
                 name="name"
                 type="text"
+                value={formData.name}
+                onChange={(e) => handleInputChange('name', e.target.value)}
+                onBlur={() => setFieldTouched('name')}
                 placeholder="John Doe"
                 required
                 minLength={2}
                 maxLength={50}
-                className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+                className="pl-10"
+                validation={validations.name}
+                isTouched={touchedFields.name}
+                autoFocus
               />
             </div>
           </div>
@@ -116,10 +150,15 @@ export function SignupForm() {
                 id="email"
                 name="email"
                 type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
+                onBlur={() => setFieldTouched('email')}
                 placeholder="you@example.com"
                 required
                 pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+                className="pl-10"
+                validation={validations.email}
+                isTouched={touchedFields.email}
               />
             </div>
           </div>
@@ -132,11 +171,16 @@ export function SignupForm() {
                 id="password"
                 name="password"
                 type="password"
+                value={formData.password}
+                onChange={(e) => handleInputChange('password', e.target.value)}
+                onBlur={() => setFieldTouched('password')}
                 placeholder="••••••••"
                 required
                 minLength={6}
                 maxLength={100}
-                className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+                className="pl-10"
+                validation={validations.password}
+                isTouched={touchedFields.password}
               />
             </div>
           </div>
@@ -149,11 +193,16 @@ export function SignupForm() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
+                onBlur={() => setFieldTouched('confirmPassword')}
                 placeholder="••••••••"
                 required
                 minLength={6}
                 maxLength={100}
-                className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+                className="pl-10"
+                validation={validations.confirmPassword}
+                isTouched={touchedFields.confirmPassword}
               />
             </div>
           </div>

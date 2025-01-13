@@ -4,11 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { login } from "@/app/auth/login/actions";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Lock, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "./auth-context";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -33,24 +34,74 @@ function SubmitButton() {
 
 export function LoginForm() {
   const [error, setError] = useState<string>();
+  const { 
+    formData, 
+    setFormData, 
+    isLoading, 
+    setFieldLoading, 
+    validations, 
+    validateField,
+    touchedFields,
+    setFieldTouched 
+  } = useAuth();
+  const emailInputRef = useRef<HTMLInputElement>(null);
+
+  // Autofocus email input on mount
+  useEffect(() => {
+    if (emailInputRef.current) {
+      emailInputRef.current.focus();
+    }
+  }, []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError(undefined);
 
-    const form = e.currentTarget;
-    const formData = new FormData(form);
+    // Mark all fields as touched on submit
+    const fields = ['email', 'password'] as const;
+    fields.forEach(field => setFieldTouched(field));
+
+    // Validate all fields
+    Object.entries(formData).forEach(([field, value]) => {
+      validateField(field as keyof typeof formData, value);
+    });
+
+    // Check if all required fields are valid
+    const isValid = fields.every(field => validations[field]?.isValid);
+
+    if (!isValid) {
+      setError("Please fix the validation errors before submitting");
+      return;
+    }
 
     try {
-      const result = await login(formData);
+      setFieldLoading('submit', true);
+      const formDataToSend = new FormData();
+      formDataToSend.append('email', formData.email);
+      formDataToSend.append('password', formData.password);
+      
+      const result = await login(formDataToSend);
       if (!result.success) {
         setError("Invalid credentials");
       }
     } catch (error: unknown) {
       setError("An error occurred during login");
       console.error("Login error:", error);
+    } finally {
+      setFieldLoading('submit', false);
     }
   }
+
+  const handleInputChange = (field: 'email' | 'password', value: string) => {
+    setFormData({ [field]: value });
+    validateField(field, value);
+    // Simulate field validation loading state
+    setFieldLoading(field, true);
+    const timer = setTimeout(() => {
+      setFieldLoading(field, false);
+    }, 500);
+    return () => clearTimeout(timer);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -59,12 +110,18 @@ export function LoginForm() {
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
           <Input
+            ref={emailInputRef}
             id="email"
             name="email"
             type="email"
+            value={formData.email}
+            onChange={(e) => handleInputChange('email', e.target.value)}
+            onBlur={() => setFieldTouched('email')}
             placeholder="you@example.com"
             required
             className="pl-10"
+            validation={validations.email}
+            isTouched={touchedFields.email}
           />
         </div>
       </div>
@@ -84,10 +141,15 @@ export function LoginForm() {
             id="password"
             name="password"
             type="password"
+            value={formData.password}
+            onChange={(e) => handleInputChange('password', e.target.value)}
+            onBlur={() => setFieldTouched('password')}
             placeholder="••••••••"
             required
             minLength={6}
-            className="pl-10 bg-white/50 border-white/40 focus:border-violet-500/50 focus:ring-violet-500/30 transition-all duration-300"
+            className="pl-10"
+            validation={validations.password}
+            isTouched={touchedFields.password}
           />
         </div>
       </div>
