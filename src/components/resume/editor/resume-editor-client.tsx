@@ -240,9 +240,9 @@ export function ResumeEditorClient({
               <ResizablePanel defaultSize={40} minSize={30} maxSize={70}>
                 <div className="flex flex-col h-full mr-4">
                   {/* Main Editor Area */}
-                  <div className="flex-1 overflow-hidden flex flex-col">
+                  <div className="flex-1 overflow-hidden flex flex-col h-full">
                     <ScrollArea className="flex-1 pr-2">
-                      <div className="pb-6">
+                      <div className="pb-4">
                         <ResumeEditorActions
                           resume={state.resume}
                           isSaving={state.isSaving}
@@ -314,7 +314,7 @@ export function ResumeEditorClient({
                     </ScrollArea>
                   </div>
                   {/* Fixed ChatBot at bottom */}
-                  <div className="mt-auto mb-10">
+                  <div className="mt-auto mb-4">
                     <ChatBot resume={state.resume} onResumeChange={updateField} />
                   </div>
                 </div>
