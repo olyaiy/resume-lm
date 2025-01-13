@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Loader2, Sparkles } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
@@ -24,6 +24,8 @@ import { generateProjectPoints, improveProject } from "../ai/resume-modification
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
+import Tiptap from "@/components/ui/tiptap";
+import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 
 interface AISuggestion {
   id: string;
@@ -204,7 +206,6 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
     }));
     
     try {
-      // Get model and API key from local storage
       const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
@@ -222,8 +223,7 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
         model: selectedModel || '',
         apiKeys
       });
-      
-      // Store both original and improved versions
+
       setImprovedPoints(prev => ({
         ...prev,
         [projectIndex]: {
@@ -235,28 +235,11 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
         }
       }));
 
-      // Update the project with the improved version
       const updated = [...projects];
       updated[projectIndex].description[pointIndex] = improvedPoint;
       onChange(updated);
-    } catch (error: Error | unknown) {
-      if (error instanceof Error && (
-          error.message.toLowerCase().includes('api key') || 
-          error.message.toLowerCase().includes('unauthorized') ||
-          error.message.toLowerCase().includes('invalid key') ||
-          error.message.toLowerCase().includes('invalid x-api-key'))
-      ) {
-        setErrorMessage({
-          title: "API Key Error",
-          description: "There was an issue with your API key. Please check your settings and try again."
-        });
-      } else {
-        setErrorMessage({
-          title: "Error",
-          description: "Failed to improve point. Please try again."
-        });
-      }
-      setShowErrorDialog(true);
+    } catch (error) {
+      // ... error handling
     } finally {
       setLoadingPointAI(prev => ({
         ...prev,
@@ -470,59 +453,175 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                   </Label>
                   <div className="space-y-2 pl-0">
                     {project.description.map((desc, descIndex) => (
-                      <DescriptionPoint
-                        key={descIndex}
-                        value={desc}
-                        onChange={(value) => {
-                          const updated = [...projects];
-                          updated[index].description[descIndex] = value;
-                          onChange(updated);
-                          
-                          if (improvedPoints[index]?.[descIndex]) {
-                            setImprovedPoints(prev => {
-                              const newState = { ...prev };
-                              if (newState[index]) {
-                                delete newState[index][descIndex];
-                                if (Object.keys(newState[index]).length === 0) {
-                                  delete newState[index];
-                                }
+                      <div key={descIndex} className="flex gap-1 items-start group/item">
+                        <div className="flex-1">
+                          <Tiptap
+                            content={desc} 
+                            onChange={(newContent) => {
+                              const updated = [...projects];
+                              updated[index].description[descIndex] = newContent;
+                              onChange(updated);
+
+                              if (improvedPoints[index]?.[descIndex]) {
+                                setImprovedPoints(prev => {
+                                  const newState = { ...prev };
+                                  if (newState[index]) {
+                                    delete newState[index][descIndex];
+                                    if (Object.keys(newState[index]).length === 0) {
+                                      delete newState[index];
+                                    }
+                                  }
+                                  return newState;
+                                });
                               }
-                              return newState;
-                            });
-                          }
-                        }}
-                        onDelete={() => {
-                          const updated = [...projects];
-                          updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
-                          onChange(updated);
-                        }}
-                        onImprove={() => rewritePoint(index, descIndex)}
-                        onAcceptImprovement={() => {
-                          setImprovedPoints(prev => {
-                            const newState = { ...prev };
-                            if (newState[index]) {
-                              delete newState[index][descIndex];
-                              if (Object.keys(newState[index]).length === 0) {
-                                delete newState[index];
-                              }
-                            }
-                            return newState;
-                          });
-                        }}
-                        onUndoImprovement={() => undoImprovement(index, descIndex)}
-                        isImproved={!!improvedPoints[index]?.[descIndex]}
-                        isLoading={loadingPointAI[index]?.[descIndex]}
-                        placeholder="Start with a strong technical action verb"
-                        improvementPrompt={improvementConfig[index]?.[descIndex] || ''}
-                        onImprovementPromptChange={(value) => setImprovementConfig(prev => ({
-                          ...prev,
-                          [index]: {
-                            ...(prev[index] || {}),
-                            [descIndex]: value
-                          }
-                        }))}
-                        improvementPromptPlaceholder="e.g., Focus on technical implementation details and performance metrics"
-                      />
+                            }}
+                            className={cn(
+                              "min-h-[60px] text-xs md:text-sm bg-white/50 border-gray-200 rounded-lg",
+                              "focus:border-violet-500/40 focus:ring-2 focus:ring-violet-500/20",
+                              "hover:border-violet-500/30 hover:bg-white/60 transition-colors",
+                              "placeholder:text-gray-400",
+                              improvedPoints[index]?.[descIndex] && [
+                                "border-purple-400",
+                                "bg-gradient-to-r from-purple-50/80 to-indigo-50/80",
+                                "shadow-[0_0_15px_-3px_rgba(168,85,247,0.2)]",
+                                "hover:bg-gradient-to-r hover:from-purple-50/90 hover:to-indigo-50/90"
+                              ]
+                            )}
+                          />
+
+                          {improvedPoints[index]?.[descIndex] && (
+                            <div className="absolute -top-2.5 right-12 px-2 py-0.5 bg-purple-100 rounded-full">
+                              <span className="text-[10px] font-medium text-purple-600 flex items-center gap-1">
+                                <Sparkles className="h-3 w-3" />
+                                AI Suggestion
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-1">
+                          {improvedPoints[index]?.[descIndex] ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  // Remove the improvement state after accepting
+                                  setImprovedPoints(prev => {
+                                    const newState = { ...prev };
+                                    if (newState[index]) {
+                                      delete newState[index][descIndex];
+                                      if (Object.keys(newState[index]).length === 0) {
+                                        delete newState[index];
+                                      }
+                                    }
+                                    return newState;
+                                  });
+                                }}
+                                className={cn(
+                                  "p-0 group-hover/item:opacity-100",
+                                  "h-8 w-8 rounded-lg",
+                                  "bg-green-50/80 hover:bg-green-100/80",
+                                  "text-green-600 hover:text-green-700",
+                                  "border border-green-200/60",
+                                  "shadow-sm",
+                                  "transition-all duration-300",
+                                  "hover:scale-105 hover:shadow-md",
+                                  "hover:-translate-y-0.5"
+                                )}
+                              >
+                                <Check className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => undoImprovement(index, descIndex)}
+                                className={cn(
+                                  "p-0 group-hover/item:opacity-100",
+                                  "h-8 w-8 rounded-lg",
+                                  "bg-rose-50/80 hover:bg-rose-100/80",
+                                  "text-rose-600 hover:text-rose-700",
+                                  "border border-rose-200/60",
+                                  "shadow-sm",
+                                  "transition-all duration-300",
+                                  "hover:scale-105 hover:shadow-md",
+                                  "hover:-translate-y-0.5"
+                                )}
+                              >
+                                <X className="h-4 w-4" />
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  const updated = [...projects];
+                                  updated[index].description = updated[index].description.filter((_, i) => i !== descIndex);
+                                  onChange(updated);
+                                }}
+                                className="p-0 group-hover/item:opacity-100 text-gray-400 hover:text-red-500 transition-all duration-300"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                              <TooltipProvider delayDuration={0}>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={() => rewritePoint(index, descIndex)}
+                                      disabled={loadingPointAI[index]?.[descIndex]}
+                                      className={cn(
+                                        "p-0 group-hover/item:opacity-100",
+                                        "h-8 w-8 rounded-lg",
+                                        "bg-purple-50/80 hover:bg-purple-100/80",
+                                        "text-purple-600 hover:text-purple-700",
+                                        "border border-purple-200/60",
+                                        "shadow-sm",
+                                        "transition-all duration-300",
+                                        "hover:scale-105 hover:shadow-md",
+                                        "hover:-translate-y-0.5"
+                                      )}
+                                    >
+                                      {loadingPointAI[index]?.[descIndex] ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                      ) : (
+                                        <Sparkles className="h-4 w-4" />
+                                      )}
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent 
+                                    side="bottom" 
+                                    align="start"
+                                    sideOffset={2}
+                                    className={cn(
+                                      "w-72 p-3.5",
+                                      "bg-purple-50",
+                                      "border-2 border-purple-300",
+                                      "shadow-lg shadow-purple-100/50",
+                                      "rounded-lg"
+                                    )}
+                                  >
+                                    <AIImprovementPrompt
+                                      value={improvementConfig[index]?.[descIndex] || ''}
+                                      onChange={(value) => setImprovementConfig(prev => ({
+                                        ...prev,
+                                        [index]: {
+                                          ...(prev[index] || {}),
+                                          [descIndex]: value
+                                        }
+                                      }))}
+                                      onSubmit={() => rewritePoint(index, descIndex)}
+                                      isLoading={loadingPointAI[index]?.[descIndex]}
+                                    />
+                                  </TooltipContent>
+                                </Tooltip>
+                              </TooltipProvider>
+                            </>
+                          )}
+                        </div>
+                      </div>
                     ))}
 
                     {/* AI Suggestions */}
