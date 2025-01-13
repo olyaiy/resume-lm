@@ -45,8 +45,8 @@ export default function ChatInput({
             "focus:ring-2 focus:ring-purple-500/10",
             "placeholder:text-purple-400",
             "text-sm",
-            "h-8",
-            "px-2.5 py-1"
+            "h-full",
+            "px-2 py-0.5"
           )}
         />
         <Button 
