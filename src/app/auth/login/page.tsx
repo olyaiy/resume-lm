@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { MockResume } from "@/components/landing/mock-resume";
 import { BenefitsList } from "@/components/landing/benefits-list";
-import { ActionButtons } from "@/components/landing/action-buttons";
+// import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";

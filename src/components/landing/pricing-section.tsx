@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AuthDialog } from "@/components/auth/auth-dialog";
+// import { AuthDialog } from "@/components/auth/auth-dialog";
 
 interface PricingFeature {
   text: string;

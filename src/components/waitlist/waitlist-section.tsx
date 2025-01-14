@@ -2,7 +2,6 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ArrowRight, Sparkles, Mail, User, CheckCircle2, XCircle } from "lucide-react";
 import { joinWaitlist } from "@/app/auth/login/actions";
 import { useState } from "react";
@@ -61,7 +60,7 @@ export function WaitlistSection() {
         <div className="relative z-10 p-8 flex flex-col items-center justify-center text-center space-y-3">
           <CheckCircle2 className="w-12 h-12 text-green-500" />
           <h3 className="text-xl font-semibold">Thank you for joining!</h3>
-          <p className="text-muted-foreground">We'll notify you when ResumeLM launches.</p>
+          <p className="text-muted-foreground">We&apos;ll notify you when ResumeLM launches.</p>
         </div>
       </section>
     );

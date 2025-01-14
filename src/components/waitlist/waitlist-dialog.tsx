@@ -113,7 +113,7 @@ export function WaitlistDialog() {
 
             <div className="space-y-3 text-center">
               <p className="text-xs text-muted-foreground">
-                We'll notify you when we launch. No spam, just updates!
+                We&apos;ll notify you when we launch. No spam, just updates!
               </p>
               <div className="flex items-center justify-center gap-3">
                 <div className="h-px flex-1 bg-gradient-to-r from-transparent via-muted-foreground/20 to-transparent" />
