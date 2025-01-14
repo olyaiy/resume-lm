@@ -74,6 +74,12 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     },
     maxSteps: 5,
     onResponse() {
+      console.log('Current messages after response:', 
+        messages.map(m => ({
+          role: m.role,
+          content: JSON.stringify(m.content)
+        }))
+      );
       setIsInitialLoading(false);
     },
     onError() {
@@ -222,10 +228,29 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
+    console.log('Before append - messages:', 
+      messages.map(m => ({
+        role: m.role,
+        content: JSON.stringify(m.content)
+      }))
+    );
+    
+    console.log('About to append message:', JSON.stringify(message));
     setIsInitialLoading(true);
-    append({ content: message, role: 'user' });
+    append({ 
+      content: message.replace(/\s+$/, ''), // Extra safety: trim trailing whitespace
+      role: 'user' 
+    });
+    
+    console.log('After append - messages:', 
+      messages.map(m => ({
+        role: m.role,
+        content: JSON.stringify(m.content)
+      }))
+    );
+    
     setAccordionValue("chat");
-  }, [append]);
+  }, [append, messages]);
 
   return (
     <Card className={cn(
@@ -316,7 +341,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                 "bg-gradient-to-br from-purple-500 to-indigo-500",
                                 "text-white",
                                 "shadow-md shadow-purple-500/10",
-                                "ml-auto"
+                                "ml-auto pb-0"
                               ] : [
                                 "bg-white/60",
                                 "border border-purple-200/60",

@@ -20,7 +20,16 @@ export default function ChatInput({
     const handleSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault();
       if (inputValue.trim()) {
-        onSubmit(inputValue.trim());
+        console.log('Original input:', JSON.stringify(inputValue));
+        console.log('Input length:', inputValue.length);
+        console.log('Last char code:', inputValue.charCodeAt(inputValue.length - 1));
+        
+        const cleanedMessage = inputValue.replace(/\n+$/, '').trim();
+        console.log('Cleaned message:', JSON.stringify(cleanedMessage));
+        console.log('Cleaned length:', cleanedMessage.length);
+        console.log('Last cleaned char code:', cleanedMessage.charCodeAt(cleanedMessage.length - 1));
+        
+        onSubmit(cleanedMessage);
         setInputValue("");
       }
     }, [inputValue, onSubmit]);
@@ -36,6 +45,12 @@ export default function ChatInput({
         <Input
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              handleSubmit(e);
+            }
+          }}
           placeholder="Ask me anything about your resume..."
           className={cn(
             "flex-1",
