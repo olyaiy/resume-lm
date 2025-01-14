@@ -295,20 +295,24 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                   "font-medium text-gray-900",
                   !currentEducation || (currentEducation.degree !== education.degree || currentEducation.field !== education.field) && DIFF_HIGHLIGHT_CLASSES
                 )}>
-                  {education.degree} in {education.field}
+                  {education.degree.replace(/\*\*/g, '')} in {education.field.replace(/\*\*/g, '')}
                 </h3>
                 <p className={cn(
                   "text-sm text-gray-700",
                   !currentEducation || currentEducation.school !== education.school && DIFF_HIGHLIGHT_CLASSES
                 )}>
-                  {education.school}
+                  {education.school.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                    part.startsWith('**') && part.endsWith('**') ? 
+                      <strong key={i}>{part.slice(2, -2)}</strong> : 
+                      part
+                  )}
                 </p>
               </div>
               <span className={cn(
                 "text-xs text-gray-600",
                 !currentEducation || currentEducation.date !== education.date && DIFF_HIGHLIGHT_CLASSES
               )}>
-                {education.date}
+                {education.date.replace(/\*\*/g, '')}
               </span>
             </div>
             {education.achievements && (
