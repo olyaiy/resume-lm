@@ -127,17 +127,15 @@ export function TextImportDialog({
       <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
-            Import Text Content
+            Import Resume Content
           </DialogTitle>
           <DialogDescription asChild>
             <div className="space-y-2 text-base text-muted-foreground/80">
-              <span className="block">
-                Drop your PDF resume or paste any text content below (resume, job description, achievements, etc.).
-                Our AI will analyze it and enhance your resume by adding relevant information.
-              </span>
-              <span className="block text-sm">
-                Your existing resume information will be preserved and enhanced with the new content.
-              </span>
+              <p className="font-medium text-foreground">Choose one of these options:</p>
+              <ol className="list-decimal list-inside space-y-1 ml-1">
+                <li>Upload your PDF resume by dropping it below or clicking to browse</li>
+                <li>Paste your resume text directly into the text area</li>
+              </ol>
             </div>
           </DialogDescription>
         </DialogHeader>
@@ -148,10 +146,10 @@ export function TextImportDialog({
             onDragOver={handleDrag}
             onDrop={handleDrop}
             className={cn(
-              "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2 transition-colors duration-200 cursor-pointer",
+              "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
               isDragging
                 ? "border-violet-500 bg-violet-50/50"
-                : "border-gray-200 hover:border-violet-500/50"
+                : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
             )}
           >
             <input
@@ -160,17 +158,27 @@ export function TextImportDialog({
               accept="application/pdf"
               onChange={handleFileInput}
             />
-            <Upload className="w-8 h-8 text-violet-500" />
-            <p className="text-sm text-muted-foreground">
-              Drop your PDF resume here or click to browse
-            </p>
+            <Upload className="w-10 h-10 text-violet-500 group-hover:scale-110 transition-transform duration-200" />
+            <div className="text-center">
+              <p className="text-sm font-medium text-foreground">
+                Drop your PDF resume here
+              </p>
+              <p className="text-sm text-muted-foreground">
+                or click to browse files
+              </p>
+            </div>
           </label>
-          <Textarea
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            placeholder="Paste your text content here..."
-            className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
-          />
+          <div className="relative">
+            <div className="absolute -top-3 left-3 bg-white px-2 text-sm text-muted-foreground">
+              Or paste your resume text here
+            </div>
+            <Textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              placeholder="Start pasting your resume content here..."
+              className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+            />
+          </div>
         </div>
         <DialogFooter>
           <Button
