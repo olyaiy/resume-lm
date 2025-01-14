@@ -80,7 +80,7 @@ export default function RootLayout({
             {children}
           </main>
           <Footer />
-          <BuyMeCoffee />
+          {/* <BuyMeCoffee /> */}
         </div>
         <Toaster richColors position="top-right" />
       </body>

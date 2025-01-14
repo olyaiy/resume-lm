@@ -1,7 +1,7 @@
 'use client';
 
 import { Resume } from "@/lib/types";
-import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link } from '@react-pdf/renderer';
+import { Document as PDFDocument, Page as PDFPage, Text, View, StyleSheet, Link, Image } from '@react-pdf/renderer';
 import { memo, useMemo, useCallback } from 'react';
 import type { ReactNode } from 'react';
 
@@ -335,13 +335,14 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     // Base page configuration
     page: {
       paddingTop: document_margin_vertical,
-      paddingBottom: document_margin_vertical,
+      paddingBottom: document_margin_vertical + 28,
       paddingLeft: document_margin_horizontal,
       paddingRight: document_margin_horizontal,
       fontFamily: 'Helvetica',
       color: '#1f2937',
       fontSize: document_font_size,
       lineHeight: document_line_height,
+      position: 'relative',
     },
     header: {
       alignItems: 'center',
@@ -511,6 +512,22 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       fontSize: document_font_size,
       color: '#4b5563',
     },
+    footer: {
+      position: 'absolute',
+      bottom: 20,
+      left: 0,
+      right: 0,
+      height: 'auto',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+
+    },
+    footerImage: {
+
+      width: '95%',
+      height: 'auto',
+    },
   });
 }
 
@@ -531,6 +548,13 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
         <ExperienceSection experiences={resume.work_experience} styles={styles} />
         <ProjectsSection projects={resume.projects} styles={styles} />
         <EducationSection education={resume.education} styles={styles} />
+        
+        <View style={styles.footer}>
+          <Image 
+            src="/images/ubc-science-footer.png"
+            style={styles.footerImage}
+          />
+        </View>
       </PDFPage>
     </PDFDocument>
   );
