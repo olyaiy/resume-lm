@@ -131,6 +131,8 @@ export interface DocumentSettings {
   education_margin_bottom: number;
   education_margin_horizontal: number;
   education_item_spacing: number;
+
+  show_ubc_footer?: boolean;
 }
 
 export interface Profile {

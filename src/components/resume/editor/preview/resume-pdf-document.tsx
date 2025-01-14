@@ -549,12 +549,14 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
         <ProjectsSection projects={resume.projects} styles={styles} />
         <EducationSection education={resume.education} styles={styles} />
         
-        <View style={styles.footer}>
-          <Image 
-            src="/images/ubc-science-footer.png"
-            style={styles.footerImage}
-          />
-        </View>
+        {resume.document_settings?.show_ubc_footer && (
+          <View style={styles.footer}>
+            <Image 
+              src="/images/ubc-science-footer.png"
+              style={styles.footerImage}
+            />
+          </View>
+        )}
       </PDFPage>
     </PDFDocument>
   );

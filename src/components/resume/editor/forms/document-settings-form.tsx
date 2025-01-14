@@ -4,6 +4,7 @@ import { Slider } from "@/components/ui/slider";
 import { Resume, DocumentSettings } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react"
+import { Switch } from "@/components/ui/switch";
 
 interface DocumentSettingsFormProps {
   resume: Resume;
@@ -265,6 +266,36 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           </Button>
         </CardHeader>
         <CardContent className="space-y-8">
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+                Footer Options
+              </Label>
+              <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
+            </div>
+
+            <div className="space-y-2 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+              <div className="flex items-center justify-between space-x-2">
+                <Label className="text-sm font-medium text-muted-foreground">
+                  Show UBC Science Co-op Footer
+                </Label>
+                <Switch
+                  checked={resume.document_settings?.show_ubc_footer ?? false}
+                  onCheckedChange={(checked) =>
+                    onChange('document_settings', {
+                      ...defaultSettings,
+                      ...resume.document_settings,
+                      show_ubc_footer: checked,
+                    })
+                  }
+                />
+              </div>
+              <p className="text-xs text-muted-foreground/60 mt-2">
+                By enabling this footer, I confirm that I am a UBC Faculty of Science Co-op student and acknowledge that I am responsible for ensuring appropriate use of UBC branding in my resume.
+              </p>
+            </div>
+          </div>
+
           {/* Global Document Settings */}
           <div className="space-y-6">
             <div className="flex items-center justify-between">
