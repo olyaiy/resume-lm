@@ -4,11 +4,13 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2 } from "lucide-react";
+import { Loader2, Upload } from "lucide-react";
 import { Resume } from "@/lib/types";
 
 import { toast } from "@/hooks/use-toast";
 import { addTextToResume } from "../../editor/ai/resume-modification-ai";
+import pdfToText from "react-pdftotext";
+import { cn } from "@/lib/utils";
 
 interface TextImportDialogProps {
   resume: Resume;
@@ -24,6 +26,61 @@ export function TextImportDialog({
   const [open, setOpen] = useState(false);
   const [content, setContent] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragging(true);
+    } else if (e.type === "dragleave") {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const pdfFile = files.find(file => file.type === "application/pdf");
+
+    if (pdfFile) {
+      try {
+        const text = await pdfToText(pdfFile);
+        setContent(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        toast({
+          title: "PDF Processing Error",
+          description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please drop a PDF file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      try {
+        const text = await pdfToText(file);
+        setContent(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        toast({
+          title: "PDF Processing Error",
+          description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
+          variant: "destructive",
+        });
+      }
+    }
+  };
 
   const handleImport = async () => {
     if (!content.trim()) {
@@ -75,7 +132,7 @@ export function TextImportDialog({
           <DialogDescription asChild>
             <div className="space-y-2 text-base text-muted-foreground/80">
               <span className="block">
-                Paste any text content below (resume, job description, achievements, etc.).
+                Drop your PDF resume or paste any text content below (resume, job description, achievements, etc.).
                 Our AI will analyze it and enhance your resume by adding relevant information.
               </span>
               <span className="block text-sm">
@@ -85,6 +142,29 @@ export function TextImportDialog({
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
+          <label
+            onDragEnter={handleDrag}
+            onDragLeave={handleDrag}
+            onDragOver={handleDrag}
+            onDrop={handleDrop}
+            className={cn(
+              "border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center gap-2 transition-colors duration-200 cursor-pointer",
+              isDragging
+                ? "border-violet-500 bg-violet-50/50"
+                : "border-gray-200 hover:border-violet-500/50"
+            )}
+          >
+            <input
+              type="file"
+              className="hidden"
+              accept="application/pdf"
+              onChange={handleFileInput}
+            />
+            <Upload className="w-8 h-8 text-violet-500" />
+            <p className="text-sm text-muted-foreground">
+              Drop your PDF resume here or click to browse
+            </p>
+          </label>
           <Textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
