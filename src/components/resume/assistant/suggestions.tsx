@@ -42,10 +42,13 @@ function compareDescriptions(current: string, suggested: string): {
     const prevIsNew = index > 0 ? !currentWords.includes(suggestedWords[index - 1]) : false;
     const nextIsNew = index < suggestedWords.length - 1 ? !currentWords.includes(suggestedWords[index + 1]) : false;
     
+    const isBold = word.startsWith('**') && word.endsWith('**');
+    const cleanedWord = isBold ? word.slice(2, -2) : word;
+    
     return {
-      text: word,
+      text: cleanedWord,
       isNew,
-      isBold: word.startsWith('**') && word.endsWith('**'),
+      isBold,
       isStart: isNew && !prevIsNew,
       isEnd: isNew && !nextIsNew
     };
@@ -295,17 +298,27 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                   "font-medium text-gray-900",
                   !currentEducation || (currentEducation.degree !== education.degree || currentEducation.field !== education.field) && DIFF_HIGHLIGHT_CLASSES
                 )}>
-                  {education.degree.replace(/\*\*/g, '')} in {education.field.replace(/\*\*/g, '')}
+                  <span>
+                    {education.degree.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                      part.startsWith('**') && part.endsWith('**') ? 
+                        <strong key={i}>{part.slice(2, -2)}</strong> : 
+                        part
+                    )}
+                  </span>
+                  {' in '}
+                  <span>
+                    {education.field.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                      part.startsWith('**') && part.endsWith('**') ? 
+                        <strong key={i}>{part.slice(2, -2)}</strong> : 
+                        part
+                    )}
+                  </span>
                 </h3>
                 <p className={cn(
                   "text-sm text-gray-700",
                   !currentEducation || currentEducation.school !== education.school && DIFF_HIGHLIGHT_CLASSES
                 )}>
-                  {education.school.split(/(\*\*.*?\*\*)/).map((part, i) => 
-                    part.startsWith('**') && part.endsWith('**') ? 
-                      <strong key={i}>{part.slice(2, -2)}</strong> : 
-                      part
-                  )}
+                  {education.school.replace(/\*\*/g, '')}
                 </p>
               </div>
               <span className={cn(
@@ -319,9 +332,9 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
               <div className="space-y-1.5">
                 {education.achievements.map((achievement, index) => {
                   const currentAchievement = currentEducation?.achievements?.[index];
-                  const comparedWords = currentAchievement
+                  const comparedWords = currentAchievement 
                     ? compareDescriptions(currentAchievement, achievement)
-                    : [{ text: achievement, isNew: true, isBold: false, isStart: true, isEnd: true }];
+                    : [{ text: achievement.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
 
                   return (
                     <div key={index} className="flex items-start gap-1.5">
@@ -337,7 +350,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                             )}
                           >
                             {word.isBold ? (
-                              <strong>{word.text.slice(2, -2)}</strong>
+                              <strong>{word.text}</strong>
                             ) : (
                               word.text
                             )}

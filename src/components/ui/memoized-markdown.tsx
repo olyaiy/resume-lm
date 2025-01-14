@@ -68,9 +68,9 @@ const MemoizedMarkdownBlock = memo(
               // For code blocks, we return a div wrapper instead of pre directly
               return (
                 <div className="not-prose">
-                  <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs">
+                  {/* <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs"> */}
                     <code className={className}>{children}</code>
-                  </pre>
+                  {/* </pre> */}
                 </div>
               );
             },
