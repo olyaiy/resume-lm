@@ -257,25 +257,37 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
         const currentSkill = currentContent as Skill | null;
         return (
           <div className="space-y-2">
-            <h3 className={cn(
-              "font-medium text-gray-900",
-              !currentSkill || currentSkill.category !== skill.category && DIFF_HIGHLIGHT_CLASSES
-            )}>
-              {skill.category}
-            </h3>
+            <div className="flex-1">
+              <Tiptap
+                content={skill.category}
+                onChange={() => {}}
+                readOnly={true}
+                className={cn(
+                  "min-h-[20px] text-sm font-medium",
+                  "bg-white/50",
+                  "border-none shadow-none",
+                  !currentSkill || currentSkill.category !== skill.category && "bg-green-500/10"
+                )}
+              />
+            </div>
             <div className="flex flex-wrap gap-1.5">
               {skill.items.map((item, index) => (
-                <span
+                <div
                   key={index}
                   className={cn(
-                    "px-2 py-0.5 text-xs rounded-full border text-gray-700",
+                    " text-xs rounded-sm border text-gray-700",
                     !currentSkill || isNewItem(currentSkill.items, skill.items, item)
-                      ? DIFF_HIGHLIGHT_CLASSES
+                      ? "bg-green-300/50 border-green-300"
                       : "bg-gray-100/80 border-gray-200/60"
                   )}
                 >
-                  {item}
-                </span>
+                  <Tiptap
+                    content={item}
+                    onChange={() => {}}
+                    readOnly={true}
+                    className="border-none shadow-none p-0 min-h-0 bg-transparent"
+                  />
+                </div>
               ))}
             </div>
           </div>
