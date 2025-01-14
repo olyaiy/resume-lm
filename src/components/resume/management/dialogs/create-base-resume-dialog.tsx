@@ -295,7 +295,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       try {
         const text = await pdfToText(pdfFile);
         setResumeText(prev => prev + (prev ? "\n\n" : "") + text);
-      } catch (error) {
+      } catch {
         toast({
           title: "PDF Processing Error",
           description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
@@ -317,7 +317,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       try {
         const text = await pdfToText(file);
         setResumeText(prev => prev + (prev ? "\n\n" : "") + text);
-      } catch (error) {
+      } catch {
         toast({
           title: "PDF Processing Error",
           description: "Failed to extract text from the PDF. Please try again or paste the content manually.",

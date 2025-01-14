@@ -50,7 +50,8 @@ export function TextImportDialog({
       try {
         const text = await pdfToText(pdfFile);
         setContent(prev => prev + (prev ? "\n\n" : "") + text);
-      } catch (error) {
+      } catch (err) {
+        console.error('PDF processing error:', err);
         toast({
           title: "PDF Processing Error",
           description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
@@ -72,7 +73,8 @@ export function TextImportDialog({
       try {
         const text = await pdfToText(file);
         setContent(prev => prev + (prev ? "\n\n" : "") + text);
-      } catch (error) {
+      } catch (err) {
+        console.error('PDF processing error:', err);
         toast({
           title: "PDF Processing Error",
           description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
