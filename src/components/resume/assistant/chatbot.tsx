@@ -40,6 +40,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
   const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
+  const [isInitialLoading, setIsInitialLoading] = React.useState(false);
+  const [isStreaming, setIsStreaming] = React.useState(false);
   
   // Load settings from local storage
   useEffect(() => {
@@ -72,8 +74,16 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       config,
     },
     maxSteps: 5,
+    onResponse() {
+      setIsInitialLoading(false);
+      setIsStreaming(true);
+    },
+    onError() {
+      setIsInitialLoading(false);
+      setIsStreaming(false);
+    },
     async onToolCall({ toolCall }) {
-      // setIsStreaming(false);
+      setIsStreaming(false);
       
       if (toolCall.toolName === 'getResume') {
         const params = toolCall.args as { sections: string[] };
@@ -191,12 +201,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       }
     },
     onFinish() {
-
-      // setIsStreaming(false);
+      setIsInitialLoading(false);
+      setIsStreaming(false);
     },
-    // onResponse(response) {
-    //   setIsStreaming(true);
-    // },
   });
 
   // Scroll to bottom helper function
@@ -216,6 +223,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
 
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
+    setIsInitialLoading(true);
     append({ content: message, role: 'user' });
     setAccordionValue("chat");
   }, [append]);
@@ -431,8 +439,9 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                       })}
 
 
-                      {/* Loading Dots Message */}
-                      {isLoading && index === messages.length - 1 && m.role === 'assistant' && (
+                      {/* Loading Dots Message - Modified condition */}
+                      {((isInitialLoading && index === messages.length - 1 && m.role === 'user') ||
+                        (isLoading && !isStreaming && index === messages.length - 1 && m.role === 'assistant')) && (
                         <div className="mt-2">
                           <div className="flex justify-start">
                             <div className={cn(

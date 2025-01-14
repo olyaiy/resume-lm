@@ -128,7 +128,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                   "text-base font-bold text-gray-900",
                   !currentWork || currentWork.position !== work.position && DIFF_HIGHLIGHT_CLASSES
                 )}>
-                  {work.position}
+                  {work.position.replace(/\*\*/g, '')}
                 </h3>
                 <p className={cn(
                   "text-xs text-gray-700",
