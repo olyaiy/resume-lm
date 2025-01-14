@@ -371,14 +371,16 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                   return (
                     <div key={index} className="flex items-start gap-1.5">
                       <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                      <p className="text-xs text-gray-800 flex-1">
+                      <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
                         {comparedWords.map((word, wordIndex) => (
                           <span
                             key={wordIndex}
                             className={cn(
+                              "inline-flex items-center",
                               word.isNew && "bg-green-300",
                               word.isStart && "rounded-l-sm pl-1",
-                              word.isEnd && "rounded-r-sm pr-1"
+                              word.isEnd && "rounded-r-sm pr-1",
+                              wordIndex < comparedWords.length - 1 && "mr-1"
                             )}
                           >
                             {word.isBold ? (
@@ -386,7 +388,6 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                             ) : (
                               word.text
                             )}
-                            {' '}
                           </span>
                         ))}
                       </p>
