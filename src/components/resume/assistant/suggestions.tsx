@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, X, Sparkles, Loader2 } from "lucide-react";
+import { Check, X, Sparkles } from "lucide-react";
 import { WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { useState } from 'react';
 import Tiptap from "@/components/ui/tiptap";
