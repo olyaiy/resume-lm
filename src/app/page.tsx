@@ -25,7 +25,6 @@ import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
-import { AppHeader } from "@/components/layout/app-header";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -80,7 +79,7 @@ export default async function Home({
   return (
     
     <main className="min-h-screen relative">
-      <AppHeader />
+
       {/* Welcome Dialog for New Signups */}
       <WelcomeDialog isOpen={!!isNewSignup} />
       

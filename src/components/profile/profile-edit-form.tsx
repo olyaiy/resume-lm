@@ -10,7 +10,7 @@ import { updateProfile, importResume } from "@/utils/actions";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload} from "lucide-react";
+import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload, Save, Trash2} from "lucide-react";
 
 import {
   Dialog,
@@ -27,8 +27,9 @@ import { ProfileWorkExperienceForm } from "@/components/profile/profile-work-exp
 import { ProfileProjectsForm } from "@/components/profile/profile-projects-form";
 import { ProfileEducationForm } from "@/components/profile/profile-education-form";
 import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
-import { ProfileEditorHeader } from "./profile-editor-header";
+// import { ProfileEditorHeader } from "./profile-editor-header";
 import { formatProfileWithAI } from "./ai/profile-editor-ai";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -261,19 +262,88 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
       </div>
 
-      {/* Top Bar */}
-      <ProfileEditorHeader 
-        isSubmitting={isSubmitting}
-        isResetting={isResetting}
-        onSave={handleSubmit}
-        onReset={handleReset}
-      />
+      {/* Action Bar */}
+      <div className="fixed bottom-0 left-0 right-0 z-50">
+        <div className="max-w-[2000px] mx-auto">
+          <div className="mx-6 mb-6">
+            <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg rounded-2xl p-4 flex items-center justify-between gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-gradient-to-r from-teal-500 to-cyan-600" />
+                <span className="text-sm font-medium text-muted-foreground">Profile Editor</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                {/* Reset Profile Button */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="relative bg-white/50 hover:bg-white/60 border-rose-500/20 hover:border-rose-500/30 text-rose-600 transition-all duration-500 h-9 px-4 shadow-sm hover:shadow-md group"
+                      disabled={isResetting}
+                    >
+                      <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 via-rose-500/5 to-rose-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+                      {isResetting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Resetting...
+                        </>
+                      ) : (
+                        <>
+                          <Trash2 className="mr-2 h-4 w-4" />
+                          Reset
+                        </>
+                      )}
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="sm:max-w-[425px]">
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Reset Profile</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Are you sure you want to reset your profile? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel disabled={isResetting}>Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={handleReset}
+                        disabled={isResetting}
+                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        {isResetting ? "Resetting..." : "Reset Profile"}
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
 
-      {/* Spacer for Fixed Header */}
-      <div className="h-8" />
+                {/* Save Button */}
+                <Button 
+                  onClick={handleSubmit} 
+                  disabled={isSubmitting}
+                  size="sm"
+                  className="relative bg-gradient-to-r from-teal-500 to-cyan-600 text-white hover:from-teal-600 hover:to-cyan-700 transition-all duration-500 shadow-md hover:shadow-lg hover:shadow-teal-500/20 h-9 px-4 group"
+                >
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    <>
+                      <Save className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
 
       {/* Main content container with consistent styling */}
-      <div className="relative pt-24 px-6 md:px-8 lg:px-10 pb-10">
+      <div className="relative px-6 md:px-8 lg:px-10 pb-10">
         {/* Import Actions Row */}
         <div className="relative mb-6">
           <div className="bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">

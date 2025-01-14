@@ -4,13 +4,13 @@ import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { User } from "lucide-react";
+import { PageTitle } from "./page-title";
 
 interface AppHeaderProps {
-  title?: string;
   children?: React.ReactNode;
 }
 
-export function AppHeader({ title = "Dashboard", children }: AppHeaderProps) {
+export function AppHeader({ children }: AppHeaderProps) {
   return (
     <header className="h-14 border-b backdrop-blur-xl sticky top-0 left-0 right-0 z-40 shadow-md border-purple-200/50">
       {/* Gradient backdrop with blur */}
@@ -28,11 +28,7 @@ export function AppHeader({ title = "Dashboard", children }: AppHeaderProps) {
           <Logo className="text-xl" />
           <div className="h-5 w-px bg-purple-200/50 hidden sm:block" />
           <div className="flex items-center">
-            <h1 className="text-base font-medium">
-              <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-                {title}
-              </span>
-            </h1>
+            <PageTitle />
           </div>
         </div>
 

@@ -2,7 +2,8 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
-// import { BuyMeCoffee } from "@/components/shared/buy-me-coffee";
+import { AppHeader } from "@/components/layout/app-header";
+import { createClient } from "@/utils/supabase/server";
 import { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -62,25 +63,28 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "google-site-verification-code", // Replace with actual verification code
-  },
+  // verification: {
+  //   google: "google-site-verification-code", // Replace with actual verification code
+  // },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
   return (
     <html lang="en">
       <body className={inter.className}>
         <div className="relative min-h-screen flex flex-col">
+          {user && <AppHeader />}
           <main className="flex-1">
             {children}
           </main>
           <Footer />
-          {/* <BuyMeCoffee /> */}
         </div>
         <Toaster richColors position="top-right" />
       </body>

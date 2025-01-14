@@ -51,7 +51,7 @@ export default async function ResumesPage({
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
-      <AppHeader />
+
       
       <div className="container max-w-7xl mx-auto p-6 space-y-8">
         {/* Header with controls */}
