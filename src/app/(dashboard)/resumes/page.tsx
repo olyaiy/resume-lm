@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
 import { ResumeSortControls } from "@/components/resume/management/resume-sort-controls";
 import type { SortOption, SortDirection } from "@/components/resume/management/resume-sort-controls";
-import { AppHeader } from "@/components/layout/app-header";
 
 const RESUMES_PER_PAGE = 12;
 
