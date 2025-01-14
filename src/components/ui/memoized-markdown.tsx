@@ -2,14 +2,18 @@ import { marked } from 'marked';
 import { memo, useMemo } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
 
 
 function parseMarkdownIntoBlocks(markdown: string): string[] {
   // First, normalize newlines to ensure consistent handling
   const normalizedMarkdown = markdown.replace(/\r\n/g, '\n');
   
+  // Preserve double spaces at end of lines (markdown line breaks)
+  const preservedSpaces = normalizedMarkdown.replace(/(\s\s)$/gm, '  \n');
+  
   // Split the content by double newlines before parsing
-  const sections = normalizedMarkdown.split(/\n\n+/);
+  const sections = preservedSpaces.split(/\n\n+/);
   
   // Parse each section separately to maintain spacing
   const blocks: string[] = [];
@@ -40,7 +44,7 @@ const MemoizedMarkdownBlock = memo(
     return (
       <div className="prose prose-neutral dark:prose-invert max-w-none">
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
             // Ensure lists are properly styled
             ul: ({ children }) => <ul className="list-disc ml-3">{children}</ul>,
@@ -54,6 +58,10 @@ const MemoizedMarkdownBlock = memo(
                 {children}
               </li>
             ),
+            // Handle line breaks explicitly
+            br: () => <br className="block h-4" />,
+            // Proper paragraph styling with spacing
+            p: ({ children }) => <p className="text-sm mb-4 whitespace-pre-line">{children}</p>,
             // Proper heading styles
             h1: ({ children }) => <h1 className="text-2xl font-bold mt-4 mb-2">{children}</h1>,
             h2: ({ children }) => <h2 className="text-xl font-bold mt-3 mb-1.5">{children}</h2>,
@@ -81,8 +89,6 @@ const MemoizedMarkdownBlock = memo(
             blockquote: ({ children }) => (
               <blockquote className="border-l-4 border-muted pl-3 italic text-sm">{children}</blockquote>
             ),
-            // Add default paragraph styling
-            p: ({ children }) => <p className="text-sm">{children}</p>,
           }}
         >
           {content}
