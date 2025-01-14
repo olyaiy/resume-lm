@@ -18,11 +18,30 @@ interface ChatRequest {
 
 export async function POST(req: Request) {
   try {
-    const { messages, target_role, config }: ChatRequest = await req.json();
+    const { messages, resume, target_role, config }: ChatRequest = await req.json();
 
     const aiClient = initializeAIClient(config);
 
-    // console.log('Using AI Model:', config?.model || 'gpt-4o-mini (default)');
+    // Create resume sections object
+    const personalInfo = {
+      first_name: resume.first_name,
+      last_name: resume.last_name,
+      email: resume.email,
+      phone_number: resume.phone_number,
+      location: resume.location,
+      website: resume.website,
+      linkedin_url: resume.linkedin_url,
+      github_url: resume.github_url,
+    };
+
+    const resumeSections = {
+      personal_info: personalInfo,
+      work_experience: resume.work_experience,
+      education: resume.education,
+      skills: resume.skills,
+      projects: resume.projects,
+      certifications: resume.certifications,
+    };
 
     const result = streamText({
       model: aiClient,
@@ -46,6 +65,9 @@ export async function POST(req: Request) {
 
       When the user asks you to perform a task, think step by step, and use the tools to perform the task.
       TARGET ROLE: ${target_role}
+
+      CURRENT RESUME:
+      ${JSON.stringify(resumeSections, null, 2)}
       `,
       messages,
       maxSteps: 5,
