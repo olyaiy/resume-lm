@@ -31,20 +31,48 @@ function compareDescriptions(current: string, suggested: string): {
   isStart: boolean;
   isEnd: boolean;
 }[] {
-  const splitText = (text: string): string[] => {
-    return text.match(/\*\*[^*]+\*\*|\S+/g) || [];
+  // Clean the text by normalizing spaces and removing extra whitespace
+  const cleanText = (text: string): string => {
+    return text.trim().replace(/\s+/g, ' ');
   };
 
-  const currentWords = splitText(current);
-  const suggestedWords = splitText(suggested);
-  
-  const result = suggestedWords.map((word, index) => {
-    const isNew = !currentWords.includes(word);
-    const prevIsNew = index > 0 ? !currentWords.includes(suggestedWords[index - 1]) : false;
-    const nextIsNew = index < suggestedWords.length - 1 ? !currentWords.includes(suggestedWords[index + 1]) : false;
+  // Split text into words, preserving bold markdown
+  const splitText = (text: string): string[] => {
+    // First, split by bold markdown
+    const parts = text.split(/(\*\*[^*]+\*\*)/).filter(Boolean);
     
+    // Then split non-bold parts by spaces while preserving bold parts
+    return parts.flatMap(part => {
+      if (part.startsWith('**') && part.endsWith('**')) {
+        return [part];
+      }
+      return part.split(/\s+/).filter(Boolean);
+    });
+  };
+
+  const currentText = cleanText(current);
+  const suggestedText = cleanText(suggested);
+  
+  const currentWords = splitText(currentText);
+  const suggestedWords = splitText(suggestedText);
+  
+  return suggestedWords.map((word, index) => {
     const isBold = word.startsWith('**') && word.endsWith('**');
     const cleanedWord = isBold ? word.slice(2, -2) : word;
+    
+    // Check if the word exists in current text (considering bold status)
+    const isNew = !currentWords.some(currentWord => {
+      const currentIsBold = currentWord.startsWith('**') && currentWord.endsWith('**');
+      const currentCleaned = currentIsBold ? currentWord.slice(2, -2) : currentWord;
+      return currentCleaned === cleanedWord;
+    });
+    
+    // Check if adjacent words are new
+    const prevWord = index > 0 ? suggestedWords[index - 1] : null;
+    const nextWord = index < suggestedWords.length - 1 ? suggestedWords[index + 1] : null;
+    
+    const prevIsNew = prevWord ? !currentWords.includes(prevWord) : false;
+    const nextIsNew = nextWord ? !currentWords.includes(nextWord) : false;
     
     return {
       text: cleanedWord,
@@ -54,8 +82,6 @@ function compareDescriptions(current: string, suggested: string): {
       isEnd: isNew && !nextIsNew
     };
   });
-
-  return result;
 }
   
 
