@@ -85,3 +85,41 @@ export async function resetPasswordForEmail(formData: FormData): Promise<AuthRes
 
   return { success: true };
 } 
+
+// Waitlist Signup
+export async function joinWaitlist(formData: FormData): Promise<AuthResult> {
+  const supabase = await createClient();
+
+  const data = {
+    email: formData.get('email') as string,
+    first_name: formData.get('firstName') as string,
+    last_name: formData.get('lastName') as string,
+  };
+
+  console.log('Attempting to join waitlist with data:', data);
+
+  try {
+    const { error } = await supabase
+      .from('mailing-list')
+      .insert([data]);
+
+    if (error) {
+      console.error('Supabase error details:', {
+        code: error.code,
+        message: error.message,
+        details: error.details,
+        hint: error.hint
+      });
+      return { success: false, error: error.message };
+    }
+
+    console.log('Successfully joined waitlist');
+    return { success: true };
+  } catch (e) {
+    console.error('Unexpected error during waitlist signup:', e);
+    return { 
+      success: false, 
+      error: e instanceof Error ? e.message : 'An unexpected error occurred' 
+    };
+  }
+} 
