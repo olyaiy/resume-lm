@@ -293,6 +293,48 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
               <p className="text-xs text-muted-foreground/60 mt-2">
                 By enabling this footer, I confirm that I am a UBC Faculty of Science Co-op student and acknowledge that I am responsible for ensuring appropriate use of UBC branding in my resume.
               </p>
+              
+              {/* Footer Width Control - Only shown when footer is enabled */}
+              {resume.document_settings?.show_ubc_footer && (
+                <div className="space-y-2 mt-4 pt-4 border-t border-slate-200/50">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-sm font-medium text-muted-foreground">Footer Width</Label>
+                    <div className="flex items-center">
+                      <NumberInput
+                        value={resume.document_settings?.footer_width ?? 95}
+                        min={50}
+                        max={100}
+                        step={1}
+                        onChange={(value) => 
+                          onChange('document_settings', {
+                            ...defaultSettings,
+                            ...resume.document_settings,
+                            footer_width: value
+                          })
+                        }
+                      />
+                      <span className="text-xs text-muted-foreground/60 ml-1">%</span>
+                    </div>
+                  </div>
+                  <Slider
+                    value={[resume.document_settings?.footer_width ?? 95]}
+                    min={50}
+                    max={100}
+                    step={1}
+                    onValueChange={([value]) => 
+                      onChange('document_settings', {
+                        ...defaultSettings,
+                        ...resume.document_settings,
+                        footer_width: value
+                      })
+                    }
+                  />
+                  <div className="flex justify-between mt-1">
+                    <span className="text-[10px] text-muted-foreground/40">Narrow</span>
+                    <span className="text-[10px] text-muted-foreground/40">Full Width</span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

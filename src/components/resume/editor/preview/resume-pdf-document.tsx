@@ -304,6 +304,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
   education_margin_bottom: 2,
   education_margin_horizontal: 0,
   education_item_spacing: 4,
+  footer_width: 80,
 }) {
   const {
     document_font_size = 10,
@@ -328,6 +329,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     education_margin_bottom = 2,
     education_margin_horizontal = 0,
     education_item_spacing = 4,
+    footer_width = 95,
   } = settings;
 
   return StyleSheet.create({
@@ -521,11 +523,9 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-
     },
     footerImage: {
-
-      width: '95%',
+      width: `${footer_width}%`,
       height: 'auto',
     },
   });

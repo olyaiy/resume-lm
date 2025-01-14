@@ -133,6 +133,7 @@ export interface DocumentSettings {
   education_item_spacing: number;
 
   show_ubc_footer?: boolean;
+  footer_width?: number; // Percentage width of the footer
 }
 
 export interface Profile {
