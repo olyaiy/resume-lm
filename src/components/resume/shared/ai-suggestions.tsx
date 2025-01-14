@@ -2,8 +2,8 @@
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Check, Sparkles, X } from "lucide-react";
+import Tiptap from "@/components/ui/tiptap";
 
 interface AISuggestion {
   id: string;
@@ -59,9 +59,10 @@ export function AISuggestions({ suggestions, onApprove, onDelete }: AISuggestion
             >
               <div className="flex gap-3">
                 <div className="flex-1">
-                  <Textarea
-                    value={suggestion.point}
-                    readOnly
+                  <Tiptap
+                    content={suggestion.point}
+                    onChange={() => {}}
+                    readOnly={true}
                     className={cn(
                       "min-h-[80px] text-sm",
                       "bg-white/60",

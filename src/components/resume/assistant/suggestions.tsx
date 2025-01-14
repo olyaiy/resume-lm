@@ -3,9 +3,10 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Check, X, Sparkles } from "lucide-react";
+import { Check, X, Sparkles, Loader2 } from "lucide-react";
 import { WorkExperience, Project, Skill, Education } from "@/lib/types";
 import { useState } from 'react';
+import Tiptap from "@/components/ui/tiptap";
 
 const DIFF_HIGHLIGHT_CLASSES = "bg-green-300 px-1  rounded-sm";
 
@@ -157,25 +158,18 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                 return (
                   <div key={index} className="flex items-start gap-1.5">
                     <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                    <p className="text-xs text-gray-800 flex-1">
-                      {comparedWords.map((word, wordIndex) => (
-                        <span
-                          key={wordIndex}
-                          className={cn(
-                            word.isNew && "bg-green-300",
-                            word.isStart && "rounded-l-sm pl-1",
-                            word.isEnd && "rounded-r-sm pr-1"
-                          )}
-                        >
-                          {word.isBold ? (
-                            <strong>{word.text.slice(2, -2)}</strong>
-                          ) : (
-                            word.text
-                          )}
-                          {' '}
-                        </span>
-                      ))}
-                    </p>
+                    <div className="flex-1">
+                      <Tiptap
+                        content={point}
+                        readOnly={true}
+                        onChange={() => {}}
+                        className={cn(
+                          "min-h-[60px] text-xs text-gray-800",
+                          currentPoint && "bg-green-300/20",
+                          "border-none shadow-none"
+                        )}
+                      />
+                    </div>
                   </div>
                 );
               })}
