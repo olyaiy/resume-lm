@@ -8,9 +8,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Profile, WorkExperience, Education, Skill, Project, Resume } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, FileText, Copy, Wand2, Plus } from "lucide-react";
+import { Loader2, FileText, Copy, Wand2, Plus, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createBaseResume } from "@/utils/actions";
+import pdfToText from "react-pdftotext";
 
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -48,6 +49,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
     title: "",
     description: ""
   });
+  const [isDragging, setIsDragging] = useState(false);
 
   const getItemId = (type: keyof typeof selectedItems, item: WorkExperience | Education | Skill | Project): string => {
     switch (type) {
@@ -268,6 +270,60 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       setTargetRole('');
       setImportOption('import-profile');
       initializeSelectedItems();
+    }
+  };
+
+  const handleDrag = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setIsDragging(true);
+    } else if (e.type === "dragleave") {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const pdfFile = files.find(file => file.type === "application/pdf");
+
+    if (pdfFile) {
+      try {
+        const text = await pdfToText(pdfFile);
+        setResumeText(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        toast({
+          title: "PDF Processing Error",
+          description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
+          variant: "destructive",
+        });
+      }
+    } else {
+      toast({
+        title: "Invalid File",
+        description: "Please drop a PDF file.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      try {
+        const text = await pdfToText(file);
+        setResumeText(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        toast({
+          title: "PDF Processing Error",
+          description: "Failed to extract text from the PDF. Please try again or paste the content manually.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -691,17 +747,47 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
               )}
 
               {importOption === 'import-resume' && (
-                <div className="space-y-3">
-                  <Label htmlFor="resume-text" className="text-sm font-medium text-purple-950">
-                    Paste your resume text
-                  </Label>
-                  <Textarea
-                    id="resume-text"
-                    value={resumeText}
-                    onChange={(e) => setResumeText(e.target.value)}
-                    placeholder="Paste your resume content here..."
-                    className="h-[200px] bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20"
-                  />
+                <div className="space-y-4">
+                  <label
+                    onDragEnter={handleDrag}
+                    onDragLeave={handleDrag}
+                    onDragOver={handleDrag}
+                    onDrop={handleDrop}
+                    className={cn(
+                      "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
+                      isDragging
+                        ? "border-purple-500 bg-purple-50/50"
+                        : "border-gray-200 hover:border-purple-500/50 hover:bg-purple-50/10"
+                    )}
+                  >
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept="application/pdf"
+                      onChange={handleFileInput}
+                    />
+                    <Upload className="w-10 h-10 text-purple-500 group-hover:scale-110 transition-transform duration-200" />
+                    <div className="text-center">
+                      <p className="text-sm font-medium text-foreground">
+                        Drop your PDF resume here
+                      </p>
+                      <p className="text-sm text-muted-foreground">
+                        or click to browse files
+                      </p>
+                    </div>
+                  </label>
+                  <div className="relative">
+                    <div className="absolute -top-3 left-3 bg-white px-2 text-sm text-muted-foreground">
+                      Or paste your resume text here
+                    </div>
+                    <Textarea
+                      id="resume-text"
+                      value={resumeText}
+                      onChange={(e) => setResumeText(e.target.value)}
+                      placeholder="Start pasting your resume content here..."
+                      className="min-h-[200px] bg-white/80 border-gray-200 focus:border-purple-500 focus:ring-purple-500/20 pt-4"
+                    />
+                  </div>
                 </div>
               )}
             </div>
