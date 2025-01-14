@@ -262,7 +262,7 @@ const EducationSection = memo(function EducationSection({
           <View style={styles.educationHeader}>
             <View>
               <Text style={styles.schoolName}>{processText(edu.school, true)}</Text>
-              <Text style={styles.degree}>{processText(`${edu.degree} in ${edu.field}`)}</Text>
+              <Text style={styles.degree}>{processText(`${edu.degree} ${edu.field}`)}</Text>
             </View>
             <Text style={styles.dateRange}>{edu.date}</Text>
           </View>
