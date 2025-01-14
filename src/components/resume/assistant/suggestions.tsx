@@ -177,10 +177,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
             <div className="space-y-1.5">
               {work.description.map((point, index) => {
                 const currentPoint = currentWork?.description?.[index];
-                const comparedWords = currentPoint 
-                  ? compareDescriptions(currentPoint, point)
-                  : [{ text: point, isNew: true, isBold: false, isStart: true, isEnd: true }];
-
+                
                 return (
                   <div key={index} className="flex items-start gap-1.5">
                     <span className="text-gray-800 mt-0.5 text-xs">•</span>
@@ -191,7 +188,7 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
                         onChange={() => {}}
                         className={cn(
                           "min-h-[60px] text-xs text-gray-800",
-                          currentPoint && "bg-green-300/20",
+                          !currentPoint && DIFF_HIGHLIGHT_CLASSES,
                           "border-none shadow-none"
                         )}
                       />
