@@ -195,7 +195,10 @@ export const jobSchema = z.object({
   updated_at: z.string().datetime(),
   keywords: z.array(z.string()).default([]),
   work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable(),
-  employment_type: z.enum(['full_time', 'part_time', 'co_op', 'internship']).nullable(),
+  employment_type: z.preprocess(
+    (val) => val === null || val === '' ? 'full_time' : val,
+    z.enum(['full_time', 'part_time', 'co_op', 'internship', 'contract']).default('full_time')
+  ),
   is_active: z.boolean().default(true),
 });
 
@@ -207,8 +210,14 @@ export const simplifiedJobSchema = z.object({
     location: z.string().nullable().optional(),
     salary_range: salaryRangeSchema.nullable().optional(),
     keywords: z.array(z.string()).default([]).optional(),
-    work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable().optional(),
-    employment_type: z.enum(['full_time', 'part_time', 'co_op', 'internship']).nullable().optional(),
+    work_location: z.preprocess(
+      (val) => val === null || val === '' ? 'in_person' : val,
+      z.enum(['remote', 'in_person', 'hybrid']).nullable().optional()
+    ),
+    employment_type: z.preprocess(
+      (val) => val === null || val === '' ? 'full_time' : val,
+      z.enum(['full_time', 'part_time', 'co_op', 'internship', 'contract'])
+    ),
     is_active: z.boolean().default(true).optional(),
   });
   

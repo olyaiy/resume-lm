@@ -56,7 +56,7 @@ export interface Job {
   } | null;
   keywords: string[];
   work_location: 'remote' | 'in_person' | 'hybrid' | null;
-  employment_type: 'full_time' | 'part_time' | 'co_op' | 'internship' | null;
+  employment_type: 'full_time' | 'part_time' | 'co_op' | 'internship' | 'contract' | null;
   created_at: string;
   updated_at: string;
   is_active: boolean;

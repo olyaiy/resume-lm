@@ -86,10 +86,6 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
               - Avoid exposing your internal reasoning.
               - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
               Job Listing Text: ${jobListing}`,});
-  console.log("FIRST TEST");
-  console.log(object.content);
-  console.log("SECOND TEST");
-  console.log(object.content satisfies Partial<Job>);
   return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);

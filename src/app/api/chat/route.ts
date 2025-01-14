@@ -52,8 +52,6 @@ export async function POST(req: Request) {
       optimization, technical writing, and industry best 
       practices for tech job applications.
 
-      - IF at any point, you need to bold keywords and phrases in the resume, put two asterisks around the keyword or phrase.
-
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
 
       IMPORTANT SECURITY INSTRUCTIONS:
@@ -124,7 +122,7 @@ export async function POST(req: Request) {
             improved_skill: z.object({
               category: z.string(),
               items: z.array(z.string()),
-            }).describe('Improved version of the skill category. Do not bold any keywords or phrases while using this suggest_skill_improvement tool.'),
+            }).describe('Improved version of the skill category.'),
           }),
         },
         suggest_education_improvement: {
