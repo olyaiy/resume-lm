@@ -338,10 +338,10 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                     <React.Fragment key={index}>
                       {/* Regular Message Content */}
                       {m.content && (
-                        <div className="my-4">
+                        <div className="my-6">
                           <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={cn(
-                              "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group",
+                              "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group items-center",
                               m.role === 'user' ? [
                                 "bg-gradient-to-br from-purple-500 to-indigo-500",
                                 "text-white",
@@ -351,21 +351,18 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                 "bg-white/60",
                                 "border border-purple-200/60",
                                 "shadow-sm",
-                                "backdrop-blur-sm"
+                                "backdrop-blur-sm pb-0"
                               ]
                             )}>
                               <MemoizedMarkdown id={m.id} content={m.content} />
                               <button
                                 onClick={() => handleDelete(m.id)}
                                 className={cn(
-                                  "absolute -bottom-6 left-2",
-                                  "opacity-0 group-hover:opacity-100",
-                                  "transition-opacity duration-200",
-                                  "p-1 rounded-full",
+                                  "absolute -bottom-4 left-2",
+                                  "transition-colors duration-200",
                                   m.role === 'user' 
-                                    ? "text-purple-500 hover:text-purple-600 bg-white/80 hover:bg-white"
-                                    : "text-purple-400 hover:text-purple-500 bg-white/60 hover:bg-white/80",
-                                  "shadow-sm"
+                                    ? "text-purple-500/60 hover:text-purple-600"
+                                    : "text-purple-400/60 hover:text-purple-500",
                                 )}
                                 aria-label="Delete message"
                               >
