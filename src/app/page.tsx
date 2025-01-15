@@ -94,7 +94,10 @@ export default async function Home({
 
       {/* Content */}
       <div className="relative z-10">
-        <div className="container max-w-7xl mx-auto p-6">
+      {/* Profile Row Component */}
+      <ProfileRow profile={profile} />
+        
+        <div className="container max-w-7xl mx-auto p-6">  
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
@@ -112,8 +115,7 @@ export default async function Home({
               </div>
             </div>
 
-            {/* Profile Row Component */}
-            <ProfileRow profile={profile} />
+            
 
             {/* Resume Bookshelf */}
             <div className="">
