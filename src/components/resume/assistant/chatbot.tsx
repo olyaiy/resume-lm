@@ -1,11 +1,11 @@
 'use client';
 
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Bot, Trash2 } from "lucide-react";
+import { Bot, Trash2, Pencil } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -41,6 +41,8 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
   const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
   
   // Load settings from local storage
   useEffect(() => {
@@ -257,6 +259,23 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     setMessages(messages.filter(message => message.id !== id));
   };
 
+  // Add edit handler
+  const handleEdit = (id: string, content: string) => {
+    setEditingMessageId(id);
+    setEditContent(content);
+  };
+
+  // Add save handler
+  const handleSaveEdit = (id: string) => {
+    setMessages(messages.map(message => 
+      message.id === id 
+        ? { ...message, content: editContent }
+        : message
+    ));
+    setEditingMessageId(null);
+    setEditContent("");
+  };
+
   return (
     <Card className={cn(
       "flex flex-col w-full l mx-auto",
@@ -354,20 +373,62 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                                 "backdrop-blur-sm pb-0"
                               ]
                             )}>
-                              <MemoizedMarkdown id={m.id} content={m.content} />
-                              <button
-                                onClick={() => handleDelete(m.id)}
-                                className={cn(
-                                  "absolute -bottom-4 left-2",
-                                  "transition-colors duration-200",
-                                  m.role === 'user' 
-                                    ? "text-purple-500/60 hover:text-purple-600"
-                                    : "text-purple-400/60 hover:text-purple-500",
-                                )}
-                                aria-label="Delete message"
-                              >
-                                <Trash2 className="h-3 w-3" />
-                              </button>
+                              {editingMessageId === m.id ? (
+                                <div className="flex flex-col gap-2">
+                                  <textarea
+                                    value={editContent}
+                                    onChange={(e) => setEditContent(e.target.value)}
+                                    className={cn(
+                                      "w-full min-h-[100px] p-2 rounded-lg",
+                                      "bg-white/80 backdrop-blur-sm",
+                                      m.role === 'user' 
+                                        ? "text-purple-900 placeholder-purple-400"
+                                        : "text-gray-900 placeholder-gray-400",
+                                      "border border-purple-200/60 focus:border-purple-400/60",
+                                      "focus:outline-none focus:ring-1 focus:ring-purple-400/60"
+                                    )}
+                                  />
+                                  <button
+                                    onClick={() => handleSaveEdit(m.id)}
+                                    className={cn(
+                                      "self-end px-3 py-1 rounded-lg text-xs",
+                                      "bg-purple-500 text-white",
+                                      "hover:bg-purple-600",
+                                      "transition-colors duration-200"
+                                    )}
+                                  >
+                                    Save
+                                  </button>
+                                </div>
+                              ) : (
+                                <MemoizedMarkdown id={m.id} content={m.content} />
+                              )}
+                              <div className="absolute -bottom-4 left-2 flex gap-2">
+                                <button
+                                  onClick={() => handleDelete(m.id)}
+                                  className={cn(
+                                    "transition-colors duration-200",
+                                    m.role === 'user' 
+                                      ? "text-purple-500/60 hover:text-purple-600"
+                                      : "text-purple-400/60 hover:text-purple-500",
+                                  )}
+                                  aria-label="Delete message"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                </button>
+                                <button
+                                  onClick={() => handleEdit(m.id, m.content)}
+                                  className={cn(
+                                    "transition-colors duration-200",
+                                    m.role === 'user' 
+                                      ? "text-purple-500/60 hover:text-purple-600"
+                                      : "text-purple-400/60 hover:text-purple-500",
+                                  )}
+                                  aria-label="Edit message"
+                                >
+                                  <Pencil className="h-3 w-3" />
+                                </button>
+                              </div>
                             </div>
                           </div>
                         </div>
