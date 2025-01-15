@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Bot} from "lucide-react";
+import { Bot, Trash2 } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -65,7 +65,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     apiKeys,
   };
   
-  const { messages, error, append, isLoading, addToolResult, stop } = useChat({
+  const { messages, error, append, isLoading, addToolResult, stop, setMessages } = useChat({
     api: '/api/chat',
     body: {
       target_role: resume.target_role,
@@ -252,6 +252,11 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
     setAccordionValue("chat");
   }, [append, messages]);
 
+  // Add delete handler
+  const handleDelete = (id: string) => {
+    setMessages(messages.filter(message => message.id !== id));
+  };
+
   return (
     <Card className={cn(
       "flex flex-col w-full l mx-auto",
@@ -336,7 +341,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                         <div className="my-4">
                           <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={cn(
-                              "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                              "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group",
                               m.role === 'user' ? [
                                 "bg-gradient-to-br from-purple-500 to-indigo-500",
                                 "text-white",
@@ -350,6 +355,22 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
                               ]
                             )}>
                               <MemoizedMarkdown id={m.id} content={m.content} />
+                              <button
+                                onClick={() => handleDelete(m.id)}
+                                className={cn(
+                                  "absolute -bottom-6 left-2",
+                                  "opacity-0 group-hover:opacity-100",
+                                  "transition-opacity duration-200",
+                                  "p-1 rounded-full",
+                                  m.role === 'user' 
+                                    ? "text-purple-500 hover:text-purple-600 bg-white/80 hover:bg-white"
+                                    : "text-purple-400 hover:text-purple-500 bg-white/60 hover:bg-white/80",
+                                  "shadow-sm"
+                                )}
+                                aria-label="Delete message"
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </button>
                             </div>
                           </div>
                         </div>
