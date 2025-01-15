@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { Send, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import React, { useState, useCallback } from "react";
@@ -20,15 +20,7 @@ export default function ChatInput({
     const handleSubmit = useCallback((e: React.FormEvent) => {
       e.preventDefault();
       if (inputValue.trim()) {
-        console.log('Original input:', JSON.stringify(inputValue));
-        console.log('Input length:', inputValue.length);
-        console.log('Last char code:', inputValue.charCodeAt(inputValue.length - 1));
-        
         const cleanedMessage = inputValue.replace(/\n+$/, '').trim();
-        console.log('Cleaned message:', JSON.stringify(cleanedMessage));
-        console.log('Cleaned length:', cleanedMessage.length);
-        console.log('Last cleaned char code:', cleanedMessage.charCodeAt(cleanedMessage.length - 1));
-        
         onSubmit(cleanedMessage);
         setInputValue("");
       }
@@ -42,7 +34,7 @@ export default function ChatInput({
         "backdrop-blur-sm",
         "flex gap-1.5"
       )}>
-        <Input
+        <Textarea
           value={inputValue}
           onChange={(event) => setInputValue(event.target.value)}
           onKeyDown={(e) => {
@@ -52,6 +44,7 @@ export default function ChatInput({
             }
           }}
           placeholder="Ask me anything about your resume..."
+          rows={1}
           className={cn(
             "flex-1",
             "bg-white/60",
@@ -60,8 +53,13 @@ export default function ChatInput({
             "focus:ring-2 focus:ring-purple-500/10",
             "placeholder:text-purple-400",
             "text-sm",
-            "h-full",
-            "px-2 py-0.5"
+            "h-8",
+            "min-h-[32px]",
+            "max-h-[120px]",
+            "resize-none",
+            "overflow-y-auto",
+            "px-2 py-0.5",
+            "scrollbar-thin scrollbar-thumb-purple-200 scrollbar-track-transparent"
           )}
         />
         <Button 
