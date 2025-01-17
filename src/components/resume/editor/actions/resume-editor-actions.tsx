@@ -2,9 +2,8 @@
 
 import { Resume } from "@/lib/types";
 import { Button } from "@/components/ui/button";
-import { Download, Loader2, Save, Trash2 } from "lucide-react";
+import { Download, Loader2, Save } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { pdf } from '@react-pdf/renderer';
 import { TextImport } from "../../text-import";
 import { ResumePDFDocument } from "../preview/resume-pdf-document";
@@ -22,47 +21,42 @@ interface ResumeEditorActionsProps {
 export function ResumeEditorActions({
   resume,
   isSaving,
-  isDeleting,
   onSave,
-  onDelete,
   onResumeChange
 }: ResumeEditorActionsProps) {
   // Dynamic color classes based on resume type
   const colors = resume.is_base_resume ? {
-    gradient: "from-purple-600 to-indigo-600",
-    hover: "hover:from-purple-700 hover:to-indigo-700",
-    shadow: "shadow-purple-500/20"
+    bg: "bg-purple-100/30",
+    hover: "hover:bg-purple-200/40",
+    text: "text-purple-700",
+    border: "border-purple-200/40"
   } : {
-    gradient: "from-pink-600 to-rose-600",
-    hover: "hover:from-pink-700 hover:to-rose-700",
-    shadow: "shadow-pink-500/20"
+    bg: "bg-pink-100/40",
+    hover: "hover:bg-pink-200/50",
+    text: "text-pink-700",
+    border: "border-pink-300/50"
   };
 
   const buttonBaseClasses = cn(
-    "transition-all duration-500 shadow-md hover:shadow-lg hover:-translate-y-0.5",
-    "relative overflow-hidden group disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0",
-    "h-8 px-3 text-[10px] @[300px]:text-[13px]"
+    "transition-all duration-300",
+    "relative overflow-hidden",
+    "h-8 px-3 text-[11px] font-medium",
+    "border rounded-md",
+    colors.border,
+    colors.bg,
+    colors.text,
+    colors.hover,
+    "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
   );
 
-  const buttonShineOverlay = "absolute inset-0 bg-[linear-gradient(to_right,transparent_0%,#ffffff20_50%,transparent_100%)] translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000";
-
   return (
-    <div className="@container">
-      <div className={cn(
-        "grid grid-cols-2 @[400px]:grid-cols-4 gap-2",
-        "transition-all duration-300 ease-in-out mb-2"
-      )}>
+    <div className="px-1 py-2 @container">
+      <div className="grid grid-cols-3 gap-2">
         {/* Text Import Button */}
         <TextImport
           resume={resume}
           onResumeChange={onResumeChange}
-          className={cn(
-            buttonBaseClasses,
-            "w-full bg-gradient-to-r",
-            colors.gradient,
-            colors.hover,
-            "text-white"
-          )}
+          className={buttonBaseClasses}
         />
 
         {/* Download Button */}
@@ -91,16 +85,10 @@ export function ResumeEditorActions({
               });
             }
           }}
-          size="sm"
-          className={cn(
-            buttonBaseClasses,
-            "w-full bg-gradient-to-r from-indigo-600 to-violet-600",
-            "hover:from-indigo-700 hover:to-violet-700",
-            "text-white"
-          )}
+          variant="ghost"
+          className={buttonBaseClasses}
         >
-          <div className={buttonShineOverlay} />
-          <Download className=" h-3 w-3" />
+          <Download className="mr-1.5 h-3.5 w-3.5" />
           Download
         </Button>
 
@@ -108,75 +96,21 @@ export function ResumeEditorActions({
         <Button 
           onClick={onSave} 
           disabled={isSaving}
-          size="sm"
-          className={cn(
-            buttonBaseClasses,
-            "w-full bg-gradient-to-r from-teal-500 to-cyan-600",
-            "hover:from-teal-600 hover:to-cyan-700",
-            "text-white"
-          )}
+          variant="ghost"
+          className={buttonBaseClasses}
         >
-          <div className={buttonShineOverlay} />
           {isSaving ? (
             <>
-              <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
               Saving...
             </>
           ) : (
             <>
-              <Save className="mr-1.5 h-4 w-4" />
+              <Save className="mr-1.5 h-3.5 w-3.5" />
               Save
             </>
           )}
         </Button>
-
-        {/* Delete Button */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button
-              size="sm"
-              variant="destructive"
-              className={cn(
-                buttonBaseClasses,
-                "w-full bg-gradient-to-r from-red-500 to-rose-600",
-                "hover:from-red-600 hover:to-rose-700",
-                "text-white"
-              )}
-              disabled={isDeleting}
-            >
-              <div className={buttonShineOverlay} />
-              {isDeleting ? (
-                <>
-                  <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
-                  Deleting...
-                </>
-              ) : (
-                <>
-                  <Trash2 className="mr-1.5 h-4 w-4" />
-                  Delete
-                </>
-              )}
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent className="sm:max-w-[425px]">
-            <AlertDialogHeader>
-              <AlertDialogTitle>Delete Resume</AlertDialogTitle>
-              <AlertDialogDescription>
-                Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={onDelete}
-                disabled={isDeleting}
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                {isDeleting ? "Deleting..." : "Delete"}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
       </div>
     </div>
   );
