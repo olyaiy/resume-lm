@@ -27,6 +27,7 @@ import { ResumePreview } from "./preview/resume-preview";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { ResumeEditorActions } from './actions/resume-editor-actions';
 import { createClient } from "@/utils/supabase/client";
+import { cn } from "@/lib/utils";
 
 
 
@@ -230,7 +231,12 @@ export function ResumeEditorClient({
 
   return (
     <ResumeContext.Provider value={{ state, dispatch }}>
-      <main className="relative bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
+      <main className={cn(
+        "relative",
+        state.resume.is_base_resume 
+          ? "bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50"
+          : "bg-gradient-to-br from-pink-100/80 via-rose-50/80 to-pink-100/80"
+      )}>
         <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -259,19 +265,34 @@ export function ResumeEditorClient({
 
         {/* Animated Background Elements */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl animate-blob opacity-70" />
-          <div className="absolute top-[20%] -right-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-blob animation-delay-2000 opacity-70" />
-          <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
+          {state.resume.is_base_resume ? (
+            <>
+              <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl animate-blob opacity-70" />
+              <div className="absolute top-[20%] -right-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-blob animation-delay-2000 opacity-70" />
+              <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
+            </>
+          ) : (
+            <>
+              <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-pink-300/30 to-rose-300/30 blur-3xl animate-blob opacity-70" />
+              <div className="absolute top-[20%] -right-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-rose-300/30 to-pink-300/30 blur-3xl animate-blob animation-delay-2000 opacity-70" />
+              <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-300/30 to-rose-300/30 blur-3xl animate-blob animation-delay-4000 opacity-70" />
+            </>
+          )}
         </div>
 
 
 
         {/* Main Content */}
-        <div className="relative min-h-screen pt-4 px-6 md:px-8 lg:px-12 mx-auto ">
+        <div className="relative min-h-screen pt-4 px-6 md:px-8 lg:px-12 mx-auto">
           <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">
             <ResizablePanelGroup
               direction="horizontal"
-              className="h-full rounded-lg"
+              className={cn(
+                "h-full rounded-lg",
+                state.resume.is_base_resume
+                  ? "border-purple-200/40"
+                  : "border-pink-300/50"
+              )}
             >
               {/* Editor Panel */}
               <ResizablePanel defaultSize={40} minSize={30} maxSize={70}>
@@ -281,7 +302,12 @@ export function ResumeEditorClient({
                     <ScrollArea className="flex-1 pr-2">
                       <Tabs defaultValue="basic" className="relative">
                         {/* Make the actions and tabs sticky */}
-                        <div className="sticky top-0 z-20 bg-background/80 backdrop-blur-sm ">
+                        <div className={cn(
+                          "sticky top-0 z-20 backdrop-blur-sm",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/80"
+                            : "bg-pink-100/90 shadow-sm shadow-pink-200/50"
+                        )}>
                           <ResumeEditorActions
                             resume={state.resume}
                             isSaving={state.isSaving}
@@ -294,7 +320,12 @@ export function ResumeEditorClient({
                         </div>
 
                         {/* Tab content below */}
-                        <TabsContent value="basic" className="space-y-6 mt-6">
+                        <TabsContent value="basic" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           {!state.resume.is_base_resume && (
                             <TailoredJobCard 
                               jobId={state.resume.job_id || null}
@@ -308,7 +339,12 @@ export function ResumeEditorClient({
                           />
                         </TabsContent>
 
-                        <TabsContent value="work" className="space-y-6 mt-6">
+                        <TabsContent value="work" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           <WorkExperienceForm
                             experiences={state.resume.work_experience}
                             onChange={(experiences) => updateField('work_experience', experiences)}
@@ -317,7 +353,12 @@ export function ResumeEditorClient({
                           />
                         </TabsContent>
 
-                        <TabsContent value="projects" className="space-y-6 mt-6">
+                        <TabsContent value="projects" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           <ProjectsForm
                             projects={state.resume.projects}
                             onChange={(projects) => updateField('projects', projects)}
@@ -325,7 +366,12 @@ export function ResumeEditorClient({
                           />
                         </TabsContent>
 
-                        <TabsContent value="education" className="space-y-6 mt-6">
+                        <TabsContent value="education" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           <EducationForm
                             education={state.resume.education}
                             onChange={(education) => updateField('education', education)}
@@ -337,7 +383,12 @@ export function ResumeEditorClient({
                           />
                         </TabsContent>
 
-                        <TabsContent value="skills" className="space-y-6 mt-6">
+                        <TabsContent value="skills" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           <SkillsForm
                             skills={state.resume.skills}
                             onChange={(skills) => updateField('skills', skills)}
@@ -345,7 +396,12 @@ export function ResumeEditorClient({
                           />
                         </TabsContent>
 
-                        <TabsContent value="settings" className="space-y-6 mt-6">
+                        <TabsContent value="settings" className={cn(
+                          "space-y-6 mt-6 rounded-lg p-4",
+                          state.resume.is_base_resume
+                            ? "bg-purple-50/30"
+                            : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                        )}>
                           <DocumentSettingsForm
                             resume={state.resume}
                             onChange={updateField}
@@ -355,7 +411,12 @@ export function ResumeEditorClient({
                     </ScrollArea>
                   </div>
                   {/* Fixed ChatBot at bottom */}
-                  <div className="mt-auto mb-4">
+                  <div className={cn(
+                    "mt-auto mb-4 rounded-lg border",
+                    state.resume.is_base_resume
+                      ? "bg-purple-50/50 border-purple-200/40"
+                      : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"
+                  )}>
                     <ChatBot 
                       resume={state.resume} 
                       onResumeChange={updateField}
@@ -366,11 +427,23 @@ export function ResumeEditorClient({
               </ResizablePanel>
 
               {/* Resize Handle */}
-              <ResizableHandle withHandle />
+              <ResizableHandle 
+                withHandle 
+                className={cn(
+                  state.resume.is_base_resume
+                    ? "bg-purple-100/50 hover:bg-purple-200/50"
+                    : "bg-pink-200/50 hover:bg-pink-300/50 shadow-sm shadow-pink-200/20"
+                )}
+              />
 
               {/* Preview Panel */}
               <ResizablePanel defaultSize={60} minSize={30} maxSize={70}>
-                <ScrollArea className="h-full pr-4">
+                <ScrollArea className={cn(
+                  "h-full pr-4 rounded-lg",
+                  state.resume.is_base_resume
+                    ? "bg-purple-50/30"
+                    : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
+                )}>
                   <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
                     <div className="absolute inset-0">
                       <ResumePreview resume={debouncedResume} containerWidth={previewPanelWidth} />

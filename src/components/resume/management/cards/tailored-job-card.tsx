@@ -455,13 +455,7 @@ export function TailoredJobCard({
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
-              {/* Test Button */}
-              <Button
-                onClick={() => console.log("Job Object:", effectiveJob)}
-                className="m-2"
-              >
-                Log Job Object
-              </Button>
+           
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="details" className="border-none">
                   <div className="flex items-center px-3 py-2">

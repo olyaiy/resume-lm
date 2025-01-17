@@ -343,13 +343,13 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
           {/* Accordion Trigger */}
           <div className="relative">
             <AccordionTrigger className={cn(
-              "px-2 py-1",
+              "px-2 py-2",
               "hover:no-underline",
               "group",
               "transition-all duration-300",
               "data-[state=open]:border-b border-purple-200/60",
               "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100",
-              "data-[state=closed]:py-0.5"
+              "data-[state=closed]:py-1"
             )}>
               <div className={cn(
                 "flex items-center w-full",
@@ -384,7 +384,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                     "transition-all duration-300",
                     "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
                     "disabled:opacity-50",
-                    "group-data-[state=closed]:hidden",
+                    accordionValue !== "chat" && "hidden",
                     "flex items-center gap-1.5"
                   )}
                   disabled={messages.length === 0}
