@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import { MockResume } from "@/components/landing/mock-resume";
 import { MockResumeMobile } from "@/components/landing/mock-resume-mobile";
 import { BenefitsList } from "@/components/landing/benefits-list";
-// import { ActionButtons } from "@/components/landing/action-buttons";
+import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
 import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
@@ -161,7 +161,7 @@ export default async function LoginPage({
                 <BenefitsList />
               </div>
               
-              {/* <ActionButtons /> */}
+              <ActionButtons />
               
               <WaitlistSection />
             </div>
