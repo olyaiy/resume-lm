@@ -72,12 +72,6 @@ function SocialAuth() {
       if (!result.success) {
         console.error('GitHub sign in error:', result.error);
         // You might want to show this error to the user
-        return;
-      }
-
-      // Handle the redirect on the client side
-      if (result.url) {
-        window.location.href = result.url;
       }
     } catch (error) {
       console.error('Failed to sign in with GitHub:', error);

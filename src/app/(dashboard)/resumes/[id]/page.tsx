@@ -15,7 +15,7 @@ export async function generateMetadata({
       title: `${resume.name} | ResumeLM`,
       description: `Editing ${resume.name} - ${resume.target_role} resume`,
     };
-  } catch (error) {
+  } catch (_) {
     return {
       title: 'Resume Editor | ResumeLM',
       description: 'AI-powered resume editor',

@@ -1,7 +1,7 @@
 'use client';
 
 import { Profile } from "@/lib/types";
-import { User, MapPin, Mail, Phone, Briefcase, GraduationCap, Code, Award, Pencil } from "lucide-react";
+import { User, Briefcase, GraduationCap, Code, Award, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";

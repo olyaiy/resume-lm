@@ -1,9 +1,8 @@
 'use client';
 
 
-import React, { useEffect, useRef, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
