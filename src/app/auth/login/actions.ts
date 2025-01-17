@@ -130,9 +130,11 @@ export async function joinWaitlist(formData: FormData): Promise<AuthResult> {
 
 // GitHub Sign In
 export async function signInWithGithub(): Promise<GithubAuthResult> {
+  console.log('🔐 Server: Starting GitHub OAuth process');
   const supabase = await createClient();
 
   try {
+    console.log('🔑 Server: Initiating Supabase OAuth with GitHub');
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
       options: {
@@ -144,18 +146,20 @@ export async function signInWithGithub(): Promise<GithubAuthResult> {
     });
 
     if (error) {
-      console.error('Supabase OAuth error:', error);
+      console.error('❌ Server: Supabase OAuth error:', error);
       return { success: false, error: error.message };
     }
 
-    // Return the URL instead of redirecting
+    console.log('📤 Server: Received OAuth response:', { url: data?.url });
     if (data?.url) {
+      console.log('✅ Server: Successfully got OAuth URL');
       return { success: true, url: data.url };
     }
 
+    console.error('❌ Server: No OAuth URL received');
     return { success: false, error: 'Failed to get OAuth URL' };
   } catch (error) {
-    console.error('Unexpected error during GitHub sign in:', error);
+    console.error('💥 Server: Unexpected error during GitHub sign in:', error);
     return { 
       success: false, 
       error: error instanceof Error ? error.message : 'An unexpected error occurred' 

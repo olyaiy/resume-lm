@@ -11,6 +11,7 @@ export function CreatorStory() {
               src="/alex.webp"
               alt="Alex, creator of ResumeLM"
               fill
+              sizes="(max-width: 768px) 256px, 384px"
               className="object-cover"
               priority
             />

@@ -105,12 +105,12 @@ export function LoginForm() {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="email" className="text-sm font-medium">Email</Label>
+        <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
           <Input
             ref={emailInputRef}
-            id="email"
+            id="login-email"
             name="email"
             type="email"
             value={formData.email}
@@ -126,7 +126,7 @@ export function LoginForm() {
       </div>
       <div className="space-y-2">
         <div className="flex items-center justify-between">
-          <Label htmlFor="password" className="text-sm font-medium">Password</Label>
+          <Label htmlFor="login-password" className="text-sm font-medium">Password</Label>
           <Link 
             href="/auth/reset-password"
             className="text-sm text-muted-foreground hover:text-violet-600 transition-colors"
@@ -137,7 +137,7 @@ export function LoginForm() {
         <div className="relative">
           <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
           <Input
-            id="password"
+            id="login-password"
             name="password"
             type="password"
             value={formData.password}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
@@ -65,18 +65,24 @@ function SocialAuth() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGithubSignIn = async () => {
+    console.log('🚀 Starting GitHub sign-in process...');
     try {
       setIsLoading(true);
+      console.log('📡 Calling signInWithGithub server action...');
       const result = await signInWithGithub();
       
+      console.log('📥 Received result from server action:', result);
       if (!result.success) {
-        console.error('GitHub sign in error:', result.error);
-        // You might want to show this error to the user
+        console.error('❌ GitHub sign in error:', result.error);
+      } else if (result.url) {
+        console.log('✅ Received OAuth URL:', result.url);
+        window.location.href = result.url;
       }
     } catch (error) {
-      console.error('Failed to sign in with GitHub:', error);
+      console.error('💥 Failed to sign in with GitHub:', error);
     } finally {
       setIsLoading(false);
+      console.log('🔄 Sign-in process completed');
     }
   };
 
@@ -136,10 +142,10 @@ export function AuthDialog({ children }: AuthDialogProps) {
               </span>
             </div>
             <Logo className="text-3xl mb-2" asLink={false} />
-            <p className="text-muted-foreground text-sm">
-              Please Sign In or Sign Up to start your journey towards landing your dream job. 
-            </p>
           </DialogTitle>
+          <DialogDescription className="text-center px-8 text-muted-foreground text-sm">
+            Please Sign In or Sign Up to start your journey towards landing your dream job. 
+          </DialogDescription>
 
           <Tabs 
             value={activeTab} 
