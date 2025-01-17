@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { GradientHover } from "./gradient-hover";
 import { useRef } from "react";
-import html2canvas from "html2canvas";
+
 import {
   ContextMenu,
   ContextMenuContent,
