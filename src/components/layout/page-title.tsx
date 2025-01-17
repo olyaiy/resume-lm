@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function getPageTitle(pathname: string): string {
   // Remove leading and trailing slashes and split into segments
@@ -20,7 +21,7 @@ function getPageTitle(pathname: string): string {
   
   // Special cases first
   if (parentSegment === "resumes" && lastSegment !== "resumes") {
-    return "Resume Editor";
+    return "custom"; // Return special value to indicate we should look for custom title
   }
   
   switch (lastSegment) {
@@ -38,7 +39,18 @@ function getPageTitle(pathname: string): string {
 
 export function PageTitle() {
   const pathname = usePathname();
-  const title = getPageTitle(pathname);
+  const [title, setTitle] = useState(() => getPageTitle(pathname));
+
+  useEffect(() => {
+    const baseTitle = getPageTitle(pathname);
+    if (baseTitle === "custom") {
+      // Look for the data attribute in the main content
+      const pageTitle = document.querySelector("[data-page-title]")?.getAttribute("data-page-title");
+      setTitle(pageTitle || "Resume Editor");
+    } else {
+      setTitle(baseTitle);
+    }
+  }, [pathname]);
 
   return (
     <h1 className="text-base font-medium">

@@ -1,7 +1,27 @@
 import { redirect } from "next/navigation";
 import { getResumeById } from "@/utils/actions";
 import { ResumeEditorClient } from "@/components/resume/editor/resume-editor-client";
+import { Metadata } from "next";
 
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  try {
+    const { id } = await params;
+    const { resume } = await getResumeById(id);
+    return {
+      title: `${resume.name} | ResumeLM`,
+      description: `Editing ${resume.name} - ${resume.target_role} resume`,
+    };
+  } catch (error) {
+    return {
+      title: 'Resume Editor | ResumeLM',
+      description: 'AI-powered resume editor',
+    };
+  }
+}
 
 export default async function Page({
   params,
@@ -12,7 +32,10 @@ export default async function Page({
     const { id } = await params;
     const { resume, profile } = await getResumeById(id);
     return (
-      <div className="h-[calc(100vh-4rem)] overflow-hidden relative">
+      <div 
+        className="h-[calc(100vh-4rem)] overflow-hidden relative"
+        data-page-title={resume.name}
+      >
         {/* Gradient Background */}
         <div className="fixed inset-0 z-0">
           <div className="absolute inset-0 bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50" />
