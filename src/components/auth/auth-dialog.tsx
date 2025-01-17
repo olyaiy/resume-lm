@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Sparkles } from "lucide-react";
+import { ArrowRight, Github, Sparkles, Loader2 } from "lucide-react";
 import { Logo } from "@/components/ui/logo";
 import { AuthProvider } from "./auth-context";
 import { signInWithGithub } from "@/app/auth/login/actions";
@@ -104,8 +104,17 @@ function SocialAuth() {
         onClick={handleGithubSignIn}
         disabled={isLoading}
       >
-        <Github className="mr-2 h-4 w-4" />
-        {isLoading ? 'Connecting...' : 'GitHub'}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Connecting...
+          </>
+        ) : (
+          <>
+            <Github className="mr-2 h-4 w-4" />
+            GitHub
+          </>
+        )}
       </Button>
     </div>
   );
