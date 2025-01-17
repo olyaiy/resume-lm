@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Bot, Trash2, Pencil } from "lucide-react";
+import { Bot, Trash2, Pencil, ChevronDown } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -22,6 +22,7 @@ import { useRouter } from "next/navigation";
 import { Logo } from "@/components/ui/logo";
 import { WholeResumeSuggestion } from './suggestions';
 import { QuickSuggestions } from './quick-suggestions';
+import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
 
 
 
@@ -34,9 +35,30 @@ interface ChatBotProps {
   job?: Job | null;
 }
 
+function ScrollToBottom() {
+  const { isAtBottom, scrollToBottom } = useStickToBottomContext();
+
+  return (
+    !isAtBottom && (
+      <button
+        className={cn(
+          "absolute z-50 rounded-full p-2",
+          "bg-white/80 hover:bg-white",
+          "border border-purple-200/60 hover:border-purple-300/60",
+          "shadow-lg shadow-purple-500/5 hover:shadow-purple-500/10",
+          "transition-all duration-300",
+          "left-[50%] translate-x-[-50%] bottom-4"
+        )}
+        onClick={() => scrollToBottom()}
+      >
+        <ChevronDown className="h-4 w-4 text-purple-600" />
+      </button>
+    )
+  );
+}
+
 export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
   const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
@@ -44,7 +66,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
-  
+
   // Load settings from local storage
   useEffect(() => {
     const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -215,21 +237,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     // },
   });
 
-  // Scroll to bottom helper function
-  const scrollToBottom = () => {
-    if (scrollAreaRef.current) {
-      const scrollContainer = scrollAreaRef.current.querySelector('[data-radix-scroll-area-viewport]');
-      if (scrollContainer) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    }
-  };
-
-  // Auto scroll on new messages or when streaming
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages, isLoading]);
-
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
     console.log('Before append - messages:', 
@@ -349,265 +356,267 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
           {/* Accordion Content */}
           <AccordionContent className="space-y-4">
-            <ScrollArea ref={scrollAreaRef} className="h-[60vh] px-4 ">
-              {messages.length === 0 ? (
-                <QuickSuggestions onSuggestionClick={handleSubmit} />
-              ) : (
-                <>
-                  {/* Messages */}
-                  {messages.map((m: Message, index) => (
-                    <React.Fragment key={index}>
-                      {/* Regular Message Content */}
-                      {m.content && (
-                        <div className="my-6">
-                          <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                            <div className={cn(
-                              "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group items-center",
-                              m.role === 'user' ? [
-                                "bg-gradient-to-br from-purple-500 to-indigo-500",
-                                "text-white",
-                                "shadow-md shadow-purple-500/10",
-                                "ml-auto pb-0"
-                              ] : [
-                                "bg-white/60",
-                                "border border-purple-200/60",
-                                "shadow-sm",
-                                "backdrop-blur-sm pb-0"
-                              ]
-                            )}>
-                              {editingMessageId === m.id ? (
-                                <div className="flex flex-col gap-2">
-                                  <textarea
-                                    value={editContent}
-                                    onChange={(e) => setEditContent(e.target.value)}
-                                    className={cn(
-                                      "w-full min-h-[100px] p-2 rounded-lg",
-                                      "bg-white/80 backdrop-blur-sm",
-                                      m.role === 'user' 
-                                        ? "text-purple-900 placeholder-purple-400"
-                                        : "text-gray-900 placeholder-gray-400",
-                                      "border border-purple-200/60 focus:border-purple-400/60",
-                                      "focus:outline-none focus:ring-1 focus:ring-purple-400/60"
-                                    )}
-                                  />
+            <StickToBottom className="h-[60vh] px-4 relative" resize="smooth" initial="smooth">
+              <StickToBottom.Content className="flex flex-col">
+                {messages.length === 0 ? (
+                  <QuickSuggestions onSuggestionClick={handleSubmit} />
+                ) : (
+                  <>
+                    {/* Messages */}
+                    {messages.map((m: Message, index) => (
+                      <React.Fragment key={index}>
+                        {/* Regular Message Content */}
+                        {m.content && (
+                          <div className="my-6">
+                            <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                              <div className={cn(
+                                "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group items-center",
+                                m.role === 'user' ? [
+                                  "bg-gradient-to-br from-purple-500 to-indigo-500",
+                                  "text-white",
+                                  "shadow-md shadow-purple-500/10",
+                                  "ml-auto pb-0"
+                                ] : [
+                                  "bg-white/60",
+                                  "border border-purple-200/60",
+                                  "shadow-sm",
+                                  "backdrop-blur-sm pb-0"
+                                ]
+                              )}>
+                                {editingMessageId === m.id ? (
+                                  <div className="flex flex-col gap-2">
+                                    <textarea
+                                      value={editContent}
+                                      onChange={(e) => setEditContent(e.target.value)}
+                                      className={cn(
+                                        "w-full min-h-[100px] p-2 rounded-lg",
+                                        "bg-white/80 backdrop-blur-sm",
+                                        m.role === 'user' 
+                                          ? "text-purple-900 placeholder-purple-400"
+                                          : "text-gray-900 placeholder-gray-400",
+                                        "border border-purple-200/60 focus:border-purple-400/60",
+                                        "focus:outline-none focus:ring-1 focus:ring-purple-400/60"
+                                      )}
+                                    />
+                                    <button
+                                      onClick={() => handleSaveEdit(m.id)}
+                                      className={cn(
+                                        "self-end px-3 py-1 rounded-lg text-xs",
+                                        "bg-purple-500 text-white",
+                                        "hover:bg-purple-600",
+                                        "transition-colors duration-200"
+                                      )}
+                                    >
+                                      Save
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <MemoizedMarkdown id={m.id} content={m.content} />
+                                )}
+                                <div className="absolute -bottom-4 left-2 flex gap-2">
                                   <button
-                                    onClick={() => handleSaveEdit(m.id)}
+                                    onClick={() => handleDelete(m.id)}
                                     className={cn(
-                                      "self-end px-3 py-1 rounded-lg text-xs",
-                                      "bg-purple-500 text-white",
-                                      "hover:bg-purple-600",
-                                      "transition-colors duration-200"
+                                      "transition-colors duration-200",
+                                      m.role === 'user' 
+                                        ? "text-purple-500/60 hover:text-purple-600"
+                                        : "text-purple-400/60 hover:text-purple-500",
                                     )}
+                                    aria-label="Delete message"
                                   >
-                                    Save
+                                    <Trash2 className="h-3 w-3" />
+                                  </button>
+                                  <button
+                                    onClick={() => handleEdit(m.id, m.content)}
+                                    className={cn(
+                                      "transition-colors duration-200",
+                                      m.role === 'user' 
+                                        ? "text-purple-500/60 hover:text-purple-600"
+                                        : "text-purple-400/60 hover:text-purple-500",
+                                    )}
+                                    aria-label="Edit message"
+                                  >
+                                    <Pencil className="h-3 w-3" />
                                   </button>
                                 </div>
-                              ) : (
-                                <MemoizedMarkdown id={m.id} content={m.content} />
-                              )}
-                              <div className="absolute -bottom-4 left-2 flex gap-2">
-                                <button
-                                  onClick={() => handleDelete(m.id)}
-                                  className={cn(
-                                    "transition-colors duration-200",
-                                    m.role === 'user' 
-                                      ? "text-purple-500/60 hover:text-purple-600"
-                                      : "text-purple-400/60 hover:text-purple-500",
-                                  )}
-                                  aria-label="Delete message"
-                                >
-                                  <Trash2 className="h-3 w-3" />
-                                </button>
-                                <button
-                                  onClick={() => handleEdit(m.id, m.content)}
-                                  className={cn(
-                                    "transition-colors duration-200",
-                                    m.role === 'user' 
-                                      ? "text-purple-500/60 hover:text-purple-600"
-                                      : "text-purple-400/60 hover:text-purple-500",
-                                  )}
-                                  aria-label="Edit message"
-                                >
-                                  <Pencil className="h-3 w-3" />
-                                </button>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      )}
-                      {/* Tool Invocations as Separate Bubbles */}
-                      {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
-                        const { toolName, toolCallId, state, args } = toolInvocation;
-                        // Show loading state for non-result states
-                        if (state !== 'result') {
-                          return (
-                            <div key={toolCallId} className="mt-2 max-w-[90%]">
-                              <div className="flex justify-start max-w-[90%]">
-                                <SuggestionSkeleton />
-                              </div>
-                            </div>
-                          );
-                        }
-                        // Handle getResume tool separately
-                        if (toolName === 'getResume') {
-                          return (
-                            <div key={toolCallId} className="mt-2">
-                              <div className="flex justify-start">
-                                <div className={cn(
-                                  "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                                  "bg-white/60 border border-purple-200/60",
-                                  "shadow-sm backdrop-blur-sm"
-                                )}>
-                                  {args.message}
-                                  <p>Read Resume ✅</p>
+                        )}
+                        {/* Tool Invocations as Separate Bubbles */}
+                        {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
+                          const { toolName, toolCallId, state, args } = toolInvocation;
+                          // Show loading state for non-result states
+                          if (state !== 'result') {
+                            return (
+                              <div key={toolCallId} className="mt-2 max-w-[90%]">
+                                <div className="flex justify-start max-w-[90%]">
+                                  <SuggestionSkeleton />
                                 </div>
                               </div>
-                            </div>
-                          );
-                        }
-                        // Map tool names to resume sections and handle suggestions
-                        const toolConfig = {
-                          suggest_work_experience_improvement: {
-                            type: 'work_experience',
-                            field: 'work_experience',
-                            content: 'improved_experience',
-                          },
-                          suggest_project_improvement: {
-                            type: 'project',
-                            field: 'projects',
-                            content: 'improved_project',
-                          },
-                          suggest_skill_improvement: {
-                            type: 'skill',
-                            field: 'skills',
-                            content: 'improved_skill',
-                          },
-                          suggest_education_improvement: {
-                            type: 'education',
-                            field: 'education',
-                            content: 'improved_education',
-                          },
-                          modifyWholeResume: {
-                            type: 'whole_resume',
-                            field: 'all',
-                            content: null,
-                          },
-                        } as const;
+                            );
+                          }
+                          // Handle getResume tool separately
+                          if (toolName === 'getResume') {
+                            return (
+                              <div key={toolCallId} className="mt-2">
+                                <div className="flex justify-start">
+                                  <div className={cn(
+                                    "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                                    "bg-white/60 border border-purple-200/60",
+                                    "shadow-sm backdrop-blur-sm"
+                                  )}>
+                                    {args.message}
+                                    <p>Read Resume ✅</p>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          }
+                          // Map tool names to resume sections and handle suggestions
+                          const toolConfig = {
+                            suggest_work_experience_improvement: {
+                              type: 'work_experience',
+                              field: 'work_experience',
+                              content: 'improved_experience',
+                            },
+                            suggest_project_improvement: {
+                              type: 'project',
+                              field: 'projects',
+                              content: 'improved_project',
+                            },
+                            suggest_skill_improvement: {
+                              type: 'skill',
+                              field: 'skills',
+                              content: 'improved_skill',
+                            },
+                            suggest_education_improvement: {
+                              type: 'education',
+                              field: 'education',
+                              content: 'improved_education',
+                            },
+                            modifyWholeResume: {
+                              type: 'whole_resume',
+                              field: 'all',
+                              content: null,
+                            },
+                          } as const;
 
-                        const config = toolConfig[toolName as keyof typeof toolConfig];
-                        if (!config) return null;
+                          const config = toolConfig[toolName as keyof typeof toolConfig];
+                          if (!config) return null;
 
-                        if (config.type === 'whole_resume') {
-                          // Store original state before applying updates
-                          if (!originalResume) {
-                            setOriginalResume({ ...resume });
+                          if (config.type === 'whole_resume') {
+                            // Store original state before applying updates
+                            if (!originalResume) {
+                              setOriginalResume({ ...resume });
+                            }
+
+                            return (
+                              <div key={toolCallId} className="mt-2 w-[90%]">
+                                <WholeResumeSuggestion
+                                  onReject={() => {
+                                    if (originalResume) {
+                                      // Restore all fields except metadata
+                                      Object.keys(originalResume).forEach((key) => {
+                                        if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+                                          onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
+                                        }
+                                      });
+                                      
+                                      // Clear the stored original state
+                                      setOriginalResume(null);
+                                    }
+                                  }}
+                                />
+                              </div>
+                            );
                           }
 
                           return (
                             <div key={toolCallId} className="mt-2 w-[90%]">
-                              <WholeResumeSuggestion
-                                onReject={() => {
-                                  if (originalResume) {
-                                    // Restore all fields except metadata
-                                    Object.keys(originalResume).forEach((key) => {
-                                      if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
-                                        onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
-                                      }
-                                    });
-                                    
-                                    // Clear the stored original state
-                                    setOriginalResume(null);
-                                  }
-                                }}
-                              />
+                              <div className="">
+                                <Suggestion
+                                  type={config.type}
+                                  content={args[config.content]}
+                                  currentContent={resume[config.field][args.index]}
+                                  onAccept={() => onResumeChange(config.field, 
+                                    resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
+                                      i === args.index ? args[config.content] : item
+                                    )
+                                  )}
+                                  onReject={() => {}}
+                                />
+                              </div>
                             </div>
                           );
-                        }
+                        })}
 
-                        return (
-                          <div key={toolCallId} className="mt-2 w-[90%]">
-                            <div className="">
-                              <Suggestion
-                                type={config.type}
-                                content={args[config.content]}
-                                currentContent={resume[config.field][args.index]}
-                                onAccept={() => onResumeChange(config.field, 
-                                  resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
-                                    i === args.index ? args[config.content] : item
-                                  )
-                                )}
-                                onReject={() => {}}
-                              />
+
+                        {/* Loading Dots Message - Modified condition */}
+                        {((isInitialLoading && index === messages.length - 1 && m.role === 'user') ||
+                          (isLoading && index === messages.length - 1 && m.role === 'assistant')) && (
+                          <div className="mt-2">
+                            <div className="flex justify-start">
+                              <div className={cn(
+                                "rounded-2xl px-4 py-2.5 min-w-[60px]",
+                                "bg-white/60",
+                                "border border-purple-200/60",
+                                "shadow-sm",
+                                "backdrop-blur-sm"
+                              )}>
+                                <LoadingDots className="text-purple-600" />
+                              </div>
                             </div>
                           </div>
-                        );
-                      })}
-
-
-                      {/* Loading Dots Message - Modified condition */}
-                      {((isInitialLoading && index === messages.length - 1 && m.role === 'user') ||
-                        (isLoading && index === messages.length - 1 && m.role === 'assistant')) && (
-                        <div className="mt-2">
-                          <div className="flex justify-start">
-                            <div className={cn(
-                              "rounded-2xl px-4 py-2.5 min-w-[60px]",
-                              "bg-white/60",
-                              "border border-purple-200/60",
-                              "shadow-sm",
-                              "backdrop-blur-sm"
-                            )}>
-                              <LoadingDots className="text-purple-600" />
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </React.Fragment>
-                  ))}
-                </>
-              )}
-            
-            {error && (
-              <div className={cn(
-                "mt-2 text-sm px-4",
-                "rounded-lg py-2",
-                "bg-red-50/50 border border-red-200/50",
-                "flex flex-col gap-2"
-              )}>
-                <div className="text-red-500">
-                  {typeof error === 'string' 
-                    ? error
-                    : ((error as Error)?.message?.includes('OpenAI API key not found') ||
-                       JSON.stringify(error).includes('OpenAI API key not found'))
-                      ? "OpenAI API key not found. Please set your API key in settings to continue."
-                      : ((error as Error)?.message?.includes('invalid x-api-key') || 
-                         JSON.stringify(error).includes('authentication_error'))
-                        ? "Your Anthropic API key is invalid, please try updating it in settings and try again."
-                        : ((error as Error)?.message?.includes('Incorrect API key provided') ||
-                           JSON.stringify(error).includes('invalid_api_key'))
-                            ? "Your OpenAI API key is invalid, please try updating it in settings and try again."
-                            : "An error occurred. Please try again or check your settings."}
-                </div>
-                {(error.toString().toLowerCase().includes('api key') || 
-                  error.toString().toLowerCase().includes('authentication')) && (
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className={cn(
-                      "w-fit",
-                      "bg-white/60 hover:bg-white/80",
-                      "border-red-200 hover:border-red-300",
-                      "text-red-600 hover:text-red-700"
-                    )}
-                    onClick={() => router.push('/settings')}
-                  >
-                    Go to Settings
-                  </Button>
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </>
                 )}
-              </div>
-            )}
+              
+                {error && (
+                  <div className={cn(
+                    "mt-2 text-sm px-4",
+                    "rounded-lg py-2",
+                    "bg-red-50/50 border border-red-200/50",
+                    "flex flex-col gap-2"
+                  )}>
+                    <div className="text-red-500">
+                      {typeof error === 'string' 
+                        ? error
+                        : ((error as Error)?.message?.includes('OpenAI API key not found') ||
+                           JSON.stringify(error).includes('OpenAI API key not found'))
+                            ? "OpenAI API key not found. Please set your API key in settings to continue."
+                            : ((error as Error)?.message?.includes('invalid x-api-key') || 
+                               JSON.stringify(error).includes('authentication_error'))
+                                ? "Your Anthropic API key is invalid, please try updating it in settings and try again."
+                                : ((error as Error)?.message?.includes('Incorrect API key provided') ||
+                                   JSON.stringify(error).includes('invalid_api_key'))
+                                    ? "Your OpenAI API key is invalid, please try updating it in settings and try again."
+                                    : "An error occurred. Please try again or check your settings."}
+                    </div>
+                    {(error.toString().toLowerCase().includes('api key') || 
+                      error.toString().toLowerCase().includes('authentication')) && (
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        className={cn(
+                          "w-fit",
+                          "bg-white/60 hover:bg-white/80",
+                          "border-red-200 hover:border-red-300",
+                          "text-red-600 hover:text-red-700"
+                        )}
+                        onClick={() => router.push('/settings')}
+                      >
+                        Go to Settings
+                      </Button>
+                    )}
+                  </div>
+                )}
+              </StickToBottom.Content>
 
-
-            </ScrollArea>
+              <ScrollToBottom />
+            </StickToBottom>
             
           </AccordionContent>
         </AccordionItem>
