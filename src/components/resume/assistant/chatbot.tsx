@@ -356,8 +356,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
           {/* Accordion Content */}
           <AccordionContent className="space-y-4">
-            <StickToBottom className="h-[60vh] px-4 relative" resize="smooth" initial="smooth">
-              <StickToBottom.Content className="flex flex-col">
+            <StickToBottom className="h-[60vh] px-4 relative custom-scrollbar" resize="smooth" initial="smooth">
+              <StickToBottom.Content className="flex flex-col ">
                 {messages.length === 0 ? (
                   <QuickSuggestions onSuggestionClick={handleSubmit} />
                 ) : (
