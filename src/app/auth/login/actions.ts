@@ -12,6 +12,11 @@ interface GithubAuthResult extends AuthResult {
   url?: string;
 }
 
+interface StripeCustomerUpdate {
+  success: boolean;
+  error?: string;
+}
+
 // Login
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
@@ -204,10 +209,57 @@ export async function getUserId(): Promise<string | null> {
   const supabase = await createClient();
   
   try {
-    const { data: { session } } = await supabase.auth.getSession();
-    return session?.user?.id || null;
+    const { data: { user }, error } = await supabase.auth.getUser();
+    if (error || !user) {
+      return null;
+    }
+    return user.id;
   } catch (error) {
     console.error('Error getting user ID:', error);
     return null;
+  }
+} 
+
+// Update profile with Stripe customer ID
+export async function updateUserStripeCustomer(
+  stripeCustomerId: string,
+  subscriptionData: {
+    subscriptionId: string;
+    status: 'active' | 'canceled';
+    currentPeriodEnd: Date;
+  }
+): Promise<StripeCustomerUpdate> {
+  const supabase = await createClient();
+  
+  try {
+    const userId = await getUserId();
+    
+    if (!userId) {
+      return { success: false, error: 'No authenticated user found' };
+    }
+
+    const { error } = await supabase
+      .from('profiles')
+      .update({
+        stripe_customer_id: stripeCustomerId,
+        stripe_subscription_id: subscriptionData.subscriptionId,
+        subscription_status: subscriptionData.status,
+        current_period_end: subscriptionData.currentPeriodEnd.toISOString(),
+        updated_at: new Date().toISOString()
+      })
+      .eq('user_id', userId);
+
+    if (error) {
+      console.error('Error updating stripe customer id:', error);
+      return { success: false, error: error.message };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Unexpected error updating stripe customer:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+    };
   }
 } 
