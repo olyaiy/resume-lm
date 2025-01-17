@@ -166,3 +166,48 @@ export async function signInWithGithub(): Promise<GithubAuthResult> {
     };
   }
 } 
+
+// Check if user is authenticated
+export async function checkAuth(): Promise<{ 
+  authenticated: boolean; 
+  user?: { id: string; email?: string } | null 
+}> {
+  const supabase = await createClient();
+  
+  try {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    
+    if (error) {
+      console.error('Auth check error:', error);
+      return { authenticated: false };
+    }
+
+    if (!session) {
+      return { authenticated: false };
+    }
+
+    return { 
+      authenticated: true,
+      user: {
+        id: session.user.id,
+        email: session.user.email
+      }
+    };
+  } catch (error) {
+    console.error('Unexpected error during auth check:', error);
+    return { authenticated: false };
+  }
+} 
+
+// Get user ID if authenticated
+export async function getUserId(): Promise<string | null> {
+  const supabase = await createClient();
+  
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    return session?.user?.id || null;
+  } catch (error) {
+    console.error('Error getting user ID:', error);
+    return null;
+  }
+} 
