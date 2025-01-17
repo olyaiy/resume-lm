@@ -1,5 +1,6 @@
 import { LogoutButton } from "@/components/auth/logout-button";
 import { SettingsButton } from "@/components/settings/settings-button";
+import { ModelSelector } from "@/components/settings/model-selector";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -51,6 +52,8 @@ export function AppHeader({ children }: AppHeaderProps) {
                 <User className="h-3 w-3" />
                 <span className="hidden sm:inline">Profile</span>
               </Link>
+              <div className="w-px h-3.5 bg-purple-200/70" />
+              <ModelSelector />
               <div className="w-px h-3.5 bg-purple-200/70" />
               <SettingsButton />
               <div className="w-px h-3.5 bg-purple-200/70" />

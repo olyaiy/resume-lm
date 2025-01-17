@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff, Copy } from "lucide-react"
+import { Eye, EyeOff, Copy, Check } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
@@ -66,6 +66,7 @@ export function ApiKeysForm() {
   const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>({} as Record<ServiceName, boolean>)
   const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
   const [defaultModel, setDefaultModel] = useState<string>('')
+  const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
 
   // Load stored data on mount
   useEffect(() => {
@@ -196,6 +197,12 @@ export function ApiKeysForm() {
     return apiKeys.some(k => k.service === model.provider)
   }
 
+  const handleCopyKey = (service: ServiceName, key: string) => {
+    navigator.clipboard.writeText(key)
+    setCopiedKey(service)
+    setTimeout(() => setCopiedKey(null), 1000)
+  }
+
   return (
     <div className="space-y-6">
       {/* Model Selection Card */}
@@ -296,10 +303,19 @@ export function ApiKeysForm() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        onClick={() => navigator.clipboard.writeText(existingKey.key)}
-                        className="h-7 px-2 text-muted-foreground hover:text-gray-900 transition-colors"
+                        onClick={() => handleCopyKey(provider.id, existingKey.key)}
+                        className={cn(
+                          "h-7 px-2 transition-colors",
+                          copiedKey === provider.id 
+                            ? "text-emerald-500 hover:text-emerald-600" 
+                            : "text-muted-foreground hover:text-gray-900"
+                        )}
                       >
-                        <Copy className="h-3.5 w-3.5" />
+                        {copiedKey === provider.id ? (
+                          <Check className="h-3.5 w-3.5" />
+                        ) : (
+                          <Copy className="h-3.5 w-3.5" />
+                        )}
                       </Button>
                       <Button
                         variant="ghost"
