@@ -11,7 +11,6 @@ interface NewSessionOptions {
 }
 
 export const postStripeSession = async ({priceId}: NewSessionOptions) => {
-    console.log('SECRET KEY', apiKey)
     const returnUrl = 'http://localhost:3000/checkout-return?session_id={CHECKOUT_SESSION_ID}'
 
     const session = await stripe.checkout.sessions.create({
