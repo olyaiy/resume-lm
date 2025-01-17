@@ -26,6 +26,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { cn } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { ResumeSortControls, type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
+import type { Resume } from "@/lib/types";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -64,14 +65,14 @@ export default async function Home({
   const tailoredDirection = (params.tailoredDirection as SortDirection) || 'desc';
 
   // Sort function
-  function sortResumes(resumes: any[], sort: SortOption, direction: SortDirection) {
+  function sortResumes(resumes: Resume[], sort: SortOption, direction: SortDirection) {
     return [...resumes].sort((a, b) => {
       const modifier = direction === 'asc' ? 1 : -1;
       switch (sort) {
         case 'name':
           return modifier * a.name.localeCompare(b.name);
         case 'jobTitle':
-          return modifier * (a.target_role?.localeCompare(b.target_role || '') || 0);
+          return modifier * ((a.target_role || '').localeCompare(b.target_role || '') || 0);
         case 'updatedAt':
         default:
           return modifier * (new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
