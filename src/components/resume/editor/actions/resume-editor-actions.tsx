@@ -26,27 +26,47 @@ export function ResumeEditorActions({
 }: ResumeEditorActionsProps) {
   // Dynamic color classes based on resume type
   const colors = resume.is_base_resume ? {
-    bg: "bg-purple-100/30",
-    hover: "hover:bg-purple-200/40",
-    text: "text-purple-700",
-    border: "border-purple-200/40"
+    // Import button colors
+    importBg: "bg-indigo-600",
+    importHover: "hover:bg-indigo-700",
+    importShadow: "shadow-indigo-400/20",
+    // Action buttons colors (download & save)
+    actionBg: "bg-purple-600",
+    actionHover: "hover:bg-purple-700",
+    actionShadow: "shadow-purple-400/20"
   } : {
-    bg: "bg-pink-100/40",
-    hover: "hover:bg-pink-200/50",
-    text: "text-pink-700",
-    border: "border-pink-300/50"
+    // Import button colors
+    importBg: "bg-rose-600",
+    importHover: "hover:bg-rose-700",
+    importShadow: "shadow-rose-400/20",
+    // Action buttons colors (download & save)
+    actionBg: "bg-pink-600",
+    actionHover: "hover:bg-pink-700",
+    actionShadow: "shadow-pink-400/20"
   };
 
-  const buttonBaseClasses = cn(
+  const buttonBaseStyle = cn(
     "transition-all duration-300",
     "relative overflow-hidden",
     "h-8 px-3 text-[11px] font-medium",
-    "border rounded-md",
-    colors.border,
-    colors.bg,
-    colors.text,
-    colors.hover,
-    "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+    "rounded-md border-none",
+    "text-white shadow-sm",
+    "hover:shadow-md hover:-translate-y-[1px]",
+    "disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:shadow-none disabled:hover:translate-y-0"
+  );
+
+  const importButtonClasses = cn(
+    buttonBaseStyle,
+    colors.importBg,
+    colors.importHover,
+    colors.importShadow
+  );
+
+  const actionButtonClasses = cn(
+    buttonBaseStyle,
+    colors.actionBg,
+    colors.actionHover,
+    colors.actionShadow
   );
 
   return (
@@ -56,7 +76,7 @@ export function ResumeEditorActions({
         <TextImport
           resume={resume}
           onResumeChange={onResumeChange}
-          className={buttonBaseClasses}
+          className={importButtonClasses}
         />
 
         {/* Download Button */}
@@ -85,8 +105,7 @@ export function ResumeEditorActions({
               });
             }
           }}
-          variant="ghost"
-          className={buttonBaseClasses}
+          className={actionButtonClasses}
         >
           <Download className="mr-1.5 h-3.5 w-3.5" />
           Download
@@ -96,8 +115,7 @@ export function ResumeEditorActions({
         <Button 
           onClick={onSave} 
           disabled={isSaving}
-          variant="ghost"
-          className={buttonBaseClasses}
+          className={actionButtonClasses}
         >
           {isSaving ? (
             <>
