@@ -5,6 +5,7 @@ interface MiniResumePreviewProps {
   name: string;
   type: 'base' | 'tailored';
   updatedAt?: string;
+  createdAt?: string;
   target_role?: string;
   className?: string;
 }
@@ -12,9 +13,19 @@ interface MiniResumePreviewProps {
 export function MiniResumePreview({
   name,
   type,
-  updatedAt,
+  createdAt,
   className
 }: MiniResumePreviewProps) {
+
+  function formatDate(dateString?: string) {
+    if (!dateString) return '';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      month: '2-digit',
+      day: '2-digit',
+      year: 'numeric'
+    });
+  }
 
   const accentBorder = type === 'base' ? 'purple-200' : 'pink-200';
   const accentBg = type === 'base' ? 'purple-50' : 'pink-50';
@@ -123,10 +134,10 @@ export function MiniResumePreview({
           </div>
         </div>
 
-        {/* Footer with update info */}
-        {updatedAt && (
+        {/* Footer with creation date */}
+        {createdAt && (
           <div className="absolute bottom-2 right-2 text-[10px] text-gray-400">
-            Updated {format(new Date(updatedAt), 'MMM d')}
+            {formatDate(createdAt)}
           </div>
         )}
       </div>

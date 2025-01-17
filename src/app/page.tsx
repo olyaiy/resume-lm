@@ -173,7 +173,7 @@ export default async function Home({
                                 name={resume.name}
                                 type="base"
                                 target_role={resume.target_role}
-                                updatedAt={resume.updated_at}
+                                createdAt={resume.created_at}
                                 className="hover:-translate-y-1 transition-transform duration-300"
                               />
                             </Link>
@@ -292,7 +292,7 @@ export default async function Home({
                                 name={resume.name}
                                 type="tailored"
                                 target_role={resume.target_role}
-                                updatedAt={resume.updated_at}
+                                createdAt={resume.created_at}
                                 className="hover:-translate-y-1 transition-transform duration-300"
                               />
                             </Link>
