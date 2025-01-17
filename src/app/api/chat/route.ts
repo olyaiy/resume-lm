@@ -135,7 +135,7 @@ export async function POST(req: Request) {
             improved_skill: z.object({
               category: z.string(),
               items: z.array(z.string()),
-            }).describe('Improved version of the skill category.'),
+            }).describe('Improved version of the skill category. ONLY use this tool to add NEW skills or REMOVE existing skills, DO NOT ADD IN EXISTING SKILLS IN ANY WAY.'),
           }),
         },
         suggest_education_improvement: {

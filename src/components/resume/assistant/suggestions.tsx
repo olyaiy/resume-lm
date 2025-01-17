@@ -243,15 +243,21 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
               {project.description.map((point, index) => (
                 <div 
                   key={index} 
-                  className={cn(
-                    "flex items-start gap-2",
-                    !currentProject || isNewItem(currentProject.description, project.description, point) && DIFF_HIGHLIGHT_CLASSES
-                  )}
+                  className="flex items-start gap-2"
                 >
                   <span className="text-gray-800 mt-1">•</span>
-                  <p className="text-sm text-gray-800 flex-1">
-                    {point}
-                  </p>
+                  <div className="flex-1">
+                    <Tiptap
+                      content={point}
+                      readOnly={true}
+                      onChange={() => {}}
+                      className={cn(
+                        "min-h-[60px] text-xs text-gray-800",
+                        !currentProject || isNewItem(currentProject.description, project.description, point) && DIFF_HIGHLIGHT_CLASSES,
+                        "border-none shadow-none"
+                      )}
+                    />
+                  </div>
                 </div>
               ))}
             </div>

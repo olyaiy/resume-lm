@@ -341,89 +341,94 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
         <AccordionItem value="chat" className="border-none py-0 my-0">
 
           {/* Accordion Trigger */}
-          <AccordionTrigger className={cn(
-            "px-2 py-1",
-            "hover:no-underline",
-            "group",
-            "transition-all duration-300",
-            "data-[state=open]:border-b border-purple-200/60",
-            "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100",
-            "data-[state=closed]:py-0.5"
-          )}>
-            <div className={cn(
-              "flex items-center justify-between w-full",
-              "transition-transform duration-300",
-              "group-hover:scale-[0.99]",
-              "group-data-[state=closed]:scale-95"
+          <div className="relative">
+            <AccordionTrigger className={cn(
+              "px-2 py-1",
+              "hover:no-underline",
+              "group",
+              "transition-all duration-300",
+              "data-[state=open]:border-b border-purple-200/60",
+              "data-[state=closed]:opacity-80 data-[state=closed]:hover:opacity-100",
+              "data-[state=closed]:py-0.5"
             )}>
-              <div className="flex items-center gap-1.5">
-                <div className={cn(
-                  "p-1 rounded-lg",
-                  "bg-purple-100/80 text-purple-600",
-                  "group-hover:bg-purple-200/80",
-                  "transition-colors duration-300",
-                  "group-data-[state=closed]:bg-white/60",
-                  "group-data-[state=closed]:p-0.5"
-                )}>
-                  <Bot className="h-3 w-3" />
+              <div className={cn(
+                "flex items-center w-full",
+                "transition-transform duration-300",
+                "group-hover:scale-[0.99]",
+                "group-data-[state=closed]:scale-95"
+              )}>
+                <div className="flex items-center gap-1.5">
+                  <div className={cn(
+                    "p-1 rounded-lg",
+                    "bg-purple-100/80 text-purple-600",
+                    "group-hover:bg-purple-200/80",
+                    "transition-colors duration-300",
+                    "group-data-[state=closed]:bg-white/60",
+                    "group-data-[state=closed]:p-0.5"
+                  )}>
+                    <Bot className="h-3 w-3" />
+                  </div>
+                  <Logo className="text-xs" asLink={false} />
                 </div>
-                <Logo className="text-xs" asLink={false} />
               </div>
+            </AccordionTrigger>
 
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
-                  <button
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  className={cn(
+                    "absolute right-8 top-1/2 -translate-y-1/2",
+                    "px-3 py-1.5 rounded-lg",
+                    "bg-purple-100/40 text-purple-500/80",
+                    "hover:bg-purple-200/60 hover:text-purple-600",
+                    "transition-all duration-300",
+                    "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
+                    "disabled:opacity-50",
+                    "group-data-[state=closed]:hidden",
+                    "flex items-center gap-1.5"
+                  )}
+                  disabled={messages.length === 0}
+                  aria-label="Clear chat history"
+                  variant="ghost"
+                  size="sm"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  <span className="text-xs font-medium">Clear Chat History</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className={cn(
+                "bg-white/95 backdrop-blur-xl",
+                "border-purple-200/60",
+                "shadow-lg shadow-purple-500/5"
+              )}>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will remove all messages and reset the chat. This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className={cn(
+                    "border-purple-200/60",
+                    "hover:bg-purple-50/50",
+                    "hover:text-purple-700"
+                  )}>
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleClearChat}
                     className={cn(
-                      "px-3 py-1.5 rounded-lg",
-                      "bg-purple-100/40 text-purple-500/80",
-                      "hover:bg-purple-200/60 hover:text-purple-600",
-                      "transition-all duration-300",
-                      "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
-                      "disabled:opacity-50",
-                      "group-data-[state=closed]:hidden",
-                      "flex items-center gap-1.5"
+                      "bg-purple-500 text-white",
+                      "hover:bg-purple-600",
+                      "focus:ring-purple-400"
                     )}
-                    disabled={messages.length === 0}
-                    aria-label="Clear chat history"
                   >
-                    <RefreshCw className="h-3 w-3" />
-                    <span className="text-xs font-medium">Clear Chat History</span>
-                  </button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className={cn(
-                  "bg-white/95 backdrop-blur-xl",
-                  "border-purple-200/60",
-                  "shadow-lg shadow-purple-500/5"
-                )}>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      This will remove all messages and reset the chat. This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel className={cn(
-                      "border-purple-200/60",
-                      "hover:bg-purple-50/50",
-                      "hover:text-purple-700"
-                    )}>
-                      Cancel
-                    </AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={handleClearChat}
-                      className={cn(
-                        "bg-purple-500 text-white",
-                        "hover:bg-purple-600",
-                        "focus:ring-purple-400"
-                      )}
-                    >
-                      Clear Chat
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            </div>
-          </AccordionTrigger>
+                    Clear Chat
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
 
           {/* Accordion Content */}
           <AccordionContent className="space-y-4">
