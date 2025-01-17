@@ -9,6 +9,8 @@ import {
 import { Download, Copy } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Resume, WorkExperience, Education, Project } from "@/lib/types";
+import { pdf } from '@react-pdf/renderer';
+import { ResumePDFDocument } from "../preview/resume-pdf-document";
 
 interface ResumeContextMenuProps {
   children: React.ReactNode;
@@ -17,11 +19,28 @@ interface ResumeContextMenuProps {
 
 export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) {
   const handleDownloadPDF = async () => {
-    // TODO: Implement PDF download
-    toast({
-      title: "Coming soon",
-      description: "PDF download will be available soon.",
-    });
+    try {
+      const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast({
+        title: "Download started",
+        description: "Your resume PDF is being downloaded.",
+      });
+    } catch (error) {
+      console.error(error);
+      toast({
+        title: "Download failed",
+        description: "Unable to download your resume. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const formatWorkExperience = (exp: WorkExperience) => {
