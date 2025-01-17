@@ -144,7 +144,7 @@ export default async function LoginPage({
                 <div className="space-y-3 lg:space-y-4">
                   <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tight">
                     <span className="inline-block bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent animate-gradient-x pb-2">
-                      Open Source, AI Resume Builder
+                      Free AI Resume Builder
                     </span>
                     <br />
                     <span className="inline-block bg-gradient-to-r from-violet-500/90 via-blue-500/90 to-violet-500/90 bg-clip-text text-transparent animate-gradient-x relative">
@@ -171,7 +171,27 @@ export default async function LoginPage({
               {/* Mobile-only single resume view */}
               <div className="block lg:hidden">
                 <div className="relative w-full max-w-[min(85vw,_6in)] mx-auto">
-                  <MockResumeMobile />
+                  {/* Decorative Elements - Subtle gradients for mobile */}
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/3 to-blue-500/3 rounded-sm transform rotate-2 scale-[1.02]" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-violet-500/3 to-blue-500/3 rounded-sm transform -rotate-2 scale-[1.02]" />
+                  
+                  {/* Stacked Resume Previews - Mobile Optimized */}
+                  <div className="relative">
+                    {/* Background Resume - Third Layer */}
+                    <div className="absolute -right-4 top-2 opacity-80  scale-[0.99] rotate-[-6deg] ">
+                      <MockResumeMobile />
+                    </div>
+                    
+                    {/* Middle Resume - Second Layer */}
+                    <div className="absolute -right-2 top-1 opacity-100 scale-[0.995] rotate-[-3deg] origin-center">
+                      <MockResumeMobile />
+                    </div>
+
+                    {/* Front Resume - Main Layer */}
+                    <div className="relative">
+                      <MockResumeMobile />
+                    </div>
+                  </div>
                 </div>
               </div>
 
