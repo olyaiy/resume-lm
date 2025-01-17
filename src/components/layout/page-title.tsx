@@ -40,23 +40,36 @@ function getPageTitle(pathname: string): string {
 export function PageTitle() {
   const pathname = usePathname();
   const [title, setTitle] = useState(() => getPageTitle(pathname));
+  const [resumeType, setResumeType] = useState<string | null>(null);
 
   useEffect(() => {
     const baseTitle = getPageTitle(pathname);
     if (baseTitle === "custom") {
-      // Look for the data attribute in the main content
-      const pageTitle = document.querySelector("[data-page-title]")?.getAttribute("data-page-title");
+      // Look for the data attributes in the main content
+      const element = document.querySelector("[data-page-title]");
+      const pageTitle = element?.getAttribute("data-page-title");
+      const type = element?.getAttribute("data-resume-type") || null;
+      
       setTitle(pageTitle || "Resume Editor");
+      setResumeType(type);
     } else {
       setTitle(baseTitle);
+      setResumeType(null);
     }
   }, [pathname]);
 
   return (
-    <h1 className="text-base font-medium">
-      <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
-        {title}
-      </span>
-    </h1>
+    <div className="flex flex-col">
+      <h1 className="text-base font-medium">
+        <span className="bg-gradient-to-r from-purple-600 via-purple-500 to-indigo-600 bg-clip-text text-transparent">
+          {title}
+        </span>
+      </h1>
+      {resumeType && (
+        <span className="text-xs text-muted-foreground -mt-0.5">
+          {resumeType}
+        </span>
+      )}
+    </div>
   );
 } 

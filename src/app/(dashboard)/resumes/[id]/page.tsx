@@ -35,6 +35,7 @@ export default async function Page({
       <div 
         className="h-[calc(100vh-4rem)] overflow-hidden relative"
         data-page-title={resume.name}
+        data-resume-type={resume.is_base_resume ? "Base Resume" : "Tailored Resume"}
       >
         {/* Gradient Background */}
         <div className="fixed inset-0 z-0">
