@@ -8,6 +8,10 @@ interface AuthResult {
   error?: string;
 }
 
+interface GithubAuthResult extends AuthResult {
+  url?: string;
+}
+
 // Login
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();
@@ -120,6 +124,41 @@ export async function joinWaitlist(formData: FormData): Promise<AuthResult> {
     return { 
       success: false, 
       error: e instanceof Error ? e.message : 'An unexpected error occurred' 
+    };
+  }
+} 
+
+// GitHub Sign In
+export async function signInWithGithub(): Promise<GithubAuthResult> {
+  const supabase = await createClient();
+
+  try {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'github',
+      options: {
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+        queryParams: {
+          next: '/'
+        }
+      }
+    });
+
+    if (error) {
+      console.error('Supabase OAuth error:', error);
+      return { success: false, error: error.message };
+    }
+
+    // Return the URL instead of redirecting
+    if (data?.url) {
+      return { success: true, url: data.url };
+    }
+
+    return { success: false, error: 'Failed to get OAuth URL' };
+  } catch (error) {
+    console.error('Unexpected error during GitHub sign in:', error);
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
     };
   }
 } 
