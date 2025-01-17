@@ -8,7 +8,7 @@ import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
 import { CreatorStory } from "@/components/landing/creator-story";
 import { HowItWorks } from "@/components/landing/how-it-works";
-import { WaitlistSection } from "@/components/waitlist/waitlist-section";
+// import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
 export const metadata: Metadata = {
   title: "Login | ResumeLM - AI-Powered Resume Builder",
@@ -163,7 +163,7 @@ export default async function LoginPage({
               
               <ActionButtons />
               
-              <WaitlistSection />
+              {/* <WaitlistSection /> */}
             </div>
 
             {/* Right Column - Floating Resume Preview */}
