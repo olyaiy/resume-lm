@@ -124,7 +124,7 @@ export default async function Home({
       {/* Profile Row Component */}
       <ProfileRow profile={profile} />
         
-        <div className="container max-w-7xl mx-auto px-4 sm:px-6">  
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6 pt-4">  
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
