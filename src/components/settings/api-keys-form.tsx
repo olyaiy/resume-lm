@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { Eye, EyeOff } from "lucide-react"
+import { Eye, EyeOff, Copy } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
@@ -222,6 +222,9 @@ export function ApiKeysForm() {
                 )}
               >
                 {model.name}
+                {!isModelSelectable(model.id) && (
+                  <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
+                )}
               </SelectItem>
             ))}
           </SelectContent>
@@ -289,6 +292,14 @@ export function ApiKeysForm() {
                         ) : (
                           <Eye className="h-3.5 w-3.5" />
                         )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => navigator.clipboard.writeText(existingKey.key)}
+                        className="h-7 px-2 text-muted-foreground hover:text-gray-900 transition-colors"
+                      >
+                        <Copy className="h-3.5 w-3.5" />
                       </Button>
                       <Button
                         variant="ghost"
