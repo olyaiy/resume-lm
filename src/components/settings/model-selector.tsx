@@ -59,18 +59,57 @@ export function ModelSelector() {
     const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
     if (storedKeys) {
       try {
-        setApiKeys(JSON.parse(storedKeys))
+        const keys: ApiKey[] = JSON.parse(storedKeys)
+        setApiKeys(keys)
+
+        // Load default model
+        const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
+        
+        // Check if stored model is still valid with current API keys
+        if (storedModel) {
+          const model = AI_MODELS.find(m => m.id === storedModel)
+          if (model && keys.some((k: ApiKey) => k.service === model.provider)) {
+            setDefaultModel(storedModel)
+          } else {
+            // Find first available model
+            const firstAvailableModel = AI_MODELS.find(m => 
+              keys.some((k: ApiKey) => k.service === m.provider)
+            )
+            if (firstAvailableModel) {
+              setDefaultModel(firstAvailableModel.id)
+              localStorage.setItem(MODEL_STORAGE_KEY, firstAvailableModel.id)
+              toast.info(`Switched to ${firstAvailableModel.shortName} as previous model was unavailable`)
+            } else {
+              setDefaultModel('')
+              localStorage.removeItem(MODEL_STORAGE_KEY)
+            }
+          }
+        }
       } catch (error) {
         console.error('Error loading API keys:', error)
       }
     }
-
-    // Load default model
-    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
-    if (storedModel) {
-      setDefaultModel(storedModel)
-    }
   }, [])
+
+  // Watch for API key changes
+  useEffect(() => {
+    const currentModel = AI_MODELS.find(m => m.id === defaultModel)
+    if (currentModel && !apiKeys.some(k => k.service === currentModel.provider)) {
+      // Current model's API key was removed, switch to first available model
+      const firstAvailableModel = AI_MODELS.find(m => 
+        apiKeys.some(k => k.service === m.provider)
+      )
+      if (firstAvailableModel) {
+        setDefaultModel(firstAvailableModel.id)
+        localStorage.setItem(MODEL_STORAGE_KEY, firstAvailableModel.id)
+        toast.info(`Switched to ${firstAvailableModel.shortName} as previous model was unavailable`)
+      } else {
+        setDefaultModel('')
+        localStorage.removeItem(MODEL_STORAGE_KEY)
+        toast.info('No AI models available. Please add an API key in settings.')
+      }
+    }
+  }, [apiKeys, defaultModel])
 
   const handleModelChange = (modelId: string) => {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
@@ -84,7 +123,7 @@ export function ModelSelector() {
 
     setDefaultModel(modelId)
     localStorage.setItem(MODEL_STORAGE_KEY, modelId)
-    toast.success('Default model updated successfully')
+    toast.success(`Switched to ${selectedModel.shortName}`)
   }
 
   const isModelSelectable = (modelId: string) => {
@@ -104,7 +143,7 @@ export function ModelSelector() {
           <div className="flex items-center gap-1">
             <Sparkles className="h-3 w-3 text-purple-500" />
             <span className="text-purple-600">
-              {selectedModel?.shortName || "Select Model"}
+              {selectedModel?.shortName || "No Model Available"}
             </span>
           </div>
         </SelectTrigger>
