@@ -61,7 +61,7 @@ const MemoizedMarkdownBlock = memo(
             // Handle line breaks explicitly
             br: () => <br className="block h-4" />,
             // Proper paragraph styling with spacing
-            p: ({ children }) => <p className="text-sm mb-4 whitespace-pre-line">{children}</p>,
+            p: ({ children }) => <p className="text-sm mb-2 whitespace-pre-line">{children}</p>,
             // Proper heading styles
             h1: ({ children }) => <h1 className="text-2xl font-bold mt-4 mb-2">{children}</h1>,
             h2: ({ children }) => <h2 className="text-xl font-bold mt-3 mb-1.5">{children}</h2>,

@@ -489,6 +489,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                 ) : (
                                   <MemoizedMarkdown id={m.id} content={m.content} />
                                 )}
+
+                                {/* Message Actions */}
                                 <div className="absolute -bottom-4 left-2 flex gap-2">
                                   <button
                                     onClick={() => handleDelete(m.id)}
@@ -519,6 +521,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                             </div>
                           </div>
                         )}
+                        
                         {/* Tool Invocations as Separate Bubbles */}
                         {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                           const { toolName, toolCallId, state, args } = toolInvocation;
