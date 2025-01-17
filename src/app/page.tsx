@@ -124,7 +124,7 @@ export default async function Home({
       {/* Profile Row Component */}
       <ProfileRow profile={profile} />
         
-        <div className="container max-w-7xl mx-auto p-6">  
+        <div className="container max-w-7xl mx-auto px-4 sm:px-6">  
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
@@ -148,8 +148,8 @@ export default async function Home({
             <div className="">
               {/* Base Resumes Section */}
               <div className="relative">
-                <div className="relative flex items-center justify-between pb-4">
-                  <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
+                  <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     Base Resumes
                   </h2>
                   <div className="flex items-center gap-2">
@@ -163,7 +163,7 @@ export default async function Home({
                 </div>
                 
                 <div className="relative pb-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     {baseResumes.map((resume) => (
                       <div key={resume.id} className="group relative">
                         <AlertDialog>
@@ -266,9 +266,9 @@ export default async function Home({
               </div>
 
               {/* Tailored Resumes Section */}
-              <div className="relative rounded-xl bg-gradient-to-br from-pink-50/50 to-rose-50/50 ">
-                <div className="relative flex items-center justify-between pb-4">
-                  <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
+              <div className="relative rounded-xl bg-gradient-to-br from-pink-50/50 to-rose-50/50">
+                <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
+                  <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
                     Tailored Resumes
                   </h2>
                   <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default async function Home({
                 </div>
 
                 <div className="relative pb-6">
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     {tailoredResumes.map((resume) => (
                       <div key={resume.id} className="group relative">
                         <AlertDialog>

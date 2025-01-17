@@ -98,7 +98,7 @@ export function Logo({ className, asLink = true }: LogoProps) {
   const logoContent = (
     <ContextMenu>
       <ContextMenuTrigger>
-        <div ref={logoRef}>
+        <div ref={logoRef} className="transition-transform duration-500 hover:scale-105">
           <GradientHover className={cn("text-2xl font-bold", className)}>
             ResumeLM
           </GradientHover>
