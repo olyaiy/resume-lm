@@ -5,6 +5,7 @@ import { Resume, DocumentSettings } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { Switch } from "@/components/ui/switch";
+import { SavedStylesDialog } from "./saved-styles-dialog";
 
 interface DocumentSettingsFormProps {
   resume: Resume;
@@ -256,14 +257,20 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
           <CardTitle className="text-lg font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
             Document Settings
           </CardTitle>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={handleRestoreDefaults}
-            className="text-xs text-muted-foreground hover:text-teal-600 border-slate-200/50 hover:border-teal-200/50 transition-colors"
-          >
-            Restore Defaults
-          </Button>
+          <div className="flex items-center space-x-2">
+            <SavedStylesDialog
+              currentSettings={resume.document_settings || defaultSettings}
+              onApplyStyle={(settings) => onChange('document_settings', settings)}
+            />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleRestoreDefaults}
+              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-200/50 hover:border-teal-200/50 transition-colors"
+            >
+              Restore Defaults
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="space-y-6">
