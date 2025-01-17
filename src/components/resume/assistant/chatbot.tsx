@@ -6,7 +6,7 @@ import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
 import { Bot, Trash2, Pencil } from "lucide-react";
-import { Certification, Education, Project, Resume, Skill, WorkExperience } from '@/lib/types';
+import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
@@ -31,9 +31,10 @@ const MODEL_STORAGE_KEY = 'resumelm-default-model';
 interface ChatBotProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: Resume[typeof field]) => void;
+  job?: Job | null;
 }
 
-export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
+export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const [accordionValue, setAccordionValue] = React.useState<string>("");
@@ -73,6 +74,7 @@ export default function ChatBot({ resume, onResumeChange }: ChatBotProps) {
       target_role: resume.target_role,
       resume: resume,
       config,
+      job: job,
     },
     maxSteps: 5,
     onResponse() {

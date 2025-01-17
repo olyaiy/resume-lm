@@ -27,31 +27,39 @@ interface TailoredJobCardProps {
   jobId: string | null;
   onJobCreate?: (jobId: string) => void;
   onJobDelete?: () => void;
+  job?: Job | null;
+  isLoading?: boolean;
 }
 
-export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJobCardProps) {
+export function TailoredJobCard({ 
+  jobId, 
+  onJobCreate, 
+  onJobDelete,
+  job: externalJob,
+  isLoading: externalIsLoading 
+}: TailoredJobCardProps) {
   const router = useRouter();
 
-  const [job, setJob] = useState<Job | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [jobDescription, setJobDescription] = useState('');
-  const [isFormatting, setIsFormatting] = useState(false);
-  const [validationErrors, setValidationErrors] = useState<{
-    jobDescription?: string;
-  }>({});
+  // Only use internal state if external job is not provided
+  const [internalJob, setInternalJob] = useState<Job | null>(null);
+  const [internalIsLoading, setInternalIsLoading] = useState(true);
+  
+  const effectiveJob = externalJob ?? internalJob;
+  const effectiveIsLoading = externalIsLoading ?? internalIsLoading;
 
+  // Only fetch if external job is not provided
   useEffect(() => {
+    if (externalJob !== undefined) return;
+
     async function fetchJob() {
       if (!jobId) {
-        setIsLoading(false);
+        setInternalJob(null);
+        setInternalIsLoading(false);
         return;
       }
 
       try {
-        setIsLoading(true);
+        setInternalIsLoading(true);
         const supabase = createClient();
         const { data: jobData, error } = await supabase
           .from('jobs')
@@ -63,24 +71,32 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
           if (error.code !== 'PGRST116') {
             throw error;
           }
-          setJob(null);
+          setInternalJob(null);
           return;
         }
         
-        setJob(jobData);
+        setInternalJob(jobData);
       } catch (error) {
         console.error('Error fetching job:', error);
         if (error instanceof Error && error.message !== 'No rows returned') {
-          setJob(null);
+          setInternalJob(null);
         }
       } finally {
-        setIsLoading(false);
+        setInternalIsLoading(false);
       }
     }
 
     fetchJob();
-  }, [jobId]);
+  }, [jobId, externalJob]);
 
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCreating, setIsCreating] = useState(false);
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
+  const [jobDescription, setJobDescription] = useState('');
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [validationErrors, setValidationErrors] = useState<{
+    jobDescription?: string;
+  }>({});
 
   const formatWorkLocation = (workLocation: Job['work_location']) => {
     if (!workLocation) return 'Not specified';
@@ -109,15 +125,15 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
         if (error.code !== 'PGRST116') {
           throw error;
         }
-        setJob(null);
+        setInternalJob(null);
         return;
       }
       
-      setJob(jobData);
+      setInternalJob(jobData);
     } catch (error) {
       console.error('Error deleting job:', error);
       if (error instanceof Error && error.message !== 'No rows returned') {
-        setJob(null);
+        setInternalJob(null);
       }
     } finally {
       setIsDeleting(false);
@@ -429,9 +445,9 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
       
       <div className="relative">
         <AnimatePresence mode="wait">
-          {isLoading ? (
+          {effectiveIsLoading ? (
             <LoadingSkeleton />
-          ) : job ? (
+          ) : effectiveJob ? (
             <motion.div
               key="content"
               initial={{ opacity: 0, y: 10 }}
@@ -439,6 +455,13 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
             >
+              {/* Test Button */}
+              <Button
+                onClick={() => console.log("Job Object:", effectiveJob)}
+                className="m-2"
+              >
+                Log Job Object
+              </Button>
               <Accordion type="single" collapsible className="w-full">
                 <AccordionItem value="details" className="border-none">
                   <div className="flex items-center px-3 py-2">
@@ -447,11 +470,11 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
                         <div className="flex items-center gap-1.5">
                           <Building2 className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
                           <span className="font-medium truncate text-sm text-gray-600 group-hover:text-pink-700 transition-colors duration-300">
-                            {job.company_name}
+                            {effectiveJob.company_name}
                           </span>
                         </div>
                         <h3 className="text-sm font-semibold bg-gradient-to-r from-pink-700 to-rose-700 bg-clip-text text-transparent truncate mt-0.5">
-                          {job.position_title}
+                          {effectiveJob.position_title}
                         </h3>
                       </div>
 
@@ -496,14 +519,14 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
                     >
                       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                         {[
-                          { icon: MapPin, text: job.location || 'Location not specified', color: 'pink' },
-                          { icon: Briefcase, text: formatWorkLocation(job.work_location), color: 'rose' },
-                          { icon: DollarSign, text: typeof job.salary_range === 'string' ? job.salary_range : 
-                            job.salary_range ? `${job.salary_range.currency}${job.salary_range.min}-${job.salary_range.max}` : 
+                          { icon: MapPin, text: effectiveJob.location || 'Location not specified', color: 'pink' },
+                          { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location), color: 'rose' },
+                          { icon: DollarSign, text: typeof effectiveJob.salary_range === 'string' ? effectiveJob.salary_range : 
+                            effectiveJob.salary_range ? `${effectiveJob.salary_range.currency}${effectiveJob.salary_range.min}-${effectiveJob.salary_range.max}` : 
                             'Salary not specified', 
                             color: 'pink' 
                           },
-                          { icon: Clock, text: job.employment_type?.replace('_', ' ') || 'Employment type not specified', color: 'rose' }
+                          { icon: Clock, text: effectiveJob.employment_type?.replace('_', ' ') || 'Employment type not specified', color: 'rose' }
                         ].map((item, index) => (
                           <motion.div
                             key={index}
@@ -523,17 +546,17 @@ export function TailoredJobCard({ jobId, onJobCreate, onJobDelete }: TailoredJob
                         ))}
                       </div>
 
-                      {job.description && (
+                      {effectiveJob.description && (
                         <div className="space-y-2">
                           <h4 className="text-sm font-medium text-gray-700">Description</h4>
                           <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                            {job.description}
+                            {effectiveJob.description}
                           </p>
                         </div>
                       )}
                       
                       <div className="flex flex-wrap gap-2">
-                        {job.keywords?.map((keyword, index) => (
+                        {effectiveJob.keywords?.map((keyword, index) => (
                           <motion.div
                             key={keyword}
                             initial={{ opacity: 0, scale: 0.9 }}

@@ -4,7 +4,7 @@
 import React from 'react';
 
 import { updateResume, deleteResume } from "@/utils/actions";
-import { Resume, Profile } from "@/lib/types";
+import { Resume, Profile, Job } from "@/lib/types";
 import { useState, useRef, useEffect, useMemo, useReducer } from "react";
 import { WorkExperienceForm } from "@/components/resume/editor/forms/work-experience-form";
 import { EducationForm } from "@/components/resume/editor/forms/education-form";
@@ -26,6 +26,7 @@ import ChatBot from "../assistant/chatbot";
 import { ResumePreview } from "./preview/resume-preview";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { ResumeEditorActions } from './actions/resume-editor-actions';
+import { createClient } from "@/utils/supabase/client";
 
 
 
@@ -93,6 +94,43 @@ export function ResumeEditorClient({
   const router = useRouter();
 
   const debouncedResume = useDebouncedValue(state.resume, 500);
+
+  const [job, setJob] = useState<Job | null>(null);
+  const [isLoadingJob, setIsLoadingJob] = useState(false);
+
+  // Single job fetching effect
+  useEffect(() => {
+    async function fetchJob() {
+      if (!state.resume.job_id) {
+        setJob(null);
+        return;
+      }
+
+      try {
+        setIsLoadingJob(true);
+        const supabase = createClient();
+        const { data: jobData, error } = await supabase
+          .from('jobs')
+          .select('*')
+          .eq('id', state.resume.job_id)
+          .single();
+
+        if (error) {
+          console.error('Supabase error:', error);
+          setJob(null);
+          return;
+        }
+
+        setJob(jobData);
+      } catch (error) {
+        console.error('Error fetching job:', error);
+        setJob(null);
+      } finally {
+        setIsLoadingJob(false);
+      }
+    }
+    fetchJob();
+  }, [state.resume.job_id]);
 
   useEffect(() => {
     if (previewPanelRef.current) {
@@ -259,8 +297,10 @@ export function ResumeEditorClient({
                         <TabsContent value="basic" className="space-y-6 mt-6">
                           {!state.resume.is_base_resume && (
                             <TailoredJobCard 
-                              jobId={state.resume.job_id || null} 
+                              jobId={state.resume.job_id || null}
                               onJobCreate={handleJobCreate}
+                              job={job}
+                              isLoading={isLoadingJob}
                             />
                           )}
                           <BasicInfoForm
@@ -316,7 +356,11 @@ export function ResumeEditorClient({
                   </div>
                   {/* Fixed ChatBot at bottom */}
                   <div className="mt-auto mb-4">
-                    <ChatBot resume={state.resume} onResumeChange={updateField} />
+                    <ChatBot 
+                      resume={state.resume} 
+                      onResumeChange={updateField}
+                      job={job}
+                    />
                   </div>
                 </div>
               </ResizablePanel>

@@ -1,5 +1,5 @@
 import { ToolInvocation, smoothStream, streamText } from 'ai';
-import { Resume } from '@/lib/types';
+import { Resume, Job } from '@/lib/types';
 import { z } from 'zod';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
@@ -14,11 +14,12 @@ interface ChatRequest {
   resume: Resume;
   target_role: string;
   config?: AIConfig;
+  job?: Job;
 }
 
 export async function POST(req: Request) {
   try {
-    const { messages, resume, target_role, config }: ChatRequest = await req.json();
+    const { messages, resume, target_role, config, job }: ChatRequest = await req.json();
 
     const aiClient = initializeAIClient(config);
 
@@ -43,6 +44,17 @@ export async function POST(req: Request) {
       certifications: resume.certifications,
     };
 
+    // Create job details section if available
+    const jobDetails = job ? {
+      company_name: job.company_name,
+      position_title: job.position_title,
+      description: job.description,
+      location: job.location,
+      keywords: job.keywords,
+      work_location: job.work_location,
+      employment_type: job.employment_type,
+    } : null;
+
     const result = streamText({
       model: aiClient,
       system: `
@@ -66,6 +78,7 @@ export async function POST(req: Request) {
 
       CURRENT RESUME:
       ${JSON.stringify(resumeSections, null, 2)}
+      ${jobDetails ? `\nThis resume is meant to be tailored for the following job:\n${JSON.stringify(jobDetails, null, 2)}` : ''}
       `,
       messages,
       maxSteps: 5,
