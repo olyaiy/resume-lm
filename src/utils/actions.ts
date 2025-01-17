@@ -787,3 +787,101 @@ export async function copyResume(resumeId: string): Promise<Resume> {
   return copiedResume;
 }
 
+export async function getSubscriptionStatus() {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select(`
+      subscription_plan,
+      subscription_status,
+      current_period_end,
+      trial_end,
+      stripe_customer_id,
+      stripe_subscription_id
+    `)
+    .eq('user_id', user.id)
+    .single();
+
+  if (profileError) {
+    throw new Error('Failed to fetch subscription status');
+  }
+
+  return profile;
+}
+
+export async function createCheckoutSession(priceId: string) {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      priceId,
+      userId: user.id,
+      email: user.email,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create checkout session');
+  }
+
+  const { sessionId } = await response.json();
+  return { sessionId };
+}
+
+export async function cancelSubscription() {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const response = await fetch('/api/cancel-subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: user.id,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to cancel subscription');
+  }
+
+  // Update the profile subscription status
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({
+      subscription_status: 'canceled',
+    })
+    .eq('user_id', user.id);
+
+  if (updateError) {
+    throw new Error('Failed to update subscription status');
+  }
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/settings', 'layout');
+  revalidatePath('/plans', 'layout');
+}
+
