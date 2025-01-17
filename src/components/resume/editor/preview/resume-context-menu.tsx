@@ -145,7 +145,8 @@ export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) 
         title: "Copied to clipboard",
         description: "Resume content has been copied to your clipboard.",
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      void error;
       toast({
         title: "Failed to copy",
         description: "Could not copy resume content to clipboard.",
