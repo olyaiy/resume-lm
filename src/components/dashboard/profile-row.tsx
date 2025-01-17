@@ -31,23 +31,6 @@ export function ProfileRow({ profile }: ProfileRowProps) {
               {profile.first_name} {profile.last_name}
             </h3>
 
-            {/* Contact Info Row */}
-            <div className="flex items-center gap-4 mb-3">
-              {profile.location && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground/80 hover:text-muted-foreground transition-colors duration-300">
-                  <MapPin className="h-3.5 w-3.5" />
-                  <span>{profile.location}</span>
-                </div>
-              )}
-              
-              {profile.phone_number && (
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground/80 hover:text-muted-foreground transition-colors duration-300">
-                  <Phone className="h-3.5 w-3.5" />
-                  <span>{profile.phone_number}</span>
-                </div>
-              )}
-            </div>
-
             {/* Stats Row with enhanced styling */}
             <div className="flex flex-wrap items-center gap-3">
               {[

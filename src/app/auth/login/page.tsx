@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { MockResume } from "@/components/landing/mock-resume";
+import { MockResumeMobile } from "@/components/landing/mock-resume-mobile";
 import { BenefitsList } from "@/components/landing/benefits-list";
 // import { ActionButtons } from "@/components/landing/action-buttons";
 import { Logo } from "@/components/ui/logo";
@@ -48,9 +49,9 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-  verification: {
-    google: "google-site-verification-code", // Replace with actual verification code
-  },
+  // verification: {
+  //   google: "google-site-verification-code", // Replace with actual verification code
+  // },
 };
 
 export default async function LoginPage({
@@ -170,7 +171,7 @@ export default async function LoginPage({
               {/* Mobile-only single resume view */}
               <div className="block lg:hidden">
                 <div className="relative w-full max-w-[min(85vw,_6in)] mx-auto">
-                  <MockResume />
+                  <MockResumeMobile />
                 </div>
               </div>
 
