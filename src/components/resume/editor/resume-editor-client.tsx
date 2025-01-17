@@ -28,6 +28,7 @@ import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { ResumeEditorActions } from './actions/resume-editor-actions';
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
+import { ResumeContextMenu } from "./preview/resume-context-menu";
 
 
 
@@ -446,7 +447,9 @@ export function ResumeEditorClient({
                 )}>
                   <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
                     <div className="absolute inset-0">
-                      <ResumePreview resume={debouncedResume} containerWidth={previewPanelWidth} />
+                      <ResumeContextMenu resume={debouncedResume}>
+                        <ResumePreview resume={debouncedResume} containerWidth={previewPanelWidth} />
+                      </ResumeContextMenu>
                     </div>
                   </div>
                 </ScrollArea>
