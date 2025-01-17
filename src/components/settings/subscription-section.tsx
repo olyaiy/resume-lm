@@ -25,7 +25,7 @@ export function SubscriptionSection() {
         </div>
         <Button 
           variant="outline"
-          className="bg-gradient-to-r from-violet-600 to-purple-600 text-white border-0 hover:opacity-90"
+          className="bg-violet-600 text-white border-0 hover:bg-violet-700 transition-colors"
         >
           Upgrade to Pro $20/mo
         </Button>
