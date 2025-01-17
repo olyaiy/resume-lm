@@ -19,25 +19,37 @@ const sortOptions = [
   { value: 'updatedAt', label: 'Last Updated', icon: Calendar },
 ]
 
-export function ResumeSortControls() {
+interface ResumeSortControlsProps {
+  sortParam?: string;
+  directionParam?: string;
+  currentSort?: SortOption;
+  currentDirection?: SortDirection;
+}
+
+export function ResumeSortControls({ 
+  sortParam = 'sort',
+  directionParam = 'direction',
+  currentSort: propCurrentSort,
+  currentDirection: propCurrentDirection
+}: ResumeSortControlsProps) {
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  const currentSort = searchParams.get('sort') as SortOption || 'updatedAt'
-  const direction = searchParams.get('direction') as SortDirection || 'desc'
+  const currentSort = propCurrentSort || (searchParams.get(sortParam) as SortOption) || 'updatedAt'
+  const direction = propCurrentDirection || (searchParams.get(directionParam) as SortDirection) || 'desc'
 
   function handleSortChange(sort: SortOption) {
     const params = new URLSearchParams(searchParams)
-    params.set('sort', sort)
+    params.set(sortParam, sort)
     if (sort !== currentSort) {
-      params.set('direction', 'asc')
+      params.set(directionParam, 'asc')
     }
     router.push(`?${params.toString()}`)
   }
 
   function toggleDirection() {
     const params = new URLSearchParams(searchParams)
-    params.set('direction', direction === 'asc' ? 'desc' : 'asc')
+    params.set(directionParam, direction === 'asc' ? 'desc' : 'asc')
     router.push(`?${params.toString()}`)
   }
 

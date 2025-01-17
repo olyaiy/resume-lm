@@ -25,6 +25,7 @@ import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
+import { ResumeSortControls, type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 
 function getGreeting() {
   const hour = new Date().getHours();
@@ -54,7 +55,33 @@ export default async function Home({
     redirect("/auth/login");
   }
 
-  const { profile, baseResumes, tailoredResumes } = data;
+  const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;
+
+  // Get sort parameters for both sections
+  const baseSort = (params.baseSort as SortOption) || 'updatedAt';
+  const baseDirection = (params.baseDirection as SortDirection) || 'desc';
+  const tailoredSort = (params.tailoredSort as SortOption) || 'updatedAt';
+  const tailoredDirection = (params.tailoredDirection as SortDirection) || 'desc';
+
+  // Sort function
+  function sortResumes(resumes: any[], sort: SortOption, direction: SortDirection) {
+    return [...resumes].sort((a, b) => {
+      const modifier = direction === 'asc' ? 1 : -1;
+      switch (sort) {
+        case 'name':
+          return modifier * a.name.localeCompare(b.name);
+        case 'jobTitle':
+          return modifier * (a.target_role?.localeCompare(b.target_role || '') || 0);
+        case 'updatedAt':
+        default:
+          return modifier * (new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+      }
+    });
+  }
+
+  // Sort both resume lists
+  const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
+  const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
 
   // Display a friendly message if no profile exists
   if (!profile) {
@@ -125,6 +152,14 @@ export default async function Home({
                   <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
                     Base Resumes
                   </h2>
+                  <div className="flex items-center gap-2">
+                    <ResumeSortControls 
+                      sortParam="baseSort"
+                      directionParam="baseDirection"
+                      currentSort={baseSort}
+                      currentDirection={baseDirection}
+                    />
+                  </div>
                 </div>
                 
                 <div className="relative pb-6">
@@ -236,6 +271,14 @@ export default async function Home({
                   <h2 className="text-3xl font-semibold tracking-tight bg-gradient-to-r from-pink-600 to-rose-600 bg-clip-text text-transparent">
                     Tailored Resumes
                   </h2>
+                  <div className="flex items-center gap-2">
+                    <ResumeSortControls 
+                      sortParam="tailoredSort"
+                      directionParam="tailoredDirection"
+                      currentSort={tailoredSort}
+                      currentDirection={tailoredDirection}
+                    />
+                  </div>
                 </div>
 
                 <div className="relative pb-6">
