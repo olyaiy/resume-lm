@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card } from "@/components/ui/card";
-import { Bot, Trash2, Pencil, ChevronDown } from "lucide-react";
+import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -23,6 +23,17 @@ import { Logo } from "@/components/ui/logo";
 import { WholeResumeSuggestion } from './suggestions';
 import { QuickSuggestions } from './quick-suggestions';
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 
 
@@ -285,6 +296,13 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     setEditContent("");
   };
 
+  const handleClearChat = useCallback(() => {
+    setMessages([]);
+    setOriginalResume(null);
+    setEditingMessageId(null);
+    setEditContent("");
+  }, [setMessages]);
+
   return (
     <Card className={cn(
       "flex flex-col w-full l mx-auto",
@@ -333,31 +351,84 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
             "data-[state=closed]:py-0.5"
           )}>
             <div className={cn(
-              "flex items-center gap-1.5 w-full",
+              "flex items-center justify-between w-full",
               "transition-transform duration-300",
               "group-hover:scale-[0.99]",
               "group-data-[state=closed]:scale-95"
             )}>
-              <div className={cn(
-                "p-1 rounded-lg",
-                "bg-purple-100/80 text-purple-600",
-                "group-hover:bg-purple-200/80",
-                "transition-colors duration-300",
-                "group-data-[state=closed]:bg-white/60",
-                "group-data-[state=closed]:p-0.5"
-              )}>
-                <Bot className="h-3 w-3" />
-              </div>
               <div className="flex items-center gap-1.5">
+                <div className={cn(
+                  "p-1 rounded-lg",
+                  "bg-purple-100/80 text-purple-600",
+                  "group-hover:bg-purple-200/80",
+                  "transition-colors duration-300",
+                  "group-data-[state=closed]:bg-white/60",
+                  "group-data-[state=closed]:p-0.5"
+                )}>
+                  <Bot className="h-3 w-3" />
+                </div>
                 <Logo className="text-xs" asLink={false} />
               </div>
+
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <button
+                    className={cn(
+                      "px-3 py-1.5 rounded-lg",
+                      "bg-purple-100/40 text-purple-500/80",
+                      "hover:bg-purple-200/60 hover:text-purple-600",
+                      "transition-all duration-300",
+                      "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
+                      "disabled:opacity-50",
+                      "group-data-[state=closed]:hidden",
+                      "flex items-center gap-1.5"
+                    )}
+                    disabled={messages.length === 0}
+                    aria-label="Clear chat history"
+                  >
+                    <RefreshCw className="h-3 w-3" />
+                    <span className="text-xs font-medium">Clear Chat History</span>
+                  </button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className={cn(
+                  "bg-white/95 backdrop-blur-xl",
+                  "border-purple-200/60",
+                  "shadow-lg shadow-purple-500/5"
+                )}>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      This will remove all messages and reset the chat. This action cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className={cn(
+                      "border-purple-200/60",
+                      "hover:bg-purple-50/50",
+                      "hover:text-purple-700"
+                    )}>
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleClearChat}
+                      className={cn(
+                        "bg-purple-500 text-white",
+                        "hover:bg-purple-600",
+                        "focus:ring-purple-400"
+                      )}
+                    >
+                      Clear Chat
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             </div>
           </AccordionTrigger>
 
           {/* Accordion Content */}
           <AccordionContent className="space-y-4">
             <StickToBottom className="h-[60vh] px-4 relative custom-scrollbar" resize="smooth" initial="smooth">
-              <StickToBottom.Content className="flex flex-col ">
+              <StickToBottom.Content className="flex flex-col custom-scrollbar">
                 {messages.length === 0 ? (
                   <QuickSuggestions onSuggestionClick={handleSubmit} />
                 ) : (
