@@ -17,7 +17,7 @@ interface AuthStatus {
     user?: { id: string; email?: string } | null;
 }
 
-export const CheckoutForm = ({ priceId }: { priceId: string }) => {
+function CheckoutContent({ priceId }: { priceId: string }) {
     const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -109,5 +109,13 @@ export const CheckoutForm = ({ priceId }: { priceId: string }) => {
                 </div>
             </div>
         </div>
+    );
+}
+
+export function CheckoutForm({ priceId }: { priceId: string }) {
+    return (
+        <React.Suspense fallback={<div>Loading checkout...</div>}>
+            <CheckoutContent priceId={priceId} />
+        </React.Suspense>
     );
 }

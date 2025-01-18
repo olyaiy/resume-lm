@@ -26,9 +26,21 @@ export const postStripeSession = async ({priceId}: NewSessionOptions) => {
         return_url: returnUrl,
       });
 
-      if(!session.client_secret) throw new Error('Error initiating Stripe session');
+    // Debug logging
+    console.log('🔍 Stripe Session Response:', {
+        id: session.id,
+        clientSecret: session.client_secret,
+        customerId: session.customer,
+        subscriptionId: session.subscription,
+        paymentStatus: session.payment_status,
+        status: session.status,
+        mode: session.mode,
+        // Add any other relevant fields you want to inspect
+    });
 
-      return {
+    if(!session.client_secret) throw new Error('Error initiating Stripe session');
+
+    return {
         clientSecret: session.client_secret
-      }
+    }
 }
