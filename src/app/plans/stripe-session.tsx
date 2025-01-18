@@ -10,6 +10,7 @@ interface NewSessionOptions {
     priceId: string
 }
 
+// Function to create a Stripe Checkout Session
 export const postStripeSession = async ({priceId}: NewSessionOptions) => {
     const returnUrl = 'http://localhost:3000/checkout-return?session_id={CHECKOUT_SESSION_ID}'
 
