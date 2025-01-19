@@ -8,13 +8,14 @@ import { checkAuth } from '@/app/auth/login/actions';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
-import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
+import { createPortalSession, postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
+
 
 interface AuthStatus {
   authenticated: boolean;
   user?: { id: string; email?: string } | null;
 }
-
+s
 interface Plan {
   title: string;
   priceId: string;
@@ -98,7 +99,16 @@ export default function Pricing({ initialProfile }: PricingProps) {
     if (plan.title === subscriptionPlan) {
       await handleCancelSubscription();
     } else if (plan.priceId) {
-      router.push('/plans/checkout');
+      try {
+        setLoading(true);
+        const { clientSecret } = await postStripeSession({ priceId: plan.priceId });
+        router.push(`/subscription/checkout?session_id=${clientSecret}`);
+      } catch (error) {
+        console.error('Error creating checkout session:', error);
+        // You might want to show an error toast here
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
