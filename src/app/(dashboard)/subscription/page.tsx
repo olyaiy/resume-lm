@@ -1,7 +1,6 @@
 import { getSubscriptionStatus } from '@/utils/actions';
 import Pricing from '@/components/pricing';
-import { createPortalSession } from './stripe-session';
-import { Button } from '@/components/ui/button';
+import ManageSubscriptionButton from '@/components/subscription/manage-subscription-button';
 
 interface Profile {
   subscription_plan: string | null;
@@ -10,25 +9,6 @@ interface Profile {
   trial_end: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
-}
-
-// Client component for the manage subscription button
-'use client';
-function ManageSubscriptionButton() {
-  const handleManageSubscription = async () => {
-    try {
-      const result = await createPortalSession();
-      console.log('Portal session result:', result);
-    } catch (error) {
-      console.error('Error creating portal session:', error);
-    }
-  };
-
-  return (
-    <Button onClick={handleManageSubscription} variant="outline">
-      Manage Subscription
-    </Button>
-  );
 }
 
 export default async function PlansPage() {

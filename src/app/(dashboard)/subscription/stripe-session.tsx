@@ -57,6 +57,8 @@ export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
 
 // Function to create a Stripe Portal Session
 export const createPortalSession = async () => {
+    'use server';
+    
     // Check if user is authenticated
     const { authenticated, user } = await checkAuth();
     

@@ -8,6 +8,7 @@ import { checkAuth } from '@/app/auth/login/actions';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
+import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 
 interface AuthStatus {
   authenticated: boolean;
@@ -69,6 +70,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
   const [loading, setLoading] = useState<boolean>(false);
   const [cancelLoading, setCancelLoading] = useState<boolean>(false);
   const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+  const [portalLoading, setPortalLoading] = useState<boolean>(false);
 
   useEffect(() => {
     // Only fetch if we don't have initial data
@@ -111,6 +113,20 @@ export default function Pricing({ initialProfile }: PricingProps) {
     setCancelLoading(false);
   };
 
+  const handlePortalSession = async () => {
+    try {
+      setPortalLoading(true);
+      const result = await createPortalSession();
+      if (result?.url) {
+        window.location.href = result.url;
+      }
+    } catch (error) {
+      console.error('Error accessing billing portal:', error);
+    } finally {
+      setPortalLoading(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
@@ -137,8 +153,17 @@ export default function Pricing({ initialProfile }: PricingProps) {
             <Button 
               size="lg" 
               className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              onClick={handlePortalSession}
+              disabled={portalLoading}
             >
-              Manage Subscription
+              {portalLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Manage Subscription'
+              )}
             </Button>
           </div>
         </Card>
