@@ -9,18 +9,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { createPortalSession, postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
-
+import { PricingCard, type Plan } from './pricing/pricing-card';
 
 interface AuthStatus {
   authenticated: boolean;
   user?: { id: string; email?: string } | null;
-}
-s
-interface Plan {
-  title: string;
-  priceId: string;
-  price: string;
-  features: string[];
 }
 
 const plans: Plan[] = [
@@ -96,7 +89,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
   }, [initialProfile]);
 
   const handleCheckout = async (plan: Plan) => {
-    if (plan.title === subscriptionPlan) {
+    if (plan.title.toLowerCase() === subscriptionPlan) {
       await handleCancelSubscription();
     } else if (plan.priceId) {
       try {
@@ -105,7 +98,6 @@ export default function Pricing({ initialProfile }: PricingProps) {
         router.push(`/subscription/checkout?session_id=${clientSecret}`);
       } catch (error) {
         console.error('Error creating checkout session:', error);
-        // You might want to show an error toast here
       } finally {
         setLoading(false);
       }
@@ -178,20 +170,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
           </div>
         </Card>
 
-        {/* Keep the debug information */}
-        {initialProfile && (
-          <div className="mt-12 p-6 rounded-lg border border-border/50 max-w-2xl mx-auto">
-            <h3 className="text-xl font-semibold mb-4">Current Subscription Status</h3>
-            <div className="space-y-2 text-sm text-muted-foreground">
-              <p>Plan: {initialProfile.subscription_plan || 'No plan'}</p>
-              <p>Status: {initialProfile.subscription_status || 'No status'}</p>
-              <p>Current Period Ends: {initialProfile.current_period_end ? new Date(initialProfile.current_period_end).toLocaleDateString() : 'N/A'}</p>
-              <p>Trial Ends: {initialProfile.trial_end ? new Date(initialProfile.trial_end).toLocaleDateString() : 'N/A'}</p>
-              <p>Stripe Customer ID: {initialProfile.stripe_customer_id || 'None'}</p>
-              <p>Stripe Subscription ID: {initialProfile.stripe_subscription_id || 'None'}</p>
-            </div>
-          </div>
-        )}
+        <DebugInfo profile={initialProfile} />
       </div>
     );
   }
@@ -207,60 +186,35 @@ export default function Pricing({ initialProfile }: PricingProps) {
 
       <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
-          <Card key={plan.title} className="relative p-8 rounded-2xl border border-border/50 backdrop-blur-xl bg-background/50 flex flex-col">
-            <div className="mb-8">
-              <h3 className="text-2xl font-semibold mb-2">{plan.title}</h3>
-              <div className="flex items-baseline gap-1">
-                <span className="text-4xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">/month</span>
-              </div>
-            </div>
-
-            <ul className="space-y-4 mb-8">
-              {plan.features.map((feature) => (
-                <li key={feature} className="flex items-center gap-2">
-                  <Check className="h-5 w-5 text-green-500" />
-                  <span>{feature}</span>
-                </li>
-              ))}
-            </ul>
-
-            <div className="mt-auto">
-              <Button
-                className="w-full"
-                variant={plan.title === 'Pro' ? 'default' : 'outline'}
-                onClick={() => handleCheckout(plan)}
-                disabled={cancelLoading || plan.title === 'Free'}
-                {...(plan.title === 'Free' && { className: "w-full opacity-50 cursor-not-allowed" })}
-              >
-                {cancelLoading && plan.title === subscriptionPlan ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : null}
-                {plan.title === 'Free' && subscriptionPlan === 'free'
-                  ? 'Your current plan'
-                  : plan.title === subscriptionPlan
-                  ? 'Cancel Subscription'
-                  : `Upgrade to ${plan.title}`}
-              </Button>
-            </div>
-          </Card>
+          <PricingCard
+            key={plan.title}
+            plan={plan}
+            isCurrentPlan={plan.title.toLowerCase() === subscriptionPlan}
+            isLoading={loading || (cancelLoading && plan.title.toLowerCase() === subscriptionPlan)}
+            onAction={handleCheckout}
+          />
         ))}
       </div>
 
-      {/* Subscription Debug Information */}
-      {initialProfile && (
-        <div className="mt-12 p-6 rounded-lg border border-border/50 max-w-2xl mx-auto">
-          <h3 className="text-xl font-semibold mb-4">Current Subscription Status</h3>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>Plan: {initialProfile.subscription_plan || 'No plan'}</p>
-            <p>Status: {initialProfile.subscription_status || 'No status'}</p>
-            <p>Current Period Ends: {initialProfile.current_period_end ? new Date(initialProfile.current_period_end).toLocaleDateString() : 'N/A'}</p>
-            <p>Trial Ends: {initialProfile.trial_end ? new Date(initialProfile.trial_end).toLocaleDateString() : 'N/A'}</p>
-            <p>Stripe Customer ID: {initialProfile.stripe_customer_id || 'None'}</p>
-            <p>Stripe Subscription ID: {initialProfile.stripe_subscription_id || 'None'}</p>
-          </div>
-        </div>
-      )}
+      <DebugInfo profile={initialProfile} />
+    </div>
+  );
+}
+
+function DebugInfo({ profile }: { profile: Profile | null }) {
+  if (!profile) return null;
+  
+  return (
+    <div className="mt-12 p-6 rounded-lg border border-border/50 max-w-2xl mx-auto">
+      <h3 className="text-xl font-semibold mb-4">Current Subscription Status</h3>
+      <div className="space-y-2 text-sm text-muted-foreground">
+        <p>Plan: {profile.subscription_plan || 'No plan'}</p>
+        <p>Status: {profile.subscription_status || 'No status'}</p>
+        <p>Current Period Ends: {profile.current_period_end ? new Date(profile.current_period_end).toLocaleDateString() : 'N/A'}</p>
+        <p>Trial Ends: {profile.trial_end ? new Date(profile.trial_end).toLocaleDateString() : 'N/A'}</p>
+        <p>Stripe Customer ID: {profile.stripe_customer_id || 'None'}</p>
+        <p>Stripe Subscription ID: {profile.stripe_subscription_id || 'None'}</p>
+      </div>
     </div>
   );
 }
