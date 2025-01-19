@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
+import { manageSubscriptionStatusChange } from '@/utils/stripe/actions'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia'
@@ -20,15 +21,25 @@ async function handleSubscriptionChange(
     trialEnd?: Date | null;
   }
 ) {
-  // Log the subscription change
-  console.log('📝 Processing subscription change:', {
-    customerId: stripeCustomerId,
-    ...subscriptionData
-  });
+  try {
+    // Log the subscription change
+    console.log('📝 Processing subscription change:', {
+      customerId: stripeCustomerId,
+      ...subscriptionData
+    });
 
-  // TODO: Implement your database update logic here
-  
-  console.log('✅ Subscription change processed');
+    // Update subscription in database
+    await manageSubscriptionStatusChange(
+      subscriptionData.subscriptionId,
+      stripeCustomerId,
+      subscriptionData.status === 'active'
+    );
+    
+    console.log('✅ Subscription change processed successfully');
+  } catch (error) {
+    console.error('❌ Error processing subscription change:', error);
+    throw error;
+  }
 }
 
 export async function POST(req: Request) {
@@ -129,6 +140,10 @@ export async function POST(req: Request) {
           }
         );
         break;
+      }
+
+      default: {
+        console.log(`⚠️ Unhandled event type: ${event.type}`);
       }
     }
 
