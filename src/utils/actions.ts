@@ -5,6 +5,7 @@ import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { getAuthenticatedUser } from './auth';
 
 interface DashboardData {
   profile: Profile | null;
@@ -15,111 +16,104 @@ interface DashboardData {
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError) {
-    console.error('Auth error:', userError);
-    throw new Error('Authentication error');
-  }
+  try {
+    const user = await getAuthenticatedUser();
 
-  if (!user) {
-    return {
-      profile: null,
-      baseResumes: [],
-      tailoredResumes: []
-    };
-  }
-
-  // Fetch profile data
-  let profile;
-  const { data, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
-  
-  profile = data;
-
-  // If profile doesn't exist, create one
-  if (profileError?.code === 'PGRST116') {
-    const { data: newProfile, error: createError } = await supabase
+    // Fetch profile data
+    let profile;
+    const { data, error: profileError } = await supabase
       .from('profiles')
-      .insert([{
-        user_id: user.id,
-        first_name: null,
-        last_name: null,
-        email: user.email,
-        phone_number: null,
-        location: null,
-        website: null,
-        linkedin_url: null,
-        github_url: null,
-        work_experience: [],
-        education: [],
-        skills: [],
-        projects: [],
-        certifications: []
-      }])
-      .select()
+      .select('*')
+      .eq('user_id', user.id)
       .single();
+    
+    profile = data;
 
-    if (createError) {
-      console.error('Error creating profile:', createError);
-      throw new Error('Error creating user profile');
+    // If profile doesn't exist, create one
+    if (profileError?.code === 'PGRST116') {
+      const { data: newProfile, error: createError } = await supabase
+        .from('profiles')
+        .insert([{
+          user_id: user.id,
+          first_name: null,
+          last_name: null,
+          email: user.email,
+          phone_number: null,
+          location: null,
+          website: null,
+          linkedin_url: null,
+          github_url: null,
+          work_experience: [],
+          education: [],
+          skills: [],
+          projects: [],
+          certifications: []
+        }])
+        .select()
+        .single();
+
+      if (createError) {
+        console.error('Error creating profile:', createError);
+        throw new Error('Error creating user profile');
+      }
+
+      profile = newProfile;
+    } else if (profileError) {
+      console.error('Error fetching profile:', profileError);
+      throw new Error('Error fetching dashboard data');
     }
 
-    profile = newProfile;
-  } else if (profileError) {
-    console.error('Error fetching profile:', profileError);
-    throw new Error('Error fetching dashboard data');
+    // Fetch resumes data
+    const { data: resumes, error: resumesError } = await supabase
+      .from('resumes')
+      .select('*')
+      .eq('user_id', user.id);
+
+    if (resumesError) {
+      console.error('Error fetching resumes:', resumesError);
+      throw new Error('Error fetching dashboard data');
+    }
+
+    const baseResumes = resumes?.filter(resume => resume.is_base_resume) ?? [];
+    const tailoredResumes = resumes?.filter(resume => !resume.is_base_resume) ?? [];
+
+    const baseResumesData = baseResumes.map(resume => ({
+      ...resume,
+      type: 'base' as const
+    }));
+
+    const tailoredResumesData = tailoredResumes.map(resume => ({
+      ...resume,
+      type: 'tailored' as const
+    }));
+
+    return {
+      profile,
+      baseResumes: baseResumesData,
+      tailoredResumes: tailoredResumesData
+    };
+  } catch (error) {
+    if (error instanceof Error && error.message === 'User not authenticated') {
+      return {
+        profile: null,
+        baseResumes: [],
+        tailoredResumes: []
+      };
+    }
+    throw error;
   }
-
-  // Fetch resumes data
-  const { data: resumes, error: resumesError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('user_id', user.id);
-
-  if (resumesError) {
-    console.error('Error fetching resumes:', resumesError);
-    throw new Error('Error fetching dashboard data');
-  }
-
-  const baseResumes = resumes?.filter(resume => resume.is_base_resume) ?? [];
-  const tailoredResumes = resumes?.filter(resume => !resume.is_base_resume) ?? [];
-
-  const baseResumesData = baseResumes.map(resume => ({
-    ...resume,
-    type: 'base' as const
-  }));
-
-  const tailoredResumesData = tailoredResumes.map(resume => ({
-    ...resume,
-    type: 'tailored' as const
-  }));
-
-  return {
-    profile,
-    baseResumes: baseResumesData,
-    tailoredResumes: tailoredResumesData
-  };
 }
 
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
   console.time('🔄 Total getResumeById');
   const supabase = await createClient();
 
-  // 1. First authenticate
+  // Get cached auth user
   console.time('🔐 Auth Check');
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
   console.timeEnd('🔐 Auth Check');
-  
-  if (userError || !user) {
-    console.timeEnd('🔄 Total getResumeById');
-    throw new Error('User not authenticated');
-  }
 
-  // 2. Then fetch resume and profile in parallel
+  // Fetch resume and profile in parallel
   console.time('📄 Parallel Data Fetch');
   try {
     const [resumeResult, profileResult] = await Promise.all([
@@ -160,12 +154,7 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
 
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {
   const supabase = await createClient();
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
   const { data: resume, error } = await supabase
     .from('resumes')
@@ -184,12 +173,7 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
 
 export async function importResume(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
   // First, get the current profile
   const { data: currentProfile, error: fetchError } = await supabase
@@ -407,15 +391,8 @@ export async function createBaseResume(
     projects: Project[];
   }
 ): Promise<Resume> {
-
   const supabase = await createClient();
-
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    console.error('Authentication Error:', userError);
-    throw new Error('User not authenticated');
-  }
+  const user = await getAuthenticatedUser();
 
   // Get user's profile for initial data if not starting fresh
   let profile = null;
@@ -476,7 +453,6 @@ export async function createBaseResume(
     }
   };
 
-
   const { data: resume, error: createError } = await supabase
     .from('resumes')
     .insert([newResume])
@@ -497,8 +473,9 @@ export async function createBaseResume(
     console.error('\nNo resume data returned after insert');
     throw new Error('Resume creation failed: No data returned');
   }
+
   return resume;
-} 
+}
 
 export async function createTailoredResume(
   baseResume: Resume,
