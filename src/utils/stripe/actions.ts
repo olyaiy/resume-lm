@@ -1,7 +1,7 @@
 'use server';
 
 import { Stripe } from "stripe";
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Profile, Subscription } from '@/lib/types';
 
 // Initialize stripe
@@ -17,41 +17,53 @@ export async function createOrRetrieveCustomer({
   uuid: string;
   email: string;
 }): Promise<string> {
-  const supabase = await createClient();
+  console.log('1. Starting createOrRetrieveCustomer for user:', uuid);
+  const supabase = await createServiceClient();
 
+  console.log('2. Checking for existing subscription...');
   // First check if user has a subscription record with stripe_customer_id
-  const { data: subscription } = await supabase
+  const { data: subscription, error: subscriptionError } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id')
     .eq('user_id', uuid)
     .single();
 
+  console.log('3. Subscription check result:', { subscription, error: subscriptionError });
+
   if (subscription?.stripe_customer_id) {
+    console.log('4. Found existing customer ID:', subscription.stripe_customer_id);
     return subscription.stripe_customer_id;
   }
 
+  console.log('5. No existing customer found, creating new one...');
   // If no customer exists, create one
   const customerID = await createCustomerInStripe(uuid, email);
+  console.log('6. Created Stripe customer:', customerID);
+  
+  console.log('7. Upserting customer to Supabase...');
   await upsertCustomerToSupabase(uuid, customerID);
+  console.log('8. Customer upsert complete');
   
   return customerID;
 }
 
 // Create a new customer in Stripe
 async function createCustomerInStripe(uuid: string, email: string): Promise<string> {
+  console.log('Creating Stripe customer for:', { uuid, email });
   const customer = await stripe.customers.create({
     email,
     metadata: {
       supabaseUUID: uuid
     }
   });
-
+  console.log('Stripe customer created:', customer.id);
   return customer.id;
 }
 
 // Update or insert customer info in Supabase
 async function upsertCustomerToSupabase(uuid: string, customerId: string) {
-  const supabase = await createClient();
+  console.log('Starting upsert for:', { uuid, customerId });
+  const supabase = await createServiceClient();
 
   // Update or create subscription record
   const { error: subscriptionError } = await supabase
@@ -65,6 +77,7 @@ async function upsertCustomerToSupabase(uuid: string, customerId: string) {
       updated_at: new Date().toISOString()
     });
 
+  console.log('Upsert result:', { error: subscriptionError });
   if (subscriptionError) throw subscriptionError;
 }
 
@@ -74,7 +87,7 @@ export async function manageSubscriptionStatusChange(
   customerId: string,
   isSubscriptionNew: boolean
 ) {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   // Get customer's UUID from Stripe metadata
   const customerData = await stripe.customers.retrieve(customerId);
@@ -110,7 +123,7 @@ export async function manageSubscriptionStatusChange(
 
 // Delete customer
 export async function deleteCustomerAndData(uuid: string) {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   // Get Stripe customer ID
   const { data: subscription } = await supabase
@@ -135,7 +148,7 @@ export async function deleteCustomerAndData(uuid: string) {
 
 // Helper to get subscription status
 export async function getSubscriptionStatus(uuid: string) {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const { data: subscription, error } = await supabase
     .from('subscriptions')
