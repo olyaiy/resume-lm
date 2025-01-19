@@ -1,6 +1,5 @@
 // src/app/api/webhooks/stripe/route.ts
 
-import { createClient } from "@/utils/supabase/server";
 import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
@@ -11,7 +10,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
-async function updateProfileSubscription(
+async function handleSubscriptionChange(
   stripeCustomerId: string,
   subscriptionData: {
     subscriptionId: string;
@@ -21,34 +20,15 @@ async function updateProfileSubscription(
     trialEnd?: Date | null;
   }
 ) {
-  const supabase = await createClient();
-  
-  console.log('📝 Updating subscription:', {
+  // Log the subscription change
+  console.log('📝 Processing subscription change:', {
     customerId: stripeCustomerId,
     ...subscriptionData
   });
-  
-  const subscriptionPlan = subscriptionData.planId.includes('pro') ? 'pro' : 'free';
-  
-  const { error } = await supabase
-    .from('profiles')
-    .update({
-      subscription_plan: subscriptionPlan,
-      subscription_status: subscriptionData.status,
-      stripe_subscription_id: subscriptionData.subscriptionId,
-      stripe_customer_id: stripeCustomerId,
-      current_period_end: subscriptionData.currentPeriodEnd.toISOString(),
-      trial_end: subscriptionData.trialEnd?.toISOString() || null,
-      updated_at: new Date().toISOString()
-    })
-    .eq('stripe_customer_id', stripeCustomerId);
 
-  if (error) {
-    console.error('Error updating profile subscription:', error);
-    throw error;
-  }
-
-  console.log('✅ Subscription updated successfully');
+  // TODO: Implement your database update logic here
+  
+  console.log('✅ Subscription change processed');
 }
 
 export async function POST(req: Request) {
@@ -65,7 +45,7 @@ export async function POST(req: Request) {
 
     const idempotencyKey = (await headers()).get('stripe-idempotency-key');
     if (idempotencyKey) {
-      console.log('�� Processing webhook with idempotency key:', idempotencyKey);
+      console.log('📦 Processing webhook with idempotency key:', idempotencyKey);
     }
 
     let event: Stripe.Event
@@ -82,11 +62,10 @@ export async function POST(req: Request) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         
-        // Only handle subscription checkouts
         if (session.mode === 'subscription' && session.subscription) {
           const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
           
-          await updateProfileSubscription(
+          await handleSubscriptionChange(
             session.customer as string,
             {
               subscriptionId: subscription.id,
@@ -106,7 +85,7 @@ export async function POST(req: Request) {
         if (invoice.subscription) {
           const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
           
-          await updateProfileSubscription(
+          await handleSubscriptionChange(
             invoice.customer as string,
             {
               subscriptionId: subscription.id,
@@ -123,7 +102,7 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         
-        await updateProfileSubscription(
+        await handleSubscriptionChange(
           subscription.customer as string,
           {
             subscriptionId: subscription.id,
@@ -139,7 +118,7 @@ export async function POST(req: Request) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         
-        await updateProfileSubscription(
+        await handleSubscriptionChange(
           subscription.customer as string,
           {
             subscriptionId: subscription.id,
@@ -151,7 +130,6 @@ export async function POST(req: Request) {
         );
         break;
       }
-
     }
 
     return NextResponse.json({ received: true }, { status: 200 })

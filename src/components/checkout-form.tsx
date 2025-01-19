@@ -1,12 +1,14 @@
 'use client'
-import React, { useCallback, useState, useEffect } from "react";
+
+import React, { useCallback, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
     EmbeddedCheckoutProvider,
     EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
-import { checkAuth, getUserId } from "@/app/auth/login/actions";
+import { checkAuth, getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
 import { postStripeSession } from "@/app/plans/stripe-session";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
@@ -17,9 +19,33 @@ interface AuthStatus {
     user?: { id: string; email?: string } | null;
 }
 
+function StatusCard({ title, children, isLoading }: { 
+    title: string; 
+    children: React.ReactNode; 
+    isLoading: boolean;
+}) {
+    return (
+        <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
+            <h3 className="text-lg font-semibold mb-2">{title}</h3>
+            {isLoading ? (
+                <div className="space-y-2">
+                    <Skeleton className="h-4 w-3/4" />
+                    <Skeleton className="h-4 w-1/2" />
+                </div>
+            ) : children}
+        </div>
+    );
+}
+
 function CheckoutContent({ priceId }: { priceId: string }) {
     const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
     const [userId, setUserId] = useState<string | null>(null);
+    const [subscriptionStatus, setSubscriptionStatus] = useState<{
+        hasSubscription: boolean;
+        plan?: string;
+        status?: string;
+        error?: string;
+    } | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const fetchClientSecret = useCallback(async () => {
@@ -27,23 +53,25 @@ function CheckoutContent({ priceId }: { priceId: string }) {
         return stripeResponse.clientSecret;
     }, [priceId]);
 
-    useEffect(() => {
-        async function checkAuthStatus() {
+    React.useEffect(() => {
+        async function checkStatuses() {
             try {
-                const [status, id] = await Promise.all([
+                const [status, id, subscription] = await Promise.all([
                     checkAuth(),
-                    getUserId()
+                    getUserId(),
+                    getSubscriptionStatus()
                 ]);
                 setAuthStatus(status);
                 setUserId(id);
+                setSubscriptionStatus(subscription);
             } catch (error) {
-                console.error('Error checking auth status:', error);
+                console.error('Error checking statuses:', error);
             } finally {
                 setIsLoading(false);
             }
         }
 
-        checkAuthStatus();
+        checkStatuses();
     }, []);
 
     const options = { fetchClientSecret };
@@ -56,66 +84,84 @@ function CheckoutContent({ priceId }: { priceId: string }) {
                 </EmbeddedCheckoutProvider>
             </div>
 
-            {/* Auth Status Display */}
             <div className="mt-8 space-y-4">
-                {/* Full Auth Status */}
-                <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-2">Full Auth Status:</h3>
-                    {isLoading ? (
-                        <p>Checking authentication status...</p>
-                    ) : (
-                        <div className="space-y-2">
-                            <p>
-                                <span className="font-medium">Status:</span>{' '}
-                                {authStatus?.authenticated ? (
-                                    <span className="text-green-600">Authenticated</span>
-                                ) : (
-                                    <span className="text-red-600">Not Authenticated</span>
-                                )}
-                            </p>
-                            {authStatus?.authenticated && authStatus.user && (
-                                <>
-                                    <p>
-                                        <span className="font-medium">User ID:</span>{' '}
-                                        {authStatus.user.id}
-                                    </p>
-                                    <p>
-                                        <span className="font-medium">Email:</span>{' '}
-                                        {authStatus.user.email}
-                                    </p>
-                                </>
+                <StatusCard title="Full Auth Status" isLoading={isLoading}>
+                    <div className="space-y-2">
+                        <p>
+                            <span className="font-medium">Status:</span>{' '}
+                            {authStatus?.authenticated ? (
+                                <span className="text-green-600">Authenticated</span>
+                            ) : (
+                                <span className="text-red-600">Not Authenticated</span>
                             )}
-                        </div>
-                    )}
-                </div>
+                        </p>
+                        {authStatus?.authenticated && authStatus.user && (
+                            <>
+                                <p>
+                                    <span className="font-medium">User ID:</span>{' '}
+                                    {authStatus.user.id}
+                                </p>
+                                <p>
+                                    <span className="font-medium">Email:</span>{' '}
+                                    {authStatus.user.email}
+                                </p>
+                            </>
+                        )}
+                    </div>
+                </StatusCard>
 
-                {/* Simple User ID Check */}
-                <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold mb-2">Simple User ID Check:</h3>
-                    {isLoading ? (
-                        <p>Checking user ID...</p>
-                    ) : (
-                        <div className="space-y-2">
-                            <p>
-                                <span className="font-medium">User ID:</span>{' '}
-                                {userId ? (
-                                    <span className="text-green-600">{userId}</span>
-                                ) : (
-                                    <span className="text-red-600">No user ID found</span>
+                <StatusCard title="Simple User ID Check" isLoading={isLoading}>
+                    <div className="space-y-2">
+                        <p>
+                            <span className="font-medium">User ID:</span>{' '}
+                            {userId ? (
+                                <span className="text-green-600">{userId}</span>
+                            ) : (
+                                <span className="text-red-600">No user ID found</span>
+                            )}
+                        </p>
+                    </div>
+                </StatusCard>
+
+                <StatusCard title="Subscription Status" isLoading={isLoading}>
+                    <div className="space-y-2">
+                        {subscriptionStatus?.error ? (
+                            <p className="text-red-600">Error: {subscriptionStatus.error}</p>
+                        ) : (
+                            <>
+                                <p>
+                                    <span className="font-medium">Has Subscription:</span>{' '}
+                                    {subscriptionStatus?.hasSubscription ? (
+                                        <span className="text-green-600">Yes</span>
+                                    ) : (
+                                        <span className="text-red-600">No</span>
+                                    )}
+                                </p>
+                                {subscriptionStatus?.hasSubscription && (
+                                    <>
+                                        <p>
+                                            <span className="font-medium">Plan:</span>{' '}
+                                            <span className="text-purple-600">
+                                                {subscriptionStatus.plan}
+                                            </span>
+                                        </p>
+                                        <p>
+                                            <span className="font-medium">Status:</span>{' '}
+                                            <span className={subscriptionStatus.status === 'active' ? 'text-green-600' : 'text-yellow-600'}>
+                                                {subscriptionStatus.status}
+                                            </span>
+                                        </p>
+                                    </>
                                 )}
-                            </p>
-                        </div>
-                    )}
-                </div>
+                            </>
+                        )}
+                    </div>
+                </StatusCard>
             </div>
         </div>
     );
 }
 
 export function CheckoutForm({ priceId }: { priceId: string }) {
-    return (
-        <React.Suspense fallback={<div>Loading checkout...</div>}>
-            <CheckoutContent priceId={priceId} />
-        </React.Suspense>
-    );
+    return <CheckoutContent priceId={priceId} />;
 }

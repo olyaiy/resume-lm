@@ -180,22 +180,18 @@ export async function checkAuth(): Promise<{
   const supabase = await createClient();
   
   try {
-    const { data: { session }, error } = await supabase.auth.getSession();
+    const { data: { user }, error } = await supabase.auth.getUser();
     
-    if (error) {
+    if (error || !user) {
       console.error('Auth check error:', error);
-      return { authenticated: false };
-    }
-
-    if (!session) {
       return { authenticated: false };
     }
 
     return { 
       authenticated: true,
       user: {
-        id: session.user.id,
-        email: session.user.email
+        id: user.id,
+        email: user.email
       }
     };
   } catch (error) {
@@ -220,46 +216,42 @@ export async function getUserId(): Promise<string | null> {
   }
 } 
 
-// Update profile with Stripe customer ID
-export async function updateUserStripeCustomer(
-  stripeCustomerId: string,
-  subscriptionData: {
-    subscriptionId: string;
-    status: 'active' | 'canceled';
-    currentPeriodEnd: Date;
-  }
-): Promise<StripeCustomerUpdate> {
+// New function to check subscription status
+export async function getSubscriptionStatus(): Promise<{
+  hasSubscription: boolean;
+  plan?: string;
+  status?: string;
+  error?: string;
+}> {
   const supabase = await createClient();
   
   try {
     const userId = await getUserId();
-    
     if (!userId) {
-      return { success: false, error: 'No authenticated user found' };
+      return { hasSubscription: false, error: 'No authenticated user' };
     }
 
-    const { error } = await supabase
-      .from('profiles')
-      .update({
-        stripe_customer_id: stripeCustomerId,
-        stripe_subscription_id: subscriptionData.subscriptionId,
-        subscription_status: subscriptionData.status,
-        current_period_end: subscriptionData.currentPeriodEnd.toISOString(),
-        updated_at: new Date().toISOString()
-      })
-      .eq('user_id', userId);
+    const { data: subscription, error } = await supabase
+      .from('subscriptions')
+      .select('subscription_plan, subscription_status')
+      .eq('user_id', userId)
+      .single();
 
     if (error) {
-      console.error('Error updating stripe customer id:', error);
-      return { success: false, error: error.message };
+      console.error('Error fetching subscription:', error);
+      return { hasSubscription: false, error: error.message };
     }
 
-    return { success: true };
+    return {
+      hasSubscription: !!subscription,
+      plan: subscription?.subscription_plan,
+      status: subscription?.subscription_status
+    };
   } catch (error) {
-    console.error('Unexpected error updating stripe customer:', error);
+    console.error('Error checking subscription status:', error);
     return { 
-      success: false, 
-      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+      hasSubscription: false, 
+      error: error instanceof Error ? error.message : 'Unknown error' 
     };
   }
 } 
