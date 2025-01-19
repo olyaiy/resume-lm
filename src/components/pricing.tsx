@@ -197,7 +197,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
 
       <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
         {plans.map((plan) => (
-          <Card key={plan.title} className="relative p-8 rounded-2xl border border-border/50 backdrop-blur-xl bg-background/50">
+          <Card key={plan.title} className="relative p-8 rounded-2xl border border-border/50 backdrop-blur-xl bg-background/50 flex flex-col">
             <div className="mb-8">
               <h3 className="text-2xl font-semibold mb-2">{plan.title}</h3>
               <div className="flex items-baseline gap-1">
@@ -215,19 +215,24 @@ export default function Pricing({ initialProfile }: PricingProps) {
               ))}
             </ul>
 
-            <Button
-              className="w-full"
-              variant={plan.title === 'Pro' ? 'default' : 'outline'}
-              onClick={() => handleCheckout(plan)}
-              disabled={cancelLoading}
-            >
-              {cancelLoading && plan.title === subscriptionPlan ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : null}
-              {plan.title === subscriptionPlan
-                ? 'Cancel Subscription'
-                : `Upgrade to ${plan.title}`}
-            </Button>
+            <div className="mt-auto">
+              <Button
+                className="w-full"
+                variant={plan.title === 'Pro' ? 'default' : 'outline'}
+                onClick={() => handleCheckout(plan)}
+                disabled={cancelLoading || plan.title === 'Free'}
+                {...(plan.title === 'Free' && { className: "w-full opacity-50 cursor-not-allowed" })}
+              >
+                {cancelLoading && plan.title === subscriptionPlan ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {plan.title === 'Free' && subscriptionPlan === 'free'
+                  ? 'Your current plan'
+                  : plan.title === subscriptionPlan
+                  ? 'Cancel Subscription'
+                  : `Upgrade to ${plan.title}`}
+              </Button>
+            </div>
           </Card>
         ))}
       </div>
