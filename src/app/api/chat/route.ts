@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       `,
       messages,
       maxSteps: 5,
-      tools,
+      tools: tools,
       experimental_transform: smoothStream(),
     });
 

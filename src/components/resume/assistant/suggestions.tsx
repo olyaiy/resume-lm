@@ -155,39 +155,84 @@ interface SkillSuggestionProps {
 
 function SkillSuggestion({ content: skill, currentContent: currentSkill }: SkillSuggestionProps) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
+      {/* Category Header */}
       <div className="flex-1">
         <Tiptap
           content={skill.category}
           onChange={() => {}}
           readOnly={true}
+          variant="skill"
           className={cn(
-            "min-h-[20px] text-sm font-medium",
-            "bg-white/50",
+            "text-sm font-semibold tracking-wide",
+            "bg-transparent",
             "border-none shadow-none",
-            !currentSkill || currentSkill.category !== skill.category && "bg-green-500/10"
+            !currentSkill || currentSkill.category !== skill.category && "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 px-2 py-1 rounded-md"
           )}
         />
       </div>
-      <div className="flex flex-wrap gap-1.5">
-        {skill.items.map((item, index) => (
-          <div
-            key={index}
-            className={cn(
-              " text-xs rounded-sm border text-gray-700",
-              !currentSkill || isNewItem(currentSkill.items, skill.items, item)
-                ? "bg-green-300/50 border-green-300"
-                : "bg-gray-100/80 border-gray-200/60"
-            )}
-          >
-            <Tiptap
-              content={item}
-              onChange={() => {}}
-              readOnly={true}
-              className="border-none shadow-none p-0 min-h-0 bg-transparent"
-            />
-          </div>
-        ))}
+
+      {/* Skills Grid */}
+      <div className="flex flex-wrap gap-2">
+        {skill.items.map((item, index) => {
+          const isNew = !currentSkill || isNewItem(currentSkill.items, skill.items, item);
+          
+          return (
+            <div
+              key={index}
+              className={cn(
+                "relative group transition-all duration-500",
+                "rounded-lg overflow-hidden",
+                isNew ? [
+                  "bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-50",
+                  "border border-emerald-200",
+                  "shadow-sm shadow-emerald-100",
+                ] : [
+                  "bg-gradient-to-br from-gray-50 via-white to-gray-50",
+                  "border border-gray-200/60",
+                  "shadow-sm",
+                ],
+                "hover:-translate-y-0.5 hover:shadow-md",
+                "transition-all duration-500 ease-in-out"
+              )}
+            >
+              {/* Animated Background Gradient */}
+              <div className={cn(
+                "absolute inset-0 opacity-0 transition-opacity duration-500",
+                "group-hover:opacity-100",
+                isNew 
+                  ? "bg-gradient-to-br from-emerald-100/50 via-teal-100/50 to-emerald-100/50"
+                  : "bg-gradient-to-br from-gray-100/50 via-white to-gray-100/50"
+              )} />
+
+              {/* Skill Content */}
+              <div className="relative px-3 py-1.5">
+                <Tiptap
+                  content={item}
+                  onChange={() => {}}
+                  readOnly={true}
+                  variant="skill"
+                  className={cn(
+                    "border-none shadow-none p-0",
+                    "text-sm",
+                    "bg-transparent",
+                    isNew ? "text-emerald-700" : "text-gray-700"
+                  )}
+                />
+              </div>
+
+              {/* New Indicator */}
+              {isNew && (
+                <div className="absolute -top-1 -right-1">
+                  <div className="relative flex h-4 w-4">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-20"></span>
+                    <span className="relative inline-flex rounded-full h-4 w-4 bg-emerald-500/10"></span>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );
