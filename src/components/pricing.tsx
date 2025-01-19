@@ -85,7 +85,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
           setSubscriptionPlan(profile.subscription_plan?.toLowerCase() || 'free');
           setAuthStatus(auth);
         } catch (error) {
-          console.error('Failed to fetch statuses:', error);
+          // Handle error silently
         } finally {
           setLoading(false);
         }
@@ -108,7 +108,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
       await cancelSubscription();
       setSubscriptionPlan('free');
     } catch (error) {
-      console.error('Failed to cancel subscription:', error);
+      // Handle error silently
     }
     setCancelLoading(false);
   };
@@ -121,7 +121,7 @@ export default function Pricing({ initialProfile }: PricingProps) {
         window.location.href = result.url;
       }
     } catch (error) {
-      console.error('Error accessing billing portal:', error);
+      // Handle error silently
     } finally {
       setPortalLoading(false);
     }

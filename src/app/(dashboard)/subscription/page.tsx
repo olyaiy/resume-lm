@@ -22,7 +22,6 @@ export default async function PlansPage() {
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4">
-      {profile?.stripe_subscription_id && <ManageSubscriptionButton />}
       <Pricing initialProfile={profile} />
     </div>
   );
