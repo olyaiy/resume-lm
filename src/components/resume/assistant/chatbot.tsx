@@ -529,15 +529,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
                           if (state === 'result') {
 
-                            if (toolName === 'displayWeather') {
-                              const { result } = toolInvocation;
-                              return (
-                                <div key={toolCallId}>
-                                  <Weather {...result} />
-                                </div>
-                              );
-                            }
-
 
                             // Map tool names to resume sections and handle suggestions
                             const toolConfig = {
@@ -568,8 +559,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                               },
                               getResume: null // Changed to null since it doesn't need suggestion handling
                             } as const;
-
                             const config = toolConfig[toolName as keyof typeof toolConfig];
+
+
                             if (!config) return null;
 
                             // Handle specific tool results
