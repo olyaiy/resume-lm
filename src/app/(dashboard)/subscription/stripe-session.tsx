@@ -54,3 +54,35 @@ export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
         throw new Error(error instanceof Error ? error.message : 'Failed to create checkout session');
     }
 }
+
+// Function to create a Stripe Portal Session
+export const createPortalSession = async () => {
+    // Check if user is authenticated
+    const { authenticated, user } = await checkAuth();
+    
+    if (!authenticated || !user?.id || !user?.email) {
+        throw new Error('User must be authenticated to access the billing portal');
+    }
+
+    try {
+        // Get or create Stripe customer
+        const customerId = await createOrRetrieveCustomer({
+            uuid: user.id,
+            email: user.email
+        });
+
+        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/subscription`;
+
+        const portalSession = await stripe.billingPortal.sessions.create({
+            customer: customerId,
+            return_url: returnUrl,
+        });
+
+        return {
+            url: portalSession.url
+        };
+    } catch (error) {
+        console.error('Error creating portal session:', error);
+        throw new Error(error instanceof Error ? error.message : 'Failed to create portal session');
+    }
+}
