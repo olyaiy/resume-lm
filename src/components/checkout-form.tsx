@@ -7,8 +7,9 @@ import {
     EmbeddedCheckout,
 } from "@stripe/react-stripe-js";
 import { checkAuth, getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
-import { postStripeSession } from "@/app/plans/stripe-session";
+
 import { Skeleton } from "@/components/ui/skeleton";
+import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
 
 const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,

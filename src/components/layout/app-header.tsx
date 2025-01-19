@@ -6,7 +6,7 @@ import { ModelSelector } from "@/components/settings/model-selector";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { User } from "lucide-react";
+import { User, CreditCard } from "lucide-react";
 import { PageTitle } from "./page-title";
 
 interface AppHeaderProps {
@@ -47,6 +47,14 @@ export function AppHeader({ children }: AppHeaderProps) {
               "shadow-sm hover:shadow-none transition-all duration-500",
               "relative overflow-hidden"
             )}>
+              <Link 
+                href="/subscription" 
+                className="flex items-center gap-0.5 px-1 py-0.5 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
+              >
+                <CreditCard className="h-3 w-3" />
+                <span className="hidden sm:inline">Subscription</span>
+              </Link>
+              <div className="w-px h-3.5 bg-purple-200/70" />
               <Link 
                 href="/profile" 
                 className="flex items-center gap-0.5 px-1 py-0.5 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
