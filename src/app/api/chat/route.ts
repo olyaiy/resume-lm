@@ -2,7 +2,7 @@ import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
 import { z } from 'zod';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
-import { resumeTools } from '@/lib/tools';
+import { tools } from '@/lib/tools';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -83,7 +83,7 @@ export async function POST(req: Request) {
       `,
       messages,
       maxSteps: 5,
-      tools: resumeTools,
+      tools,
       experimental_transform: smoothStream(),
     });
 
