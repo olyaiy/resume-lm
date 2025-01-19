@@ -56,68 +56,52 @@ interface PricingProps {
   initialProfile: Profile | null;
 }
 
+interface ActionState {
+  type: 'idle' | 'checkout' | 'cancel' | 'portal';
+  isLoading: boolean;
+}
+
 export default function Pricing({ initialProfile }: PricingProps) {
   const router = useRouter();
-  const [subscriptionPlan, setSubscriptionPlan] = useState<string>(
-    initialProfile?.subscription_plan?.toLowerCase() || 'free'
-  );
-  const [loading, setLoading] = useState<boolean>(false);
-  const [cancelLoading, setCancelLoading] = useState<boolean>(false);
-  const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
-  const [portalLoading, setPortalLoading] = useState<boolean>(false);
-
-  useEffect(() => {
-    // Only fetch if we don't have initial data
-    if (!initialProfile) {
-      const fetchStatuses = async () => {
-        try {
-          setLoading(true);
-          const [profile, auth] = await Promise.all([
-            getSubscriptionStatus(),
-            checkAuth()
-          ]);
-          setSubscriptionPlan(profile.subscription_plan?.toLowerCase() || 'free');
-          setAuthStatus(auth);
-        } catch (error) {
-          // Handle error silently
-        } finally {
-          setLoading(false);
-        }
-      };
-      fetchStatuses();
-    }
-  }, [initialProfile]);
+  const [actionState, setActionState] = useState<ActionState>({ 
+    type: 'idle', 
+    isLoading: false 
+  });
+  const subscriptionPlan = initialProfile?.subscription_plan?.toLowerCase() || 'free';
 
   const handleCheckout = async (plan: Plan) => {
     if (plan.title.toLowerCase() === subscriptionPlan) {
       await handleCancelSubscription();
-    } else if (plan.priceId) {
-      try {
-        setLoading(true);
-        const { clientSecret } = await postStripeSession({ priceId: plan.priceId });
-        router.push(`/subscription/checkout?session_id=${clientSecret}`);
-      } catch (error) {
-        console.error('Error creating checkout session:', error);
-      } finally {
-        setLoading(false);
-      }
+      return;
+    }
+
+    if (!plan.priceId) return;
+
+    try {
+      setActionState({ type: 'checkout', isLoading: true });
+      const { clientSecret } = await postStripeSession({ priceId: plan.priceId });
+      router.push(`/subscription/checkout?session_id=${clientSecret}`);
+    } catch (error) {
+      console.error('Error creating checkout session:', error);
+    } finally {
+      setActionState({ type: 'idle', isLoading: false });
     }
   };
 
   const handleCancelSubscription = async () => {
-    setCancelLoading(true);
     try {
+      setActionState({ type: 'cancel', isLoading: true });
       await cancelSubscription();
-      setSubscriptionPlan('free');
     } catch (error) {
       // Handle error silently
+    } finally {
+      setActionState({ type: 'idle', isLoading: false });
     }
-    setCancelLoading(false);
   };
 
   const handlePortalSession = async () => {
     try {
-      setPortalLoading(true);
+      setActionState({ type: 'portal', isLoading: true });
       const result = await createPortalSession();
       if (result?.url) {
         window.location.href = result.url;
@@ -125,11 +109,11 @@ export default function Pricing({ initialProfile }: PricingProps) {
     } catch (error) {
       // Handle error silently
     } finally {
-      setPortalLoading(false);
+      setActionState({ type: 'idle', isLoading: false });
     }
   };
 
-  if (loading) {
+  if (actionState.isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-background">
         <Loader2 className="animate-spin text-blue-500 w-10 h-10" />
@@ -156,9 +140,9 @@ export default function Pricing({ initialProfile }: PricingProps) {
               size="lg" 
               className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               onClick={handlePortalSession}
-              disabled={portalLoading}
+              disabled={actionState.isLoading}
             >
-              {portalLoading ? (
+              {actionState.isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading...
@@ -190,7 +174,10 @@ export default function Pricing({ initialProfile }: PricingProps) {
             key={plan.title}
             plan={plan}
             isCurrentPlan={plan.title.toLowerCase() === subscriptionPlan}
-            isLoading={loading || (cancelLoading && plan.title.toLowerCase() === subscriptionPlan)}
+            isLoading={actionState.isLoading && (
+              (actionState.type === 'checkout') || 
+              (actionState.type === 'cancel' && plan.title.toLowerCase() === subscriptionPlan)
+            )}
             onAction={handleCheckout}
           />
         ))}
