@@ -35,40 +35,44 @@ export function AppHeader({ children }: AppHeaderProps) {
           </div>
         </div>
 
-        {/* Right Section - Action Buttons */}
+        {/* Right Section - Navigation Items */}
         <div className="flex items-center">
           {children ? (
             children
           ) : (
-            <div className={cn(
-              "flex items-center gap-1 px-1.5 py-0.5 rounded-full",
-              "bg-gradient-to-br from-purple-500/5 to-indigo-500/5",
-              "border border-purple-200/40 backdrop-blur-md",
-              "shadow-sm hover:shadow-none transition-all duration-500",
-              "relative overflow-hidden"
-            )}>
+            <nav className="flex items-center">
               <Link 
                 href="/subscription" 
-                className="flex items-center gap-0.5 px-1 py-0.5 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1",
+                  "text-sm font-medium text-purple-600/80 hover:text-purple-800",
+                  "transition-colors duration-200"
+                )}
               >
-                <CreditCard className="h-3 w-3" />
+                <CreditCard className="h-4 w-4" />
                 <span className="hidden sm:inline">Subscription</span>
               </Link>
-              <div className="w-px h-3.5 bg-purple-200/70" />
+              <div className="h-4 w-px bg-purple-200/50" />
               <Link 
                 href="/profile" 
-                className="flex items-center gap-0.5 px-1 py-0.5 text-xs font-medium text-purple-600 hover:text-purple-700 transition-colors"
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1",
+                  "text-sm font-medium text-purple-600/80 hover:text-purple-800",
+                  "transition-colors duration-200"
+                )}
               >
-                <User className="h-3 w-3" />
+                <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Profile</span>
               </Link>
-              <div className="w-px h-3.5 bg-purple-200/70" />
-              <ModelSelector />
-              <div className="w-px h-3.5 bg-purple-200/70" />
-              <SettingsButton />
-              <div className="w-px h-3.5 bg-purple-200/70" />
-              <LogoutButton />
-            </div>
+              <div className="h-4 w-px bg-purple-200/50" />
+              <div className="flex items-center px-3 py-1">
+                <ModelSelector />
+                <div className="mx-2 h-4 w-px bg-purple-200/50" />
+                <SettingsButton />
+                <div className="mx-2 h-4 w-px bg-purple-200/50" />
+                <LogoutButton />
+              </div>
+            </nav>
           )}
         </div>
       </div>
