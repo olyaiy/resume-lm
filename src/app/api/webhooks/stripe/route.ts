@@ -26,25 +26,50 @@ async function handleSubscriptionChange(
     status: 'active' | 'canceled';
     currentPeriodEnd: Date;
     trialEnd?: Date | null;
+    cancelAtPeriodEnd?: boolean;
   }
 ) {
   try {
-    // Log the subscription change
-    console.log('📝 Processing subscription change:', {
+    // Enhanced initial logging
+    console.log('🔔 Subscription Status Update:', {
+      event: 'subscription_change',
+      timestamp: new Date().toISOString(),
       customerId: stripeCustomerId,
-      ...subscriptionData
+      subscriptionId: subscriptionData.subscriptionId,
+      currentStatus: subscriptionData.status,
+      cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
+      planId: subscriptionData.planId,
+      accessUntil: subscriptionData.currentPeriodEnd.toISOString(),
+      trialStatus: subscriptionData.trialEnd ? 'Active' : 'Not Active'
     });
 
     // Update subscription in database
     await manageSubscriptionStatusChange(
       subscriptionData.subscriptionId,
       stripeCustomerId,
-      subscriptionData.status === 'active'
+      subscriptionData.status === 'active' && !subscriptionData.cancelAtPeriodEnd
     );
     
-    console.log('✅ Subscription change processed successfully');
+    console.log('✨ Final Subscription State:', {
+      result: 'success',
+      updatedAt: new Date().toISOString(),
+      subscriptionId: subscriptionData.subscriptionId,
+      status: subscriptionData.status,
+      cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
+      accessUntil: subscriptionData.currentPeriodEnd.toISOString(),
+      note: subscriptionData.cancelAtPeriodEnd 
+        ? 'Subscription is cancelled but remains active until period end'
+        : subscriptionData.status === 'active' 
+          ? 'Subscription is currently active' 
+          : 'Subscription is cancelled'
+    });
   } catch (error) {
-    console.error('❌ Error processing subscription change:', error);
+    console.error('❌ Subscription Update Failed:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString(),
+      customerId: stripeCustomerId,
+      subscriptionId: subscriptionData.subscriptionId
+    });
     throw error;
   }
 }
@@ -139,15 +164,43 @@ export async function POST(req: Request) {
 
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
+        const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
+        
+        // Enhanced logging for subscription updates
+        console.log('📝 Subscription Update Details:', {
+          event: 'subscription_updated',
+          customerId: subscription.customer,
+          subscriptionId: subscription.id,
+          status: subscription.status,
+          cancelAtPeriodEnd: subscription.cancel_at_period_end,
+          currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+          changes: {
+            willCancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+            previousCancelAtPeriodEnd: previousAttributes.cancel_at_period_end,
+            newCancelAtPeriodEnd: subscription.cancel_at_period_end,
+            previousStatus: previousAttributes.status,
+            newStatus: subscription.status
+          }
+        });
+
+        // Add specific cancellation notice if detected
+        if (subscription.cancel_at_period_end) {
+          console.log('🚫 Subscription Cancellation Scheduled:', {
+            message: 'Subscription will remain active until period end',
+            activeUntil: new Date(subscription.current_period_end * 1000).toISOString(),
+            willAutoRenew: false
+          });
+        }
         
         await handleSubscriptionChange(
           subscription.customer as string,
           {
             subscriptionId: subscription.id,
             planId: subscription.items.data[0].price.id,
-            status: subscription.status === 'active' ? 'active' : 'canceled',
+            status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
             currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
+            trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
+            cancelAtPeriodEnd: subscription.cancel_at_period_end
           }
         );
         break;

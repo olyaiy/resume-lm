@@ -116,7 +116,7 @@ export async function manageSubscriptionStatusChange(
     stripe_subscription_id: subscription.id,
     stripe_customer_id: customerId,
     subscription_plan: plan,
-    subscription_status: subscription.status === 'active' ? 'active' : 'canceled',
+    subscription_status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
     current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
     trial_end: subscription.trial_end 
       ? new Date(subscription.trial_end * 1000).toISOString()
