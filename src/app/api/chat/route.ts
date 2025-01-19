@@ -84,6 +84,7 @@ export async function POST(req: Request) {
       messages,
       maxSteps: 5,
       tools: tools,
+      experimental_toolCallStreaming: true,
       experimental_transform: smoothStream(),
     });
 
