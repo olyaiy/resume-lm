@@ -796,8 +796,8 @@ export async function getSubscriptionStatus() {
     throw new Error('User not authenticated');
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from('subscriptions')
     .select(`
       subscription_plan,
       subscription_status,
@@ -809,11 +809,22 @@ export async function getSubscriptionStatus() {
     .eq('user_id', user.id)
     .single();
 
-  if (profileError) {
+  if (subscriptionError) {
+    // If no subscription found, return a default free plan instead of throwing
+    if (subscriptionError.code === 'PGRST116') {
+      return {
+        subscription_plan: 'Free',
+        subscription_status: 'active',
+        current_period_end: null,
+        trial_end: null,
+        stripe_customer_id: null,
+        stripe_subscription_id: null
+      };
+    }
     throw new Error('Failed to fetch subscription status');
   }
 
-  return profile;
+  return subscription;
 }
 
 export async function createCheckoutSession(priceId: string) {
