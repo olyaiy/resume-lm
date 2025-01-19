@@ -1,8 +1,8 @@
 'use server';
 
 import { Stripe } from "stripe";
-import { createClient, createServiceClient } from '@/utils/supabase/server';
-import { Profile, Subscription } from '@/lib/types';
+import { createServiceClient } from '@/utils/supabase/server';
+import { Subscription } from '@/lib/types';
 
 // Initialize stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

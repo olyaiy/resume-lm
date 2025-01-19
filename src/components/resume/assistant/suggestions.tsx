@@ -24,6 +24,259 @@ interface WholeResumeSuggestionProps {
   onReject: () => void;
 }
 
+interface WorkExperienceSuggestionProps {
+  content: WorkExperience;
+  currentContent: WorkExperience | null;
+}
+
+function WorkExperienceSuggestion({ content: work, currentContent: currentWork }: WorkExperienceSuggestionProps) {
+  return (
+    <div className="space-y-2">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className={cn(
+            "text-base font-bold text-gray-900",
+            !currentWork || currentWork.position !== work.position && DIFF_HIGHLIGHT_CLASSES
+          )}>
+            {work.position.replace(/\*\*/g, '')}
+          </h3>
+          <p className={cn(
+            "text-xs text-gray-700",
+            !currentWork || currentWork.company !== work.company && DIFF_HIGHLIGHT_CLASSES
+          )}>
+            {work.company}
+          </p>
+        </div>
+        <span className={cn(
+          "text-[10px] text-gray-600",
+          !currentWork || currentWork.date !== work.date && DIFF_HIGHLIGHT_CLASSES
+        )}>
+          {work.date}
+        </span>
+      </div>
+      <div className="space-y-1.5">
+        {work.description.map((point, index) => {
+          const currentPoint = currentWork?.description?.[index];
+          
+          return (
+            <div key={index} className="flex items-start gap-1.5">
+              <span className="text-gray-800 mt-0.5 text-xs">•</span>
+              <div className="flex-1">
+                <Tiptap
+                  content={point}
+                  readOnly={true}
+                  onChange={() => {}}
+                  className={cn(
+                    "min-h-[60px] text-xs text-gray-800",
+                    !currentPoint && DIFF_HIGHLIGHT_CLASSES,
+                    "border-none shadow-none"
+                  )}
+                />
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+interface ProjectSuggestionProps {
+  content: Project;
+  currentContent: Project | null;
+}
+
+function ProjectSuggestion({ content: project, currentContent: currentProject }: ProjectSuggestionProps) {
+  return (
+    <div className="space-y-3">
+      <div className="flex justify-between items-start">
+        <h3 className={cn(
+          "text-lg font-bold text-gray-900",
+          !currentProject || currentProject.name !== project.name && DIFF_HIGHLIGHT_CLASSES
+        )}>
+          {project.name}
+        </h3>
+        {project.date && (
+          <span className={cn(
+            "text-xs text-gray-600",
+            !currentProject || currentProject.date !== project.date && DIFF_HIGHLIGHT_CLASSES
+          )}>
+            {project.date}
+          </span>
+        )}
+      </div>
+      <div className="space-y-2">
+        {project.description.map((point, index) => (
+          <div 
+            key={index} 
+            className="flex items-start gap-2"
+          >
+            <span className="text-gray-800 mt-1">•</span>
+            <div className="flex-1">
+              <Tiptap
+                content={point}
+                readOnly={true}
+                onChange={() => {}}
+                className={cn(
+                  "min-h-[60px] text-xs text-gray-800",
+                  !currentProject || isNewItem(currentProject.description, project.description, point) && DIFF_HIGHLIGHT_CLASSES,
+                  "border-none shadow-none"
+                )}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
+      {project.technologies && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {project.technologies.map((tech, index) => (
+            <span
+              key={index}
+              className={cn(
+                "px-2 py-0.5 text-xs rounded-full border text-gray-700",
+                !currentProject || isNewItem(currentProject.technologies, project.technologies, tech)
+                  ? DIFF_HIGHLIGHT_CLASSES
+                  : "bg-gray-100/80 border-gray-200/60"
+              )}
+            >
+              {tech}
+            </span>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+interface SkillSuggestionProps {
+  content: Skill;
+  currentContent: Skill | null;
+}
+
+function SkillSuggestion({ content: skill, currentContent: currentSkill }: SkillSuggestionProps) {
+  return (
+    <div className="space-y-2">
+      <div className="flex-1">
+        <Tiptap
+          content={skill.category}
+          onChange={() => {}}
+          readOnly={true}
+          className={cn(
+            "min-h-[20px] text-sm font-medium",
+            "bg-white/50",
+            "border-none shadow-none",
+            !currentSkill || currentSkill.category !== skill.category && "bg-green-500/10"
+          )}
+        />
+      </div>
+      <div className="flex flex-wrap gap-1.5">
+        {skill.items.map((item, index) => (
+          <div
+            key={index}
+            className={cn(
+              " text-xs rounded-sm border text-gray-700",
+              !currentSkill || isNewItem(currentSkill.items, skill.items, item)
+                ? "bg-green-300/50 border-green-300"
+                : "bg-gray-100/80 border-gray-200/60"
+            )}
+          >
+            <Tiptap
+              content={item}
+              onChange={() => {}}
+              readOnly={true}
+              className="border-none shadow-none p-0 min-h-0 bg-transparent"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+interface EducationSuggestionProps {
+  content: Education;
+  currentContent: Education | null;
+}
+
+function EducationSuggestion({ content: education, currentContent: currentEducation }: EducationSuggestionProps) {
+  return (
+    <div className="space-y-2 w-full">
+      <div className="flex justify-between items-start">
+        <div>
+          <h3 className={cn(
+            "font-medium text-gray-900",
+            !currentEducation || (currentEducation.degree !== education.degree || currentEducation.field !== education.field) && DIFF_HIGHLIGHT_CLASSES
+          )}>
+            <span>
+              {education.degree.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                part.startsWith('**') && part.endsWith('**') ? 
+                  <strong key={i}>{part.slice(2, -2)}</strong> : 
+                  part
+              )}
+            </span>
+            {' in '}
+            <span>
+              {education.field.split(/(\*\*.*?\*\*)/).map((part, i) => 
+                part.startsWith('**') && part.endsWith('**') ? 
+                  <strong key={i}>{part.slice(2, -2)}</strong> : 
+                  part
+              )}
+            </span>
+          </h3>
+          <p className={cn(
+            "text-sm text-gray-700",
+            !currentEducation || currentEducation.school !== education.school && DIFF_HIGHLIGHT_CLASSES
+          )}>
+            {education.school.replace(/\*\*/g, '')}
+          </p>
+        </div>
+        <span className={cn(
+          "text-xs text-gray-600",
+          !currentEducation || currentEducation.date !== education.date && DIFF_HIGHLIGHT_CLASSES
+        )}>
+          {education.date.replace(/\*\*/g, '')}
+        </span>
+      </div>
+      {education.achievements && (
+        <div className="space-y-1.5">
+          {education.achievements.map((achievement, index) => {
+            const currentAchievement = currentEducation?.achievements?.[index];
+            const comparedWords = currentAchievement 
+              ? compareDescriptions(currentAchievement, achievement)
+              : [{ text: achievement.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
+
+            return (
+              <div key={index} className="flex items-start gap-1.5">
+                <span className="text-gray-800 mt-0.5 text-xs">•</span>
+                <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
+                  {comparedWords.map((word, wordIndex) => (
+                    <span
+                      key={wordIndex}
+                      className={cn(
+                        "inline-flex items-center",
+                        word.isNew && "bg-green-300",
+                        word.isStart && "rounded-l-sm pl-1",
+                        word.isEnd && "rounded-r-sm pr-1",
+                        wordIndex < comparedWords.length - 1 && "mr-1"
+                      )}
+                    >
+                      {word.isBold ? (
+                        <strong>{word.text}</strong>
+                      ) : (
+                        word.text
+                      )}
+                    </span>
+                  ))}
+                </p>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 function compareDescriptions(current: string, suggested: string): {
   text: string;
   isNew: boolean;
@@ -148,259 +401,13 @@ export function Suggestion({ type, content, currentContent, onAccept, onReject }
   const renderContent = () => {
     switch (type) {
       case 'work_experience':
-        const work = content as WorkExperience;
-        const currentWork = currentContent as WorkExperience | null;
-        return (
-          <div className="space-y-2">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className={cn(
-                  "text-base font-bold text-gray-900",
-                  !currentWork || currentWork.position !== work.position && DIFF_HIGHLIGHT_CLASSES
-                )}>
-                  {work.position.replace(/\*\*/g, '')}
-                </h3>
-                <p className={cn(
-                  "text-xs text-gray-700",
-                  !currentWork || currentWork.company !== work.company && DIFF_HIGHLIGHT_CLASSES
-                )}>
-                  {work.company}
-                </p>
-              </div>
-              <span className={cn(
-                "text-[10px] text-gray-600",
-                !currentWork || currentWork.date !== work.date && DIFF_HIGHLIGHT_CLASSES
-              )}>
-                {work.date}
-              </span>
-            </div>
-            <div className="space-y-1.5">
-              {work.description.map((point, index) => {
-                const currentPoint = currentWork?.description?.[index];
-                
-                return (
-                  <div key={index} className="flex items-start gap-1.5">
-                    <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                    <div className="flex-1">
-                      <Tiptap
-                        content={point}
-                        readOnly={true}
-                        onChange={() => {}}
-                        className={cn(
-                          "min-h-[60px] text-xs text-gray-800",
-                          !currentPoint && DIFF_HIGHLIGHT_CLASSES,
-                          "border-none shadow-none"
-                        )}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-              {/* COMMENTING FOR NOW, DO NOT REMOVE */}
-            {/* {work.technologies && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {work.technologies.map((tech, index) => (
-                  <span
-                    key={index}
-                    className={cn(
-                      "px-1.5 py-0.5 text-[10px] rounded-full border text-gray-700",
-                      !currentWork || isNewItem(currentWork.technologies, work.technologies, tech)
-                        ? DIFF_HIGHLIGHT_CLASSES
-                        : "bg-gray-100/80 border-gray-200/60"
-                    )}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            )} */}
-          </div>
-        );
-
+        return <WorkExperienceSuggestion content={content as WorkExperience} currentContent={currentContent as WorkExperience | null} />;
       case 'project':
-        const project = content as Project;
-        const currentProject = currentContent as Project | null;
-        return (
-          <div className="space-y-3">
-            <div className="flex justify-between items-start">
-              <h3 className={cn(
-                "text-lg font-bold text-gray-900",
-                !currentProject || currentProject.name !== project.name && DIFF_HIGHLIGHT_CLASSES
-              )}>
-                {project.name}
-              </h3>
-              {project.date && (
-                <span className={cn(
-                  "text-xs text-gray-600",
-                  !currentProject || currentProject.date !== project.date && DIFF_HIGHLIGHT_CLASSES
-                )}>
-                  {project.date}
-                </span>
-              )}
-            </div>
-            <div className="space-y-2">
-              {project.description.map((point, index) => (
-                <div 
-                  key={index} 
-                  className="flex items-start gap-2"
-                >
-                  <span className="text-gray-800 mt-1">•</span>
-                  <div className="flex-1">
-                    <Tiptap
-                      content={point}
-                      readOnly={true}
-                      onChange={() => {}}
-                      className={cn(
-                        "min-h-[60px] text-xs text-gray-800",
-                        !currentProject || isNewItem(currentProject.description, project.description, point) && DIFF_HIGHLIGHT_CLASSES,
-                        "border-none shadow-none"
-                      )}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-            {project.technologies && (
-              <div className="flex flex-wrap gap-1.5 mt-2">
-                {project.technologies.map((tech, index) => (
-                  <span
-                    key={index}
-                    className={cn(
-                      "px-2 py-0.5 text-xs rounded-full border text-gray-700",
-                      !currentProject || isNewItem(currentProject.technologies, project.technologies, tech)
-                        ? DIFF_HIGHLIGHT_CLASSES
-                        : "bg-gray-100/80 border-gray-200/60"
-                    )}
-                  >
-                    {tech}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        );
-
+        return <ProjectSuggestion content={content as Project} currentContent={currentContent as Project | null} />;
       case 'skill':
-        const skill = content as Skill;
-        const currentSkill = currentContent as Skill | null;
-        return (
-          <div className="space-y-2">
-            <div className="flex-1">
-              <Tiptap
-                content={skill.category}
-                onChange={() => {}}
-                readOnly={true}
-                className={cn(
-                  "min-h-[20px] text-sm font-medium",
-                  "bg-white/50",
-                  "border-none shadow-none",
-                  !currentSkill || currentSkill.category !== skill.category && "bg-green-500/10"
-                )}
-              />
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {skill.items.map((item, index) => (
-                <div
-                  key={index}
-                  className={cn(
-                    " text-xs rounded-sm border text-gray-700",
-                    !currentSkill || isNewItem(currentSkill.items, skill.items, item)
-                      ? "bg-green-300/50 border-green-300"
-                      : "bg-gray-100/80 border-gray-200/60"
-                  )}
-                >
-                  <Tiptap
-                    content={item}
-                    onChange={() => {}}
-                    readOnly={true}
-                    className="border-none shadow-none p-0 min-h-0 bg-transparent"
-                  />
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-
+        return <SkillSuggestion content={content as Skill} currentContent={currentContent as Skill | null} />;
       case 'education':
-        const education = content as Education;
-        const currentEducation = currentContent as Education | null;
-        return (
-          <div className="space-y-2 w-full">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className={cn(
-                  "font-medium text-gray-900",
-                  !currentEducation || (currentEducation.degree !== education.degree || currentEducation.field !== education.field) && DIFF_HIGHLIGHT_CLASSES
-                )}>
-                  <span>
-                    {education.degree.split(/(\*\*.*?\*\*)/).map((part, i) => 
-                      part.startsWith('**') && part.endsWith('**') ? 
-                        <strong key={i}>{part.slice(2, -2)}</strong> : 
-                        part
-                    )}
-                  </span>
-                  {' in '}
-                  <span>
-                    {education.field.split(/(\*\*.*?\*\*)/).map((part, i) => 
-                      part.startsWith('**') && part.endsWith('**') ? 
-                        <strong key={i}>{part.slice(2, -2)}</strong> : 
-                        part
-                    )}
-                  </span>
-                </h3>
-                <p className={cn(
-                  "text-sm text-gray-700",
-                  !currentEducation || currentEducation.school !== education.school && DIFF_HIGHLIGHT_CLASSES
-                )}>
-                  {education.school.replace(/\*\*/g, '')}
-                </p>
-              </div>
-              <span className={cn(
-                "text-xs text-gray-600",
-                !currentEducation || currentEducation.date !== education.date && DIFF_HIGHLIGHT_CLASSES
-              )}>
-                {education.date.replace(/\*\*/g, '')}
-              </span>
-            </div>
-            {education.achievements && (
-              <div className="space-y-1.5">
-                {education.achievements.map((achievement, index) => {
-                  const currentAchievement = currentEducation?.achievements?.[index];
-                  const comparedWords = currentAchievement 
-                    ? compareDescriptions(currentAchievement, achievement)
-                    : [{ text: achievement.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
-
-                  return (
-                    <div key={index} className="flex items-start gap-1.5">
-                      <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                      <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
-                        {comparedWords.map((word, wordIndex) => (
-                          <span
-                            key={wordIndex}
-                            className={cn(
-                              "inline-flex items-center",
-                              word.isNew && "bg-green-300",
-                              word.isStart && "rounded-l-sm pl-1",
-                              word.isEnd && "rounded-r-sm pr-1",
-                              wordIndex < comparedWords.length - 1 && "mr-1"
-                            )}
-                          >
-                            {word.isBold ? (
-                              <strong>{word.text}</strong>
-                            ) : (
-                              word.text
-                            )}
-                          </span>
-                        ))}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-          </div>
-        );
+        return <EducationSuggestion content={content as Education} currentContent={currentContent as Education | null} />;
     }
   };
 
