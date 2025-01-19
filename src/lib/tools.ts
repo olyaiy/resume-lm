@@ -121,6 +121,19 @@ export const modifyWholeResumeTool = createTool({
   }),
 });
 
+
+export const weatherTool = createTool({
+    description: 'Display the weather for a location',
+    parameters: z.object({
+      location: z.string().describe('The location to get the weather for'),
+    }),
+    execute: async function ({ location }) {
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      return { weather: 'Sunny', temperature: 75, location };
+    },
+  });
+  
+
 // Export all tools in a single object for convenience
 export const tools = {
   getResume: getResumeTool,
@@ -129,4 +142,6 @@ export const tools = {
   suggest_skill_improvement: suggestSkillTool,
   suggest_education_improvement: suggestEducationTool,
   modifyWholeResume: modifyWholeResumeTool,
+  displayWeather: weatherTool,
+
 }; 
