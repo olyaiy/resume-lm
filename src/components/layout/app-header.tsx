@@ -1,3 +1,5 @@
+'use client';
+
 import { LogoutButton } from "@/components/auth/logout-button";
 import { SettingsButton } from "@/components/settings/settings-button";
 import { ModelSelector } from "@/components/settings/model-selector";

@@ -1,7 +1,6 @@
 // src/app/api/webhooks/stripe/route.ts
 
 import { headers } from 'next/headers'
-import { NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { manageSubscriptionStatusChange } from '@/utils/stripe/actions'
 
@@ -10,6 +9,14 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
 })
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
+
+const relevantEvents = new Set([
+  'checkout.session.completed',
+  'invoice.paid',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted'
+]);
 
 async function handleSubscriptionChange(
   stripeCustomerId: string,
@@ -48,9 +55,12 @@ export async function POST(req: Request) {
     const signature = (await headers()).get('stripe-signature')
 
     if (!signature) {
-      return NextResponse.json(
-        { error: 'Missing stripe-signature header' },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: 'Missing stripe-signature header' }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
       )
     }
 
@@ -65,7 +75,24 @@ export async function POST(req: Request) {
     } catch (err: unknown) {
       const error = err as Error
       console.error(`⚠️ Webhook signature verification failed: ${error.message}`)
-      return NextResponse.json({ error: error.message }, { status: 400 })
+      return new Response(
+        JSON.stringify({ error: error.message }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      )
+    }
+
+    if (!relevantEvents.has(event.type)) {
+      console.log(`⚠️ Unhandled event type: ${event.type}`);
+      return new Response(
+        JSON.stringify({ error: `Unhandled event type: ${event.type}` }),
+        { 
+          status: 400,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
     }
 
     // Handle the event based on type
@@ -147,12 +174,21 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ received: true }, { status: 200 })
+    return new Response(
+      JSON.stringify({ received: true }),
+      { 
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
+      }
+    )
   } catch (err) {
     console.error('🔥 Webhook error:', err)
-    return NextResponse.json(
-      { error: 'Webhook handler failed' },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: 'Webhook handler failed' }),
+      { 
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
+      }
     )
   }
 }
