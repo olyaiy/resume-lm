@@ -41,6 +41,43 @@ export function ResumeEditorClient({
   initialResume,
   profile,
 }: ResumeEditorClientProps) {
+  console.time('⚛️ Editor Client Init');
+  const router = useRouter();
+  const [state, dispatch] = useReducer(resumeReducer, {
+    resume: initialResume,
+    isSaving: false,
+    isDeleting: false,
+    hasUnsavedChanges: false
+  });
+
+  const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
+  const previewPanelRef = useRef<HTMLDivElement>(null);
+
+  // Track initial mount
+  useEffect(() => {
+    console.timeEnd('⚛️ Editor Client Init');
+    console.time('🖥️ Editor First Render');
+    return () => {
+      console.timeEnd('🖥️ Editor First Render');
+    };
+  }, []);
+
+  // Track PDF preview initialization
+  useEffect(() => {
+    if (previewPanelRef.current) {
+      console.time('📱 Preview Panel Setup');
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setPreviewPanelWidth(entry.contentRect.width);
+        }
+      });
+
+      resizeObserver.observe(previewPanelRef.current);
+      console.timeEnd('📱 Preview Panel Setup');
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
+
   // Convert initial resume data to use single date string format
   const convertedInitialResume = useMemo(() => ({
     ...initialResume,
@@ -82,18 +119,8 @@ export function ResumeEditorClient({
     }
   }), [initialResume]);
 
-  const [state, dispatch] = useReducer(resumeReducer, {
-    resume: convertedInitialResume,
-    isSaving: false,
-    isDeleting: false,
-    hasUnsavedChanges: false
-  });
-
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const [previewPanelWidth, setPreviewPanelWidth] = useState<number>(0);
-  const previewPanelRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
 
   const debouncedResume = useDebouncedValue(state.resume, 500);
 
@@ -133,19 +160,6 @@ export function ResumeEditorClient({
     }
     fetchJob();
   }, [state.resume.job_id]);
-
-  useEffect(() => {
-    if (previewPanelRef.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setPreviewPanelWidth(entry.contentRect.width);
-        }
-      });
-
-      resizeObserver.observe(previewPanelRef.current);
-      return () => resizeObserver.disconnect();
-    }
-  }, []);
 
   const updateField = <K extends keyof Resume>(field: K, value: Resume[K]) => {
     dispatch({ type: 'UPDATE_FIELD', field, value });

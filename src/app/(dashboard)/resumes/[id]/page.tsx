@@ -29,10 +29,15 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
+  console.time('🔍 Total Resume Page Load');
   try {
     const { id } = await params;
+    console.time('📊 Resume Data Fetch');
     const { resume, profile } = await getResumeById(id);
-    return (
+    console.timeEnd('📊 Resume Data Fetch');
+    
+    console.time('🎨 Resume Page Render');
+    const component = (
       <div 
         className="h-[calc(100vh-4rem)] overflow-hidden relative"
         data-page-title={resume.name}
@@ -48,12 +53,16 @@ export default async function Page({
         </div>
 
         {/* Content */}
-        <div className="relative z-10 ">
+        <div className="relative z-10">
           <ResumeEditorClient initialResume={resume} profile={profile} />
         </div>
       </div>
     );
+    console.timeEnd('🎨 Resume Page Render');
+    console.timeEnd('🔍 Total Resume Page Load');
+    return component;
   } catch (error) {
+    console.timeEnd('🔍 Total Resume Page Load');
     if (error instanceof Error && error.message === 'User not authenticated') {
       redirect("/auth/login");
     }

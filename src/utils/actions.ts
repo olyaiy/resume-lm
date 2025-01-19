@@ -106,38 +106,56 @@ export async function getDashboardData(): Promise<DashboardData> {
 }
 
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
+  console.time('🔄 Total getResumeById');
   const supabase = await createClient();
 
+  // 1. First authenticate
+  console.time('🔐 Auth Check');
   const { data: { user }, error: userError } = await supabase.auth.getUser();
+  console.timeEnd('🔐 Auth Check');
   
   if (userError || !user) {
+    console.timeEnd('🔄 Total getResumeById');
     throw new Error('User not authenticated');
   }
 
-  // Fetch the specific resume
-  const { data: resume, error: resumeError } = await supabase
-    .from('resumes')
-    .select('*')
-    .eq('id', resumeId)
-    .eq('user_id', user.id)
-    .single();
+  // 2. Then fetch resume and profile in parallel
+  console.time('📄 Parallel Data Fetch');
+  try {
+    const [resumeResult, profileResult] = await Promise.all([
+      supabase
+        .from('resumes')
+        .select('*')
+        .eq('id', resumeId)
+        .eq('user_id', user.id)
+        .single(),
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single()
+    ]);
+    console.timeEnd('📄 Parallel Data Fetch');
 
-  if (resumeError || !resume) {
-    throw new Error('Resume not found');
+    // Check for errors and handle them
+    if (resumeResult.error || !resumeResult.data) {
+      throw new Error('Resume not found');
+    }
+
+    if (profileResult.error || !profileResult.data) {
+      throw new Error('Profile not found');
+    }
+
+    console.timeEnd('🔄 Total getResumeById');
+    return { 
+      resume: resumeResult.data, 
+      profile: profileResult.data 
+    };
+  } catch (error) {
+    console.timeEnd('📄 Parallel Data Fetch');
+    console.timeEnd('🔄 Total getResumeById');
+    throw error;
   }
-
-  // Fetch the user's profile
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('user_id', user.id)
-    .single();
-
-  if (profileError || !profile) {
-    throw new Error('Profile not found');
-  }
-
-  return { resume, profile };
 }
 
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {
