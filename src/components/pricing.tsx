@@ -3,18 +3,14 @@
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { Loader2 } from 'lucide-react';
-import { getSubscriptionStatus, createCheckoutSession, cancelSubscription } from '@/utils/actions';
-import { checkAuth } from '@/app/auth/login/actions';
+import { cancelSubscription } from '@/utils/actions';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Check } from 'lucide-react';
 import { createPortalSession, postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { PricingCard, type Plan } from './pricing/pricing-card';
 
-interface AuthStatus {
-  authenticated: boolean;
-  user?: { id: string; email?: string } | null;
-}
+
 
 const plans: Plan[] = [
   {
@@ -56,21 +52,22 @@ interface PricingProps {
   initialProfile: Profile | null;
 }
 
-interface ActionState {
-  type: 'idle' | 'checkout' | 'cancel' | 'portal';
-  isLoading: boolean;
-}
+// Simplify ActionState to just the type
+type ActionType = 'idle' | 'checkout' | 'cancel' | 'portal';
 
 export default function Pricing({ initialProfile }: PricingProps) {
   const router = useRouter();
-  const [actionState, setActionState] = useState<ActionState>({ 
-    type: 'idle', 
-    isLoading: false 
-  });
+  const [actionType, setActionType] = useState<ActionType>('idle');
   const subscriptionPlan = initialProfile?.subscription_plan?.toLowerCase() || 'free';
 
+  const handleError = (error: unknown, action: string) => {
+    console.error(`Error during ${action}:`, error);
+    setActionType('idle');
+  };
+
   const handleCheckout = async (plan: Plan) => {
-    if (plan.title.toLowerCase() === subscriptionPlan) {
+    const planTitle = plan.title.toLowerCase();
+    if (planTitle === subscriptionPlan) {
       await handleCancelSubscription();
       return;
     }
@@ -78,51 +75,74 @@ export default function Pricing({ initialProfile }: PricingProps) {
     if (!plan.priceId) return;
 
     try {
-      setActionState({ type: 'checkout', isLoading: true });
+      setActionType('checkout');
       const { clientSecret } = await postStripeSession({ priceId: plan.priceId });
       router.push(`/subscription/checkout?session_id=${clientSecret}`);
     } catch (error) {
-      console.error('Error creating checkout session:', error);
-    } finally {
-      setActionState({ type: 'idle', isLoading: false });
+      handleError(error, 'checkout');
     }
   };
 
   const handleCancelSubscription = async () => {
     try {
-      setActionState({ type: 'cancel', isLoading: true });
+      setActionType('cancel');
       await cancelSubscription();
     } catch (error) {
       // Handle error silently
-    } finally {
-      setActionState({ type: 'idle', isLoading: false });
     }
   };
 
   const handlePortalSession = async () => {
     try {
-      setActionState({ type: 'portal', isLoading: true });
+      setActionType('portal');
       const result = await createPortalSession();
       if (result?.url) {
         window.location.href = result.url;
       }
     } catch (error) {
       // Handle error silently
-    } finally {
-      setActionState({ type: 'idle', isLoading: false });
     }
   };
 
-  if (actionState.isLoading) {
+  if (actionType === 'portal') {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-background">
-        <Loader2 className="animate-spin text-blue-500 w-10 h-10" />
+      <div className="container mx-auto px-4 py-16">
+        <Card className="max-w-2xl mx-auto p-12 text-center rounded-2xl border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-violet-50/50 backdrop-blur-xl">
+          <div className="space-y-6">
+            <div className="h-16 w-16 mx-auto rounded-2xl bg-gradient-to-br from-purple-500/10 to-violet-500/10 flex items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-purple-600" />
+            </div>
+            <h2 className="text-3xl font-bold bg-gradient-to-br from-purple-600 to-violet-600 bg-clip-text text-transparent">
+              Loading...
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              Redirecting to manage subscription
+            </p>
+            <Button 
+              size="lg" 
+              className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 transition-all duration-200 shadow-lg hover:shadow-xl"
+              onClick={handlePortalSession}
+              disabled={(actionType as ActionType) === 'portal'}
+            >
+              {(actionType as ActionType) === 'portal' ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Loading...
+                </>
+              ) : (
+                'Manage Subscription'
+              )}
+            </Button>
+          </div>
+        </Card>
+
+        <DebugInfo profile={initialProfile} />
       </div>
     );
   }
 
   // Show thank you message for Pro subscribers
-  if (subscriptionPlan?.toLowerCase() === 'pro') {
+  if (subscriptionPlan === 'pro') {
     return (
       <div className="container mx-auto px-4 py-16">
         <Card className="max-w-2xl mx-auto p-12 text-center rounded-2xl border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-violet-50/50 backdrop-blur-xl">
@@ -140,9 +160,9 @@ export default function Pricing({ initialProfile }: PricingProps) {
               size="lg" 
               className="bg-gradient-to-r from-purple-600 to-violet-600 text-white hover:from-purple-700 hover:to-violet-700 transition-all duration-200 shadow-lg hover:shadow-xl"
               onClick={handlePortalSession}
-              disabled={actionState.isLoading}
+              disabled={(actionType as ActionType) === 'portal'}
             >
-              {actionState.isLoading ? (
+              {(actionType as ActionType) === 'portal' ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Loading...
@@ -174,10 +194,10 @@ export default function Pricing({ initialProfile }: PricingProps) {
             key={plan.title}
             plan={plan}
             isCurrentPlan={plan.title.toLowerCase() === subscriptionPlan}
-            isLoading={actionState.isLoading && (
-              (actionState.type === 'checkout') || 
-              (actionState.type === 'cancel' && plan.title.toLowerCase() === subscriptionPlan)
-            )}
+            isLoading={
+              (actionType === 'checkout') || 
+              (actionType === 'cancel' && plan.title.toLowerCase() === subscriptionPlan)
+            }
             onAction={handleCheckout}
           />
         ))}

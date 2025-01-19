@@ -21,14 +21,14 @@ export const GET = async (request: NextRequest, response: NextResponse) => {
 
   if (session.status === "complete") {
     
-    return redirect(`/checkout/success`);
+    return redirect(`/subscription/checkout/success`);
   }
 
   if (session.status === "open") {
     // Here you'll likely want to head back to some pre-payment page in your checkout 
     // so the user can try again
     return redirect(
-      `/plans/checkout`,
+      `/subscription/checkout`,
     );
   }
 
