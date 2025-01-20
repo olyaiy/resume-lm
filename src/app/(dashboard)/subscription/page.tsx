@@ -1,6 +1,7 @@
 import { getSubscriptionStatus } from '@/utils/actions';
 import { ProPlanDisplay } from '@/components/pricing/pro-plan-display';
 import { FreePlanDisplay } from '@/components/pricing/free-plan-display';
+import { CancelingPlanDisplay } from '@/components/pricing/canceling-plan-display';
 
 interface Profile {
   subscription_plan: string | null;
@@ -21,11 +22,16 @@ export default async function PlansPage() {
   }
 
   const isPro = profile?.subscription_plan?.toLowerCase() === 'pro';
+  const isCanceling = profile?.subscription_status === 'canceled';
 
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4">
       {isPro ? (
-        <ProPlanDisplay initialProfile={profile} />
+        isCanceling ? (
+          <CancelingPlanDisplay initialProfile={profile} />
+        ) : (
+          <ProPlanDisplay initialProfile={profile} />
+        )
       ) : (
         <FreePlanDisplay initialProfile={profile} />
       )}
