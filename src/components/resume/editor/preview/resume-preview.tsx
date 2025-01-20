@@ -177,7 +177,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   if (!url) {
     return (
       <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
-        <div className="space-y-8 animate-pulse">
+        <div className="space-y-0 animate-pulse">
           {/* Header skeleton */}
           <div className="space-y-4">
             <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />
@@ -244,7 +244,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
         externalLinkTarget="_blank"
         loading={
           <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
-            <div className="space-y-8 animate-pulse">
+            <div className="space-y-24 animate-pulse">
               {/* Header skeleton */}
               <div className="space-y-4">
                 <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />

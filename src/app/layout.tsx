@@ -81,7 +81,7 @@ export default async function RootLayout({
       <body className={inter.className}>
         <div className="relative min-h-screen flex flex-col">
           {user && <AppHeader />}
-          <main className="flex-1">
+          <main className="">
             {children}
           </main>
           <Footer />

@@ -77,44 +77,22 @@ export default async function Page({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  console.time('🔍 [Page] Total Load Time');
-  console.time('⚙️ [Page] Initial Setup');
+
   
   try {
     const { id } = await params;
-    console.timeEnd('⚙️ [Page] Initial Setup');
-
-    console.time('📊 [Data] Resume Fetch & Process');
     const { resume: rawResume, profile } = await getResumeById(id);
-    console.timeEnd('📊 [Data] Resume Fetch & Process');
-    
-    console.time('🔄 [Data] Normalization');
     const normalizedResume = normalizeResumeData(rawResume);
-    console.timeEnd('🔄 [Data] Normalization');
-    
-    console.time('🎨 [Render] Component Build');
     const component = (
       <div 
-        className="h-[calc(100vh-4rem)] overflow-hidden"
+        className=""
         data-page-title={normalizedResume.name}
         data-resume-type={normalizedResume.is_base_resume ? "Base Resume" : "Tailored Resume"}
       >
         <ResumeEditorClient initialResume={normalizedResume} profile={profile} />
       </div>
     );
-    console.timeEnd('🎨 [Render] Component Build');
-    
-    console.timeEnd('🔍 [Page] Total Load Time');
-    console.log('📝 [Resume] Details:', {
-      name: normalizedResume.name,
-      type: normalizedResume.is_base_resume ? "Base Resume" : "Tailored Resume",
-      sections: {
-        workExperience: normalizedResume.work_experience?.length || 0,
-        education: normalizedResume.education?.length || 0,
-        projects: normalizedResume.projects?.length || 0,
-        skills: normalizedResume.skills?.length || 0,
-      }
-    });
+  
     
     return component;
   } catch (error) {

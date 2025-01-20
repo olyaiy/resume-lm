@@ -20,12 +20,12 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
-      "h-full pr-4 rounded-lg",
+      "h-full rounded-lg pb-[9rem]  z-50",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
-      <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
+      <div className="relative h-full w-full" ref={previewPanelRef}>
         <div className="absolute inset-0">
           <ResumeContextMenu resume={resume}>
             <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
