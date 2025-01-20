@@ -1,16 +1,14 @@
 'use client';
 
-
 import React from 'react';
-
+import dynamic from 'next/dynamic';
+import { Suspense } from 'react';
 import { updateResume, deleteResume } from "@/utils/actions";
 import { Resume, Profile, Job } from "@/lib/types";
 import { useState, useRef, useEffect, useMemo, useReducer } from "react";
 import { WorkExperienceForm } from "@/components/resume/editor/forms/work-experience-form";
 import { EducationForm } from "@/components/resume/editor/forms/education-form";
-import { SkillsForm } from "@/components/resume/editor/forms/skills-form";
 import { ProjectsForm } from "@/components/resume/editor/forms/projects-form";
-import { CertificationsForm } from "@/components/resume/editor/forms/certifications-form";
 import { toast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
@@ -19,7 +17,6 @@ import { BasicInfoForm } from "@/components/resume/editor/forms/basic-info-form"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { DocumentSettingsForm } from "@/components/resume/editor/forms/document-settings-form";
 import { ResumeEditorTabs } from "./header/resume-editor-tabs";
 import { TailoredJobCard } from "../management/cards/tailored-job-card";
 import ChatBot from "../assistant/chatbot";
@@ -30,7 +27,79 @@ import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { ResumeContextMenu } from "./preview/resume-context-menu";
 
+// Dynamic imports for form components
+const WorkExperienceFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/work-experience-form').then(mod => ({ default: mod.WorkExperienceForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
 
+const EducationFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/education-form').then(mod => ({ default: mod.EducationForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
+
+const SkillsFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/skills-form').then(mod => ({ default: mod.SkillsForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
+
+const ProjectsFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/projects-form').then(mod => ({ default: mod.ProjectsForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
+
+const CertificationsFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/certifications-form').then(mod => ({ default: mod.CertificationsForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
+
+const DocumentSettingsFormDynamic = dynamic(
+  () => import('@/components/resume/editor/forms/document-settings-form').then(mod => ({ default: mod.DocumentSettingsForm })),
+  {
+    loading: () => (
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-muted rounded-md w-1/3" />
+        <div className="h-24 bg-muted rounded-md" />
+      </div>
+    ),
+  }
+);
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -77,47 +146,6 @@ export function ResumeEditorClient({
       return () => resizeObserver.disconnect();
     }
   }, []);
-
-  // Convert initial resume data to use single date string format
-  const convertedInitialResume = useMemo(() => ({
-    ...initialResume,
-    work_experience: initialResume.work_experience?.map(exp => ({
-      ...exp,
-      date: exp.date || ''
-    })),
-    education: initialResume.education?.map(edu => ({
-      ...edu,
-      date: edu.date || ''
-    })),
-    projects: initialResume.projects?.map(project => ({
-      ...project,
-      date: project.date || ''
-    })),
-    document_settings: initialResume.document_settings || {
-      document_font_size: 10,
-      document_line_height: 1.5,
-      document_margin_vertical: 36,
-      document_margin_horizontal: 36,
-      header_name_size: 24,
-      header_name_bottom_spacing: 24,
-      skills_margin_top: 2,
-      skills_margin_bottom: 2,
-      skills_margin_horizontal: 0,
-      skills_item_spacing: 2,
-      experience_margin_top: 2,
-      experience_margin_bottom: 2,
-      experience_margin_horizontal: 0,
-      experience_item_spacing: 4,
-      projects_margin_top: 2,
-      projects_margin_bottom: 2,
-      projects_margin_horizontal: 0,
-      projects_item_spacing: 4,
-      education_margin_top: 2,
-      education_margin_bottom: 2,
-      education_margin_horizontal: 0,
-      education_item_spacing: 4
-    }
-  }), [initialResume]);
 
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
@@ -207,9 +235,9 @@ export function ResumeEditorClient({
 
   // Track changes
   useEffect(() => {
-    const hasChanges = JSON.stringify(state.resume) !== JSON.stringify(convertedInitialResume);
+    const hasChanges = JSON.stringify(state.resume) !== JSON.stringify(initialResume);
     dispatch({ type: 'SET_HAS_CHANGES', value: hasChanges });
-  }, [state.resume, convertedInitialResume]);
+  }, [state.resume, initialResume]);
 
   // Handle beforeunload event
   useEffect(() => {
@@ -295,8 +323,6 @@ export function ResumeEditorClient({
           )}
         </div>
 
-
-
         {/* Main Content */}
         <div className="relative min-h-screen pt-4 px-6 md:px-8 lg:px-12 mx-auto">
           <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">
@@ -360,12 +386,20 @@ export function ResumeEditorClient({
                             ? "bg-purple-50/30"
                             : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
                         )}>
-                          <WorkExperienceForm
-                            experiences={state.resume.work_experience}
-                            onChange={(experiences) => updateField('work_experience', experiences)}
-                            profile={profile}
-                            targetRole={state.resume.target_role}
-                          />
+                          <Suspense fallback={
+                            <div className="space-y-4 animate-pulse">
+                              <div className="h-8 bg-muted rounded-md w-1/3" />
+                              <div className="h-24 bg-muted rounded-md" />
+                              <div className="h-24 bg-muted rounded-md" />
+                            </div>
+                          }>
+                            <WorkExperienceForm
+                              experiences={state.resume.work_experience}
+                              onChange={(experiences) => updateField('work_experience', experiences)}
+                              profile={profile}
+                              targetRole={state.resume.target_role}
+                            />
+                          </Suspense>
                         </TabsContent>
 
                         <TabsContent value="projects" className={cn(
@@ -374,11 +408,18 @@ export function ResumeEditorClient({
                             ? "bg-purple-50/30"
                             : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
                         )}>
-                          <ProjectsForm
-                            projects={state.resume.projects}
-                            onChange={(projects) => updateField('projects', projects)}
-                            profile={profile}
-                          />
+                          <Suspense fallback={
+                            <div className="space-y-4 animate-pulse">
+                              <div className="h-8 bg-muted rounded-md w-1/3" />
+                              <div className="h-24 bg-muted rounded-md" />
+                            </div>
+                          }>
+                            <ProjectsForm
+                              projects={state.resume.projects}
+                              onChange={(projects) => updateField('projects', projects)}
+                              profile={profile}
+                            />
+                          </Suspense>
                         </TabsContent>
 
                         <TabsContent value="education" className={cn(
@@ -387,12 +428,19 @@ export function ResumeEditorClient({
                             ? "bg-purple-50/30"
                             : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
                         )}>
-                          <EducationForm
-                            education={state.resume.education}
-                            onChange={(education) => updateField('education', education)}
-                            profile={profile}
-                          />
-                          <CertificationsForm
+                          <Suspense fallback={
+                            <div className="space-y-4 animate-pulse">
+                              <div className="h-8 bg-muted rounded-md w-1/3" />
+                              <div className="h-24 bg-muted rounded-md" />
+                            </div>
+                          }>
+                            <EducationForm
+                              education={state.resume.education}
+                              onChange={(education) => updateField('education', education)}
+                              profile={profile}
+                            />
+                          </Suspense>
+                          <CertificationsFormDynamic
                             certifications={state.resume.certifications}
                             onChange={(certifications) => updateField('certifications', certifications)}
                           />
@@ -404,11 +452,18 @@ export function ResumeEditorClient({
                             ? "bg-purple-50/30"
                             : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
                         )}>
-                          <SkillsForm
-                            skills={state.resume.skills}
-                            onChange={(skills) => updateField('skills', skills)}
-                            profile={profile}
-                          />
+                          <Suspense fallback={
+                            <div className="space-y-4 animate-pulse">
+                              <div className="h-8 bg-muted rounded-md w-1/3" />
+                              <div className="h-24 bg-muted rounded-md" />
+                            </div>
+                          }>
+                            <SkillsFormDynamic
+                              skills={state.resume.skills}
+                              onChange={(skills) => updateField('skills', skills)}
+                              profile={profile}
+                            />
+                          </Suspense>
                         </TabsContent>
 
                         <TabsContent value="settings" className={cn(
@@ -417,10 +472,17 @@ export function ResumeEditorClient({
                             ? "bg-purple-50/30"
                             : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
                         )}>
-                          <DocumentSettingsForm
-                            resume={state.resume}
-                            onChange={updateField}
-                          />
+                          <Suspense fallback={
+                            <div className="space-y-4 animate-pulse">
+                              <div className="h-8 bg-muted rounded-md w-1/3" />
+                              <div className="h-24 bg-muted rounded-md" />
+                            </div>
+                          }>
+                            <DocumentSettingsFormDynamic
+                              resume={state.resume}
+                              onChange={updateField}
+                            />
+                          </Suspense>
                         </TabsContent>
                       </Tabs>
                     </ScrollArea>
