@@ -41,7 +41,6 @@ export function ResumeEditorClient({
   initialResume,
   profile,
 }: ResumeEditorClientProps) {
-  console.time('⚛️ Editor Client Init');
   const router = useRouter();
   const [state, dispatch] = useReducer(resumeReducer, {
     resume: initialResume,
@@ -53,19 +52,9 @@ export function ResumeEditorClient({
   const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
   const previewPanelRef = useRef<HTMLDivElement>(null);
 
-  // Track initial mount
-  useEffect(() => {
-    console.timeEnd('⚛️ Editor Client Init');
-    console.time('🖥️ Editor First Render');
-    return () => {
-      console.timeEnd('🖥️ Editor First Render');
-    };
-  }, []);
-
   // Track PDF preview initialization
   useEffect(() => {
     if (previewPanelRef.current) {
-      console.time('📱 Preview Panel Setup');
       const resizeObserver = new ResizeObserver((entries) => {
         for (const entry of entries) {
           setPreviewPanelWidth(entry.contentRect.width);
@@ -73,7 +62,6 @@ export function ResumeEditorClient({
       });
 
       resizeObserver.observe(previewPanelRef.current);
-      console.timeEnd('📱 Preview Panel Setup');
       return () => resizeObserver.disconnect();
     }
   }, []);
@@ -104,14 +92,12 @@ export function ResumeEditorClient({
           .single();
 
         if (error) {
-          console.error('Supabase error:', error);
           setJob(null);
           return;
         }
 
         setJob(jobData);
       } catch (error) {
-        console.error('Error fetching job:', error);
         setJob(null);
       } finally {
         setIsLoadingJob(false);
@@ -153,7 +139,6 @@ export function ResumeEditorClient({
       });
       router.push('/');
     } catch (error) {
-      console.error('Delete error:', error);
       toast({
         title: "Delete failed",
         description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
@@ -194,7 +179,6 @@ export function ResumeEditorClient({
     
     // Save the changes to the database
     updateResume(state.resume.id, updatedResume).catch(error => {
-      console.error('Error updating resume with new job:', error);
       toast({
         title: "Update failed",
         description: "Failed to link the new job to your resume.",

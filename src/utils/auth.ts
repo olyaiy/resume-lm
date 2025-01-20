@@ -4,7 +4,7 @@ import AuthCache from './auth-cache';
 
 // Cache the auth check using React cache()
 export async function getAuthenticatedUser() {
-  const headersList = headers();
+  const headersList = await headers();
   const requestId = headersList.get('x-request-id');
   const userId = headersList.get('x-user-id');
   
@@ -31,7 +31,7 @@ export async function getAuthenticatedUser() {
   if (requestId) {
     AuthCache.set(requestId, {
       id: user.id,
-      email: user.email,
+      email: user.email || null,
       timestamp: Date.now()
     });
   }
