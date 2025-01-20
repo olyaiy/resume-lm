@@ -5,7 +5,8 @@ import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
-import { getAuthenticatedUser } from './auth';
+import { getAuthenticatedUser } from "./auth";
+
 
 interface DashboardData {
   profile: Profile | null;
@@ -105,16 +106,9 @@ export async function getDashboardData(): Promise<DashboardData> {
 }
 
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
-  console.time('🔄 Total getResumeById');
   const supabase = await createClient();
-
-  // Get cached auth user
-  console.time('🔐 Auth Check');
   const user = await getAuthenticatedUser();
-  console.timeEnd('🔐 Auth Check');
 
-  // Fetch resume and profile in parallel
-  console.time('📄 Parallel Data Fetch');
   try {
     const [resumeResult, profileResult] = await Promise.all([
       supabase
@@ -129,9 +123,7 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
         .eq('user_id', user.id)
         .single()
     ]);
-    console.timeEnd('📄 Parallel Data Fetch');
 
-    // Check for errors and handle them
     if (resumeResult.error || !resumeResult.data) {
       throw new Error('Resume not found');
     }
@@ -140,14 +132,11 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
       throw new Error('Profile not found');
     }
 
-    console.timeEnd('🔄 Total getResumeById');
     return { 
       resume: resumeResult.data, 
       profile: profileResult.data 
     };
   } catch (error) {
-    console.timeEnd('📄 Parallel Data Fetch');
-    console.timeEnd('🔄 Total getResumeById');
     throw error;
   }
 }
@@ -711,17 +700,13 @@ export async function createEmptyJob(): Promise<Job> {
 
 export async function copyResume(resumeId: string): Promise<Resume> {
   const supabase = await createClient();
-  console.log('Starting copy resume process for ID:', resumeId);
 
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
   if (userError || !user) {
-    console.error('Authentication error:', userError);
     throw new Error('User not authenticated');
   }
-  console.log('User authenticated:', user.id);
 
-  // First, fetch the resume to copy
   const { data: sourceResume, error: fetchError } = await supabase
     .from('resumes')
     .select('*')
@@ -730,10 +715,8 @@ export async function copyResume(resumeId: string): Promise<Resume> {
     .single();
 
   if (fetchError || !sourceResume) {
-    console.error('Error fetching source resume:', fetchError);
     throw new Error('Resume not found or access denied');
   }
-  console.log('Source resume found:', sourceResume.id);
 
   // Create a new resume with copied data, excluding the id field
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -744,11 +727,6 @@ export async function copyResume(resumeId: string): Promise<Resume> {
     name: `${sourceResume.name} (Copy)`,
     user_id: user.id,
   };
-  
-  console.log('Prepared new resume data:', { 
-    name: newResume.name,
-    user_id: newResume.user_id
-  });
 
   const { data: copiedResume, error: createError } = await supabase
     .from('resumes')
@@ -757,20 +735,12 @@ export async function copyResume(resumeId: string): Promise<Resume> {
     .single();
 
   if (createError) {
-    console.error('Error creating copy:', {
-      code: createError.code,
-      message: createError.message,
-      details: createError.details,
-      hint: createError.hint
-    });
     throw new Error(`Failed to copy resume: ${createError.message}`);
   }
 
   if (!copiedResume) {
-    console.error('No resume data returned after insert');
     throw new Error('Resume creation failed: No data returned');
   }
-  console.log('Successfully created copy with ID:', copiedResume.id);
 
   // Revalidate all routes that might display resumes
   revalidatePath('/', 'layout');
