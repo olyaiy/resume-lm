@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import dynamic from 'next/dynamic';
 import { Suspense } from 'react';
 import { updateResume, deleteResume } from "@/utils/actions";
 import { Resume, Profile, Job } from "@/lib/types";
@@ -23,80 +22,15 @@ import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { ResumeContextMenu } from "./preview/resume-context-menu";
 import { EditorLayout } from "./layout/EditorLayout";
-
-// Dynamic imports for form components
-const WorkExperienceFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/work-experience-form').then(mod => ({ default: mod.WorkExperienceForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
-
-const EducationFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/education-form').then(mod => ({ default: mod.EducationForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
-
-const SkillsFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/skills-form').then(mod => ({ default: mod.SkillsForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
-
-const ProjectsFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/projects-form').then(mod => ({ default: mod.ProjectsForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
-
-const CertificationsFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/certifications-form').then(mod => ({ default: mod.CertificationsForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
-
-const DocumentSettingsFormDynamic = dynamic(
-  () => import('@/components/resume/editor/forms/document-settings-form').then(mod => ({ default: mod.DocumentSettingsForm })),
-  {
-    loading: () => (
-      <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-muted rounded-md w-1/3" />
-        <div className="h-24 bg-muted rounded-md" />
-      </div>
-    ),
-  }
-);
+import { LoadingFallback } from './shared/LoadingFallback';
+import {
+  WorkExperienceForm,
+  EducationForm,
+  SkillsForm,
+  ProjectsForm,
+  CertificationsForm,
+  DocumentSettingsForm
+} from './dynamic-components';
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -326,7 +260,7 @@ export function ResumeEditorClient({
                   <div className="h-24 bg-muted rounded-md" />
                 </div>
               }>
-                <WorkExperienceFormDynamic
+                <WorkExperienceForm
                   experiences={state.resume.work_experience}
                   onChange={(experiences) => updateField('work_experience', experiences)}
                   profile={profile}
@@ -347,7 +281,7 @@ export function ResumeEditorClient({
                   <div className="h-24 bg-muted rounded-md" />
                 </div>
               }>
-                <ProjectsFormDynamic
+                <ProjectsForm
                   projects={state.resume.projects}
                   onChange={(projects) => updateField('projects', projects)}
                   profile={profile}
@@ -367,13 +301,13 @@ export function ResumeEditorClient({
                   <div className="h-24 bg-muted rounded-md" />
                 </div>
               }>
-                <EducationFormDynamic
+                <EducationForm
                   education={state.resume.education}
                   onChange={(education) => updateField('education', education)}
                   profile={profile}
                 />
               </Suspense>
-              <CertificationsFormDynamic
+              <CertificationsForm
                 certifications={state.resume.certifications}
                 onChange={(certifications) => updateField('certifications', certifications)}
               />
@@ -391,7 +325,7 @@ export function ResumeEditorClient({
                   <div className="h-24 bg-muted rounded-md" />
                 </div>
               }>
-                <SkillsFormDynamic
+                <SkillsForm
                   skills={state.resume.skills}
                   onChange={(skills) => updateField('skills', skills)}
                   profile={profile}
@@ -411,7 +345,7 @@ export function ResumeEditorClient({
                   <div className="h-24 bg-muted rounded-md" />
                 </div>
               }>
-                <DocumentSettingsFormDynamic
+                <DocumentSettingsForm
                   resume={state.resume}
                   onChange={updateField}
                 />
