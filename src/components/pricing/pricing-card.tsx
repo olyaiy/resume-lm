@@ -19,6 +19,7 @@ interface PricingCardProps {
   onAction: (plan: Plan) => Promise<void>;
   buttonText?: string;
   variant?: 'default' | 'pro' | 'canceling';
+  className?: string;
 }
 
 export function PricingCard({ 
@@ -27,7 +28,8 @@ export function PricingCard({
   isLoading,
   onAction,
   buttonText,
-  variant = 'default'
+  variant = 'default',
+  className
 }: PricingCardProps) {
   const isFree = plan.title === 'Free';
   const isPro = plan.title === 'Pro';
@@ -63,7 +65,8 @@ export function PricingCard({
   return (
     <Card className={cn(
       "relative p-8 rounded-2xl backdrop-blur-xl flex flex-col",
-      colors.card
+      colors.card,
+      className
     )}>
       <div className="mb-8">
         <h3 className="text-2xl font-semibold mb-2">{plan.title}</h3>
@@ -85,29 +88,28 @@ export function PricingCard({
         ))}
       </ul>
 
-      <div className="mt-auto">
-        <Button
-          className={cn(
-            "w-full",
-            isProVariant && `bg-gradient-to-r ${colors.button} text-white`
-          )}
-          variant={isProVariant ? 'default' : 'outline'}
-          onClick={() => onAction(plan)}
-          disabled={isLoading || isFree}
-          {...(isFree && { className: "w-full opacity-50 cursor-not-allowed" })}
-        >
-          {isLoading && isCurrentPlan ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : null}
-          {buttonText || (
-            isFree && isCurrentPlan
-              ? 'Your current plan'
-              : isCurrentPlan
-              ? 'Cancel Subscription'
-              : `Upgrade to ${plan.title}`
-          )}
-        </Button>
-      </div>
+      {!isFree && (
+        <div className="mt-auto">
+          <Button
+            className={cn(
+              "w-full",
+              isProVariant && `bg-gradient-to-r ${colors.button} text-white`
+            )}
+            variant={isProVariant ? 'default' : 'outline'}
+            onClick={() => onAction(plan)}
+            disabled={isLoading}
+          >
+            {isLoading && isCurrentPlan ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : null}
+            {buttonText || (
+              isCurrentPlan
+                ? 'Cancel Subscription'
+                : `Upgrade to ${plan.title}`
+            )}
+          </Button>
+        </div>
+      )}
     </Card>
   );
 } 
