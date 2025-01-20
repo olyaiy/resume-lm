@@ -48,8 +48,8 @@ export function EditorPanel({
     <div className="flex flex-col h-full mr-4">
       {/* Main Editor Area */}
       <div className="flex-1 overflow-hidden flex flex-col h-full">
-        <ScrollArea className="flex-1 pr-2">
-          <Tabs defaultValue="basic" className="relative">
+        <ScrollArea className="flex-1">
+          <Tabs defaultValue="basic" className="relative pb-12">
             {/* Make the actions and tabs sticky */}
             <div className={cn(
               "sticky top-0 z-20 backdrop-blur-sm",
@@ -70,7 +70,7 @@ export function EditorPanel({
 
             {/* Tab content below */}
             <TabsContent value="basic" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -89,7 +89,7 @@ export function EditorPanel({
             </TabsContent>
 
             <TabsContent value="work" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -111,7 +111,7 @@ export function EditorPanel({
             </TabsContent>
 
             <TabsContent value="projects" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -131,7 +131,7 @@ export function EditorPanel({
             </TabsContent>
 
             <TabsContent value="education" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -155,7 +155,7 @@ export function EditorPanel({
             </TabsContent>
 
             <TabsContent value="skills" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -175,7 +175,7 @@ export function EditorPanel({
             </TabsContent>
 
             <TabsContent value="settings" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
+              "space-y-6 mt-6 rounded-lg pr-4",
               resume.is_base_resume
                 ? "bg-purple-50/30"
                 : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -197,7 +197,7 @@ export function EditorPanel({
       </div>
       {/* Fixed ChatBot at bottom */}
       <div className={cn(
-        "mt-auto mb-4 rounded-lg border",
+        "mt-auto mb-6 rounded-lg border",
         resume.is_base_resume
           ? "bg-purple-50/50 border-purple-200/40"
           : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"

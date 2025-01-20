@@ -24,7 +24,7 @@ export function EditorLayout({
       <BackgroundEffects isBaseResume={isBaseResume} />
       
       <div className="relative  pt-4 px-6 md:px-8 lg:px-12 mx-auto">
-        <div className="max-w-[2000px] mx-auto h-[calc(100vh-120px)]">
+        <div className="max-w-7xl mx-auto h-[calc(100vh-120px)]">
           <ResizablePanels
             isBaseResume={isBaseResume}
             editorPanel={editorPanel}
