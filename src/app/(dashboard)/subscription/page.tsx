@@ -1,6 +1,6 @@
 import { getSubscriptionStatus } from '@/utils/actions';
-import Pricing from '@/components/pricing';
-import ManageSubscriptionButton from '@/components/subscription/manage-subscription-button';
+import { ProPlanDisplay } from '@/components/pricing/pro-plan-display';
+import { FreePlanDisplay } from '@/components/pricing/free-plan-display';
 
 interface Profile {
   subscription_plan: string | null;
@@ -20,9 +20,15 @@ export default async function PlansPage() {
     console.error('Error fetching subscription status:', error);
   }
 
+  const isPro = profile?.subscription_plan?.toLowerCase() === 'pro';
+
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4">
-      <Pricing initialProfile={profile} />
+      {isPro ? (
+        <ProPlanDisplay initialProfile={profile} />
+      ) : (
+        <FreePlanDisplay initialProfile={profile} />
+      )}
     </div>
   );
 }
