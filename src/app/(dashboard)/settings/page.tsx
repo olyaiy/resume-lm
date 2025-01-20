@@ -15,7 +15,7 @@ export default async function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
-      <main className="pt-4 pb-16 px-4 md:px-8 max-w-[2000px] mx-auto">
+      <main className="pt-4 pb-16 px-4 md:px-8 max-w-7xl mx-auto">
         <SettingsContent user={user}/>
       </main>
     </div>
