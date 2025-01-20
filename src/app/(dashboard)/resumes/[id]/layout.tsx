@@ -7,7 +7,7 @@ export default function ResumeEditorLayout({
   children: ReactNode;
 }) {
   return (
-    <div className="min-h-screen relative">
+    <div className=" relative h-[calc(100vh-8rem)] overflow-hidden">
       {/* Background Layer */}
       <BackgroundEffects />
 

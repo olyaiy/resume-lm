@@ -1,36 +1,18 @@
 'use client';
 
 import React from 'react';
-import { Suspense } from 'react';
 import { updateResume, deleteResume } from "@/utils/actions";
 import { Resume, Profile, Job } from "@/lib/types";
-import { useState, useRef, useEffect, useMemo, useReducer } from "react";
+import { useState, useRef, useEffect, useReducer } from "react";
 import { toast } from "@/hooks/use-toast";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { useRouter } from "next/navigation";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { BasicInfoForm } from "@/components/resume/editor/forms/basic-info-form";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { ResumeEditorTabs } from "./header/resume-editor-tabs";
-import { TailoredJobCard } from "../management/cards/tailored-job-card";
-import ChatBot from "../assistant/chatbot";
-import { ResumePreview } from "./preview/resume-preview";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
-import { ResumeEditorActions } from './actions/resume-editor-actions';
 import { createClient } from "@/utils/supabase/client";
-import { cn } from "@/lib/utils";
-import { ResumeContextMenu } from "./preview/resume-context-menu";
 import { EditorLayout } from "./layout/EditorLayout";
-import { LoadingFallback } from './shared/LoadingFallback';
-import {
-  WorkExperienceForm,
-  EducationForm,
-  SkillsForm,
-  ProjectsForm,
-  CertificationsForm,
-  DocumentSettingsForm
-} from './dynamic-components';
+import { EditorPanel } from './panels/editor-panel';
+import { PreviewPanel } from './panels/preview-panel';
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -188,187 +170,26 @@ export function ResumeEditorClient({
   };
 
   const editorPanel = (
-    <div className="flex flex-col h-full mr-4">
-      {/* Main Editor Area */}
-      <div className="flex-1 overflow-hidden flex flex-col h-full">
-        <ScrollArea className="flex-1 pr-2">
-          <Tabs defaultValue="basic" className="relative">
-            {/* Make the actions and tabs sticky */}
-            <div className={cn(
-              "sticky top-0 z-20 backdrop-blur-sm",
-              state.resume.is_base_resume
-                ? "bg-purple-50/80"
-                : "bg-pink-100/90 shadow-sm shadow-pink-200/50"
-            )}>
-              <ResumeEditorActions
-                resume={state.resume}
-                isSaving={state.isSaving}
-                isDeleting={state.isDeleting}
-                onSave={handleSave}
-                onDelete={handleDelete}
-                onResumeChange={updateField}
-              />
-              <ResumeEditorTabs />
-            </div>
-
-            {/* Tab content below */}
-            <TabsContent value="basic" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              {!state.resume.is_base_resume && (
-                <TailoredJobCard 
-                  jobId={state.resume.job_id || null}
-                  onJobCreate={handleJobCreate}
-                  job={job}
-                  isLoading={isLoadingJob}
-                />
-              )}
-              <BasicInfoForm
-                profile={profile}
-              />
-            </TabsContent>
-
-            <TabsContent value="work" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              <Suspense fallback={
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-8 bg-muted rounded-md w-1/3" />
-                  <div className="h-24 bg-muted rounded-md" />
-                  <div className="h-24 bg-muted rounded-md" />
-                </div>
-              }>
-                <WorkExperienceForm
-                  experiences={state.resume.work_experience}
-                  onChange={(experiences) => updateField('work_experience', experiences)}
-                  profile={profile}
-                  targetRole={state.resume.target_role}
-                />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="projects" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              <Suspense fallback={
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-8 bg-muted rounded-md w-1/3" />
-                  <div className="h-24 bg-muted rounded-md" />
-                </div>
-              }>
-                <ProjectsForm
-                  projects={state.resume.projects}
-                  onChange={(projects) => updateField('projects', projects)}
-                  profile={profile}
-                />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="education" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              <Suspense fallback={
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-8 bg-muted rounded-md w-1/3" />
-                  <div className="h-24 bg-muted rounded-md" />
-                </div>
-              }>
-                <EducationForm
-                  education={state.resume.education}
-                  onChange={(education) => updateField('education', education)}
-                  profile={profile}
-                />
-              </Suspense>
-              <CertificationsForm
-                certifications={state.resume.certifications}
-                onChange={(certifications) => updateField('certifications', certifications)}
-              />
-            </TabsContent>
-
-            <TabsContent value="skills" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              <Suspense fallback={
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-8 bg-muted rounded-md w-1/3" />
-                  <div className="h-24 bg-muted rounded-md" />
-                </div>
-              }>
-                <SkillsForm
-                  skills={state.resume.skills}
-                  onChange={(skills) => updateField('skills', skills)}
-                  profile={profile}
-                />
-              </Suspense>
-            </TabsContent>
-
-            <TabsContent value="settings" className={cn(
-              "space-y-6 mt-6 rounded-lg p-4",
-              state.resume.is_base_resume
-                ? "bg-purple-50/30"
-                : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-            )}>
-              <Suspense fallback={
-                <div className="space-y-4 animate-pulse">
-                  <div className="h-8 bg-muted rounded-md w-1/3" />
-                  <div className="h-24 bg-muted rounded-md" />
-                </div>
-              }>
-                <DocumentSettingsForm
-                  resume={state.resume}
-                  onChange={updateField}
-                />
-              </Suspense>
-            </TabsContent>
-          </Tabs>
-        </ScrollArea>
-      </div>
-      {/* Fixed ChatBot at bottom */}
-      <div className={cn(
-        "mt-auto mb-4 rounded-lg border",
-        state.resume.is_base_resume
-          ? "bg-purple-50/50 border-purple-200/40"
-          : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"
-      )}>
-        <ChatBot 
-          resume={state.resume} 
-          onResumeChange={updateField}
-          job={job}
-        />
-      </div>
-    </div>
+    <EditorPanel
+      resume={state.resume}
+      profile={profile}
+      job={job}
+      isLoadingJob={isLoadingJob}
+      isSaving={state.isSaving}
+      isDeleting={state.isDeleting}
+      onSave={handleSave}
+      onDelete={handleDelete}
+      onResumeChange={updateField}
+      onJobCreate={handleJobCreate}
+    />
   );
 
   const previewPanel = (
-    <ScrollArea className={cn(
-      "h-full pr-4 rounded-lg",
-      state.resume.is_base_resume
-        ? "bg-purple-50/30"
-        : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
-    )}>
-      <div className="relative pb-[129.4%] w-full" ref={previewPanelRef}>
-        <div className="absolute inset-0">
-          <ResumeContextMenu resume={debouncedResume}>
-            <ResumePreview resume={debouncedResume} containerWidth={previewPanelWidth} />
-          </ResumeContextMenu>
-        </div>
-      </div>
-    </ScrollArea>
+    <PreviewPanel
+      resume={debouncedResume}
+      previewPanelRef={previewPanelRef}
+      previewPanelWidth={previewPanelWidth}
+    />
   );
 
   return (

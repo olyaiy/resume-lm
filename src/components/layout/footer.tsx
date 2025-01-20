@@ -3,8 +3,8 @@ import { Github, Linkedin, Twitter } from "lucide-react";
 
 export function Footer() {
   return (
-    <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-14 items-center justify-between">
+    <footer className="w-full border-t border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 ">
+      <div className="container flex h-14 items-center justify-between ">
         <div className="flex items-center gap-4">
           <p className="text-sm text-muted-foreground">
             ResumeLM © 2025
