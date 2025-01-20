@@ -181,12 +181,6 @@ export type Certification = z.infer<typeof certificationSchema>;
 export type DocumentSettings = z.infer<typeof documentSettingsSchema>;
 export type SectionConfig = z.infer<typeof sectionConfigSchema>;
 
-// Salary range schema
-export const salaryRangeSchema = z.object({
-  min: z.number(),
-  max: z.number(),
-  currency: z.string()
-}).nullable();
 
 // Jobs schema
 export const jobSchema = z.object({
@@ -196,7 +190,7 @@ export const jobSchema = z.object({
   job_url: z.string().url().nullable(),
   description: z.string().nullable(),
   location: z.string().nullable(),
-  salary_range: salaryRangeSchema.nullable(),
+  salary_range: z.string().nullable(),
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
   keywords: z.array(z.string()).default([]),
@@ -214,7 +208,7 @@ export const simplifiedJobSchema = z.object({
     job_url: z.string().nullable().optional(),
     description: z.string().nullable().optional(),
     location: z.string().nullable().optional(),
-    salary_range: salaryRangeSchema.nullable().optional(),
+    salary_range: z.string().nullable().optional(),
     keywords: z.array(z.string()).default([]).optional(),
     work_location: z.preprocess(
       (val) => val === null || val === '' ? 'in_person' : val,
@@ -236,8 +230,22 @@ export const simplifiedResumeSchema = z.object({
   });
 
 // Add type inference helper
-export type Job = z.infer<typeof jobSchema>;
-export type SalaryRange = z.infer<typeof salaryRangeSchema>;
+export type Job = {
+  id?: string;
+  company_name?: string;
+  position_title?: string;
+  job_url?: string | null;
+  description?: string | null;
+  location?: string | null;
+  salary_range?: string | null;
+  created_at?: string;
+  updated_at?: string;
+  keywords?: string[];
+  work_location?: 'remote' | 'in_person' | 'hybrid' | null;
+  employment_type?: 'full_time' | 'part_time' | 'co_op' | 'internship' | 'contract';
+  is_active?: boolean;
+};
+export type SalaryRange = string | null;
 
 // Work Experience Bullet Points Analysis Schema
 export const workExperienceBulletPointsSchema = z.object({

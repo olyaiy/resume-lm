@@ -37,6 +37,12 @@ export async function tailorResumeToJob(
     `,
   });
 
+    // console.log('Tailored Resume Response:');
+    // console.dir({
+    //   input: { resume, jobListing },
+    //   output: object.content
+    // }, { depth: null });
+
     return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
   } catch (error) {
     console.error('Error tailoring resume:', error);
@@ -86,7 +92,14 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
               - Avoid exposing your internal reasoning.
               - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
               Job Listing Text: ${jobListing}`,});
-  return object.content satisfies Partial<Job>;
+
+    // console.log('Formatted Job Listing Response:');
+    // console.dir({
+    //   input: jobListing,
+    //   output: object.content
+    // }, { depth: null });
+
+    return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);
     throw error;

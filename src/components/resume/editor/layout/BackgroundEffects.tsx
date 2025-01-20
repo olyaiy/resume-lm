@@ -7,7 +7,7 @@ interface BackgroundEffectsProps {
 
 export function BackgroundEffects({ className, isBaseResume = true }: BackgroundEffectsProps) {
   return (
-    <div className={cn("fixed inset-0 z-0  overflow-hidden  h-[calc(100vh-8rem)]", className)}>
+    <div className={cn("fixed inset-0 z-0  overflow-hidden  h-[calc(100vh)]", className)}>
       {/* Base Gradient */}
       <div className={cn(
         "absolute inset-0 bg-gradient-to-br",
