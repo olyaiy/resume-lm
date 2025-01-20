@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { memo } from 'react';
 import { cn } from "@/lib/utils";
+import Tiptap from "@/components/ui/tiptap";
 
 
 interface EducationFormProps {
@@ -251,12 +252,16 @@ export const EducationForm = memo(function EducationFormComponent({
                   <Label className="text-[10px] sm:text-xs font-medium text-indigo-700">Achievements & Activities</Label>
                   <span className="text-[8px] sm:text-[10px] text-gray-500">One achievement per line</span>
                 </div>
-                <Textarea
-                  value={edu.achievements?.join('\n')}
-                  onChange={(e) => updateEducation(index, 'achievements', 
-                    e.target.value.split('\n').filter(Boolean)
+                <Tiptap
+                  content={(edu.achievements || []).join('\n')}
+                  onChange={(newContent) => updateEducation(index, 'achievements', 
+                    newContent.split('\n').filter(Boolean)
                   )}
-                  placeholder="• Dean's List 2020-2021&#10;• President of Computer Science Club&#10;• First Place in Hackathon 2022"
+                  editorProps={{
+                    attributes: {
+                      placeholder: "• Dean's List 2020-2021\n• President of Computer Science Club\n• First Place in Hackathon 2022"
+                    }
+                  }}
                   className={cn(
                     "min-h-[120px] bg-white/50 border-gray-200 rounded-lg",
                     "focus:border-indigo-500/40 focus:ring-2 focus:ring-indigo-500/20",

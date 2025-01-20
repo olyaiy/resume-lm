@@ -19,7 +19,7 @@ export function ProfileRow({ profile }: ProfileRowProps) {
       <div className="relative rounded-xl bg-gradient-to-br from-white/60 to-white/30 hover:from-white/70 hover:to-white/40 backdrop-blur-xl border border-white/40 shadow-lg transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-0.5">
         <div className="px-4 sm:px-6 py-3">
           {/* Main container - stack on mobile, row on desktop */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 sm:gap-6 max-w-7xl mx-auto">
             {/* Left section with avatar, name and stats */}
             <div className="flex flex-col sm:flex-row sm:items-center gap-4 flex-1 min-w-0">
               {/* Avatar and Name group */}
