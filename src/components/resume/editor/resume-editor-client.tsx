@@ -393,7 +393,7 @@ export function ResumeEditorClient({
                               <div className="h-24 bg-muted rounded-md" />
                             </div>
                           }>
-                            <WorkExperienceForm
+                            <WorkExperienceFormDynamic
                               experiences={state.resume.work_experience}
                               onChange={(experiences) => updateField('work_experience', experiences)}
                               profile={profile}
@@ -414,7 +414,7 @@ export function ResumeEditorClient({
                               <div className="h-24 bg-muted rounded-md" />
                             </div>
                           }>
-                            <ProjectsForm
+                            <ProjectsFormDynamic
                               projects={state.resume.projects}
                               onChange={(projects) => updateField('projects', projects)}
                               profile={profile}
@@ -434,7 +434,7 @@ export function ResumeEditorClient({
                               <div className="h-24 bg-muted rounded-md" />
                             </div>
                           }>
-                            <EducationForm
+                            <EducationFormDynamic
                               education={state.resume.education}
                               onChange={(education) => updateField('education', education)}
                               profile={profile}
