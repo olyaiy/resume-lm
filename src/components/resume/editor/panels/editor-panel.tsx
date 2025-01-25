@@ -69,11 +69,10 @@ export function EditorPanel({
             </div>
 
             <Accordion type="single" collapsible defaultValue="basic" className="mt-6">
-              {/* Tailored Job Section - Only show for non-base resumes */}
+              {/* Tailored Job Section */}
               {!resume.is_base_resume && (
                 <AccordionItem value="job" className={cn(
-                  "mb-4 border rounded-lg overflow-hidden",
-                  "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                  "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-pink-600/50 border-2"
                 )}>
                   <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                     <div className="flex items-center gap-2">
@@ -96,10 +95,7 @@ export function EditorPanel({
 
               {/* Basic Info */}
               <AccordionItem value="basic" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-purple-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-purple-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
@@ -118,10 +114,7 @@ export function EditorPanel({
 
               {/* Work Experience */}
               <AccordionItem value="work" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-cyan-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-cyan-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
@@ -131,7 +124,7 @@ export function EditorPanel({
                     <span className="text-sm font-medium text-cyan-900">Work Experience</span>
                   </div>
                 </AccordionTrigger>
-                <AccordionContent className="px-4 pt-2 pb-4">
+                <AccordionContent className="px-4 pt-2 pb-4 ">
                   <Suspense fallback={
                     <div className="space-y-4 animate-pulse">
                       <div className="h-8 bg-muted rounded-md w-1/3" />
@@ -151,10 +144,7 @@ export function EditorPanel({
 
               {/* Projects */}
               <AccordionItem value="projects" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-violet-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-violet-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
@@ -182,10 +172,7 @@ export function EditorPanel({
 
               {/* Education */}
               <AccordionItem value="education" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-indigo-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-indigo-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
@@ -217,10 +204,7 @@ export function EditorPanel({
 
               {/* Skills */}
               <AccordionItem value="skills" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-rose-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-rose-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
@@ -248,10 +232,7 @@ export function EditorPanel({
 
               {/* Settings */}
               <AccordionItem value="settings" className={cn(
-                "mb-4 border rounded-lg overflow-hidden",
-                resume.is_base_resume
-                  ? "bg-purple-50/30 border-gray-200/40"
-                  : "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-gray-600/50 border-2"
               )}>
                 <AccordionTrigger className="px-4 py-2 hover:no-underline group">
                   <div className="flex items-center gap-2">
