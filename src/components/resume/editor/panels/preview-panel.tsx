@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { ResumeContextMenu } from "../preview/resume-context-menu";
 import { ResumePreview } from "../preview/resume-preview";
 import { RefObject } from "react";
+import CoverLetter from "@/components/cover-letter/cover-letter";
 
 interface PreviewPanelProps {
   resume: Resume;
@@ -26,12 +27,13 @@ export function PreviewPanel({
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
       <div className="relative h-full w-full" ref={previewPanelRef}>
-        <div className="absolute inset-0">
+        <div className=" ">
           <ResumeContextMenu resume={resume}>
             <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
           </ResumeContextMenu>
         </div>
       </div>
+      <CoverLetter />
     </ScrollArea>
   );
 } 

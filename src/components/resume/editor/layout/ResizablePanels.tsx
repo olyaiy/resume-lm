@@ -1,6 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ReactNode } from "react";
+import CoverLetter from "@/components/cover-letter/cover-letter";
 
 interface ResizablePanelsProps {
   isBaseResume: boolean;
@@ -41,6 +42,7 @@ export function ResizablePanels({
       {/* Preview Panel */}
       <ResizablePanel defaultSize={60} minSize={30} maxSize={70}>
         {previewPanel}
+        {/* <CoverLetter /> */}
       </ResizablePanel>
     </ResizablePanelGroup>
   );
