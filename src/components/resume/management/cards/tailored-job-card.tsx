@@ -15,12 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { formatJobListing } from "@/utils/ai";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { cn } from "@/lib/utils";
 
 interface TailoredJobCardProps {
@@ -454,130 +448,106 @@ export function TailoredJobCard({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3 }}
+              className="p-4 space-y-6"
             >
-           
-              <Accordion type="single" collapsible className="w-full">
-                <AccordionItem value="details" className="border-none">
-                  <div className="flex items-center px-3 py-2">
-                    <div className="flex-1 min-w-0 flex items-center gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <Building2 className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
-                          <span className="font-medium truncate text-sm text-gray-600 group-hover:text-pink-700 transition-colors duration-300">
-                            {effectiveJob.company_name}
-                          </span>
-                        </div>
-                        <h3 className="text-sm font-semibold bg-gradient-to-r from-pink-700 to-rose-700 bg-clip-text text-transparent truncate mt-0.5">
-                          {effectiveJob.position_title}
-                        </h3>
-                      </div>
-
-                      <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={handleDelete}
-                          disabled={isDeleting}
-                          className={cn(
-                            "h-6 w-6",
-                            "text-gray-400",
-                            "hover:text-red-500",
-                            "hover:bg-red-50/50",
-                            "transition-all duration-300",
-                            "rounded-lg"
-                          )}
-                        >
-                          {isDeleting ? (
-                            <Loader2 className="h-3 w-3 animate-spin" />
-                          ) : (
-                            <Trash2 className="h-3 w-3" />
-                          )}
-                        </Button>
-                        <AccordionTrigger 
-                          className={cn(
-                            "p-0 hover:no-underline",
-                            "group/accordion"
-                          )}
-                        />
-                      </div>
-                    </div>
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
+                    <span className="font-medium truncate text-sm text-gray-600 group-hover:text-pink-700 transition-colors duration-300">
+                      {effectiveJob.company_name}
+                    </span>
                   </div>
+                  <h3 className="text-sm font-semibold bg-gradient-to-r from-pink-700 to-rose-700 bg-clip-text text-transparent truncate mt-0.5">
+                    {effectiveJob.position_title}
+                  </h3>
+                </div>
 
-                  <AccordionContent>
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="space-y-6 px-4 pb-4"
-                    >
-                      <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-                        {[
-                          { icon: MapPin, text: effectiveJob.location || 'Location not specified', color: 'pink' },
-                          { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location), color: 'rose' },
-                          { icon: DollarSign, text: typeof effectiveJob.salary_range === 'string' ? effectiveJob.salary_range : 
-                            effectiveJob.salary_range ? `${effectiveJob.salary_range.currency}${effectiveJob.salary_range.min}-${effectiveJob.salary_range.max}` : 
-                            'Salary not specified', 
-                            color: 'pink' 
-                          },
-                          { icon: Clock, text: effectiveJob.employment_type?.replace('_', ' ') || 'Employment type not specified', color: 'rose' }
-                        ].map((item, index) => (
-                          <motion.div
-                            key={index}
-                            initial={{ opacity: 0, y: 5 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.1 + index * 0.1 }}
-                            className={cn(
-                              "flex items-center gap-2",
-                              "text-sm text-gray-600",
-                              `group-hover:text-${item.color}-600`,
-                              "transition-colors duration-300"
-                            )}
-                          >
-                            <item.icon className="w-4 h-4" />
-                            <span className="capitalize truncate">{item.text}</span>
-                          </motion.div>
-                        ))}
-                      </div>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className={cn(
+                    "h-6 w-6",
+                    "text-gray-400",
+                    "hover:text-red-500",
+                    "hover:bg-red-50/50",
+                    "transition-all duration-300",
+                    "rounded-lg"
+                  )}
+                >
+                  {isDeleting ? (
+                    <Loader2 className="h-3 w-3 animate-spin" />
+                  ) : (
+                    <Trash2 className="h-3 w-3" />
+                  )}
+                </Button>
+              </div>
 
-                      {effectiveJob.description && (
-                        <div className="space-y-2">
-                          <h4 className="text-sm font-medium text-gray-700">Description</h4>
-                          <p className="text-sm text-gray-600 whitespace-pre-wrap">
-                            {effectiveJob.description}
-                          </p>
-                        </div>
+              {/* Job Details Grid */}
+              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+                {[
+                  { icon: MapPin, text: effectiveJob.location || 'Location not specified', color: 'pink' },
+                  { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location), color: 'rose' },
+                  { icon: DollarSign, text: effectiveJob.salary_range || 'Salary not specified', color: 'pink' },
+                  { icon: Clock, text: effectiveJob.employment_type?.replace('_', ' ') || 'Employment type not specified', color: 'rose' }
+                ].map((item, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.1 }}
+                    className={cn(
+                      "flex items-center gap-2",
+                      "text-sm text-gray-600",
+                      `group-hover:text-${item.color}-600`,
+                      "transition-colors duration-300"
+                    )}
+                  >
+                    <item.icon className="w-4 h-4" />
+                    <span className="capitalize truncate">{item.text}</span>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Description */}
+              {effectiveJob.description && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-gray-700">Description</h4>
+                  <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                    {effectiveJob.description}
+                  </p>
+                </div>
+              )}
+              
+              {/* Keywords */}
+              <div className="flex flex-wrap gap-2">
+                {effectiveJob.keywords?.map((keyword, index) => (
+                  <motion.div
+                    key={keyword}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Badge 
+                      variant="secondary" 
+                      className={cn(
+                        "text-xs py-0.5",
+                        "bg-gradient-to-r from-pink-50/50 to-rose-50/50",
+                        "hover:from-pink-100/50 hover:to-rose-100/50",
+                        "text-pink-700",
+                        "border border-pink-100/20",
+                        "transition-all duration-300",
+                        "cursor-default"
                       )}
-                      
-                      <div className="flex flex-wrap gap-2">
-                        {effectiveJob.keywords?.map((keyword, index) => (
-                          <motion.div
-                            key={keyword}
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ delay: index * 0.05 }}
-                          >
-                            <Badge 
-                              variant="secondary" 
-                              className={cn(
-                                "text-xs py-0.5",
-                                "bg-gradient-to-r from-pink-50/50 to-rose-50/50",
-                                "hover:from-pink-100/50 hover:to-rose-100/50",
-                                "text-pink-700",
-                                "border border-pink-100/20",
-                                "transition-all duration-300",
-                                "cursor-default"
-                              )}
-                            >
-                              {keyword}
-                            </Badge>
-                          </motion.div>
-                        ))}
-                      </div>
-                    </motion.div>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+                    >
+                      {keyword}
+                    </Badge>
+                  </motion.div>
+                ))}
+              </div>
             </motion.div>
           ) : (
             <ErrorState />

@@ -17,7 +17,7 @@ import {
   CertificationsForm,
   DocumentSettingsForm
 } from '../dynamic-components';
-import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate } from "lucide-react";
+import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, Briefcase as BriefcaseIcon } from "lucide-react";
 
 interface EditorPanelProps {
   resume: Resume;
@@ -69,6 +69,31 @@ export function EditorPanel({
             </div>
 
             <Accordion type="single" collapsible defaultValue="basic" className="mt-6">
+              {/* Tailored Job Section - Only show for non-base resumes */}
+              {!resume.is_base_resume && (
+                <AccordionItem value="job" className={cn(
+                  "mb-4 border rounded-lg overflow-hidden",
+                  "bg-pink-50/60 border-pink-200/40 shadow-sm shadow-pink-200/20"
+                )}>
+                  <AccordionTrigger className="px-4 py-2 hover:no-underline group">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1 rounded-md bg-pink-100/80 transition-transform duration-300 group-data-[state=open]:scale-105">
+                        <BriefcaseIcon className="h-3.5 w-3.5 text-pink-600" />
+                      </div>
+                      <span className="text-sm font-medium text-pink-900">Target Job</span>
+                    </div>
+                  </AccordionTrigger>
+                  <AccordionContent className="px-4 pt-2 pb-4">
+                    <TailoredJobCard 
+                      jobId={resume.job_id || null}
+                      onJobCreate={onJobCreate}
+                      job={job}
+                      isLoading={isLoadingJob}
+                    />
+                  </AccordionContent>
+                </AccordionItem>
+              )}
+
               {/* Basic Info */}
               <AccordionItem value="basic" className={cn(
                 "mb-4 border rounded-lg overflow-hidden",
@@ -85,14 +110,6 @@ export function EditorPanel({
                   </div>
                 </AccordionTrigger>
                 <AccordionContent className="px-4 pt-2 pb-4">
-                  {!resume.is_base_resume && (
-                    <TailoredJobCard 
-                      jobId={resume.job_id || null}
-                      onJobCreate={onJobCreate}
-                      job={job}
-                      isLoading={isLoadingJob}
-                    />
-                  )}
                   <BasicInfoForm
                     profile={profile}
                   />
