@@ -6,14 +6,17 @@ import { ModelSelector } from "@/components/settings/model-selector";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { User, CreditCard } from "lucide-react";
+import { User, Sparkles } from "lucide-react";
 import { PageTitle } from "./page-title";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
+  showUpgradeButton?: boolean;
 }
 
-export function AppHeader({ children }: AppHeaderProps) {
+export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps) {
   return (
     <header className="h-14 border-b backdrop-blur-xl sticky top-0 left-0 right-0 z-40 shadow-md border-purple-200/50">
       {/* Gradient backdrop with blur */}
@@ -41,18 +44,37 @@ export function AppHeader({ children }: AppHeaderProps) {
             children
           ) : (
             <nav className="flex items-center">
-              <Link 
-                href="/subscription" 
-                className={cn(
-                  "flex items-center gap-1.5 px-3 py-1",
-                  "text-sm font-medium text-purple-600/80 hover:text-purple-800",
-                  "transition-colors duration-200"
-                )}
-              >
-                <CreditCard className="h-4 w-4" />
-                <span className="hidden sm:inline">Subscription</span>
-              </Link>
-              <div className="h-4 w-px bg-purple-200/50" />
+              {showUpgradeButton && (
+                <>
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="relative group"
+                  >
+                    {/* Outer glow effect */}
+                    <div className="absolute -inset-[3px] bg-gradient-to-r from-amber-500/0 via-orange-500/0 to-red-500/0 rounded-lg opacity-75 blur-md group-hover:from-amber-500/50 group-hover:via-orange-500/50 group-hover:to-red-500/50 transition-all duration-500" />
+                    {/* Inner subtle gradient */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-orange-400/0 to-red-400/0 rounded-lg opacity-100 group-hover:via-orange-400/10 transition-all duration-500" />
+                    <Link 
+                      href="/subscription" 
+                      className={cn(
+                        "relative flex items-center gap-1.5 px-4 py-1.5",
+                        "bg-gradient-to-r from-amber-500 to-orange-500",
+                        "hover:from-amber-500 hover:via-orange-500 hover:to-red-500",
+                        "text-white font-medium rounded-lg",
+                        "shadow-lg hover:shadow-xl hover:shadow-orange-500/20",
+                        "transition-all duration-500",
+                        "text-sm"
+                      )}
+                    >
+                      <Sparkles className="h-4 w-4 transition-transform duration-500 group-hover:rotate-12" />
+                      <span className="transition-all duration-500 group-hover:tracking-wider group-hover:translate-x-0.5">Upgrade to Pro</span>
+                    </Link>
+                  </motion.div>
+                  <div className="h-4 w-px bg-purple-200/50 ml-3" />
+                </>
+              )}
               <Link 
                 href="/profile" 
                 className={cn(

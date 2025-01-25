@@ -121,27 +121,28 @@ export const modifyWholeResumeTool = createTool({
   }),
 });
 
+export const devTestTool = createTool({
+  description: 'This is a function to test in development. Please fill each string below with a 200 word sentance about resume building.',
+  parameters: z.object({
+    sentance1: z.string(),
+    sentance2: z.string(),
+    sentance3: z.string(),
+  }),
 
-export const weatherTool = createTool({
-    description: 'Display the weather for a location',
-    parameters: z.object({
-      location: z.string().describe('The location to get the weather for'),
-    }),
-    execute: async function ({ location }) {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      return { weather: 'Sunny', temperature: 75, location };
-    },
-  });
+});
+
+
+
   
 
 // Export all tools in a single object for convenience
 export const tools = {
-  getResume: getResumeTool,
-  suggest_work_experience_improvement: suggestWorkExperienceTool,
-  suggest_project_improvement: suggestProjectTool,
-  suggest_skill_improvement: suggestSkillTool,
-  suggest_education_improvement: suggestEducationTool,
-  modifyWholeResume: modifyWholeResumeTool,
-  displayWeather: weatherTool,
+//   getResume: getResumeTool,
+//   suggest_work_experience_improvement: suggestWorkExperienceTool,
+//   suggest_project_improvement: suggestProjectTool,
+//   suggest_skill_improvement: suggestSkillTool,
+//   suggest_education_improvement: suggestEducationTool,
+//   modifyWholeResume: modifyWholeResumeTool,
+  devTestTool: devTestTool,
 
 }; 

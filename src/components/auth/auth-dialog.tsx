@@ -168,11 +168,11 @@ export function AuthDialog({ children }: AuthDialogProps) {
 
             <div className="p-8 relative bg-white/50">
               <div 
-                className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-violet-200/5 via-blue-200/5 to-violet-200/5 rounded-full blur-xl -z-10 animate-pulse duration-[4000ms]" 
+                className="absolute top-1/2 left-1/4 w-[300px] h-[300px] bg-gradient-to-br from-violet-200/5 via-blue-200/5 to-violet-200/5 rounded-full blur-xl -z-10 " 
                 aria-hidden="true"
               />
               <div 
-                className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] bg-gradient-to-br from-blue-200/5 via-violet-200/5 to-blue-200/5 rounded-full blur-xl -z-10 animate-pulse duration-[5000ms]" 
+                className="absolute bottom-1/3 right-1/4 w-[250px] h-[250px] bg-gradient-to-br from-blue-200/5 via-violet-200/5 to-blue-200/5 rounded-full blur-xl -z-10  " 
                 aria-hidden="true"
               />
               

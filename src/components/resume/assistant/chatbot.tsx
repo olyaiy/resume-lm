@@ -258,19 +258,12 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
       }))
     );
     
-    console.log('About to append message:', JSON.stringify(message));
     setIsInitialLoading(true);
     append({ 
       content: message.replace(/\s+$/, ''), // Extra safety: trim trailing whitespace
       role: 'user' 
     });
     
-    console.log('After append - messages:', 
-      messages.map(m => ({
-        role: m.role,
-        content: JSON.stringify(m.content)
-      }))
-    );
     
     setAccordionValue("chat");
   }, [append, messages]);
@@ -442,6 +435,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                     {/* Messages */}
                     {messages.map((m: Message, index) => (
                       <React.Fragment key={index}>
+
                         {/* Regular Message Content */}
                         {m.content && (
                           <div className="my-6">
@@ -527,133 +521,148 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                         {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                           const { toolName, toolCallId, state, args } = toolInvocation;
 
-                          if (state === 'result') {
-
-
-                            // Map tool names to resume sections and handle suggestions
-                            const toolConfig = {
-                              suggest_work_experience_improvement: {
-                                type: 'work_experience' as const,
-                                field: 'work_experience',
-                                content: 'improved_experience',
-                              },
-                              suggest_project_improvement: {
-                                type: 'project' as const,
-                                field: 'projects',
-                                content: 'improved_project',
-                              },
-                              suggest_skill_improvement: {
-                                type: 'skill' as const,
-                                field: 'skills',
-                                content: 'improved_skill',
-                              },
-                              suggest_education_improvement: {
-                                type: 'education' as const,
-                                field: 'education',
-                                content: 'improved_education',
-                              },
-                              modifyWholeResume: {
-                                type: 'whole_resume' as const,
-                                field: 'all',
-                                content: null,
-                              },
-                              getResume: null // Changed to null since it doesn't need suggestion handling
-                            } as const;
-                            const config = toolConfig[toolName as keyof typeof toolConfig];
-
-
-                            if (!config) return null;
-
-                            // Handle specific tool results
-                            if (toolName === 'getResume') {
-                              return (
-                                <div key={toolCallId} className="mt-2">
-                                  <div className="flex justify-start">
-                                    <div className={cn(
-                                      "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                                      "bg-white/60 border border-purple-200/60",
-                                      "shadow-sm backdrop-blur-sm"
-                                    )}>
-                                      {args.message}
-                                      <p>Read Resume ✅</p>
-                                    </div>
-                                  </div>
-                                </div>
-                              );
-                            }
-
-                            if (config.type === 'whole_resume') {
-                              // Store original state before applying updates
-                              if (!originalResume) {
-                                setOriginalResume({ ...resume });
-                              }
-
-                              return (
-                                <div key={toolCallId} className="mt-2 w-[90%]">
-                                  <WholeResumeSuggestion
-                                    onReject={() => {
-                                      if (originalResume) {
-                                        Object.keys(originalResume).forEach((key) => {
-                                          if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
-                                            onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
-                                          }
-                                        });
-                                        setOriginalResume(null);
-                                      }
-                                    }}
-                                  />
-                                </div>
-                              );
-                            }
-
+                          // TEST DEV TOOL
+                          if (toolName === 'devTestTool') {
+                            const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
                             return (
                               <div key={toolCallId} className="mt-2 w-[90%]">
-                                <div className="">
-                                  <Suggestion
-                                    type={config.type}
-                                    content={args[config.content]}
-                                    currentContent={resume[config.field][args.index]}
-                                    onAccept={() => onResumeChange(config.field, 
-                                      resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
-                                        i === args.index ? args[config.content] : item
-                                      )
-                                    )}
-                                    onReject={() => {}}
-                                  />
+                                <div className="bg-red-500  rounded-lg">
+                                  {parsedArgs.sentance1}
+                                  {parsedArgs.sentance2}
+                                  {parsedArgs.sentance3}
                                 </div>
                               </div>
                             );
-                          } else {
-                          // Show specific loading states for non-result states
-                          return (
-                            <div key={toolCallId} className="mt-2 max-w-[90%]">
-                              <div className="flex justify-start max-w-[90%]">
-                                {toolName === 'getResume' ? (
-                                  <div className={cn(
-                                    "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
-                                    "bg-white/60 border border-purple-200/60",
-                                    "shadow-sm backdrop-blur-sm"
-                                  )}>
-                                    Reading Resume...
-                                  </div>
-                                ) : toolName === 'modifyWholeResume' ? (
-                                  <div className={cn(
-                                    "w-full rounded-2xl px-4 py-2",
-                                    "bg-white/60 border border-purple-200/60",
-                                    "shadow-sm backdrop-blur-sm"
-                                  )}>
-                                    Preparing resume modifications...
-                                  </div>
-                                ) : toolName.startsWith('suggest_') ? (
-                                  <SuggestionSkeleton />
-                                ) : null}
-                            {toolName === 'displayWeather' ? (
-                              <div>Loading weather...</div>
-                            ) : null}
-                              </div>
-                            </div>
-                          );
-                        }
+                          }
+
+                          // switch (state) {
+                          //   case 'partial-call':
+                          //   case 'call':
+                          //     return (
+                          //       <div key={toolCallId} className="mt-2 max-w-[90%]">
+                          //         <div className="flex justify-start max-w-[90%]">
+                          //           {toolName === 'getResume' ? (
+                          //             <div className={cn(
+                          //               "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                          //               "bg-white/60 border border-purple-200/60",
+                          //               "shadow-sm backdrop-blur-sm"
+                          //             )}>
+                          //               Reading Resume...
+                          //             </div>
+                          //           ) : toolName === 'modifyWholeResume' ? (
+                          //             <div className={cn(
+                          //               "w-full rounded-2xl px-4 py-2",
+                          //               "bg-white/60 border border-purple-200/60",
+                          //               "shadow-sm backdrop-blur-sm"
+                          //             )}>
+                          //               Preparing resume modifications...
+                          //             </div>
+                          //           ) : toolName.startsWith('suggest_') ? (
+                          //             <SuggestionSkeleton />
+                          //           ) : null}
+                          //           {toolName === 'displayWeather' ? (
+                          //             <div>Loading weather...</div>
+                          //           ) : null}
+                          //         </div>
+                          //       </div>
+                          //     );
+
+                          //   case 'result':
+                          //     // Map tool names to resume sections and handle suggestions
+                          //     const toolConfig = {
+                          //       suggest_work_experience_improvement: {
+                          //         type: 'work_experience' as const,
+                          //         field: 'work_experience',
+                          //         content: 'improved_experience',
+                          //       },
+                          //       suggest_project_improvement: {
+                          //         type: 'project' as const,
+                          //         field: 'projects',
+                          //         content: 'improved_project',
+                          //       },
+                          //       suggest_skill_improvement: {
+                          //         type: 'skill' as const,
+                          //         field: 'skills',
+                          //         content: 'improved_skill',
+                          //       },
+                          //       suggest_education_improvement: {
+                          //         type: 'education' as const,
+                          //         field: 'education',
+                          //         content: 'improved_education',
+                          //       },
+                          //       modifyWholeResume: {
+                          //         type: 'whole_resume' as const,
+                          //         field: 'all',
+                          //         content: null,
+                          //       },
+                          //     } as const;
+                          //     const config = toolConfig[toolName as keyof typeof toolConfig];
+
+                          //     if (!config) return null;
+
+                          //     // Handle specific tool results
+                          //     if (toolName === 'getResume') {
+                          //       return (
+                          //         <div key={toolCallId} className="mt-2 w-[90%]">
+                          //           <div className="flex justify-start">
+                          //             <div className={cn(
+                          //               "rounded-2xl px-4 py-2 max-w-[90%] text-sm",
+                          //               "bg-white/60 border border-purple-200/60",
+                          //               "shadow-sm backdrop-blur-sm"
+                          //             )}>
+                          //               {args.message}
+                          //               <p>Read Resume ✅</p>
+                          //             </div>
+                          //           </div>
+                          //         </div>
+                          //       );
+                          //     }
+
+                          //     if (config.type === 'whole_resume') {
+                          //       // Store original state before applying updates
+                          //       if (!originalResume) {
+                          //         setOriginalResume({ ...resume });
+                          //       }
+
+                          //       return (
+                          //         <div key={toolCallId} className="mt-2 w-[90%]">
+                          //           <WholeResumeSuggestion
+                          //             onReject={() => {
+                          //               if (originalResume) {
+                          //                 Object.keys(originalResume).forEach((key) => {
+                          //                   if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
+                          //                     onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
+                          //                   }
+                          //                 });
+                          //                 setOriginalResume(null);
+                          //               }
+                          //             }}
+                          //           />
+                          //         </div>
+                          //       );
+                          //     }
+
+                          //     return (
+                          //       <div key={toolCallId} className="mt-2 w-[90%]">
+                          //         <div className="">
+                          //           <Suggestion
+                          //             type={config.type}
+                          //             content={args[config.content]}
+                          //             currentContent={resume[config.field][args.index]}
+                          //             onAccept={() => onResumeChange(config.field, 
+                          //               resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
+                          //                 i === args.index ? args[config.content] : item
+                          //               )
+                          //             )}
+                          //             onReject={() => {}}
+                          //           />
+                          //         </div>
+                          //       </div>
+                          //     );
+
+                          //   default:
+                          //     return null;
+                          // }
                         })}
 
 
