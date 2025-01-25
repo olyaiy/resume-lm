@@ -107,7 +107,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
   };
 
   const SectionSettings = ({ title, section }: { title: string; section: 'skills' | 'experience' | 'projects' | 'education' }) => (
-    <div className="space-y-4 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+    <div className="space-y-4 bg-slate-50/50 rounded-lg border border-slate-200/50">
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium text-muted-foreground">Space Above {title} Section</Label>
@@ -251,13 +251,12 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
   );
 
   return (
-    <div className="space-y-6">
-      <Card className="border-white/40 shadow-xl backdrop-blur-xl">
-        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-7">
-          <CardTitle className="text-lg font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-            Document Settings
-          </CardTitle>
-          <div className="flex items-center space-x-2">
+    <div className="">
+      <Card className="">
+
+        {/* Buttons */}
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div className="flex items-center space-x-2  w-full">
             <SavedStylesDialog
               currentSettings={resume.document_settings || defaultSettings}
               onApplyStyle={(settings) => onChange('document_settings', settings)}
@@ -266,14 +265,14 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
               variant="outline"
               size="sm"
               onClick={handleRestoreDefaults}
-              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-200/50 hover:border-teal-200/50 transition-colors"
+              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-400 hover:border-teal-600 transition-colors w-full"
             >
               Restore Defaults
             </Button>
           </div>
         </CardHeader>
         <CardContent className="space-y-8">
-          <div className="space-y-6">
+          <div className="space-y-6 ">
             <div className="flex items-center justify-between">
               <Label className="text-base font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
                 Footer Options
@@ -281,7 +280,7 @@ export function DocumentSettingsForm({ resume, onChange }: DocumentSettingsFormP
               <div className="h-[1px] flex-1 mx-4 bg-gradient-to-r from-teal-200/20 via-cyan-200/20 to-transparent" />
             </div>
 
-            <div className="space-y-2 bg-slate-50/50 rounded-lg p-4 border border-slate-200/50">
+            <div className="space-y-2 bg-slate-50/50 rounded-lg  border border-slate-200/50">
               <div className="flex items-center justify-between space-x-2">
                 <Label className="text-sm font-medium text-muted-foreground">
                   Show UBC Science Co-op Footer

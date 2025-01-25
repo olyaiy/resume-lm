@@ -76,7 +76,7 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
         <Button
           variant="outline"
           size="sm"
-          className="text-xs text-muted-foreground hover:text-teal-600 border-slate-200/50 hover:border-teal-200/50 transition-colors"
+          className="text-xs text-muted-foreground hover:text-teal-600 border-slate-400 hover:border-teal-600 transition-colors w-full"
         >
           <Save className="w-3 h-3 mr-1" />
           Saved Styles
