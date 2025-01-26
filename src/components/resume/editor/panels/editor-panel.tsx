@@ -19,8 +19,7 @@ import {
   DocumentSettingsForm
 } from '../dynamic-components';
 import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, Briefcase as BriefcaseIcon, FileText, Trash2, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { generateCoverLetter } from "@/components/cover-letter/ai";
+
 
 
 interface EditorPanelProps {

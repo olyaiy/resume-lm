@@ -1,44 +1,39 @@
 'use server';
 
-import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { streamText } from 'ai';
+import { createStreamableValue } from 'ai/rsc';
+import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
-export async function generateCoverLetter(
-  resume: string,
-  jobDescription: string,
-  config?: AIConfig
-) {
-  const aiClient = initializeAIClient(config);
-  
+export async function generate(input: string, config?: AIConfig) {
   try {
-    const result = await streamText({
-      model: aiClient,
-      system: `You are a professional cover letter writer. Create a compelling cover letter that:
-              1. Matches the candidate's resume with the job requirements
-              2. Highlights relevant skills and experiences
-              3. Maintains a professional tone
-              4. Is concise (3-4 paragraphs max)
-              5. Avoids generic phrases and clichés`,
-      prompt: `Generate a cover letter based on the following resume and job description:
-              
-              Resume:
-              ${resume}
-              
-              Job Description:
-              ${jobDescription}
-              
-              Important Notes:
-              - Address the hiring manager directly if possible
-              - Focus on measurable achievements from the resume
-              - Tailor the letter to the specific job requirements
-              - Keep it professional but approachable`
-    });
+    const stream = createStreamableValue('');
+    const aiClient = initializeAIClient(config);
 
-    return result.toDataStreamResponse();
+    const system = `You are a professional cover letter writer with expertise in crafting compelling, 
+    personalized cover letters. Focus on:
+    - Clear and concise writing
+    - Professional tone
+    - Highlighting relevant experience
+    - Matching job requirements
+    - Maintaining authenticity`;
 
+    (async () => {
+      const { textStream } = streamText({
+        model: aiClient,
+        system,
+        prompt: input,
+      });
+
+      for await (const delta of textStream) {
+        stream.update(delta);
+      }
+
+      stream.done();
+    })();
+
+    return { output: stream.value };
   } catch (error) {
     console.error('Error generating cover letter:', error);
     throw error;
   }
 }
-
