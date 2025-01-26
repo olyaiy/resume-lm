@@ -42,7 +42,7 @@ function parseMarkdownIntoBlocks(markdown: string): string[] {
 const MemoizedMarkdownBlock = memo(
   ({ content }: { content: string }) => {
     return (
-      <div className="prose prose-neutral dark:prose-invert max-w-none">
+      <div className="">
         <ReactMarkdown
           remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
@@ -54,7 +54,7 @@ const MemoizedMarkdownBlock = memo(
               </ol>
             ),
             li: ({ ordered, index, children }) => (
-              <li value={ordered ? index + 1 : undefined}>
+              <li className="py-2" value={ordered ? index + 1 : undefined}>
                 {children}
               </li>
             ),

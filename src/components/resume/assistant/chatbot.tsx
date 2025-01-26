@@ -307,7 +307,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
       "hover:shadow-xl hover:shadow-purple-500/10",
       "overflow-hidden",
       "relative",
-      "data-[state=closed]:shadow-md data-[state=closed]:border data-[state=closed]:border-purple-200/40"
+      "data-[state=closed]:shadow-md data-[state=closed]:border data-[state=closed]:border-purple-200/40 "
     )}>
       
 
@@ -424,7 +424,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
                         {/* Regular Message Content */}
                         {m.content && (
-                          <div className="my-6">
+                          <div className="my-2">
                             <div className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                               <div className={cn(
                                 "rounded-2xl px-4 py-2 max-w-[90%] text-sm relative group items-center",
@@ -432,7 +432,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                   "bg-gradient-to-br from-purple-500 to-indigo-500",
                                   "text-white",
                                   "shadow-md shadow-purple-500/10",
-                                  "ml-auto pb-0"
+                                  "ml-auto pb-0 text-white"
                                 ] : [
                                   "bg-white/60",
                                   "border border-purple-200/60",

@@ -45,7 +45,7 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
     content: initialData?.content as string || '<p>Start writing your cover letter...</p>',
     editorProps: {
       attributes: {
-        class: 'prose prose-xxs focus:outline-none h-full overflow-hidden max-w-none text-black',
+        class: 'prose prose-xxs focus:outline-none h-full overflow-none max-w-none text-black',
       },
     },
     onUpdate: ({ editor }) => {
