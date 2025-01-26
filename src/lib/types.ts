@@ -91,6 +91,7 @@ export interface Resume {
   section_configs?: {
     [key: string]: { visible: boolean };
   };
+  has_cover_letter: boolean;
 }
 
 export interface DocumentSettings {

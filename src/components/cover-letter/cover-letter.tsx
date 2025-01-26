@@ -1,43 +1,42 @@
-'use client'
+import CoverLetterEditor from "./cover-letter-editor";
+import { getCoverLetter } from '@/utils/actions';
+import { Suspense } from 'react';
 
-import { useEditor, EditorContent } from '@tiptap/react'
-import StarterKit from '@tiptap/starter-kit'
-import { useEffect } from 'react'
-
-function CoverLetter() {
-  const editor = useEditor({
-    extensions: [StarterKit],
-    content: '<p>Start writing your cover letter...</p>',
-    editorProps: {
-        attributes: {
-          class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl p-8 focus:outline-none  h-full bg-green-500 overflow-hidden',
-        },
-      },
-    
-  })
-
-  // Cleanup editor on unmount
-  useEffect(() => {
-    return () => {
-      editor?.destroy()
-    }
-  }, [editor])
-
-  return (
-    <div className="relative w-full max-w-[816px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
-      <div 
-        className="relative pb-[129.41%]" // 11/8.5 = 1.2941
-        style={{ aspectRatio: '8.5 / 11' }}
-      >
-        <div className="absolute inset-0 p-8">
-          <EditorContent 
-            editor={editor} 
-            className="h-full focus:outline-none prose prose-sm max-w-none"
-          />
-        </div>
-      </div>
-    </div>
-  )
+interface CoverLetterProps {
+    resumeId: string;
+    hasCoverLetter: boolean;
 }
 
-export default CoverLetter
+// Make this a regular component, not async
+export default function CoverLetter({ resumeId, hasCoverLetter }: CoverLetterProps) {
+  // If no cover letter exists, render empty state
+  if (!hasCoverLetter) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">No cover letter found for this resume</p>
+      </div>
+    );
+  }
+
+  return (
+    <Suspense fallback={<div className="p-4">Loading cover letter...</div>}>
+      <CoverLetterContent resumeId={resumeId} />
+    </Suspense>
+  );
+}
+
+// Separate async component for content
+async function CoverLetterContent({ resumeId }: { resumeId: string }) {
+  const coverLetter = await getCoverLetter(resumeId);
+  console.log(coverLetter)
+  
+  if (!coverLetter) {
+    return (
+      <div className="p-4">
+        <p className="text-muted-foreground">Error loading cover letter</p>
+      </div>
+    );
+  }
+
+  return <CoverLetterEditor  />;
+}

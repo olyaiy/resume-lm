@@ -17,7 +17,7 @@ import {
   CertificationsForm,
   DocumentSettingsForm
 } from '../dynamic-components';
-import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, Briefcase as BriefcaseIcon } from "lucide-react";
+import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, Briefcase as BriefcaseIcon, FileText } from "lucide-react";
 
 interface EditorPanelProps {
   resume: Resume;
@@ -254,6 +254,31 @@ export function EditorPanel({
                       onChange={onResumeChange}
                     />
                   </Suspense>
+                </AccordionContent>
+              </AccordionItem>
+
+              {/* Cover Letter */}
+              <AccordionItem value="cover-letter" className={cn(
+                "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-emerald-600/50 border-2"
+              )}>
+                <AccordionTrigger className="px-4 py-2 hover:no-underline group">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1 rounded-md bg-emerald-100/80 transition-transform duration-300 group-data-[state=open]:scale-105">
+                      <FileText className="h-3.5 w-3.5 text-emerald-600" />
+                    </div>
+                    <span className="text-sm font-medium text-emerald-900">Cover Letter</span>
+                  </div>
+                </AccordionTrigger>
+                <AccordionContent className="px-4 pt-2 pb-4">
+                  {resume.has_cover_letter ? (
+                    <div className="p-4 rounded-lg bg-emerald-50/50 border border-emerald-200">
+                      <p className="text-sm text-emerald-700">Cover letter has been created for this resume.</p>
+                    </div>
+                  ) : (
+                    <div className="p-4 rounded-lg bg-muted/50 border border-muted">
+                      <p className="text-sm text-muted-foreground">No cover letter has been created for this resume yet.</p>
+                    </div>
+                  )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>

@@ -8,6 +8,7 @@ import { ResumePreview } from "../preview/resume-preview";
 import { RefObject } from "react";
 import CoverLetter from "@/components/cover-letter/cover-letter";
 
+
 interface PreviewPanelProps {
   resume: Resume;
   previewPanelRef: RefObject<HTMLDivElement | null>;
@@ -33,7 +34,10 @@ export function PreviewPanel({
           </ResumeContextMenu>
         </div>
       </div>
-      <CoverLetter />
+      <CoverLetter 
+          resumeId={resume.id} 
+          hasCoverLetter={resume.has_cover_letter} />
+          
     </ScrollArea>
   );
 } 

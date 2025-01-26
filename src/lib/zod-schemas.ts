@@ -169,6 +169,7 @@ export const resumeSchema = z.object({
 //   document_settings: documentSettingsSchema.optional(),
 //   section_order: z.array(z.string()).optional(),
 //   section_configs: z.record(sectionConfigSchema).optional(),
+  has_cover_letter: z.boolean().default(false),
 });
 
 // Type inference helpers

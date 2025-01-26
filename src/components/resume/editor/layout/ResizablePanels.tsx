@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { ReactNode } from "react";
-import CoverLetter from "@/components/cover-letter/cover-letter";
+import CoverLetter from "@/components/cover-letter/cover-letter-editor";
 
 interface ResizablePanelsProps {
   isBaseResume: boolean;
