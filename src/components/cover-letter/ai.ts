@@ -15,7 +15,11 @@ export async function generate(input: string, config?: AIConfig) {
     - Professional tone
     - Highlighting relevant experience
     - Matching job requirements
-    - Maintaining authenticity`;
+    - Maintaining authenticity
+    - aim for 500 words
+    
+    Ensure that your output is in an HTML format, but do NOT start with html tags.
+    `;
 
     (async () => {
       const { textStream } = streamText({

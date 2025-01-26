@@ -89,31 +89,68 @@ const config = {
   					transform: 'translate(0px, 0px) scale(1)'
   				}
   			},
-        'loading-dot': {
-          '0%': {
-            opacity: '0.2',
-            transform: 'translateX(-2px) scale(0.8)'
-          },
-          '50%': {
-            opacity: '0.8',
-            transform: 'translateX(2px) scale(1)'
-          },
-          '100%': {
-            opacity: '0.2',
-            transform: 'translateX(-2px) scale(0.8)'
-          }
-        }
+  			'loading-dot': {
+  				'0%': {
+  					opacity: '0.2',
+  					transform: 'translateX(-2px) scale(0.8)'
+  				},
+  				'50%': {
+  					opacity: '0.8',
+  					transform: 'translateX(2px) scale(1)'
+  				},
+  				'100%': {
+  					opacity: '0.2',
+  					transform: 'translateX(-2px) scale(0.8)'
+  				}
+  			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-  			'blob': 'blob 8s infinite'
+  			blob: 'blob 8s infinite'
+  		},
+  		typography: {
+  			xxxs: {
+  				css: {
+  					fontSize: '0.625rem',
+  					h1: {
+  						fontSize: '1rem'
+  					},
+  					h2: {
+  						fontSize: '0.875rem'
+  					},
+  					h3: {
+  						fontSize: '0.75rem'
+  					},
+  					h4: {
+  						fontSize: '0.625rem'
+  					}
+  				}
+  			},
+  			xxs: {
+  				css: {
+  					fontSize: '0.75rem',
+  					h1: {
+  						fontSize: '1.25rem'
+  					},
+  					h2: {
+  						fontSize: '1.15rem'
+  					},
+  					h3: {
+  						fontSize: '1rem'
+  					},
+  					h4: {
+  						fontSize: '0.875rem'
+  					}
+  				}
+  			}
   		}
   	}
   },
   plugins: [
     require("tailwindcss-animate"),
-    require("@tailwindcss/container-queries")
+    require("@tailwindcss/container-queries"),
+    require("@tailwindcss/typography")
   ],
 } satisfies Config;
 

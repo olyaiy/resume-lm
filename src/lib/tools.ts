@@ -137,12 +137,12 @@ export const devTestTool = createTool({
 
 // Export all tools in a single object for convenience
 export const tools = {
-//   getResume: getResumeTool,
-//   suggest_work_experience_improvement: suggestWorkExperienceTool,
-//   suggest_project_improvement: suggestProjectTool,
-//   suggest_skill_improvement: suggestSkillTool,
-//   suggest_education_improvement: suggestEducationTool,
-//   modifyWholeResume: modifyWholeResumeTool,
-  devTestTool: devTestTool,
+  getResume: getResumeTool,
+  suggest_work_experience_improvement: suggestWorkExperienceTool,
+  suggest_project_improvement: suggestProjectTool,
+  suggest_skill_improvement: suggestSkillTool,
+  suggest_education_improvement: suggestEducationTool,
+  modifyWholeResume: modifyWholeResumeTool,
+  // devTestTool: devTestTool,
 
 }; 

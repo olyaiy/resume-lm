@@ -196,47 +196,6 @@ export function CoverLetterPanel({
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-
-              {generation && (
-                <div className={cn(
-                  "relative group/suggestions",
-                  "p-4",
-                  "rounded-xl",
-                  "bg-gradient-to-br from-emerald-50/95 via-emerald-50/90 to-green-50/95",
-                  "border border-emerald-200/60",
-                  "shadow-lg shadow-emerald-500/5",
-                  "transition-all duration-500",
-                  "hover:shadow-xl hover:shadow-emerald-500/10",
-                  "overflow-hidden"
-                )}>
-                  
-                  {/* Content */}
-                  <div className="relative">
-                    <div className="flex items-center gap-2 mb-4">
-                      <div className="p-1.5 rounded-lg bg-emerald-100/80 text-emerald-600">
-                        <Sparkles className="h-4 w-4" />
-                      </div>
-                      <span className="font-semibold text-emerald-600">AI Generated Cover Letter</span>
-                    </div>
-                    
-                    <Tiptap
-                      content={generation}
-                      onChange={() => {}}
-                      readOnly={true}
-                      className={cn(
-                        "min-h-[200px] text-sm",
-                        "bg-white/60",
-                        "border-emerald-200/60",
-                        "text-emerald-900",
-                        "focus:border-emerald-300/60 focus:ring-2 focus:ring-emerald-500/10",
-                        "placeholder:text-emerald-400",
-                        "transition-all duration-300",
-                        "hover:bg-white/80"
-                      )}
-                    />
-                  </div>
-                </div>
-              )}
             </div>
           ) : (
             // No Cover Letter
