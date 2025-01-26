@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Job } from "@/lib/types";
 import { createClient } from "@/utils/supabase/client";
-import { createJob, deleteJob } from "@/utils/actions";
+import { createJob, deleteJob, updateResume } from "@/utils/actions";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -16,10 +16,10 @@ import { formatJobListing } from "@/utils/ai";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { useResumeContext } from "../../editor/resume-editor-context";
 
 interface TailoredJobCardProps {
   jobId: string | null;
-  onJobCreate?: (jobId: string) => void;
   onJobDelete?: () => void;
   job?: Job | null;
   isLoading?: boolean;
@@ -27,12 +27,12 @@ interface TailoredJobCardProps {
 
 export function TailoredJobCard({ 
   jobId, 
-  onJobCreate, 
   onJobDelete,
   job: externalJob,
   isLoading: externalIsLoading 
 }: TailoredJobCardProps) {
   const router = useRouter();
+  const { state, dispatch } = useResumeContext();
 
   // Only use internal state if external job is not provided
   const [internalJob, setInternalJob] = useState<Job | null>(null);
@@ -191,10 +191,18 @@ export function TailoredJobCard({
       // Create job in database
       const newJob = await createJob(formattedJob);
       
+      // Update resume with new job ID using context
+      dispatch({ type: 'UPDATE_FIELD', field: 'job_id', value: newJob.id });
+      
+      // Save the changes to the database
+      await updateResume(state.resume.id, {
+        ...state.resume,
+        job_id: newJob.id
+      });
+      
       // Close dialog and refresh
       setCreateDialogOpen(false);
       router.refresh();
-      onJobCreate?.(newJob.id);
 
     } catch (error) {
       console.error('Error creating job:', error);

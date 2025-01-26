@@ -29,7 +29,7 @@ export function PreviewPanel({
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
-      <div className="relative h-full w-full" ref={previewPanelRef}>
+      <div className="relative" ref={previewPanelRef}>
         <div className=" ">
           <ResumeContextMenu resume={resume}>
             <ResumePreview resume={resume} containerWidth={previewPanelWidth} />

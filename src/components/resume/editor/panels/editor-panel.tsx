@@ -50,8 +50,7 @@ interface EditorPanelProps {
   isDeleting: boolean;
   onSave: () => Promise<void>;
   onDelete: () => Promise<void>;
-  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
-  onJobCreate: (jobId: string) => void;
+  onResumeChange: <K extends keyof Resume>(field: K, value: Resume[K]) => void;
 }
 
 export function EditorPanel({
@@ -64,7 +63,6 @@ export function EditorPanel({
   onSave,
   onDelete,
   onResumeChange,
-  onJobCreate
 }: EditorPanelProps) {
   return (
     <div className="flex flex-col h-full mr-4">
@@ -104,7 +102,6 @@ export function EditorPanel({
                   <AccordionContent className="px-4 pt-2 pb-4">
                     <TailoredJobCard 
                       jobId={resume.job_id || null}
-                      onJobCreate={onJobCreate}
                       job={job}
                       isLoading={isLoadingJob}
                     />

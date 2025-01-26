@@ -153,26 +153,6 @@ export function ResumeEditorClient({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.hasUnsavedChanges]);
 
-
-  // Create Job
-  const handleJobCreate = (jobId: string) => {
-    // Update the resume with the new job ID
-    const updatedResume = {
-      ...state.resume,
-      job_id: jobId
-    };
-    dispatch({ type: 'UPDATE_FIELD', field: 'job_id', value: jobId });
-    
-    // Save the changes to the database
-    updateResume(state.resume.id, updatedResume).catch(error => {
-      toast({
-        title: "Update failed",
-        description: "Failed to link the new job to your resume.",
-        variant: "destructive",
-      });
-    });
-  };
-
   // Editor Panel
   const editorPanel = (
     <EditorPanel
@@ -185,7 +165,6 @@ export function ResumeEditorClient({
       onSave={handleSave}
       onDelete={handleDelete}
       onResumeChange={updateField}
-      onJobCreate={handleJobCreate}
     />
   );
 
