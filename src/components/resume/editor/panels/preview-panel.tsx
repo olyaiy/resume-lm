@@ -5,23 +5,35 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ResumeContextMenu } from "../preview/resume-context-menu";
 import { ResumePreview } from "../preview/resume-preview";
-import { RefObject } from "react";
+import { useRef, useState, useEffect } from "react";
 import CoverLetter from "@/components/cover-letter/cover-letter";
-
 
 interface PreviewPanelProps {
   resume: Resume;
-  previewPanelRef: RefObject<HTMLDivElement | null>;
-  previewPanelWidth: number;
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
 }
 
 export function PreviewPanel({
   resume,
-  previewPanelRef,
-  previewPanelWidth,
   onResumeChange
 }: PreviewPanelProps) {
+  const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
+  const previewPanelRef = useRef<HTMLDivElement>(null);
+
+  // Track PDF preview initialization
+  useEffect(() => {
+    if (previewPanelRef.current) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (const entry of entries) {
+          setPreviewPanelWidth(entry.contentRect.width);
+        }
+      });
+
+      resizeObserver.observe(previewPanelRef.current);
+      return () => resizeObserver.disconnect();
+    }
+  }, []);
+
   return (
     <ScrollArea className={cn(
       "h-full pb-[9rem]  z-50",
@@ -50,8 +62,6 @@ export function PreviewPanel({
           }
         }}
       /> */}
-
-      
     </ScrollArea>
   );
 } 

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Resume, Profile, Job } from "@/lib/types";
-import { useState, useRef, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer } from "react";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -29,28 +29,9 @@ export function ResumeEditorClient({
     hasUnsavedChanges: false
   });
 
-  const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
-  const previewPanelRef = useRef<HTMLDivElement>(null);
-
-  // Track PDF preview initialization
-  useEffect(() => {
-    if (previewPanelRef.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setPreviewPanelWidth(entry.contentRect.width);
-        }
-      });
-
-      resizeObserver.observe(previewPanelRef.current);
-      return () => resizeObserver.disconnect();
-    }
-  }, []);
-
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-
   const debouncedResume = useDebouncedValue(state.resume, 500);
-
   const [job, setJob] = useState<Job | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
 
@@ -125,8 +106,6 @@ export function ResumeEditorClient({
   const previewPanel = (
     <PreviewPanel
       resume={debouncedResume}
-      previewPanelRef={previewPanelRef}
-      previewPanelWidth={previewPanelWidth}
       onResumeChange={updateField}
     />
   );
