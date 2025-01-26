@@ -8,22 +8,62 @@ import { pdf } from '@react-pdf/renderer';
 import { TextImport } from "../../text-import";
 import { ResumePDFDocument } from "../preview/resume-pdf-document";
 import { cn } from "@/lib/utils";
+import { useResumeContext } from "../resume-editor-context";
+import { useRouter } from "next/navigation";
+import { updateResume, deleteResume } from "@/utils/actions";
 
 interface ResumeEditorActionsProps {
-  resume: Resume;
-  isSaving: boolean;
-  isDeleting: boolean;
-  onSave: () => Promise<void>;
-  onDelete: () => Promise<void>;
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
 }
 
 export function ResumeEditorActions({
-  resume,
-  isSaving,
-  onSave,
   onResumeChange
 }: ResumeEditorActionsProps) {
+  const { state, dispatch } = useResumeContext();
+  const router = useRouter();
+  const { resume, isSaving } = state;
+
+  // Save Resume
+  const handleSave = async () => {
+    try {
+      dispatch({ type: 'SET_SAVING', value: true });
+      await updateResume(state.resume.id, state.resume);
+      toast({
+        title: "Changes saved",
+        description: "Your resume has been updated successfully.",
+      });
+    } catch (error) {
+      toast({
+        title: "Save failed",
+        description: error instanceof Error ? error.message : "Unable to save your changes. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      dispatch({ type: 'SET_SAVING', value: false });
+    }
+  };
+
+  // Delete Resume
+  const handleDelete = async () => {
+    try {
+      dispatch({ type: 'SET_DELETING', value: true });
+      await deleteResume(state.resume.id);
+      toast({
+        title: "Resume deleted",
+        description: "Your resume has been permanently removed.",
+      });
+      router.push('/');
+    } catch (error) {
+      toast({
+        title: "Delete failed",
+        description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      dispatch({ type: 'SET_DELETING', value: false });
+    }
+  };
+
   // Dynamic color classes based on resume type
   const colors = resume.is_base_resume ? {
     // Import button colors
@@ -113,7 +153,7 @@ export function ResumeEditorActions({
 
         {/* Save Button */}
         <Button 
-          onClick={onSave} 
+          onClick={handleSave} 
           disabled={isSaving}
           className={actionButtonClasses}
         >

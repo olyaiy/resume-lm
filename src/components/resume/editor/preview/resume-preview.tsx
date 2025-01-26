@@ -111,7 +111,15 @@ interface ResumePreviewProps {
 export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const debouncedWidth = useDebouncedValue(containerWidth, 100);
+  const debouncedWidth = useDebouncedValue(containerWidth, 50);
+  
+  // Memoize the final width value if you need to pass it to expensive calculations
+  const memoizedWidth = useMemo(() => debouncedWidth, [debouncedWidth]);
+
+  // Log debounced width changes
+  useEffect(() => {
+    console.log('Debounced Preview Width:', memoizedWidth);
+  }, [memoizedWidth]);
 
   // Generate resume hash for caching
   const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
@@ -305,7 +313,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
               key={`page_${index + 1}`}
               pageNumber={index + 1}
               className="mb-4  shadow-lg"
-              width={debouncedWidth}
+              width={memoizedWidth}
               renderAnnotationLayer={true}
               renderTextLayer={true}
             />

@@ -1,10 +1,8 @@
 'use client';
 
 import React from 'react';
-import { updateResume, deleteResume } from "@/utils/actions";
 import { Resume, Profile, Job } from "@/lib/types";
 import { useState, useRef, useEffect, useReducer } from "react";
-import { toast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
@@ -92,47 +90,6 @@ export function ResumeEditorClient({
     dispatch({ type: 'UPDATE_FIELD', field, value });
   };
 
-  // Save Resume
-  const handleSave = async () => {
-    try {
-      dispatch({ type: 'SET_SAVING', value: true });
-      await updateResume(state.resume.id, state.resume);
-      toast({
-        title: "Changes saved",
-        description: "Your resume has been updated successfully.",
-      });
-    } catch (error) {
-      toast({
-        title: "Save failed",
-        description: error instanceof Error ? error.message : "Unable to save your changes. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      dispatch({ type: 'SET_SAVING', value: false });
-    }
-  };
-
-  // Delete Resume
-  const handleDelete = async () => {
-    try {
-      dispatch({ type: 'SET_DELETING', value: true });
-      await deleteResume(state.resume.id);
-      toast({
-        title: "Resume deleted",
-        description: "Your resume has been permanently removed.",
-      });
-      router.push('/');
-    } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      dispatch({ type: 'SET_DELETING', value: false });
-    }
-  };
-
   // Track changes
   useEffect(() => {
     const hasChanges = JSON.stringify(state.resume) !== JSON.stringify(initialResume);
@@ -160,10 +117,6 @@ export function ResumeEditorClient({
       profile={profile}
       job={job}
       isLoadingJob={isLoadingJob}
-      isSaving={state.isSaving}
-      isDeleting={state.isDeleting}
-      onSave={handleSave}
-      onDelete={handleDelete}
       onResumeChange={updateField}
     />
   );

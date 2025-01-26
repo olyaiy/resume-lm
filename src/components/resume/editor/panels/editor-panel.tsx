@@ -46,11 +46,7 @@ interface EditorPanelProps {
   profile: Profile;
   job: Job | null;
   isLoadingJob: boolean;
-  isSaving: boolean;
-  isDeleting: boolean;
-  onSave: () => Promise<void>;
-  onDelete: () => Promise<void>;
-  onResumeChange: <K extends keyof Resume>(field: K, value: Resume[K]) => void;
+  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
 }
 
 export function EditorPanel({
@@ -58,10 +54,6 @@ export function EditorPanel({
   profile,
   job,
   isLoadingJob,
-  isSaving,
-  isDeleting,
-  onSave,
-  onDelete,
   onResumeChange,
 }: EditorPanelProps) {
   return (
@@ -78,14 +70,11 @@ export function EditorPanel({
                 ? "bg-purple-50/80"
                 : "bg-pink-100/90 shadow-sm shadow-pink-200/50"
             )}>
-              <ResumeEditorActions
-                resume={resume}
-                isSaving={isSaving}
-                isDeleting={isDeleting}
-                onSave={onSave}
-                onDelete={onDelete}
-                onResumeChange={onResumeChange}
-              />
+              <div className="flex flex-col gap-4">
+                <ResumeEditorActions
+                  onResumeChange={onResumeChange}
+                />
+              </div>
             </div>
 
             <Accordion type="single" collapsible defaultValue="basic" className="mt-6">

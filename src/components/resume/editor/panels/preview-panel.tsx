@@ -31,13 +31,13 @@ export function PreviewPanel({
     )}>
       <div className="relative" ref={previewPanelRef}>
         <div className=" ">
-          <ResumeContextMenu resume={resume}>
+          {/* <ResumeContextMenu resume={resume}> */}
             <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
-          </ResumeContextMenu>
+          {/* </ResumeContextMenu> */}
         </div>
       </div>
 
-      <CoverLetter 
+      {/* <CoverLetter 
         resumeId={resume.id} 
         hasCoverLetter={resume.has_cover_letter}
         coverLetterData={resume.cover_letter}
@@ -49,7 +49,7 @@ export function PreviewPanel({
             onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
           }
         }}
-      />
+      /> */}
 
       
     </ScrollArea>
