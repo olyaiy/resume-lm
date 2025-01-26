@@ -13,7 +13,7 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [StarterKit],
-    content: initialData.content as string || '<p>Start writing your cover letter...</p>',
+    content: initialData?.content as string || '<p>Start writing your cover letter...</p>',
     editorProps: {
       attributes: {
         class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl p-8 focus:outline-none h-full overflow-hidden',
@@ -22,11 +22,23 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
     onUpdate: ({ editor }) => {
       onChange?.({
         content: editor.getHTML(),
-        // Add any other metadata you want to track
         lastUpdated: new Date().toISOString(),
       });
     }
   })
+
+  // Update effect to handle partial updates
+  useEffect(() => {
+    if (editor && initialData?.content) {
+      const currentContent = editor.getHTML()
+      const newContent = initialData.content as string
+      
+      // Allow partial updates if new content is longer
+      if (newContent.length > currentContent.length || newContent !== currentContent) {
+        editor.commands.setContent(newContent)
+      }
+    }
+  }, [initialData?.content, editor])
 
   // Cleanup editor on unmount
   useEffect(() => {

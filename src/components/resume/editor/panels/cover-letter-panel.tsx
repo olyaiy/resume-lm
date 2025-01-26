@@ -72,9 +72,18 @@ export function CoverLetterPanel({
         apiKeys
       });
 
+      let generatedContent = '';
       for await (const delta of readStreamableValue(output)) {
-        setGeneration(current => `${current}${delta}`);
+        generatedContent += delta;
+        // Update both local state and resume context
+        setGeneration(generatedContent);
+        onResumeChange('cover_letter', {
+          content: generatedContent,
+          generated_at: new Date().toISOString(),
+          job_id: job.id
+        });
       }
+      
     } catch (error: Error | unknown) {
       if (error instanceof Error && (
           error.message.toLowerCase().includes('api key') || 

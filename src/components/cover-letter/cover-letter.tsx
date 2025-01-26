@@ -1,5 +1,7 @@
 import CoverLetterEditor from "./cover-letter-editor";
 import { Suspense } from 'react';
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface CoverLetterProps {
     resumeId: string;
@@ -18,8 +20,22 @@ export default function CoverLetter({
   // If no cover letter exists, render empty state
   if (!hasCoverLetter) {
     return (
-      <div className="p-4">
-        <p className="text-muted-foreground">No cover letter found for this resume</p>
+      <div className="space-y-4 pb-8">
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
+          onClick={() => onCoverLetterChange?.({
+            has_cover_letter: true,
+            cover_letter: {
+              content: '',
+              lastUpdated: new Date().toISOString()
+            }
+          })}
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create Cover Letter
+        </Button>
       </div>
     );
   }

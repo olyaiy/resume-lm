@@ -176,11 +176,11 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   // Show loading state while PDF is being generated
   if (!url) {
     return (
-      <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
+      <div className="w-full aspect-[8.5/11] bg-white shadow-lg p-8">
         <div className="space-y-0 animate-pulse">
           {/* Header skeleton */}
           <div className="space-y-4">
-            <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />
+            <div className="h-8 bg-gray-200  w-1/3 mx-auto" />
             <div className="flex justify-center gap-4">
               <div className="h-3 bg-gray-200 rounded w-24" />
               <div className="h-3 bg-gray-200 rounded w-24" />
@@ -240,10 +240,10 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
       <Document
         file={url}
         onLoadSuccess={onDocumentLoadSuccess}
-        className="relative w-full h-full"
+        className="relative w-full h-full "
         externalLinkTarget="_blank"
         loading={
-          <div className="w-full aspect-[8.5/11] bg-white rounded-xl shadow-lg p-8">
+          <div className="w-full aspect-[8.5/11] bg-white shadow-lg p-8">
             <div className="space-y-24 animate-pulse">
               {/* Header skeleton */}
               <div className="space-y-4">
@@ -304,7 +304,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
           <Page
             key={`page_${index + 1}`}
             pageNumber={index + 1}
-            className="mb-4 rounded-xl shadow-lg"
+            className="mb-4  shadow-lg"
             width={debouncedWidth}
             renderAnnotationLayer={true}
             renderTextLayer={true}

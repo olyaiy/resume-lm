@@ -24,7 +24,7 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
-      "h-full rounded-lg pb-[9rem]  z-50",
+      "h-full pb-[9rem]  z-50",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
@@ -40,7 +40,14 @@ export function PreviewPanel({
         resumeId={resume.id} 
         hasCoverLetter={resume.has_cover_letter}
         coverLetterData={resume.cover_letter}
-        onCoverLetterChange={(data) => onResumeChange('cover_letter', data)}
+        onCoverLetterChange={(data: Record<string, unknown>) => {
+          if ('has_cover_letter' in data) {
+            onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
+          }
+          if ('cover_letter' in data) {
+            onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
+          }
+        }}
       />
     </ScrollArea>
   );
