@@ -34,7 +34,7 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
       const newContent = initialData.content as string
       
       // Allow partial updates if new content is longer
-      if (newContent.length > currentContent.length || newContent !== currentContent) {
+      if (newContent !== currentContent) {
         editor.commands.setContent(newContent)
       }
     }

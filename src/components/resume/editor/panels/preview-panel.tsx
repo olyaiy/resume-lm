@@ -36,6 +36,7 @@ export function PreviewPanel({
           </ResumeContextMenu>
         </div>
       </div>
+
       <CoverLetter 
         resumeId={resume.id} 
         hasCoverLetter={resume.has_cover_letter}
@@ -49,6 +50,8 @@ export function PreviewPanel({
           }
         }}
       />
+
+      
     </ScrollArea>
   );
 } 

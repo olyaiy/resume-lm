@@ -57,6 +57,7 @@ export function CoverLetterPanel({
         console.error('Error parsing API keys:', error);
       }
 
+      
       const prompt = `Write a professional cover letter for the following job:
       ${JSON.stringify(job)}
       
@@ -73,18 +74,19 @@ export function CoverLetterPanel({
       });
 
       let generatedContent = '';
+      
       for await (const delta of readStreamableValue(output)) {
         generatedContent += delta;
         // Update both local state and resume context
         setGeneration(generatedContent);
         onResumeChange('cover_letter', {
           content: generatedContent,
-          generated_at: new Date().toISOString(),
-          job_id: job.id
         });
       }
       
+      
     } catch (error: Error | unknown) {
+      console.error('Generation error:', error);
       if (error instanceof Error && (
           error.message.toLowerCase().includes('api key') || 
           error.message.toLowerCase().includes('unauthorized') ||
@@ -121,11 +123,10 @@ export function CoverLetterPanel({
           </div>
         </AccordionTrigger>
         <AccordionContent className="px-4 pt-2 pb-4">
+
+          {/* Cover Letter */}
           {resume.has_cover_letter ? (
             <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-emerald-50/50 border border-emerald-200">
-                <p className="text-sm text-emerald-700">Cover letter has been created for this resume.</p>
-              </div>
 
               {/* Delete Cover Letter */}
               <Button
@@ -142,6 +143,8 @@ export function CoverLetterPanel({
               <TooltipProvider delayDuration={0}>
                 <Tooltip>
                   <TooltipTrigger asChild>
+
+                    {/* Generate Cover Letter Button */}
                     <Button
                       variant="default"
                       size="sm"
@@ -206,12 +209,6 @@ export function CoverLetterPanel({
                   "hover:shadow-xl hover:shadow-emerald-500/10",
                   "overflow-hidden"
                 )}>
-                  {/* Animated Background Pattern */}
-                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:24px_24px] opacity-10" />
-                  
-                  {/* Floating Gradient Orbs */}
-                  <div className="absolute -top-1/2 -right-1/2 w-full h-full rounded-full bg-gradient-to-br from-emerald-200/20 to-green-200/20 blur-3xl animate-float opacity-70" />
-                  <div className="absolute -bottom-1/2 -left-1/2 w-full h-full rounded-full bg-gradient-to-br from-green-200/20 to-emerald-200/20 blur-3xl animate-float-delayed opacity-70" />
                   
                   {/* Content */}
                   <div className="relative">
@@ -242,6 +239,7 @@ export function CoverLetterPanel({
               )}
             </div>
           ) : (
+            // No Cover Letter
             <div className="space-y-4">
               <div className="p-4 rounded-lg bg-muted/50 border border-muted">
                 <p className="text-sm text-muted-foreground">No cover letter has been created for this resume yet.</p>

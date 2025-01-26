@@ -92,6 +92,7 @@ export function ResumeEditorClient({
     dispatch({ type: 'UPDATE_FIELD', field, value });
   };
 
+  // Save Resume
   const handleSave = async () => {
     try {
       dispatch({ type: 'SET_SAVING', value: true });
@@ -111,6 +112,7 @@ export function ResumeEditorClient({
     }
   };
 
+  // Delete Resume
   const handleDelete = async () => {
     try {
       dispatch({ type: 'SET_DELETING', value: true });
@@ -151,6 +153,8 @@ export function ResumeEditorClient({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.hasUnsavedChanges]);
 
+
+  // Create Job
   const handleJobCreate = (jobId: string) => {
     // Update the resume with the new job ID
     const updatedResume = {
@@ -169,6 +173,7 @@ export function ResumeEditorClient({
     });
   };
 
+  // Editor Panel
   const editorPanel = (
     <EditorPanel
       resume={state.resume}
@@ -184,6 +189,7 @@ export function ResumeEditorClient({
     />
   );
 
+  // Preview Panel
   const previewPanel = (
     <PreviewPanel
       resume={debouncedResume}

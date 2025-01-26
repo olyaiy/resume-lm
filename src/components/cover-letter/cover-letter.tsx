@@ -2,6 +2,8 @@ import CoverLetterEditor from "./cover-letter-editor";
 import { Suspense } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useResumeContext } from '@/components/resume/editor/resume-editor-context';
+
 
 interface CoverLetterProps {
     resumeId: string;
@@ -10,13 +12,18 @@ interface CoverLetterProps {
     onCoverLetterChange?: (data: Record<string, unknown>) => void;
 }
 
-// Make this a regular component, not async
+
 export default function CoverLetter({ 
-  resumeId, 
-  hasCoverLetter, 
-  coverLetterData,
   onCoverLetterChange 
 }: CoverLetterProps) {
+
+  const { state } = useResumeContext();
+  const resumeId = state.resume.id;  // Access the resume ID from context
+  const hasCoverLetter = state.resume.has_cover_letter;
+  const coverLetterData = state.resume.cover_letter;
+
+
+
   // If no cover letter exists, render empty state
   if (!hasCoverLetter) {
     return (
@@ -40,6 +47,8 @@ export default function CoverLetter({
     );
   }
 
+
+  // If cover letter exists, render it
   return (
     <Suspense fallback={
       <div className="p-4 space-y-4 animate-pulse">
