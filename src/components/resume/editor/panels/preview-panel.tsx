@@ -13,12 +13,14 @@ interface PreviewPanelProps {
   resume: Resume;
   previewPanelRef: RefObject<HTMLDivElement | null>;
   previewPanelWidth: number;
+  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
 }
 
 export function PreviewPanel({
   resume,
   previewPanelRef,
-  previewPanelWidth
+  previewPanelWidth,
+  onResumeChange
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
@@ -35,9 +37,11 @@ export function PreviewPanel({
         </div>
       </div>
       <CoverLetter 
-          resumeId={resume.id} 
-          hasCoverLetter={resume.has_cover_letter} />
-          
+        resumeId={resume.id} 
+        hasCoverLetter={resume.has_cover_letter}
+        coverLetterData={resume.cover_letter}
+        onCoverLetterChange={(data) => onResumeChange('cover_letter', data)}
+      />
     </ScrollArea>
   );
 } 

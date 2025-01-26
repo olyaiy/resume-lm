@@ -4,16 +4,28 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import { useEffect } from 'react'
 
-function CoverLetterEditor() {
+interface CoverLetterEditorProps {
+  initialData: Record<string, unknown>;
+  onChange?: (data: Record<string, unknown>) => void;
+}
+
+function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [StarterKit],
-    content: '<p>Start writing your cover letter...</p>',
+    content: initialData.content as string || '<p>Start writing your cover letter...</p>',
     editorProps: {
-        attributes: {
-          class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl p-8 focus:outline-none  h-full bg-green-500 overflow-hidden',
-        },
+      attributes: {
+        class: 'prose prose-sm sm:prose-base lg:prose-lg xl:prose-2xl p-8 focus:outline-none h-full overflow-hidden',
       },
-    
+    },
+    onUpdate: ({ editor }) => {
+      onChange?.({
+        content: editor.getHTML(),
+        // Add any other metadata you want to track
+        lastUpdated: new Date().toISOString(),
+      });
+    }
   })
 
   // Cleanup editor on unmount

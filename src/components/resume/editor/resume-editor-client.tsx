@@ -189,6 +189,7 @@ export function ResumeEditorClient({
       resume={debouncedResume}
       previewPanelRef={previewPanelRef}
       previewPanelWidth={previewPanelWidth}
+      onResumeChange={updateField}
     />
   );
 
