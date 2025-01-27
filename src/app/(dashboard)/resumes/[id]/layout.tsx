@@ -9,7 +9,7 @@ export default function ResumeEditorLayout({
   return (
     <div className=" relative h-[calc(100vh-8rem)] overflow-hidden">
       {/* Background Layer */}
-      <BackgroundEffects />
+      {/* <BackgroundEffects /> */}
 
       {/* Content Layer */}
       <div className="relative z-10">

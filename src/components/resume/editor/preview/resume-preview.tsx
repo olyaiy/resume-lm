@@ -111,16 +111,8 @@ interface ResumePreviewProps {
 export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
   const [url, setUrl] = useState<string | null>(null);
   const [numPages, setNumPages] = useState<number>(0);
-  const debouncedWidth = useDebouncedValue(containerWidth, 50);
+  const debouncedWidth = useDebouncedValue(containerWidth, 100);
   
-  // Memoize the final width value if you need to pass it to expensive calculations
-  const memoizedWidth = useMemo(() => debouncedWidth, [debouncedWidth]);
-
-  // Log debounced width changes
-  useEffect(() => {
-    console.log('Debounced Preview Width:', memoizedWidth);
-  }, [memoizedWidth]);
-
   // Generate resume hash for caching
   const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
 
@@ -177,9 +169,20 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
     };
   }, [resumeHash, url]);
 
+  // Add state for text layer visibility
+  const [shouldRenderTextLayer, setShouldRenderTextLayer] = useState(false);
+
+  // Modify Page component to conditionally render text layer
   function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
     setNumPages(numPages);
+    // Enable text layer after document is stable
+    setTimeout(() => setShouldRenderTextLayer(true), 1000);
   }
+
+  // Disable text layer during updates
+  useEffect(() => {
+    setShouldRenderTextLayer(false);
+  }, [resumeHash, variant]);
 
   // Show loading state while PDF is being generated
   if (!url) {
@@ -248,7 +251,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-        className="relative w-full h-full "
+          className="relative w-full h-full "
           externalLinkTarget="_blank"
           loading={
             <div className="w-full aspect-[8.5/11] bg-white shadow-lg p-8">
@@ -312,10 +315,10 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
             <Page
               key={`page_${index + 1}`}
               pageNumber={index + 1}
-              className="mb-4  shadow-lg"
-              width={memoizedWidth}
+              className="mb-4 shadow-lg"
+              width={debouncedWidth}
               renderAnnotationLayer={true}
-              renderTextLayer={true}
+              renderTextLayer={shouldRenderTextLayer}
             />
           ))}
         </Document>

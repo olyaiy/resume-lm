@@ -4,13 +4,13 @@ import React from 'react';
 import { Resume, Profile, Job } from "@/lib/types";
 import { useState, useEffect, useReducer } from "react";
 import { useRouter } from "next/navigation";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { createClient } from "@/utils/supabase/client";
 import { EditorLayout } from "./layout/EditorLayout";
 import { EditorPanel } from './panels/editor-panel';
 import { PreviewPanel } from './panels/preview-panel';
+import { UnsavedChangesDialog } from './dialogs/unsaved-changes-dialog';
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -31,7 +31,7 @@ export function ResumeEditorClient({
 
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const debouncedResume = useDebouncedValue(state.resume, 500);
+  const debouncedResume = useDebouncedValue(state.resume, 100);
   const [job, setJob] = useState<Job | null>(null);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
 
@@ -112,32 +112,22 @@ export function ResumeEditorClient({
 
   return (
     <ResumeContext.Provider value={{ state, dispatch }}>
-      <AlertDialog open={showExitDialog} onOpenChange={setShowExitDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. Are you sure you want to leave? Your changes will be lost.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setShowExitDialog(false)}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => {
-                if (pendingNavigation) {
-                  router.push(pendingNavigation);
-                }
-                setShowExitDialog(false);
-                setPendingNavigation(null);
-              }}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Leave Without Saving
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
 
+      {/* Unsaved Changes Dialog */}
+      <UnsavedChangesDialog
+        isOpen={showExitDialog}
+        onOpenChange={setShowExitDialog}
+        pendingNavigation={pendingNavigation}
+        onConfirm={() => {
+          if (pendingNavigation) {
+            router.push(pendingNavigation);
+          }
+          setShowExitDialog(false);
+          setPendingNavigation(null);
+        }}
+      />
+
+      {/* Editor Layout */}
       <EditorLayout
         isBaseResume={state.resume.is_base_resume}
         editorPanel={editorPanel}

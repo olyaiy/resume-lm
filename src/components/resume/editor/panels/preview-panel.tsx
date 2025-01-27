@@ -20,7 +20,7 @@ export function PreviewPanel({
   const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
   const previewPanelRef = useRef<HTMLDivElement>(null);
 
-  // Track PDF preview initialization
+  // Track preview panel width for responsive scaling
   useEffect(() => {
     if (previewPanelRef.current) {
       const resizeObserver = new ResizeObserver((entries) => {
@@ -32,7 +32,12 @@ export function PreviewPanel({
       resizeObserver.observe(previewPanelRef.current);
       return () => resizeObserver.disconnect();
     }
-  }, []);
+  }, [previewPanelWidth]);
+
+  // Add logging to verify width updates
+  useEffect(() => {
+    console.log('Preview panel width changed:', previewPanelWidth);
+  });
 
   return (
     <ScrollArea className={cn(
@@ -49,7 +54,7 @@ export function PreviewPanel({
         </div>
       </div>
 
-      {/* <CoverLetter 
+      <CoverLetter 
         resumeId={resume.id} 
         hasCoverLetter={resume.has_cover_letter}
         coverLetterData={resume.cover_letter}
@@ -61,7 +66,7 @@ export function PreviewPanel({
             onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
           }
         }}
-      /> */}
+      />
     </ScrollArea>
   );
 } 
