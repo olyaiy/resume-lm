@@ -25,7 +25,7 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
+            <ToastClose className="absolute  bg-red-500 w-16 h-16" />
           </Toast>
         )
       })}

@@ -100,7 +100,19 @@ export default async function RootLayout({
           </main>
           <Footer />
         </div>
-        <Toaster richColors position="top-right" />
+        <Toaster 
+          richColors 
+          position="top-right" 
+          closeButton 
+          toastOptions={{
+            style: {
+              fontSize: '1rem',
+              padding: '16px',
+              minWidth: '400px',
+              maxWidth: '500px'
+            }
+          }}
+        />
       </body>
     </html>
   );

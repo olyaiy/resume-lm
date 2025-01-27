@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Suspense } from "react";
 import { cn } from "@/lib/utils";
 import { ResumeEditorActions } from "../actions/resume-editor-actions";
-import { TailoredJobCard } from "../../management/cards/tailored-job-card";
+import { TailoredJobCard, TailoredJobAccordion } from "../../management/cards/tailored-job-card";
 import { BasicInfoForm } from "../forms/basic-info-form";
 import ChatBot from "../../assistant/chatbot";
 import { CoverLetterPanel } from "./cover-letter-panel";
@@ -79,24 +79,11 @@ export function EditorPanel({
 
             <Accordion type="single" collapsible defaultValue="basic" className="mt-6">
               {/* Tailored Job Section */}
-              {!resume.is_base_resume && (
-                <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-pink-600/50 border-2">
-                  <AccordionHeader
-                    icon={BriefcaseIcon}
-                    label="Target Job"
-                    iconColor="text-pink-600"
-                    bgColor="bg-pink-100/80"
-                    textColor="text-pink-900"
-                  />
-                  <AccordionContent className="px-4 pt-2 pb-4">
-                    <TailoredJobCard 
-                      jobId={resume.job_id || null}
-                      job={job}
-                      isLoading={isLoadingJob}
-                    />
-                  </AccordionContent>
-                </AccordionItem>
-              )}
+              <TailoredJobAccordion
+                resume={resume}
+                job={job}
+                isLoading={isLoadingJob}
+              />
 
               {/* Basic Info */}
               <AccordionItem value="basic" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-purple-600/50 border-2">

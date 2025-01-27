@@ -132,6 +132,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           certifications: [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
+          has_cover_letter: false,
         };
 
         // Get model and API key from local storage

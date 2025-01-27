@@ -5,6 +5,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ResumePreview } from "../preview/resume-preview";
 import CoverLetter from "@/components/cover-letter/cover-letter";
+import { ResumeContextMenu } from "../preview/resume-context-menu";
 
 interface PreviewPanelProps {
   resume: Resume;
@@ -25,9 +26,9 @@ export function PreviewPanel({
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
       <div className="relative">
-        <div>
+      <ResumeContextMenu resume={resume}>
           <ResumePreview resume={resume} containerWidth={width} />
-        </div>
+        </ResumeContextMenu>
       </div>
 
       <CoverLetter 

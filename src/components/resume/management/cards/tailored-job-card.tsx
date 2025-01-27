@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles, AlertCircle } from "lucide-react";
+import { Building2, MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles, AlertCircle, LucideIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
-import { Job } from "@/lib/types";
+import { Job, Resume } from "@/lib/types";
 import { createClient } from "@/utils/supabase/client";
 import { createJob, deleteJob, updateResume } from "@/utils/actions";
 import { Button } from "@/components/ui/button";
@@ -17,6 +17,8 @@ import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../../editor/resume-editor-context";
+import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { BriefcaseIcon } from "lucide-react";
 
 interface TailoredJobCardProps {
   jobId: string | null;
@@ -437,14 +439,7 @@ export function TailoredJobCard({
       "transition-all duration-500 ease-out",
       "hover:shadow-lg hover:shadow-pink-500/10"
     )}>
-      {/* Animated background elements */}
-      <div className="absolute inset-0 bg-gradient-to-br from-pink-500/5 via-rose-500/5 to-red-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,192,203,0.1),transparent_70%)]" />
-      
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-400/10 via-rose-400/10 to-red-400/10 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-rose-400/10 via-pink-400/10 to-red-400/10 blur-3xl rounded-full -translate-x-1/3 translate-y-1/3" />
-      
+
       <div className="relative">
         <AnimatePresence mode="wait">
           {effectiveIsLoading ? (
@@ -458,42 +453,6 @@ export function TailoredJobCard({
               transition={{ duration: 0.3 }}
               className="p-4 space-y-6"
             >
-              {/* Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <Building2 className="w-3.5 h-3.5 text-pink-500 flex-shrink-0" />
-                    <span className="font-medium truncate text-sm text-gray-600 group-hover:text-pink-700 transition-colors duration-300">
-                      {effectiveJob.company_name}
-                    </span>
-                  </div>
-                  <h3 className="text-sm font-semibold bg-gradient-to-r from-pink-700 to-rose-700 bg-clip-text text-transparent truncate mt-0.5">
-                    {effectiveJob.position_title}
-                  </h3>
-                </div>
-
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={handleDelete}
-                  disabled={isDeleting}
-                  className={cn(
-                    "h-6 w-6",
-                    "text-gray-400",
-                    "hover:text-red-500",
-                    "hover:bg-red-50/50",
-                    "transition-all duration-300",
-                    "rounded-lg"
-                  )}
-                >
-                  {isDeleting ? (
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                  ) : (
-                    <Trash2 className="h-3 w-3" />
-                  )}
-                </Button>
-              </div>
-
               {/* Job Details Grid */}
               <div className="grid grid-cols-2 gap-x-6 gap-y-3">
                 {[
@@ -563,5 +522,118 @@ export function TailoredJobCard({
         </AnimatePresence>
       </div>
     </Card>
+  );
+}
+
+interface TailoredJobAccordionProps {
+  resume: Resume;
+  job: Job | null;
+  isLoading?: boolean;
+}
+
+export function TailoredJobAccordion({
+  resume,
+  job,
+  isLoading
+}: TailoredJobAccordionProps) {
+  if (resume.is_base_resume) return null;
+
+  const title = job?.position_title || "Target Job";
+  const company = job?.company_name;
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
+
+  const handleDelete = async () => {
+    if (!resume.job_id) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteJob(resume.job_id);
+      router.refresh();
+    } catch (error) {
+      console.error('Error deleting job:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete job",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  return (
+    <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-pink-600/50 border-2">
+      <div className="px-4 py-2">
+        <AccordionTrigger className="hover:no-underline group">
+          <div className="flex items-center gap-2">
+            <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", "bg-pink-100/80")}>
+              <BriefcaseIcon className={cn("h-3.5 w-3.5", "text-pink-600")} />
+            </div>
+            <div className="flex flex-col items-start">
+              <span className={cn("text-sm font-medium", "text-pink-900")}>{title}</span>
+              {company && (
+                <span className="text-xs text-pink-600/80">{company}</span>
+              )}
+            </div>
+          </div>
+        </AccordionTrigger>
+      </div>
+      <AccordionContent className="px-4 pt-2 pb-4">
+        <div className="space-y-4">
+          <TailoredJobCard 
+            jobId={resume.job_id || null}
+            job={job}
+            isLoading={isLoading}
+          />
+          {job && (
+            <div className="flex justify-end">
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={handleDelete}
+                disabled={isDeleting}
+                className={cn(
+                  "text-gray-400",
+                  "hover:text-red-500",
+                  "hover:bg-red-50/50",
+                  "transition-all duration-300",
+                  "rounded-lg",
+                  "gap-2"
+                )}
+              >
+                {isDeleting ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Trash2 className="h-3.5 w-3.5" />
+                )}
+                Delete Job
+              </Button>
+            </div>
+          )}
+        </div>
+      </AccordionContent>
+    </AccordionItem>
+  );
+}
+
+interface AccordionHeaderProps {
+  icon: LucideIcon;
+  label: string;
+  iconColor: string;
+  bgColor: string;
+  textColor: string;
+}
+
+function AccordionHeader({ icon: Icon, label, iconColor, bgColor, textColor }: AccordionHeaderProps) {
+  return (
+    <AccordionTrigger className="px-4 py-2 hover:no-underline group">
+      <div className="flex items-center gap-2">
+        <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", bgColor)}>
+          <Icon className={cn("h-3.5 w-3.5", iconColor)} />
+        </div>
+        <span className={cn("text-sm font-medium", textColor)}>{label}</span>
+      </div>
+    </AccordionTrigger>
   );
 } 

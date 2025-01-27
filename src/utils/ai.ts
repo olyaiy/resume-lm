@@ -67,12 +67,17 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
             Perform the analysis as described in each TASK below.
             Return your final output in a structured format (e.g., JSON or the prescribed schema), using the exact field names you have been given.
             Do not guess or fabricate information that is not present in the listing; instead, return an empty string for missing fields.
-            Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.`,
+            Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.
+            
+            For the description field, always include 3-5 bullet points highlighting the most important responsibilities of the role.
+            Format these bullet points using markdown, with each point on a new line starting with "• ". These should be the most
+            critical duties mentioned in the job listing, not general requirements or nice-to-haves.`,
   
     prompt: `Analyze this job listing carefully and extract structured information.
 
               TASK 1 - ESSENTIAL INFORMATION:
               Extract the basic details (company, position, URL, location, salary).
+              For the description, include 3-5 key responsibilities as bullet points.
 
               TASK 2 - KEYWORD ANALYSIS:
               1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
@@ -85,6 +90,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
               - Keywords as they are (e.g., "React.js" → "React.js")
               - Skills are deduplicated and categorized
               - Seniority level is inferred from context
+              - Description contains 3-5 bullet points of key responsibilities
               Usage Notes:
 
               - If certain details (like salary or location) are missing, return "" (an empty string).
@@ -93,12 +99,8 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
               - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
               Job Listing Text: ${jobListing}`,});
 
-    // console.log('Formatted Job Listing Response:');
-    // console.dir({
-    //   input: jobListing,
-    //   output: object.content
-    // }, { depth: null });
 
+              
     return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);
