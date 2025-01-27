@@ -10,11 +10,13 @@ interface CoverLetterProps {
     hasCoverLetter: boolean;
     coverLetterData?: Record<string, unknown> | null;
     onCoverLetterChange?: (data: Record<string, unknown>) => void;
+    containerWidth: number;
 }
 
 
 export default function CoverLetter({ 
-  onCoverLetterChange 
+  onCoverLetterChange,
+  containerWidth 
 }: CoverLetterProps) {
 
   const { state } = useResumeContext();
@@ -59,6 +61,7 @@ export default function CoverLetter({
       <CoverLetterEditor 
         initialData={coverLetterData || {}}
         onChange={onCoverLetterChange}
+        containerWidth={containerWidth}
       />
     </Suspense>
   );

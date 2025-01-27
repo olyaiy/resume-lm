@@ -26,9 +26,14 @@ import { Separator } from '@/components/ui/separator'
 interface CoverLetterEditorProps {
   initialData: Record<string, unknown>;
   onChange?: (data: Record<string, unknown>) => void;
+  containerWidth: number;
 }
 
-function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
+function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLetterEditorProps) {
+  // Calculate scale based on container width
+  // 816 is our base width for a letter size paper (8.5 inches * 96 DPI)
+  const scale = containerWidth / 60;
+
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -207,11 +212,20 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
         className="relative pb-[129.41%]" // 11/8.5 = 1.2941
         style={{ aspectRatio: '8.5 / 11' }}
       >
-        <div className="absolute inset-0 p-8">
-          <EditorContent 
-            editor={editor} 
-            className="h-full focus:outline-none prose prose-xxs max-w-none "
-          />
+        <div 
+          className="absolute inset-0 origin-top-left"
+          style={{
+            transform: `scale(${scale})`,
+            width: `${(100 / scale)}%`,
+            height: `${(100 / scale)}%`,
+          }}
+        >
+          <div className="absolute inset-0 p-8">
+            <EditorContent 
+              editor={editor} 
+              className="h-full focus:outline-none prose prose-xxs max-w-none"
+            />
+          </div>
         </div>
       </div>
     </div>

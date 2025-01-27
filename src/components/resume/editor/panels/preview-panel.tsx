@@ -35,6 +35,7 @@ export function PreviewPanel({
         resumeId={resume.id} 
         hasCoverLetter={resume.has_cover_letter}
         coverLetterData={resume.cover_letter}
+        containerWidth={width}
         onCoverLetterChange={(data: Record<string, unknown>) => {
           if ('has_cover_letter' in data) {
             onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
