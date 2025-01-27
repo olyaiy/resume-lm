@@ -3,54 +3,30 @@
 import { Resume } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { ResumeContextMenu } from "../preview/resume-context-menu";
 import { ResumePreview } from "../preview/resume-preview";
-import { useRef, useState, useEffect } from "react";
 import CoverLetter from "@/components/cover-letter/cover-letter";
 
 interface PreviewPanelProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
+  width: number;
 }
 
 export function PreviewPanel({
   resume,
-  onResumeChange
+  onResumeChange,
+  width
 }: PreviewPanelProps) {
-  const [previewPanelWidth, setPreviewPanelWidth] = useState(0);
-  const previewPanelRef = useRef<HTMLDivElement>(null);
-
-  // Track preview panel width for responsive scaling
-  useEffect(() => {
-    if (previewPanelRef.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          setPreviewPanelWidth(entry.contentRect.width);
-        }
-      });
-
-      resizeObserver.observe(previewPanelRef.current);
-      return () => resizeObserver.disconnect();
-    }
-  }, [previewPanelWidth]);
-
-  // Add logging to verify width updates
-  useEffect(() => {
-    console.log('Preview panel width changed:', previewPanelWidth);
-  });
-
   return (
     <ScrollArea className={cn(
-      "h-full pb-[9rem]  z-50",
+      "h-full pb-[9rem] z-50",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
-      <div className="relative" ref={previewPanelRef}>
-        <div className=" ">
-          {/* <ResumeContextMenu resume={resume}> */}
-            <ResumePreview resume={resume} containerWidth={previewPanelWidth} />
-          {/* </ResumeContextMenu> */}
+      <div className="relative">
+        <div>
+          <ResumePreview resume={resume} containerWidth={width} />
         </div>
       </div>
 

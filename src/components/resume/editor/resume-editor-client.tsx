@@ -103,16 +103,16 @@ export function ResumeEditorClient({
   );
 
   // Preview Panel
-  const previewPanel = (
+  const previewPanel = (width: number) => (
     <PreviewPanel
       resume={debouncedResume}
       onResumeChange={updateField}
+      width={width}
     />
   );
 
   return (
     <ResumeContext.Provider value={{ state, dispatch }}>
-
       {/* Unsaved Changes Dialog */}
       <UnsavedChangesDialog
         isOpen={showExitDialog}

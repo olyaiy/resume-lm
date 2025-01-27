@@ -345,6 +345,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       fontSize: document_font_size,
       lineHeight: document_line_height,
       position: 'relative',
+      // backgroundColor: '#32a852',  // Bright green color that should be very visible for testing
     },
     header: {
       alignItems: 'center',

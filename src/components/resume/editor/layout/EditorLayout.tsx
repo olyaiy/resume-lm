@@ -5,7 +5,7 @@ import { ResizablePanels } from "./ResizablePanels";
 interface EditorLayoutProps {
   isBaseResume: boolean;
   editorPanel: ReactNode;
-  previewPanel: ReactNode;
+  previewPanel: (width: number) => ReactNode;
 }
 
 export function EditorLayout({

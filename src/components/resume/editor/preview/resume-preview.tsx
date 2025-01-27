@@ -10,7 +10,7 @@
 
 import { Resume } from "@/lib/types";
 import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect, memo, useMemo } from 'react';
+import { useState, useEffect, memo, useMemo, useCallback } from 'react';
 import { pdf } from '@react-pdf/renderer';
 import { ResumePDFDocument } from './resume-pdf-document';
 import { useDebouncedValue } from '@/hooks/use-debounced-value';
@@ -99,7 +99,7 @@ const customStyles = `
 interface ResumePreviewProps {
   resume: Resume;
   variant?: 'base' | 'tailored';
-  containerWidth?: number;
+  containerWidth: number;  // This is now expected to be a percentage (0-100)
 }
 
 /**
@@ -113,6 +113,22 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
   
+  // Add useEffect hooks to log width changes
+  useEffect(() => {
+    console.log('Container width percentage:', containerWidth + '%');
+  }, [containerWidth]);
+
+  useEffect(() => {
+    console.log('Debounced width percentage:', debouncedWidth + '%');
+  }, [debouncedWidth]);
+
+  // Convert percentage to pixels based on parent container
+  const getPixelWidth = useCallback(() => {
+    if (typeof window === 'undefined') return 0;
+    const parentWidth = window.innerWidth;
+    return (parentWidth * (debouncedWidth / 100));
+  }, [debouncedWidth]);
+
   // Generate resume hash for caching
   const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
 
@@ -247,14 +263,14 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
 
   // Display the generated PDF using react-pdf
   return (
-    <div className="w-full h-full relative">
+    <div className="w-full h-full relative ">
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-          className="relative w-full h-full "
+          className="relative h-full w-full "
           externalLinkTarget="_blank"
           loading={
-            <div className="w-full aspect-[8.5/11] bg-white shadow-lg p-8">
+            <div className="w-full aspect-[8.5/11] bg-white  p-8">
               <div className="space-y-24 animate-pulse">
                 {/* Header skeleton */}
                 <div className="space-y-4">
@@ -315,8 +331,8 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
             <Page
               key={`page_${index + 1}`}
               pageNumber={index + 1}
-              className="mb-4 shadow-lg"
-              width={debouncedWidth}
+              className="mb-4 shadow-xl  "
+              width={getPixelWidth()}
               renderAnnotationLayer={true}
               renderTextLayer={shouldRenderTextLayer}
             />

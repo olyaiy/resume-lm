@@ -1,11 +1,11 @@
 import { cn } from "@/lib/utils";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 interface ResizablePanelsProps {
   isBaseResume: boolean;
   editorPanel: ReactNode;
-  previewPanel: ReactNode;
+  previewPanel: (width: number) => ReactNode;
 }
 
 export function ResizablePanels({
@@ -13,6 +13,8 @@ export function ResizablePanels({
   editorPanel,
   previewPanel
 }: ResizablePanelsProps) {
+  const [previewSize, setPreviewSize] = useState(60);
+
   return (
     <ResizablePanelGroup
       direction="horizontal"
@@ -39,8 +41,23 @@ export function ResizablePanels({
       />
 
       {/* Preview Panel */}
-      <ResizablePanel defaultSize={60} minSize={30} maxSize={70}>
-        {previewPanel}
+      <ResizablePanel 
+        defaultSize={60} 
+        minSize={30} 
+        maxSize={70}
+        onResize={(size) => {
+          setPreviewSize(size);
+          console.log(size);
+          console.log(previewSize);
+        }}
+        className={cn(
+          "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)]",
+          isBaseResume
+            ? "shadow-purple-200/50"
+            : "shadow-pink-200/50"
+        )}
+      >
+        {previewPanel(previewSize * 0.92)}
       </ResizablePanel>
     </ResizablePanelGroup>
   );
