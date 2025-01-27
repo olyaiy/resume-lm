@@ -33,9 +33,6 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
     immediatelyRender: false,
     extensions: [
       StarterKit,
-      Bold,
-      Italic,
-      Strike,
       Underline,
       TextAlign.configure({
         types: ['heading', 'paragraph'],
@@ -77,7 +74,7 @@ function CoverLetterEditor({ initialData, onChange }: CoverLetterEditorProps) {
   }, [editor])
 
   return (
-    <div className="relative w-full max-w-[816px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden">
+    <div className="relative w-full max-w-[816px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden mb-12">
       {editor && (
         <BubbleMenu 
           editor={editor} 

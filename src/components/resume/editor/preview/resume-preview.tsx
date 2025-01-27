@@ -113,14 +113,6 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   const [numPages, setNumPages] = useState<number>(0);
   const debouncedWidth = useDebouncedValue(containerWidth, 100);
   
-  // Add useEffect hooks to log width changes
-  useEffect(() => {
-    console.log('Container width percentage:', containerWidth + '%');
-  }, [containerWidth]);
-
-  useEffect(() => {
-    console.log('Debounced width percentage:', debouncedWidth + '%');
-  }, [debouncedWidth]);
 
   // Convert percentage to pixels based on parent container
   const getPixelWidth = useCallback(() => {

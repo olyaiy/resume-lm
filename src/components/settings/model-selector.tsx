@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 import { toast } from "sonner"
 import { ServiceName } from "@/lib/types"
 import { Sparkles } from "lucide-react"
+import Image from 'next/image'
 
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
@@ -22,30 +23,62 @@ interface AIModel {
   shortName: string
 }
 
+// Update image imports to use string paths
+const MODEL_ICONS = {
+  anthropic: '/claude.webp',
+  openai: '/chatgpt.png',
+  deepseek: '/deepseek.png',
+} as const
+
+// Add ModelIcon component at the top of the file
+function ModelIcon({ provider, size = 24 }: { provider: ServiceName; size?: number }) {
+  return (
+    <Image
+      src={MODEL_ICONS[provider]}
+      alt={provider}
+      width={size}
+      height={size}
+      className="object-contain"
+      quality={100}
+      priority
+      style={{
+        imageRendering: 'crisp-edges',
+        WebkitFontSmoothing: 'antialiased',
+      }}
+    />
+  )
+}
+
 const AI_MODELS: AIModel[] = [
   { 
     id: 'claude-3-sonnet-20240229', 
     name: 'Claude 3.5 Sonnet (Recommended)', 
     shortName: 'Sonnet 3.5',
-    provider: 'anthropic' 
+    provider: 'anthropic'
+  },
+  { 
+    id: 'claude-3-5-haiku-20241022', 
+    name: 'Claude 3.5 Haiku', 
+    shortName: 'Haiku 3.5',
+    provider: 'anthropic'
   },
   { 
     id: 'gpt-4o', 
     name: 'GPT-4o', 
     shortName: 'GPT 4o',
-    provider: 'openai' 
+    provider: 'openai'
   },
   { 
     id: 'gpt-4o-mini', 
     name: 'GPT-4o Mini', 
     shortName: 'GPT 4o mini',
-    provider: 'openai' 
+    provider: 'openai'
   },
   { 
     id: 'deepseek-chat', 
     name: 'DeepSeek Chat', 
     shortName: 'DeepSeek V3',
-    provider: 'deepseek' 
+    provider: 'deepseek'
   },
 ]
 
@@ -141,7 +174,9 @@ export function ModelSelector() {
           className="h-7 px-2 text-xs border-none bg-transparent hover:bg-purple-500/5 transition-colors"
         >
           <div className="flex items-center gap-1">
-            <Sparkles className="h-3 w-3 text-purple-500" />
+            {selectedModel && (
+              <ModelIcon provider={selectedModel.provider} size={20} />
+            )}
             <span className="text-purple-600">
               {selectedModel?.shortName || "No Model Available"}
             </span>
@@ -155,10 +190,13 @@ export function ModelSelector() {
               disabled={!isModelSelectable(model.id)}
               className="text-xs"
             >
-              {model.name}
-              {!isModelSelectable(model.id) && (
-                <span className="ml-1 text-muted-foreground">(No API Key)</span>
-              )}
+              <div className="flex items-center gap-2">
+                <ModelIcon provider={model.provider} size={20} />
+                <span>{model.name}</span>
+                {!isModelSelectable(model.id) && (
+                  <span className="ml-1 text-muted-foreground">(No API Key)</span>
+                )}
+              </div>
             </SelectItem>
           ))}
         </SelectContent>

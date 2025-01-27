@@ -47,8 +47,6 @@ export function ResizablePanels({
         maxSize={70}
         onResize={(size) => {
           setPreviewSize(size);
-          console.log(size);
-          console.log(previewSize);
         }}
         className={cn(
           "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)]",
