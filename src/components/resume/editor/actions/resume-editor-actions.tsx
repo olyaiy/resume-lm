@@ -11,6 +11,9 @@ import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
 import { useRouter } from "next/navigation";
 import { updateResume, deleteResume } from "@/utils/actions";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useState } from "react";
 
 interface ResumeEditorActionsProps {
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
@@ -22,6 +25,10 @@ export function ResumeEditorActions({
   const { state, dispatch } = useResumeContext();
   const router = useRouter();
   const { resume, isSaving } = state;
+  const [downloadOptions, setDownloadOptions] = useState({
+    resume: true,
+    coverLetter: true
+  });
 
   // Save Resume
   const handleSave = async () => {
@@ -120,36 +127,85 @@ export function ResumeEditorActions({
         />
 
         {/* Download Button */}
-        <Button 
-          onClick={async () => {
-            try {
-              const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
-              const url = URL.createObjectURL(blob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
-              document.body.appendChild(link);
-              link.click();
-              document.body.removeChild(link);
-              URL.revokeObjectURL(url);
-              toast({
-                title: "Download started",
-                description: "Your resume PDF is being downloaded.",
-              });
-            } catch (error) {
-              console.error(error);
-              toast({
-                title: "Download failed",
-                description: "Unable to download your resume. Please try again.",
-                variant: "destructive",
-              });
-            }
-          }}
-          className={actionButtonClasses}
-        >
-          <Download className="mr-1.5 h-3.5 w-3.5" />
-          Download
-        </Button>
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button 
+                onClick={async () => {
+                  try {
+                    const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    toast({
+                      title: "Download started",
+                      description: "Your resume PDF is being downloaded.",
+                    });
+                  } catch (error) {
+                    console.error(error);
+                    toast({
+                      title: "Download failed",
+                      description: "Unable to download your resume. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+                className={actionButtonClasses}
+              >
+                <Download className="mr-1.5 h-3.5 w-3.5" />
+                Download
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent 
+              side="bottom" 
+              align="start"
+              sideOffset={5}
+              className={cn(
+                "w-48 p-3",
+                resume.is_base_resume 
+                  ? "bg-indigo-50 border-2 border-indigo-200"
+                  : "bg-rose-50 border-2 border-rose-200",
+                "rounded-lg shadow-lg"
+              )}
+            >
+              <div className="space-y-3">
+                <label className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={downloadOptions.resume}
+                    onCheckedChange={(checked) => 
+                      setDownloadOptions(prev => ({ ...prev, resume: checked as boolean }))
+                    }
+                    className={cn(
+                      resume.is_base_resume 
+                        ? "border-indigo-400 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                        : "border-rose-400 data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
+                    )}
+                  />
+                  <span className="text-sm font-medium text-foreground">Resume</span>
+                </label>
+                <label className="flex items-center space-x-2">
+                  <Checkbox 
+                    checked={downloadOptions.coverLetter}
+                    onCheckedChange={(checked) => 
+                      setDownloadOptions(prev => ({ ...prev, coverLetter: checked as boolean }))
+                    }
+                    className={cn(
+                      resume.is_base_resume 
+                        ? "border-indigo-400 data-[state=checked]:bg-indigo-600 data-[state=checked]:border-indigo-600"
+                        : "border-rose-400 data-[state=checked]:bg-rose-600 data-[state=checked]:border-rose-600"
+                    )}
+                  />
+                  <span className="text-sm font-medium text-foreground">Cover Letter</span>
+                </label>
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
 
         {/* Save Button */}
         <Button 

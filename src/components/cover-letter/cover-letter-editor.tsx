@@ -79,12 +79,12 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
   }, [editor])
 
   return (
-    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg rounded-lg overflow-hidden mb-12 bg-white">
+    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg rounded-lg overflow-hidden mb-12 ">
       {editor && (
         <BubbleMenu 
           editor={editor} 
           tippyOptions={{ duration: 100 }}
-          className="flex overflow-hidden rounded-lg border border-gray-200 bg-white shadow-md"
+          className="flex overflow-hidden rounded-lg border border-gray-300 border-2 bg-white shadow-xl"
         >
           {/* Text Style */}
           <div className="flex items-center">
@@ -209,7 +209,7 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
         </BubbleMenu>
       )}
       <div 
-        className="relative pb-[129.41%] bg-white" // 11/8.5 = 1.2941
+        className="relative pb-[129.41%] " // 11/8.5 = 1.2941
         style={{ aspectRatio: '8.5 / 11' }}
       >
         <div 
@@ -220,7 +220,7 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
             height: `${(100 / scale)}%`,
           }}
         >
-          <div className="absolute inset-0 p-16 ">
+          <div className="absolute inset-0 my-12 mx-16 overflow-hidden ">
             <EditorContent 
               editor={editor} 
               className="h-full focus:outline-none prose prose-xxs max-w-none flex flex-col "
