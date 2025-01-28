@@ -266,6 +266,13 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
 
   // Reset form and initialize selected items when dialog opens
   const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen) {
+      // Move focus back to the trigger when closing
+      const trigger = document.querySelector('[data-state="open"]');
+      if (trigger) {
+        (trigger as HTMLElement).focus();
+      }
+    }
     setOpen(newOpen);
     if (newOpen) {
       setTargetRole('');

@@ -32,7 +32,7 @@ interface CoverLetterEditorProps {
 function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLetterEditorProps) {
   // Calculate scale based on container width
   // 816 is our base width for a letter size paper (8.5 inches * 96 DPI)
-  const scale = containerWidth / 60;
+  const scale = containerWidth / 816;
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -47,7 +47,7 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
     content: initialData?.content as string || '<p>Start writing your cover letter...</p>',
     editorProps: {
       attributes: {
-        class: 'prose prose-xxs focus:outline-none h-full overflow-none max-w-none text-black',
+        class: 'prose prose-xxs focus:outline-none h-full overflow-none max-w-none text-black ',
       },
     },
     onUpdate: ({ editor }) => {
@@ -79,7 +79,7 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
   }, [editor])
 
   return (
-    <div className="relative w-full max-w-[816px] mx-auto bg-white shadow-lg rounded-lg overflow-hidden mb-12">
+    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg rounded-lg overflow-hidden mb-12 bg-white">
       {editor && (
         <BubbleMenu 
           editor={editor} 
@@ -209,21 +209,21 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
         </BubbleMenu>
       )}
       <div 
-        className="relative pb-[129.41%]" // 11/8.5 = 1.2941
+        className="relative pb-[129.41%] bg-white" // 11/8.5 = 1.2941
         style={{ aspectRatio: '8.5 / 11' }}
       >
         <div 
-          className="absolute inset-0 origin-top-left"
+          className="absolute inset-0 origin-top-left  h-ful;l"
           style={{
             transform: `scale(${scale})`,
             width: `${(100 / scale)}%`,
             height: `${(100 / scale)}%`,
           }}
         >
-          <div className="absolute inset-0 p-16">
+          <div className="absolute inset-0 p-16 ">
             <EditorContent 
               editor={editor} 
-              className="h-full focus:outline-none prose prose-xxs max-w-none flex flex-col"
+              className="h-full focus:outline-none prose prose-xxs max-w-none flex flex-col "
             />
           </div>
         </div>

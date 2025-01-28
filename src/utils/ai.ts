@@ -105,8 +105,6 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
                - Format these bullet points using markdown, with each point on a new line starting with "• "
                - These should be the most critical duties mentioned in the job listing
             2. After the bullet points, include the full job description stripped of:
-               - Equal opportunity statements
-               - Application instructions
                - Any non-job-related content
             3. Format the full description as a clean paragraph, maintaining proper grammar and flow.`,
             

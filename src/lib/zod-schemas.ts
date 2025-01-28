@@ -200,7 +200,7 @@ export const jobSchema = z.object({
   employment_type: z.preprocess(
     (val) => val === null || val === '' ? 'full_time' : val,
     z.enum(['full_time', 'part_time', 'co_op', 'internship', 'contract']).default('full_time')
-  ),
+  ).optional(),
   is_active: z.boolean().default(true),
 });
 
@@ -219,7 +219,7 @@ export const simplifiedJobSchema = z.object({
     employment_type: z.preprocess(
       (val) => val === null || val === '' ? 'full_time' : val,
       z.enum(['full_time', 'part_time', 'co_op', 'internship', 'contract'])
-    ),
+    ).optional(),
     is_active: z.boolean().default(true).optional(),
   });
   

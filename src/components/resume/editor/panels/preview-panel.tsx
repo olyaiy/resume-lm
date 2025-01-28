@@ -11,6 +11,7 @@ interface PreviewPanelProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
   width: number;
+  // percentWidth: number;
 }
 
 export function PreviewPanel({
