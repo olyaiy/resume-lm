@@ -93,13 +93,8 @@ export default function CoverLetter({
 
   // If cover letter exists, render it
   return (
-    <div className="space-y-4">
-      <Suspense fallback={
-        <div className="p-4 space-y-4 animate-pulse">
-          <div className="h-8 bg-muted rounded-md w-1/3" />
-          <div className="h-64 bg-muted rounded-md" />
-        </div>
-      }>
+    <div className="">
+      
         <div ref={contentRef}>
           <CoverLetterEditor 
             initialData={coverLetterData || {}}
@@ -116,7 +111,6 @@ export default function CoverLetter({
           <Download className="h-4 w-4 mr-2" />
           Export as PDF
         </Button>
-      </Suspense>
     </div>
   );
 }

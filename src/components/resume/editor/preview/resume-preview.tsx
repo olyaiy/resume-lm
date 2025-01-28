@@ -118,7 +118,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   const getPixelWidth = useCallback(() => {
     if (typeof window === 'undefined') return 0;
     const parentWidth = window.innerWidth;
-    return (parentWidth * (debouncedWidth / 100));
+    return (parentWidth * (debouncedWidth / 140));
   }, [debouncedWidth]);
 
   // Generate resume hash for caching
