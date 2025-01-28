@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Sparkles, Star, Trophy, Rocket, Clock, Zap } from "lucide-react"
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -64,6 +63,7 @@ export function SubscriptionSection({
       }
     } catch (error) {
       // Handle error silently
+      void error
     } finally {
       setIsLoading(false);
     }

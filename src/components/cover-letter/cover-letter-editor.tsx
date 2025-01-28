@@ -220,10 +220,10 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
             height: `${(100 / scale)}%`,
           }}
         >
-          <div className="absolute inset-0 p-8">
+          <div className="absolute inset-0 p-16">
             <EditorContent 
               editor={editor} 
-              className="h-full focus:outline-none prose prose-xxs max-w-none"
+              className="h-full focus:outline-none prose prose-xxs max-w-none flex flex-col"
             />
           </div>
         </div>

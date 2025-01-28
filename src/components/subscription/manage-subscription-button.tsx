@@ -12,6 +12,7 @@ export default function ManageSubscriptionButton() {
       }
     } catch (error) {
       // Handle error silently
+      void error
     }
   };
 

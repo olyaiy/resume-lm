@@ -4,7 +4,6 @@ import { useState, useEffect } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/ui/select"
 import { toast } from "sonner"
 import { ServiceName } from "@/lib/types"
-import { Sparkles } from "lucide-react"
 import Image from 'next/image'
 
 const MODEL_STORAGE_KEY = 'resumelm-default-model'

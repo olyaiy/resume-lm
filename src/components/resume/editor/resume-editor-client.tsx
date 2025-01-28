@@ -53,6 +53,7 @@ export function ResumeEditorClient({
           .single();
 
         if (error) {
+          void error
           setJob(null);
           return;
         }

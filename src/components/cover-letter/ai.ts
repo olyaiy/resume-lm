@@ -16,36 +16,52 @@ export async function generate(input: string, config?: AIConfig) {
     - Highlighting relevant experience
     - Matching job requirements
     - Maintaining authenticity
-    - aim for 500 words
+    - aim for 600-700 words
+
     
     Ensure that your output is in an HTML format, but do NOT start with html tags.
 
     start the text with this template:
 
     <p>
-    [Current Date]
-    [Hiring Manager Name]
-    [Company Name] 
-    [Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided)
-    [City, Province, Postal Code] (If provided, otherwise omit)
+    [Current Date] \n
+    [Hiring Manager Name] \n
+    [Company Name] \n
+    [Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided) \n
+    [City, Province, Postal Code] (If provided, otherwise omit) \n
     </p><h4>RE: [Job Title and Reference Number]</h4>
 
     <p>Dear (Hiring Manager Name),</p>
 
-    [First paragraph: Express enthusiasm for the position and company. Explain why you're interested 
-    and how your background aligns with the role. Keep to 4-5 sentences.]
+    [Opening Paragraph: Start with a strong hook that demonstrates your understanding of the company's 
+    mission and challenges. Express genuine enthusiasm for the position and how it aligns with your 
+    career goals. Mention any personal connection to the company or industry. Keep to 4-5 sentences.]
 
-    [Second paragraph: Highlight specific relevant experience, focusing on one major project or role. 
-    Describe concrete achievements and responsibilities. Keep to 4-5 sentences.]
+    [Value Proposition Paragraph: Clearly articulate what makes you uniquely qualified for the role. 
+    Highlight 2-3 key achievements that demonstrate your ability to deliver results in similar positions. 
+    Use metrics and specific outcomes where possible. Keep to 5-6 sentences.]
 
-    [Third paragraph: Detail technical skills and tools relevant to the position. Use specific examples 
-    of projects where you've applied these skills. Keep to 5-6 sentences.]
+    [Technical Expertise Paragraph: Detail your relevant technical skills and tools, focusing on those 
+    specifically mentioned in the job description. Provide concrete examples of projects where you've 
+    successfully applied these skills. Keep to 5-6 sentences.]
+
+    [Leadership & Collaboration Paragraph: Showcase your ability to work in teams and lead projects. 
+    Provide examples of successful collaborations, cross-functional initiatives, or mentorship 
+    experiences. Highlight soft skills like communication and problem-solving. Keep to 4-5 sentences.]
+
+    [Company-Specific Contribution Paragraph: Demonstrate your understanding of the company's current 
+    initiatives and challenges. Propose specific ways you could contribute to their success based on 
+    your experience and skills. Keep to 4-5 sentences.]
+
+    [Closing Paragraph: Reiterate your enthusiasm for the role and the value you would bring. Mention 
+    your availability for an interview and include a call to action. Keep to 3-4 sentences.]
+
 
     Sincerely,
     [Applicant Name]
+    <p>[Contact Information: Phone Number | Email Address]</p>
+
     (No other information about the applicationt)
-
-
     `;
 
     (async () => {

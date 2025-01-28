@@ -172,6 +172,7 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
     .single();
 
   if (fetchError) {
+    void fetchError
     throw new Error(`Failed to fetch current profile: ${fetchError.message}`);
   }
 
@@ -776,6 +777,7 @@ export async function getSubscriptionStatus() {
 
   if (subscriptionError) {
     // If no subscription found, return a default free plan instead of throwing
+    void subscriptionError
     if (subscriptionError.code === 'PGRST116') {
       return {
         subscription_plan: 'Free',

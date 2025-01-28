@@ -1,4 +1,4 @@
-import { cookies, headers } from 'next/headers';
+import { headers } from 'next/headers';
 import { createClient } from './supabase/server';
 import AuthCache from './auth-cache';
 

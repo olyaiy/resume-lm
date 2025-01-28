@@ -117,8 +117,9 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
   // Convert percentage to pixels based on parent container
   const getPixelWidth = useCallback(() => {
     if (typeof window === 'undefined') return 0;
-    const parentWidth = window.innerWidth;
-    return (parentWidth * (debouncedWidth / 140));
+    // console.log('debouncedWidth (INSIDE)'+containerWidth);
+    // console.log('debouncedWidth * 10 (INSIDE)'+debouncedWidth * 10);
+    return ((debouncedWidth));
   }, [debouncedWidth]);
 
   // Generate resume hash for caching
@@ -255,11 +256,11 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
 
   // Display the generated PDF using react-pdf
   return (
-    <div className="w-full h-full relative ">
+    <div className=" h-full relative bg-red-500">
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-          className="relative h-full w-full "
+          className="relative h-full bg-red-500  "
           externalLinkTarget="_blank"
           loading={
             <div className="w-full aspect-[8.5/11] bg-white  p-8">
@@ -323,7 +324,7 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
             <Page
               key={`page_${index + 1}`}
               pageNumber={index + 1}
-              className="mb-4 shadow-xl  "
+              className="mb-4 shadow-xl "
               width={getPixelWidth()}
               renderAnnotationLayer={true}
               renderTextLayer={shouldRenderTextLayer}

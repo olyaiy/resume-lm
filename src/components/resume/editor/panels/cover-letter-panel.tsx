@@ -65,6 +65,8 @@ export function CoverLetterPanel({
       ${JSON.stringify(resume)}
       
       The cover letter should be formal, professional, and highlight relevant experience and skills.
+      Today's date is ${new Date().toLocaleDateString()}. Use this date for the date field.
+
       ${customPrompt ? `\nAdditional requirements: ${customPrompt}` : ''}`;
       
       const { output } = await generate(prompt, {
