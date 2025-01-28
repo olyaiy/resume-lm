@@ -223,7 +223,7 @@ const ProjectsSection = memo(function ProjectsSection({
             </View>
             {project.technologies && (
               <Text style={styles.projectTechnologies}>
-                {project.technologies.join(', ')}
+                {project.technologies.map(tech => tech.replace(/\*\*/g, '')).join(', ')}
               </Text>
             )}
           </View>
