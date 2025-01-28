@@ -79,7 +79,7 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
   }, [editor])
 
   return (
-    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg rounded-lg overflow-hidden mb-12 ">
+    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg  overflow-hidden mb-12 bg-white">
       {editor && (
         <BubbleMenu 
           editor={editor} 

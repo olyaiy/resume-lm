@@ -256,11 +256,11 @@ export const ResumePreview = memo(function ResumePreview({ resume, variant = 'ba
 
   // Display the generated PDF using react-pdf
   return (
-    <div className=" h-full relative bg-red-500">
+    <div className=" h-full relative bg-black/15">
         <Document
           file={url}
           onLoadSuccess={onDocumentLoadSuccess}
-          className="relative h-full bg-red-500  "
+          className="relative h-full   "
           externalLinkTarget="_blank"
           loading={
             <div className="w-full aspect-[8.5/11] bg-white  p-8">

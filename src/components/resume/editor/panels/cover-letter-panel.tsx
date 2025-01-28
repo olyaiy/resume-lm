@@ -65,7 +65,47 @@ export function CoverLetterPanel({
       ${JSON.stringify(resume)}
       
       The cover letter should be formal, professional, and highlight relevant experience and skills.
-      Today's date is ${new Date().toLocaleDateString()}. Use this date for the date field.
+      Today's date is ${new Date().toLocaleDateString()}.
+
+      CRITICAL FORMATTING REQUIREMENTS - YOU MUST FOLLOW THESE EXACTLY:
+      1. Do NOT use any square brackets [] in the output
+      2. Only include information that is available in the job or resume data
+      3. Each piece of information MUST be on its own separate line using <br /> tags
+      4. Use actual values directly, not placeholders
+      5. Format the header EXACTLY like this (but without the brackets, using real data):
+         <p>
+         [Date]<br /><br />
+         
+         [Recipient Name/Title]<br />
+         [Company Name]<br />
+         [Company Address]<br />
+         [City, Province/State, Country]<br />
+         </p>
+
+      6. Format the signature EXACTLY like this (but without the brackets, using real data):
+         <p>
+         Sincerely,<br /><br />
+         
+         [Full Name]<br />
+         </p>
+         
+         <p>
+         [Email Address]<br />
+         [Phone Number]<br />
+         [LinkedIn URL]<br />
+         [Other URLs]<br />
+         </p>
+
+      7. NEVER combine information on the same line
+      8. ALWAYS use <br /> tags between each piece of information
+      9. Add an extra <br /> after the date and after "Sincerely,"
+
+      Please use my contact information in the letter:
+      Full Name: ${resume.first_name} ${resume.last_name}
+      Email: ${resume.email}
+      ${resume.phone_number ? `Phone: ${resume.phone_number}` : ''}
+      ${resume.linkedin_url ? `LinkedIn: ${resume.linkedin_url}` : ''}
+      ${resume.github_url ? `GitHub: ${resume.github_url}` : ''}
 
       ${customPrompt ? `\nAdditional requirements: ${customPrompt}` : ''}`;
       

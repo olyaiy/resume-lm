@@ -133,24 +133,57 @@ export function ResumeEditorActions({
               <Button 
                 onClick={async () => {
                   try {
-                    const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = url;
-                    link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
+                    // Download Resume if selected
+                    if (downloadOptions.resume) {
+                      const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${resume.first_name}_${resume.last_name}_Resume.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
+                    }
+
+                    // Download Cover Letter if selected and exists
+                    if (downloadOptions.coverLetter && resume.has_cover_letter) {
+                      // Dynamically import html2pdf only when needed
+                      const html2pdf = (await import('html2pdf.js')).default;
+                      
+                      const coverLetterElement = document.getElementById('cover-letter-content');
+                      if (!coverLetterElement) {
+                        throw new Error('Cover letter content not found');
+                      }
+
+                      const opt = {
+                        margin: [0, 0, -0.5, 0],
+                        filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
+                        image: { type: 'jpeg', quality: 0.98 },
+                        html2canvas: { 
+                          scale: 2,
+                          useCORS: true,
+                          letterRendering: true
+                        },
+                        jsPDF: { 
+                          unit: 'in', 
+                          format: 'letter', 
+                          orientation: 'portrait' 
+                        }
+                      };
+
+                      await html2pdf().set(opt).from(coverLetterElement).save();
+                    }
+
                     toast({
                       title: "Download started",
-                      description: "Your resume PDF is being downloaded.",
+                      description: "Your documents are being downloaded.",
                     });
                   } catch (error) {
                     console.error(error);
                     toast({
                       title: "Download failed",
-                      description: "Unable to download your resume. Please try again.",
+                      description: error instanceof Error ? error.message : "Unable to download your documents. Please try again.",
                       variant: "destructive",
                     });
                   }

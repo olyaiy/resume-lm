@@ -62,7 +62,7 @@ export function EditorPanel({
     <div className="flex flex-col mr-4  relative h-full max-h-full">
       
       {/* Main Editor Area */}
-      <div className="flex-1  flex flex-col">
+      <div className="flex-1  flex flex-col overflow-scroll">
         
         {/* Scroll Area */}
         <ScrollArea className="flex-1 pr-2" ref={scrollAreaRef}>

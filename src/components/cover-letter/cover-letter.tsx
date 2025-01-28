@@ -95,7 +95,7 @@ export default function CoverLetter({
   return (
     <div className="">
       
-        <div ref={contentRef} className="">
+        <div ref={contentRef} id="cover-letter-content" className="">
           <CoverLetterEditor 
             initialData={coverLetterData || {}}
             onChange={onCoverLetterChange}

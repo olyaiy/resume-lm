@@ -112,12 +112,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     },
     maxSteps: 5,
     onResponse() {
-      console.log('Current messages after response:', 
-        messages.map(m => ({
-          role: m.role,
-          content: JSON.stringify(m.content)
-        }))
-      );
+ 
       setIsInitialLoading(false);
     },
     onError() {
@@ -251,12 +246,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
-    console.log('Before append - messages:', 
-      messages.map(m => ({
-        role: m.role,
-        content: JSON.stringify(m.content)
-      }))
-    );
+  
     
     setIsInitialLoading(true);
     append({ 

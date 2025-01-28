@@ -47,9 +47,9 @@ const MemoizedMarkdownBlock = memo(
           remarkPlugins={[remarkGfm, remarkBreaks]}
           components={{
             // Ensure lists are properly styled
-            ul: ({ children }) => <ul className="list-disc ml-3 mb-6">{children}</ul>,
+            ul: ({ children }) => <ul className="list-disc ml-3 mb-0">{children}</ul>,
             ol: ({ start, children }) => (
-              <ol className="list-decimal ml-3 mb-6" start={start}>
+              <ol className="list-decimal ml-3 mb-0" start={start}>
                 {children}
               </ol>
             ),

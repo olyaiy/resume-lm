@@ -388,16 +388,22 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     skillCategory: {
       marginBottom: skills_item_spacing,
       flexDirection: 'row',
+      flexWrap: 'wrap',
+      width: '100%',
     },
     skillCategoryTitle: {
       fontSize: document_font_size,
       fontFamily: 'Helvetica-Bold',
       color: '#111827',
       marginRight: 4,
+      width: 'auto',
     },
     skillItem: {
       fontSize: document_font_size,
       color: '#4b5563',
+      flexGrow: 1,
+      flexBasis: 0,
+      flexWrap: 'wrap',
     },
     // Experience section
     experienceSection: {
@@ -422,17 +428,17 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     jobTitle: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#1f2937',
     },
     dateRange: {
       fontSize: document_font_size,
-      color: '#6b7280',
+      color: '#1f2937',
       textAlign: 'right',
     },
     bulletPoint: {
       fontSize: document_font_size,
       marginBottom: experience_item_spacing,
-      color: '#374151',
+      color: '#1f2937',
       marginLeft: 8,
       paddingLeft: 8,
       flexDirection: 'row',
@@ -483,7 +489,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     projectDescription: {
       fontSize: document_font_size,
-      color: '#374151',
+      color: '#1f2937',
     },
     projectLinks: {
       fontSize: document_font_size,
@@ -513,7 +519,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     degree: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#1f2937',
     },
     footer: {
       position: 'absolute',
