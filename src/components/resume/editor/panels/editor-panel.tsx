@@ -3,7 +3,7 @@
 import { Resume, Profile, Job } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Suspense } from "react";
+import { Suspense, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ResumeEditorActions } from "../actions/resume-editor-actions";
 import { TailoredJobCard, TailoredJobAccordion } from "../../management/cards/tailored-job-card";
@@ -56,12 +56,16 @@ export function EditorPanel({
   isLoadingJob,
   onResumeChange,
 }: EditorPanelProps) {
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+
   return (
     <div className="flex flex-col h-full mr-4">
       
       {/* Main Editor Area */}
       <div className="flex-1 overflow-hidden flex flex-col h-full">
-        <ScrollArea className="flex-1 pr-2">
+        
+        {/* Scroll Area */}
+        <ScrollArea className="flex-1 pr-2" ref={scrollAreaRef}>
           <div className="relative pb-12">
             {/* Make the actions sticky */}
             <div className={cn(
@@ -245,7 +249,7 @@ export function EditorPanel({
 
       {/* Fixed ChatBot at bottom */}
       <div className={cn(
-        "mt-auto mb-[9rem] rounded-lg border",
+        "absolute bottom-0  mb-[9rem] rounded-lg border w - `scrollAreaRef.current?.clientWidth`", 
         resume.is_base_resume
           ? "bg-purple-50/50 border-purple-200/40"
           : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"

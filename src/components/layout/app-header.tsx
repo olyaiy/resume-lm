@@ -30,20 +30,22 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
       {/* Content Container */}
       <div className="max-w-[2000px] mx-auto h-full px-3 flex items-center justify-between relative">
         {/* Left Section - Logo and Title */}
-        <div className="flex items-center gap-3">
-          <Logo className="text-xl" />
-          <div className="h-5 w-px bg-purple-200/50 hidden sm:block" />
-          <div className="flex items-center">
-            <PageTitle />
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0 flex-shrink">
+          <Logo className="text-xl flex-shrink-0" />
+          <div className="h-5 w-px bg-purple-200/50 hidden sm:block flex-shrink-0" />
+          <div className="flex items-center min-w-0 max-w-[300px] sm:max-w-[400px] lg:max-w-[600px]">
+            <div className="truncate max-w-[80ch] overflow-hidden text-ellipsis">
+              <PageTitle />
+            </div>
           </div>
         </div>
 
         {/* Right Section - Navigation Items */}
-        <div className="flex items-center">
+        <div className="flex items-center flex-shrink-0">
           {children ? (
             children
           ) : (
-            <nav className="flex items-center">
+            <nav className="flex items-center gap-2">
               {showUpgradeButton && (
                 <>
                   <motion.div
@@ -100,4 +102,4 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
       </div>
     </header>
   );
-} 
+}

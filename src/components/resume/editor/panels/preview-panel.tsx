@@ -20,7 +20,7 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
-      "h-full pb-[9rem] z-50 bg-red-500 border-2  overflow-visible border-red-500 ",
+      "h-full pb-[9rem] z-50 bg-red-500 border-2  overflow-visible  ",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"

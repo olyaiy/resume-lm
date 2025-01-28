@@ -37,9 +37,17 @@ function getPageTitle(pathname: string): string {
   }
 }
 
+const MAX_TITLE_LENGTH = 50;
+
+
+const truncateText = (text: string) => {
+  if (text.length <= MAX_TITLE_LENGTH) return text;
+  return text.slice(0, MAX_TITLE_LENGTH - 3) + '...';
+};
+
 export function PageTitle() {
   const pathname = usePathname();
-  const [title, setTitle] = useState(() => getPageTitle(pathname));
+  const [title, setTitle] = useState(() => truncateText(getPageTitle(pathname)));
   const [resumeType, setResumeType] = useState<string | null>(null);
 
   useEffect(() => {
@@ -50,13 +58,14 @@ export function PageTitle() {
       const pageTitle = element?.getAttribute("data-page-title");
       const type = element?.getAttribute("data-resume-type") || null;
       
-      setTitle(pageTitle || "Resume Editor");
+      setTitle(truncateText(pageTitle || "Resume Editor"));
       setResumeType(type);
     } else {
-      setTitle(baseTitle);
+      setTitle(truncateText(baseTitle));
       setResumeType(null);
     }
   }, [pathname]);
+
 
   return (
     <div className="flex flex-col">

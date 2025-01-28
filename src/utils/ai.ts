@@ -22,12 +22,43 @@ export async function tailorResumeToJob(
       content: simplifiedResumeSchema,
     }),
     prompt: `
-    You are a professional resume writer focusing on tailoring resumes
-    to job descriptions.
-    Please tailor the following resume to the job description. 
-    Do not hallucinate or make up information. 
-    Focus on relevent keywords and information from the job description.
-    If no items are provided for a section, please leave it blank.
+    You are a senior technical resume engineer specializing in machine-learning-driven ATS optimization for software roles.  
+    Transform the resume using surgical rewording and technical alignment:  
+
+    **Technical Transformation Protocol**  
+    1. **Semantic Rewiring**:  
+      - Map generic terms to JD-specific technical lexicon using synonym chains:  
+        "Coding → Development → Software Engineering → [JD: 'Full lifecycle engineering']"  
+      - Convert passive descriptions to active JD terminology:  
+        "Worked on systems" → "Architected distributed systems [JD keyword] using circuit breaker patterns"  
+
+    2. **STAR-Driven Technical Storytelling**:  
+      For each experience point:  
+      - **Situation**: Anchor in technical context  
+        "During cloud migration initiative [JD: 'Multi-cloud environment']..."  
+      - **Task**: Align to JD requirements  
+        "Address system reliability mandate [JD: '99.99% SLA']..."  
+      - **Action**: Mirror JD's technical verbs + stack details  
+        "Containerized legacy apps using Docker → Implemented container orchestration [JD term] via Kubernetes (v1.28, Helm charts)"  
+      - **Result**: Inject quantifiable technical outcomes  
+        "50% latency reduction → Achieved 112ms p99 latency [JD metric] through Redis cache optimization"  
+
+    3. **Precision Technical Enhancements**:  
+      - Convert stack lists to JD-aligned hierarchies:  
+        "Python → Python 3.10 (NumPy, PyTorch 2.0, FastAPI)"  
+      - Add architectural context:  
+        "Built APIs → Designed event-driven microservices [JD pattern] handling 25k RPS"  
+      - Embed technical parentheticals:  
+        "CI/CD pipeline (GitHub Actions → ArgoCD [JD tool])"  
+
+    **Strict Technical Constraints**:  
+    - Never invent tools/versions - only enhance existing resume data  
+    - Preserve original employment chronology  
+    - Require 1:1 mapping between JD technical requirements and resume content  
+    - If no direct match exists: "Legacy system modernization → Cloud migration patterns [JD concept]"  
+    - Force metric anchoring: "Improved performance → 3.2x throughput increase via Go profiling"  
+
+
     
     Resume:
     ${JSON.stringify(resume, null, 2)}
@@ -69,10 +100,17 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
             Do not guess or fabricate information that is not present in the listing; instead, return an empty string for missing fields.
             Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.
             
-            For the description field, always include 3-5 bullet points highlighting the most important responsibilities of the role.
-            Format these bullet points using markdown, with each point on a new line starting with "• ". These should be the most
-            critical duties mentioned in the job listing, not general requirements or nice-to-haves.`,
-  
+            For the description field:
+            1. Start with 3-5 bullet points highlighting the most important responsibilities of the role.
+               - Format these bullet points using markdown, with each point on a new line starting with "• "
+               - These should be the most critical duties mentioned in the job listing
+            2. After the bullet points, include the full job description stripped of:
+               - Equal opportunity statements
+               - Application instructions
+               - Any non-job-related content
+            3. Format the full description as a clean paragraph, maintaining proper grammar and flow.`,
+            
+            
     prompt: `Analyze this job listing carefully and extract structured information.
 
               TASK 1 - ESSENTIAL INFORMATION:
