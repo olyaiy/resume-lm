@@ -37,11 +37,11 @@ export function ResizablePanels({
   }, []);
 
   return (
-    <div ref={containerRef}>
+    <div ref={containerRef} className="h-[95%] relative">
       <ResizablePanelGroup
         direction="horizontal"
         className={cn(
-          "h-full rounded-lg border-green-500",
+          "relative h-full rounded-lg bg-green-500 border-4 border-green-900 ",
           isBaseResume
             ? "border-purple-200/40"
             : "border-pink-300/50"

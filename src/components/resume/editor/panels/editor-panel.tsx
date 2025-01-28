@@ -59,10 +59,10 @@ export function EditorPanel({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col h-full mr-4">
+    <div className="flex flex-col mr-4 bg-yellow-500">
       
       {/* Main Editor Area */}
-      <div className="flex-1 overflow-hidden flex flex-col h-full">
+      <div className="flex-1  flex flex-col">
         
         {/* Scroll Area */}
         <ScrollArea className="flex-1 pr-2" ref={scrollAreaRef}>
@@ -249,7 +249,7 @@ export function EditorPanel({
 
       {/* Fixed ChatBot at bottom */}
       <div className={cn(
-        "absolute bottom-0  mb-[9rem] rounded-lg border w - `scrollAreaRef.current?.clientWidth`", 
+        " bottom-0 rounded-lg border`", 
         resume.is_base_resume
           ? "bg-purple-50/50 border-purple-200/40"
           : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"

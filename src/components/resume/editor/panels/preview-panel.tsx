@@ -20,12 +20,12 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
-      "h-full pb-[9rem] z-50 bg-red-500 border-2  overflow-visible  ",
+      " z-50     bg-red-500 h-full",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"
     )}>
-      <div className="relative">
+      <div className="">
       <ResumeContextMenu resume={resume}>
           <ResumePreview resume={resume} containerWidth={width} />
         </ResumeContextMenu>

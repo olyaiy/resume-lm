@@ -70,7 +70,7 @@ export default function CoverLetter({
   // If no cover letter exists, render empty state
   if (!hasCoverLetter) {
     return (
-      <div className="space-y-4 pb-8">
+      <div className="space-y-4">
         <Button
           variant="outline"
           size="sm"
