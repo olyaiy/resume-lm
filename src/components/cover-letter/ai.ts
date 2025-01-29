@@ -25,13 +25,14 @@ export async function generate(input: string, config?: AIConfig) {
 
     <p>
     [Current Date] \n
-    [Hiring Manager Name] \n
     [Company Name] \n
     [Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided) \n
     [City, Province, Postal Code] (If provided, otherwise omit) \n
     </p><h4>RE: [Job Title and Reference Number]</h4>
 
-    <p>Dear (Hiring Manager Name),</p>
+    <p>Dear Hiring Managers at [Company Name],</p>
+    IMPORTANT: DO NOT USE ANY OTHER SALUTATION FORMAT. ALWAYS USE "Dear Hiring Managers at [Company Name]" 
+    AND REPLACE [Company Name] WITH THE ACTUAL COMPANY NAME.
 
     [Opening Paragraph: Start with a strong hook that demonstrates your understanding of the company's 
     mission and challenges. Express genuine enthusiasm for the position and how it aligns with your 

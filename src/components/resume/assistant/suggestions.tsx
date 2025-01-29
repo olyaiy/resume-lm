@@ -139,7 +139,7 @@ function ProjectSuggestion({ content: project, currentContent: currentProject }:
                   : "bg-gray-100/80 border-gray-200/60"
               )}
             >
-              {tech}
+              {tech.replace(/\*\*/g, '')}
             </span>
           ))}
         </div>

@@ -14,7 +14,11 @@ export async function tailorResumeToJob(
   jobListing: z.infer<typeof simplifiedJobSchema>,
   config?: AIConfig
 ) {
-  const aiClient = initializeAIClient(config);
+  const aiClient = initializeAIClient({
+    ...(config || {}),
+    model: 'gpt-4o-mini',
+    apiKeys: config?.apiKeys || []
+  });
   try {
     const { object } = await generateObject({
       model: aiClient,
@@ -82,7 +86,11 @@ export async function tailorResumeToJob(
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
-  const aiClient = initializeAIClient(config);
+  const aiClient = initializeAIClient({
+    ...(config || {}),
+    model: 'gpt-4o-mini',
+    apiKeys: config?.apiKeys || []
+  });
   try {
     const { object } = await generateObject({
       model: aiClient,

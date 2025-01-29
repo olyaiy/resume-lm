@@ -8,14 +8,8 @@ import { readStreamableValue } from 'ai/rsc';
 import { generate } from "@/components/cover-letter/ai";
 import type { AIConfig } from "@/utils/ai-tools";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-  TooltipProvider,
-} from "@/components/ui/tooltip";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
-import Tiptap from "@/components/ui/tiptap";
+
 
 interface CoverLetterPanelProps {
   resume: Resume;
@@ -182,62 +176,52 @@ export function CoverLetterPanel({
               </Button>
 
               {/* Write with AI */}
-              <TooltipProvider delayDuration={0}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
+              <div className="space-y-3">
+                <div className={cn(
+                  "w-full p-3",
+                  "bg-emerald-50",
+                  "border-2 border-emerald-300",
+                  "shadow-sm",
+                  "rounded-lg"
+                )}>
+                  <AIImprovementPrompt
+                    value={customPrompt}
+                    onChange={setCustomPrompt}
+                    isLoading={isGenerating}
+                    placeholder="e.g., Focus on leadership experience and technical skills"
+                    hideSubmitButton
+                  />
+                </div>
 
-                    {/* Generate Cover Letter Button */}
-                    <Button
-                      variant="default"
-                      size="sm"
-                      className={cn(
-                        "w-full",
-                        "bg-emerald-600 hover:bg-emerald-700",
-                        "text-white",
-                        "border border-emerald-200/60",
-                        "shadow-sm",
-                        "transition-all duration-300",
-                        "hover:scale-[1.02] hover:shadow-md",
-                        "hover:-translate-y-0.5"
-                      )}
-                      onClick={generateCoverLetter}
-                      disabled={isGenerating || !job}
-                    >
-                      {isGenerating ? (
-                        <>
-                          <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                          Generating...
-                        </>
-                      ) : (
-                        <>
-                          <Sparkles className="h-4 w-4 mr-2" />
-                          Generate with AI
-                        </>
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent 
-                    side="bottom" 
-                    align="start"
-                    sideOffset={2}
-                    className={cn(
-                      "w-72 p-3.5",
-                      "bg-emerald-50",
-                      "border-2 border-emerald-300",
-                      "shadow-lg shadow-emerald-100/50",
-                      "rounded-lg"
-                    )}
-                  >
-                    <AIImprovementPrompt
-                      value={customPrompt}
-                      onChange={setCustomPrompt}
-                      onSubmit={generateCoverLetter}
-                      isLoading={isGenerating}
-                      placeholder="e.g., Focus on leadership experience and technical skills"
-                    />
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+                <Button
+                  variant="default"
+                  size="sm"
+                  className={cn(
+                    "w-full",
+                    "bg-emerald-600 hover:bg-emerald-700",
+                    "text-white",
+                    "border border-emerald-200/60",
+                    "shadow-sm",
+                    "transition-all duration-300",
+                    "hover:scale-[1.02] hover:shadow-md",
+                    "hover:-translate-y-0.5"
+                  )}
+                  onClick={generateCoverLetter}
+                  disabled={isGenerating || !job}
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Generating...
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate with AI
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
             // No Cover Letter

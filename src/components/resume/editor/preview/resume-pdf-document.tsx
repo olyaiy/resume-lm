@@ -341,7 +341,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
       paddingLeft: document_margin_horizontal,
       paddingRight: document_margin_horizontal,
       fontFamily: 'Helvetica',
-      color: '#1f2937',
+      color: '#111827',
       fontSize: document_font_size,
       lineHeight: document_line_height,
       position: 'relative',
@@ -359,7 +359,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     contactInfo: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#374151',
       flexDirection: 'row',
       justifyContent: 'center',
       flexWrap: 'wrap',
@@ -400,7 +400,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     skillItem: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#374151',
       flexGrow: 1,
       flexBasis: 0,
       flexWrap: 'wrap',
@@ -428,17 +428,17 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     jobTitle: {
       fontSize: document_font_size,
-      color: '#1f2937',
+      color: '#111827',
     },
     dateRange: {
       fontSize: document_font_size,
-      color: '#1f2937',
+      color: '#111827',
       textAlign: 'right',
     },
     bulletPoint: {
       fontSize: document_font_size,
       marginBottom: experience_item_spacing,
-      color: '#1f2937',
+      color: '#111827',
       marginLeft: 8,
       paddingLeft: 8,
       flexDirection: 'row',
@@ -483,17 +483,17 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     projectTechnologies: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#374151',
       fontFamily: 'Helvetica-Bold',
       marginBottom: 0,
     },
     projectDescription: {
       fontSize: document_font_size,
-      color: '#1f2937',
+      color: '#111827',
     },
     projectLinks: {
       fontSize: document_font_size,
-      color: '#4b5563',
+      color: '#374151',
       textAlign: 'right',
     },
     // Education section
@@ -519,7 +519,7 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     },
     degree: {
       fontSize: document_font_size,
-      color: '#1f2937',
+      color: '#111827',
     },
     footer: {
       position: 'absolute',
