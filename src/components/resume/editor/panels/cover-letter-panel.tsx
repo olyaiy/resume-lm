@@ -163,18 +163,6 @@ export function CoverLetterPanel({
           {/* Cover Letter */}
           {resume.has_cover_letter ? (
             <div className="space-y-4">
-
-              {/* Delete Cover Letter */}
-              <Button
-                variant="destructive"
-                size="sm"
-                className="w-full"
-                onClick={() => onResumeChange('has_cover_letter', false)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete Cover Letter
-              </Button>
-
               {/* Write with AI */}
               <div className="space-y-3">
                 <div className={cn(
@@ -220,6 +208,17 @@ export function CoverLetterPanel({
                       Generate with AI
                     </>
                   )}
+                </Button>
+
+                {/* Delete Cover Letter */}
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => onResumeChange('has_cover_letter', false)}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete Cover Letter
                 </Button>
               </div>
             </div>

@@ -24,7 +24,7 @@ export async function generate(input: string, config?: AIConfig) {
     start the text with this template:
 
     <p>
-    [Current Date] \n
+    [Current Date] 
     [Company Name] \n
     [Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided) \n
     [City, Province, Postal Code] (If provided, otherwise omit) \n
