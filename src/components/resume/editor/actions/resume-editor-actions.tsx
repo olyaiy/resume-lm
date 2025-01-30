@@ -9,7 +9,7 @@ import { TextImport } from "../../text-import";
 import { ResumePDFDocument } from "../preview/resume-pdf-document";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
-import { useRouter } from "next/navigation";
+
 import { updateResume } from "@/utils/actions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -23,7 +23,6 @@ export function ResumeEditorActions({
   onResumeChange
 }: ResumeEditorActionsProps) {
   const { state, dispatch } = useResumeContext();
-  const router = useRouter();
   const { resume, isSaving } = state;
   const [downloadOptions, setDownloadOptions] = useState({
     resume: true,

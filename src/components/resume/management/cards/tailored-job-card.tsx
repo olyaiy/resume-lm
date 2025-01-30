@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
-import {  MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles, AlertCircle, LucideIcon } from "lucide-react";
+import {  MapPin, Clock, DollarSign, Briefcase, Trash2, Loader2, Plus, Sparkles, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Job, Resume } from "@/lib/types";
@@ -22,14 +22,13 @@ import { BriefcaseIcon } from "lucide-react";
 
 interface TailoredJobCardProps {
   jobId: string | null;
-  onJobDelete?: () => void;
+  // onJobDelete?: () => void;
   job?: Job | null;
   isLoading?: boolean;
 }
 
 export function TailoredJobCard({ 
   jobId, 
-  onJobDelete,
   job: externalJob,
   isLoading: externalIsLoading 
 }: TailoredJobCardProps) {
