@@ -118,7 +118,7 @@ export function ResumeEditorClient({
       <UnsavedChangesDialog
         isOpen={showExitDialog}
         onOpenChange={setShowExitDialog}
-        pendingNavigation={pendingNavigation}
+        // pendingNavigation={pendingNavigation}
         onConfirm={() => {
           if (pendingNavigation) {
             router.push(pendingNavigation);
