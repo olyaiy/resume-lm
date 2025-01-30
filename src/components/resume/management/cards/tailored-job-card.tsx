@@ -85,7 +85,6 @@ export function TailoredJobCard({
     fetchJob();
   }, [jobId, externalJob]);
 
-  const [isDeleting, setIsDeleting] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [jobDescription, setJobDescription] = useState('');
@@ -97,43 +96,6 @@ export function TailoredJobCard({
   const formatWorkLocation = (workLocation: Job['work_location']) => {
     if (!workLocation) return 'Not specified';
     return workLocation.replace('_', ' ');
-  };
-
-  const handleDelete = async () => {
-    if (!jobId) return;
-    
-    try {
-      setIsDeleting(true);
-      await deleteJob(jobId);
-      
-      onJobDelete?.();
-      
-      router.refresh();
-      
-      const supabase = createClient();
-      const { data: jobData, error } = await supabase
-        .from('jobs')
-        .select('*')
-        .eq('id', jobId)
-        .single();
-
-      if (error) {
-        if (error.code !== 'PGRST116') {
-          throw error;
-        }
-        setInternalJob(null);
-        return;
-      }
-      
-      setInternalJob(jobData);
-    } catch (error) {
-      console.error('Error deleting job:', error);
-      if (error instanceof Error && error.message !== 'No rows returned') {
-        setInternalJob(null);
-      }
-    } finally {
-      setIsDeleting(false);
-    }
   };
 
   const validateJobDescription = (value: string) => {
@@ -536,12 +498,13 @@ export function TailoredJobAccordion({
   job,
   isLoading
 }: TailoredJobAccordionProps) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const router = useRouter();
+
   if (resume.is_base_resume) return null;
 
   const title = job?.position_title || "Target Job";
   const company = job?.company_name;
-  const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
 
   const handleDelete = async () => {
     if (!resume.job_id) return;
@@ -614,26 +577,5 @@ export function TailoredJobAccordion({
         </div>
       </AccordionContent>
     </AccordionItem>
-  );
-}
-
-interface AccordionHeaderProps {
-  icon: LucideIcon;
-  label: string;
-  iconColor: string;
-  bgColor: string;
-  textColor: string;
-}
-
-function AccordionHeader({ icon: Icon, label, iconColor, bgColor, textColor }: AccordionHeaderProps) {
-  return (
-    <AccordionTrigger className="px-4 py-2 hover:no-underline group">
-      <div className="flex items-center gap-2">
-        <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", bgColor)}>
-          <Icon className={cn("h-3.5 w-3.5", iconColor)} />
-        </div>
-        <span className={cn("text-sm font-medium", textColor)}>{label}</span>
-      </div>
-    </AccordionTrigger>
   );
 } 

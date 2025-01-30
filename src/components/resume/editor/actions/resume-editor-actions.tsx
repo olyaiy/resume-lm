@@ -10,7 +10,7 @@ import { ResumePDFDocument } from "../preview/resume-pdf-document";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
 import { useRouter } from "next/navigation";
-import { updateResume, deleteResume } from "@/utils/actions";
+import { updateResume } from "@/utils/actions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
