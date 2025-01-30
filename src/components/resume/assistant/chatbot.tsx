@@ -255,7 +255,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     
     
     setAccordionValue("chat");
-  }, [append, messages]);
+  }, [append]);
 
   // Add delete handler
   const handleDelete = (id: string) => {

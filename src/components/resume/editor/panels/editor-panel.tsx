@@ -228,8 +228,8 @@ export function EditorPanel({
                     </div>
                   }>
                     <DocumentSettingsForm
-                      resume={resume}
-                      onChange={onResumeChange}
+                      documentSettings={resume.document_settings!}
+                      onChange={(settings) => onResumeChange('document_settings', settings)}
                     />
                   </Suspense>
                 </AccordionContent>
