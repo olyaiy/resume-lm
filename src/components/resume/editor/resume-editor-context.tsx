@@ -22,18 +22,22 @@ const ResumeContext = createContext<{
 function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
   switch (action.type) {
     case 'UPDATE_FIELD':
-      // console.log('Resume Editor Context - Field Update:', {
-      //   field: action.field,
-      //   value: action.value,
-      //   previousState: state,
-      // });
-      return {
+ 
+
+      const newState = {
         ...state,
         resume: {
           ...state.resume,
           [action.field]: action.value
         }
       };
+
+  
+
+      return newState;
+
+
+      
     case 'SET_SAVING':
       // console.log('Resume Editor Context - Saving State:', action.value);
       return { ...state, isSaving: action.value };

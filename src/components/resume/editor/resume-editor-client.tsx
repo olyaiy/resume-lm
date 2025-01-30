@@ -69,7 +69,17 @@ export function ResumeEditorClient({
   }, [state.resume.job_id]);
 
   const updateField = <K extends keyof Resume>(field: K, value: Resume[K]) => {
-    dispatch({ type: 'UPDATE_FIELD', field, value });
+    
+    if (field === 'document_settings') {
+      // Ensure we're passing a valid DocumentSettings object
+      if (typeof value === 'object' && value !== null) {
+        dispatch({ type: 'UPDATE_FIELD', field, value });
+      } else {
+        console.error('Invalid document settings:', value);
+      }
+    } else {
+      dispatch({ type: 'UPDATE_FIELD', field, value });
+    }
   };
 
   // Track changes
@@ -91,6 +101,8 @@ export function ResumeEditorClient({
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [state.hasUnsavedChanges]);
+
+
 
   // Editor Panel
   const editorPanel = (

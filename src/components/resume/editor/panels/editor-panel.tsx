@@ -1,6 +1,6 @@
 'use client';
 
-import { Resume, Profile, Job } from "@/lib/types";
+import { Resume, Profile, Job, DocumentSettings } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Suspense, useRef } from "react";
@@ -57,6 +57,7 @@ export function EditorPanel({
   onResumeChange,
 }: EditorPanelProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+
 
   return (
     <div className="flex flex-col mr-4  relative h-full max-h-full">
@@ -227,10 +228,17 @@ export function EditorPanel({
                       <div className="h-24 bg-muted rounded-md" />
                     </div>
                   }>
-                    <DocumentSettingsForm
-                      documentSettings={resume.document_settings!}
-                      onChange={(settings) => onResumeChange('document_settings', settings)}
-                    />
+
+       
+
+
+              <DocumentSettingsForm
+                documentSettings={resume.document_settings!}
+                    onChange={(_field: 'document_settings', value: DocumentSettings) => {
+                      onResumeChange('document_settings', value);
+                    }}
+                  />
+
                   </Suspense>
                 </AccordionContent>
               </AccordionItem>
