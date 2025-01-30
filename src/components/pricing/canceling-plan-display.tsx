@@ -57,7 +57,7 @@ export function CancelingPlanDisplay({ initialProfile }: CancelingPlanDisplayPro
       if (result?.url) {
         window.location.href = result.url;
       }
-    } catch (error) {
+    } catch {
       // Handle error silently
     } finally {
       setIsLoading(false);

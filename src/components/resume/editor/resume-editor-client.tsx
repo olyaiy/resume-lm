@@ -59,7 +59,7 @@ export function ResumeEditorClient({
         }
 
         setJob(jobData);
-      } catch (error) {
+      } catch {
         setJob(null);
       } finally {
         setIsLoadingJob(false);

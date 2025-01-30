@@ -20,7 +20,7 @@ export async function createOrRetrieveCustomer({
   const supabase = await createServiceClient();
 
   // First check if user has a subscription record with stripe_customer_id
-  const { data: subscription, error: subscriptionError } = await supabase
+  const { data: subscription } = await supabase
     .from('subscriptions')
     .select('stripe_customer_id')
     .eq('user_id', uuid)
@@ -127,7 +127,7 @@ export async function manageSubscriptionStatusChange(
 
   try {
     // First try to update existing subscription
-    const { data: existingSubscription, error: fetchError } = await supabase
+    const { data: existingSubscription } = await supabase
       .from('subscriptions')
       .select('id')
       .eq('user_id', uuid)

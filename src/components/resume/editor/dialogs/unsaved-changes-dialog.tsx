@@ -1,19 +1,16 @@
 'use client';
 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { useRouter } from "next/navigation";
 
 interface UnsavedChangesDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  pendingNavigation: string | null;
   onConfirm: () => void;
 }
 
 export function UnsavedChangesDialog({
   isOpen,
   onOpenChange,
-  pendingNavigation,
   onConfirm,
 }: UnsavedChangesDialogProps) {
   return (

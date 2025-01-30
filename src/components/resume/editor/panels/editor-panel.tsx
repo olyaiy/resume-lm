@@ -6,7 +6,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Suspense, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ResumeEditorActions } from "../actions/resume-editor-actions";
-import { TailoredJobCard, TailoredJobAccordion } from "../../management/cards/tailored-job-card";
+import { TailoredJobAccordion } from "../../management/cards/tailored-job-card";
 import { BasicInfoForm } from "../forms/basic-info-form";
 import ChatBot from "../../assistant/chatbot";
 import { CoverLetterPanel } from "./cover-letter-panel";
@@ -18,7 +18,7 @@ import {
   CertificationsForm,
   DocumentSettingsForm
 } from '../dynamic-components';
-import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, Briefcase as BriefcaseIcon, FileText, Trash2, Plus, LucideIcon } from "lucide-react";
+import { User, Briefcase, FolderGit2, GraduationCap, Wrench, LayoutTemplate, LucideIcon } from "lucide-react";
 
 interface AccordionHeaderProps {
   icon: LucideIcon;

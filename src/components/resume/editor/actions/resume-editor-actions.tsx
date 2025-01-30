@@ -51,25 +51,25 @@ export function ResumeEditorActions({
   };
 
   // Delete Resume
-  const handleDelete = async () => {
-    try {
-      dispatch({ type: 'SET_DELETING', value: true });
-      await deleteResume(state.resume.id);
-      toast({
-        title: "Resume deleted",
-        description: "Your resume has been permanently removed.",
-      });
-      router.push('/');
-    } catch (error) {
-      toast({
-        title: "Delete failed",
-        description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
-        variant: "destructive",
-      });
-    } finally {
-      dispatch({ type: 'SET_DELETING', value: false });
-    }
-  };
+  // const handleDelete = async () => {
+  //   try {
+  //     dispatch({ type: 'SET_DELETING', value: true });
+  //     await deleteResume(state.resume.id);
+  //     toast({
+  //       title: "Resume deleted",
+  //       description: "Your resume has been permanently removed.",
+  //     });
+  //     router.push('/');
+  //   } catch (error) {
+  //     toast({
+  //       title: "Delete failed",
+  //       description: error instanceof Error ? error.message : "Unable to delete your resume. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   } finally {
+  //     dispatch({ type: 'SET_DELETING', value: false });
+  //   }
+  // };
 
   // Dynamic color classes based on resume type
   const colors = resume.is_base_resume ? {

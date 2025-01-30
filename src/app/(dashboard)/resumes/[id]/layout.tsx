@@ -1,5 +1,4 @@
 import { ReactNode } from "react";
-import { BackgroundEffects } from "@/components/resume/editor/layout/BackgroundEffects";
 
 export default function ResumeEditorLayout({
   children,

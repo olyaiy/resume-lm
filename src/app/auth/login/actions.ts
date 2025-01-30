@@ -12,11 +12,6 @@ interface GithubAuthResult extends AuthResult {
   url?: string;
 }
 
-interface StripeCustomerUpdate {
-  success: boolean;
-  error?: string;
-}
-
 // Login
 export async function login(formData: FormData): Promise<AuthResult> {
   const supabase = await createClient();

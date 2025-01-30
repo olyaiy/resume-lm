@@ -6,7 +6,7 @@ import { PricingCard, type Plan } from './pricing-card';
 import { postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
-import { Sparkles, Rocket, Zap, ArrowRight } from 'lucide-react';
+import { Sparkles, Rocket, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const plans: Plan[] = [

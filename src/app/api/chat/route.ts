@@ -1,6 +1,5 @@
 import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
-import { z } from 'zod';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
 

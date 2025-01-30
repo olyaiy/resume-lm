@@ -84,7 +84,7 @@ export default async function RootLayout({
       // Show upgrade button only if user is not on pro plan or has canceled
       showUpgradeButton = !profile?.subscription_plan?.toLowerCase()?.includes('pro') || 
                          profile?.subscription_status === 'canceled';
-    } catch (error) {
+    } catch {
       // If there's an error, we'll show the upgrade button by default
       showUpgradeButton = true;
     }

@@ -9,7 +9,6 @@ import Link from "next/link";
 import { User, Sparkles } from "lucide-react";
 import { PageTitle } from "./page-title";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 
 interface AppHeaderProps {
   children?: React.ReactNode;

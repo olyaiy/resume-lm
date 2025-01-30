@@ -7,7 +7,6 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Download, Copy } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
 
 interface CoverLetterContextMenuProps {
   children: React.ReactNode;

@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Check, Sparkles, Star, Trophy } from 'lucide-react';
+import { Sparkles, Star, Trophy } from 'lucide-react';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { PricingCard, type Plan } from './pricing-card';
 import { motion } from 'framer-motion';
@@ -57,7 +57,7 @@ export function ProPlanDisplay({ initialProfile }: ProPlanDisplayProps) {
       if (result?.url) {
         window.location.href = result.url;
       }
-    } catch (error) {
+    } catch {
       // Handle error silently
     } finally {
       setIsLoading(false);
@@ -117,7 +117,7 @@ export function ProPlanDisplay({ initialProfile }: ProPlanDisplayProps) {
                 </span>
               </h2>
               <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-                You've unlocked our premium features and joined an exclusive community of professionals who take their career seriously.
+                You&apos;ve unlocked our premium features and joined an exclusive community of professionals who take their career seriously.
               </p>
             </div>
 

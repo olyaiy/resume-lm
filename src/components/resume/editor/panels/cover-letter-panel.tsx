@@ -24,7 +24,6 @@ export function CoverLetterPanel({
   onResumeChange,
   aiConfig,
 }: CoverLetterPanelProps) {
-  const [generation, setGeneration] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showErrorDialog, setShowErrorDialog] = useState(false);
@@ -34,7 +33,6 @@ export function CoverLetterPanel({
     if (!job) return;
     
     setIsGenerating(true);
-    setGeneration('');
     
     try {
       // Get model and API key from local storage
@@ -113,8 +111,7 @@ export function CoverLetterPanel({
       
       for await (const delta of readStreamableValue(output)) {
         generatedContent += delta;
-        // Update both local state and resume context
-        setGeneration(generatedContent);
+        // Update resume context directly
         onResumeChange('cover_letter', {
           content: generatedContent,
         });

@@ -2,7 +2,7 @@ import dynamic from 'next/dynamic';
 import React from 'react';
 import type { ComponentType } from 'react';
 import { LoadingFallback } from './shared/LoadingFallback';
-import type { WorkExperience, Education, Skill, Project, Certification, Resume } from '@/lib/types';
+import type { WorkExperience, Education, Skill, Project, Certification, DocumentSettings } from '@/lib/types';
 
 interface WorkExperienceFormProps {
   experiences: WorkExperience[];
@@ -75,7 +75,7 @@ export const CertificationsForm = dynamic(
 );
 
 export const DocumentSettingsForm = dynamic(
-  () => import('./forms/document-settings-form').then(mod => ({ default: mod.DocumentSettingsForm })) as Promise<ComponentType<any>>,
+  () => import('./forms/document-settings-form').then(mod => ({ default: mod.DocumentSettingsForm })) as Promise<ComponentType<{ documentSettings: DocumentSettings; onChange: (settings: DocumentSettings) => void }>>,
   {
     loading: () => <LoadingFallback lines={1} />,
     ssr: false

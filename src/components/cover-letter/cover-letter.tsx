@@ -1,5 +1,5 @@
 import CoverLetterEditor from "./cover-letter-editor";
-import { Suspense, useRef } from 'react';
+import { useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { useResumeContext } from '@/components/resume/editor/resume-editor-context';
