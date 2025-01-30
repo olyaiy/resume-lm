@@ -169,36 +169,37 @@ export interface Subscription {
 
 export const AI_PROVIDERS = {
   OPENAI: 'openai',
-  AZURE: 'azure',
+  // AZURE: 'azure',
   ANTHROPIC: 'anthropic',
-  BEDROCK: 'bedrock',
-  GOOGLE: 'google',
-  VERTEX: 'vertex',
-  MISTRAL: 'mistral',
-  XAI: 'xai',
-  TOGETHER: 'together',
-  COHERE: 'cohere',
-  FIREWORKS: 'fireworks',
-  DEEPINFRA: 'deepinfra',
-  GROQ: 'groq'
+  // BEDROCK: 'bedrock',
+  // GOOGLE: 'google',
+  // VERTEX: 'vertex',
+  // MISTRAL: 'mistral',
+  // XAI: 'xai',
+  // TOGETHER: 'together',
+  // COHERE: 'cohere',
+  // FIREWORKS: 'fireworks',
+  // DEEPINFRA: 'deepinfra',
+  // GROQ: 'groq'
+  DEEPSEEK: 'deepseek',
 } as const;
 
 export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 
 export type ServiceName = 
   | 'openai'
-  | 'azure'
+  // | 'azure'
   | 'anthropic'
-  | 'bedrock'
-  | 'google'
-  | 'vertex'
-  | 'mistral'
-  | 'xai'
-  | 'together'
-  | 'cohere'
-  | 'fireworks'
-  | 'deepinfra'
-  | 'groq'
+  // | 'bedrock'
+  // | 'google'
+  // | 'vertex'
+  // | 'mistral'
+  // | 'xai'
+  // | 'together'
+  // | 'cohere'
+  // | 'fireworks'
+  // | 'deepinfra'
+  // | 'groq'
   | 'deepseek';
 
 
