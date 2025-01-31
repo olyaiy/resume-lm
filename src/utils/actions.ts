@@ -5,7 +5,6 @@ import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from 
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
-import { getAuthenticatedUser } from "./auth";
 
 
 interface DashboardData {
@@ -16,10 +15,14 @@ interface DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
+
 
   try {
-    const user = await getAuthenticatedUser();
-
+    const { data: { session }, error } = await supabase.auth.getSession()
+    const user = session?.user!
+    
     // Fetch profile data
     let profile;
     const { data, error: profileError } = await supabase
@@ -107,7 +110,11 @@ export async function getDashboardData(): Promise<DashboardData> {
 
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
   const supabase = await createClient();
-  const user = await getAuthenticatedUser();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
+
+  const { data: { session }, error } = await supabase.auth.getSession()
+  const user = session?.user!
 
   try {
     const [resumeResult, profileResult] = await Promise.all([
@@ -143,7 +150,10 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
 
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {
   const supabase = await createClient();
-  const user = await getAuthenticatedUser();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user!
 
   const { data: resume, error } = await supabase
     .from('resumes')
@@ -162,8 +172,12 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
 
 export async function importResume(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
-  const user = await getAuthenticatedUser();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
+  const { data: { session } } = await supabase.auth.getSession()
+  const user = session?.user!
+  
   // First, get the current profile
   const { data: currentProfile, error: fetchError } = await supabase
     .from('profiles')
@@ -233,9 +247,15 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
 
 export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
   
+
+
+
   if (userError || !user) {
     throw new Error('User not authenticated');
   }
@@ -262,9 +282,13 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
 
 export async function resetProfile(): Promise<Profile> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!  
+
+
   if (userError || !user) {
     throw new Error('User not authenticated');
   }
@@ -300,13 +324,12 @@ export async function resetProfile(): Promise<Profile> {
 }
 
 export async function deleteResume(resumeId: string): Promise<void> {
-  const supabase = await createClient();
+    const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error } = await supabase.auth.getSession()
+  const user = session?.user!
 
   try {
     // First verify the resume exists and belongs to the user
@@ -382,8 +405,11 @@ export async function createBaseResume(
   }
 ): Promise<Resume> {
   const supabase = await createClient();
-  const user = await getAuthenticatedUser();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
+  const { data: { session }, error } = await supabase.auth.getSession()
+  const user = session?.user!
   // Get user's profile for initial data if not starting fresh
   let profile = null;
   if (importOption !== 'fresh') {
@@ -475,13 +501,11 @@ export async function createTailoredResume(
   tailoredContent: z.infer<typeof simplifiedResumeSchema>
 ) {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    console.error('Authentication Error:', userError);
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
 
   // Combine base resume settings with tailored content
   const newResume = {
@@ -521,12 +545,11 @@ export async function createTailoredResume(
 
 export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
 
   const jobData = {
     user_id: user.id,
@@ -554,13 +577,12 @@ export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>)
 
 export async function deleteJob(jobId: string): Promise<void> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    console.error('Auth error:', userError);
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
+
 
   // First, get all resumes that reference this job
   const { data: affectedResumes } = await supabase
@@ -663,12 +685,11 @@ export async function deleteTailoredJob(jobId: string): Promise<void> {
 
 export async function createEmptyJob(): Promise<Job> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
 
   const emptyJob: Partial<Job> = {
     user_id: user.id,
@@ -701,12 +722,12 @@ export async function createEmptyJob(): Promise<Job> {
 
 export async function copyResume(resumeId: string): Promise<Resume> {
   const supabase = await createClient();
+  const client = supabase.auth as any;
+  client.suppressGetSessionWarning = true;
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
+  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const user = session?.user!
+
 
   const { data: sourceResume, error: fetchError } = await supabase
     .from('resumes')

@@ -23,23 +23,31 @@ import Link from "next/link";
 import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { cn } from "@/lib/utils";
+import { cn, getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { ResumeSortControls, type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { Resume } from "@/lib/types";
+import { createClient } from "@/utils/supabase/server";
+// import ResumeRow from "@/components/dashboard/resume-row";
 
-function getGreeting() {
-  const hour = new Date().getHours();
-  if (hour < 12) return "Good morning";
-  if (hour < 17) return "Good afternoon";
-  return "Good evening";
-}
+
+
 
 export default async function Home({
   searchParams,
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const userId = user?.id;
+  
+  
+  
   // Check if user is coming from confirmation
   const params = await searchParams;
   const isNewSignup = params?.type === 'signup' && params?.token_hash;
@@ -147,6 +155,8 @@ export default async function Home({
 
             {/* Resume Bookshelf */}
             <div className="">
+
+
               {/* Base Resumes Section */}
               <div className="relative">
                 <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
@@ -260,6 +270,13 @@ export default async function Home({
                   </div>
                 </div>
               </div>
+
+              {/* <ResumeRow 
+              baseResumes={baseResumes} 
+              profile={profile} 
+              baseSort={baseSort} 
+              baseDirection={baseDirection} 
+              /> */}
 
               {/* Thin Divider */}
               <div className="relative py-2">
