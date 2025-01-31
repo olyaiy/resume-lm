@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, Copy, FileText, Sparkles } from 'lucide-react';
+import { Trash2, Copy, FileText, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -82,37 +82,41 @@ export function ResumesSection({
 
   return (
     <div className="relative">
-      <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
-        <h2 className={`text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
-          {type === 'base' ? 'Base' : 'Tailored'} Resumes
-        </h2>
-        <div className="flex items-center gap-2">
-          <ResumeSortControls 
-            sortParam={sortParam}
-            directionParam={directionParam}
-            currentSort={currentSort}
-            currentDirection={currentDirection}
-          />
-          {resumes.length > pagination.itemsPerPage && (
-            <Pagination className="ml-2">
-              <PaginationContent>
+      <div className="flex flex-col gap-4 w-full">
+        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <h2 className={`text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
+            {type === 'base' ? 'Base' : 'Tailored'} Resumes
+          </h2>
+          <div className="flex items-center gap-2">
+            <ResumeSortControls 
+              sortParam={sortParam}
+              directionParam={directionParam}
+              currentSort={currentSort}
+              currentDirection={currentDirection}
+            />
+          </div>
+        </div>
+
+        {resumes.length > pagination.itemsPerPage && (
+          <div className="w-full flex items-start justify-start ">
+            <Pagination className=" flex justify-end">
+              <PaginationContent className="gap-1">
                 <PaginationItem>
-                  <PaginationPrevious
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination.currentPage > 1) {
-                        handlePageChange(pagination.currentPage - 1);
-                      }
-                    }}
-                    className={pagination.currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage - 1)}
+                    disabled={pagination.currentPage === 1}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
                 </PaginationItem>
+                
                 {Array.from({ length: Math.ceil(resumes.length / pagination.itemsPerPage) }).map((_, index) => {
                   const pageNumber = index + 1;
                   const totalPages = Math.ceil(resumes.length / pagination.itemsPerPage);
                   
-                  // Show first page, last page, current page, and pages around current page
                   if (
                     pageNumber === 1 || 
                     pageNumber === totalPages || 
@@ -120,50 +124,51 @@ export function ResumesSection({
                   ) {
                     return (
                       <PaginationItem key={index}>
-                        <PaginationLink
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handlePageChange(pageNumber);
-                          }}
-                          isActive={pagination.currentPage === pageNumber}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handlePageChange(pageNumber)}
+                          className={cn(
+                            "h-8 w-8 p-0",
+                            "text-muted-foreground hover:text-foreground",
+                            pagination.currentPage === pageNumber && "font-medium text-foreground"
+                          )}
                         >
                           {pageNumber}
-                        </PaginationLink>
+                        </Button>
                       </PaginationItem>
                     );
                   }
 
-                  // Show ellipsis between gaps
                   if (
                     pageNumber === 2 && pagination.currentPage > 3 ||
                     pageNumber === totalPages - 1 && pagination.currentPage < totalPages - 2
                   ) {
                     return (
                       <PaginationItem key={index}>
-                        <span className="px-2">...</span>
+                        <span className="text-muted-foreground px-2">...</span>
                       </PaginationItem>
                     );
                   }
 
                   return null;
                 })}
+
                 <PaginationItem>
-                  <PaginationNext
-                    href="#"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      if (pagination.currentPage < Math.ceil(resumes.length / pagination.itemsPerPage)) {
-                        handlePageChange(pagination.currentPage + 1);
-                      }
-                    }}
-                    className={pagination.currentPage === Math.ceil(resumes.length / pagination.itemsPerPage) ? 'opacity-50 cursor-not-allowed' : ''}
-                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handlePageChange(pagination.currentPage + 1)}
+                    disabled={pagination.currentPage === Math.ceil(resumes.length / pagination.itemsPerPage)}
+                    className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
                 </PaginationItem>
               </PaginationContent>
             </Pagination>
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <div className="relative pb-6">
