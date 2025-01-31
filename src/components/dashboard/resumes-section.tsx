@@ -10,6 +10,8 @@ import { CreateResumeDialog } from '@/components/resume/management/dialogs/creat
 import { ResumeSortControls, type SortOption, type SortDirection } from '@/components/resume/management/resume-sort-controls';
 import type { Profile, Resume } from '@/lib/types';
 import { deleteResume, copyResume } from '@/utils/actions';
+import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { useState } from 'react';
 
 interface ResumesSectionProps {
   type: 'base' | 'tailored';
@@ -20,6 +22,11 @@ interface ResumesSectionProps {
   currentSort: SortOption;
   currentDirection: SortDirection;
   baseResumes?: Resume[]; // Only needed for tailored type
+}
+
+interface PaginationState {
+  currentPage: number;
+  itemsPerPage: number;
 }
 
 export function ResumesSection({ 
@@ -57,6 +64,22 @@ export function ResumesSection({
     }
   }[type];
 
+  const [pagination, setPagination] = useState<PaginationState>({
+    currentPage: 1,
+    itemsPerPage: 7 // Changed from 6 to 8
+  });
+
+  const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
+  const endIndex = startIndex + pagination.itemsPerPage;
+  const paginatedResumes = resumes.slice(startIndex, endIndex);
+
+  function handlePageChange(page: number) {
+    setPagination(prev => ({
+      ...prev,
+      currentPage: page
+    }));
+  }
+
   return (
     <div className="relative">
       <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
@@ -70,6 +93,76 @@ export function ResumesSection({
             currentSort={currentSort}
             currentDirection={currentDirection}
           />
+          {resumes.length > pagination.itemsPerPage && (
+            <Pagination className="ml-2">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (pagination.currentPage > 1) {
+                        handlePageChange(pagination.currentPage - 1);
+                      }
+                    }}
+                    className={pagination.currentPage === 1 ? 'opacity-50 cursor-not-allowed' : ''}
+                  />
+                </PaginationItem>
+                {Array.from({ length: Math.ceil(resumes.length / pagination.itemsPerPage) }).map((_, index) => {
+                  const pageNumber = index + 1;
+                  const totalPages = Math.ceil(resumes.length / pagination.itemsPerPage);
+                  
+                  // Show first page, last page, current page, and pages around current page
+                  if (
+                    pageNumber === 1 || 
+                    pageNumber === totalPages || 
+                    (pageNumber >= pagination.currentPage - 1 && pageNumber <= pagination.currentPage + 1)
+                  ) {
+                    return (
+                      <PaginationItem key={index}>
+                        <PaginationLink
+                          href="#"
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handlePageChange(pageNumber);
+                          }}
+                          isActive={pagination.currentPage === pageNumber}
+                        >
+                          {pageNumber}
+                        </PaginationLink>
+                      </PaginationItem>
+                    );
+                  }
+
+                  // Show ellipsis between gaps
+                  if (
+                    pageNumber === 2 && pagination.currentPage > 3 ||
+                    pageNumber === totalPages - 1 && pagination.currentPage < totalPages - 2
+                  ) {
+                    return (
+                      <PaginationItem key={index}>
+                        <span className="px-2">...</span>
+                      </PaginationItem>
+                    );
+                  }
+
+                  return null;
+                })}
+                <PaginationItem>
+                  <PaginationNext
+                    href="#"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      if (pagination.currentPage < Math.ceil(resumes.length / pagination.itemsPerPage)) {
+                        handlePageChange(pagination.currentPage + 1);
+                      }
+                    }}
+                    className={pagination.currentPage === Math.ceil(resumes.length / pagination.itemsPerPage) ? 'opacity-50 cursor-not-allowed' : ''}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          )}
         </div>
       </div>
 
@@ -141,7 +234,7 @@ export function ResumesSection({
             </button>
           </CreateResumeDialog>
 
-          {resumes.map((resume) => (
+          {paginatedResumes.map((resume) => (
             <div key={resume.id} className="group relative">
               <AlertDialog>
                 <div className="relative">

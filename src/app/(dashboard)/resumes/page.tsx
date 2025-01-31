@@ -24,7 +24,7 @@ export default async function ResumesPage({
   // Combine and sort resumes
   const allResumes = [...baseResumes, ...tailoredResumes];
   const currentPage = Number(params.page) || 1;
-  const sort = (params.sort as SortOption) || 'updatedAt';
+  const sort = (params.sort as SortOption) || 'createdAt';
   const direction = (params.direction as SortDirection) || 'desc';
 
   // Sort resumes
@@ -35,9 +35,9 @@ export default async function ResumesPage({
         return modifier * a.name.localeCompare(b.name);
       case 'jobTitle':
         return modifier * (a.target_role?.localeCompare(b.target_role || '') || 0);
-      case 'updatedAt':
+      case 'createdAt':
       default:
-        return modifier * (new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+        return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
     }
   });
 
