@@ -87,7 +87,7 @@ export default async function Home({
           return modifier * ((a.target_role || '').localeCompare(b.target_role || '') || 0);
         case 'updatedAt':
         default:
-          return modifier * (new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
+          return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
       }
     });
   }

@@ -10,13 +10,13 @@ import {
 import { ArrowDownAZ, ArrowUpAZ, Calendar } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export type SortOption = 'name' | 'jobTitle' | 'updatedAt'
+export type SortOption = 'name' | 'jobTitle' | 'createdAt'
 export type SortDirection = 'asc' | 'desc'
 
 const sortOptions = [
   { value: 'name', label: 'Name', icon: ArrowDownAZ },
   { value: 'jobTitle', label: 'Job Title', icon: ArrowDownAZ },
-  { value: 'updatedAt', label: 'Last Updated', icon: Calendar },
+  { value: 'createdAt', label: 'Creation Date', icon: Calendar },
 ]
 
 interface ResumeSortControlsProps {
@@ -35,7 +35,7 @@ export function ResumeSortControls({
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  const currentSort = propCurrentSort || (searchParams.get(sortParam) as SortOption) || 'updatedAt'
+  const currentSort = propCurrentSort || (searchParams.get(sortParam) as SortOption) || 'createdAt'
   const direction = propCurrentDirection || (searchParams.get(directionParam) as SortDirection) || 'desc'
 
   function handleSortChange(sort: SortOption) {
