@@ -1,5 +1,4 @@
 import { Resume, Job } from "@/lib/types";
-import { AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2, Plus, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +8,6 @@ import { generate } from "@/components/cover-letter/ai";
 import type { AIConfig } from "@/utils/ai-tools";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
-
 
 interface CoverLetterPanelProps {
   resume: Resume;
@@ -143,103 +141,93 @@ export function CoverLetterPanel({
   };
 
   return (
-    <>
-      <AccordionItem value="cover-letter" className={cn(
-        "mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-emerald-600/50 border-2"
-      )}>
-        <AccordionTrigger className="px-4 py-2 hover:no-underline group">
-          <div className="flex items-center gap-2">
-            <div className="p-1 rounded-md bg-emerald-100/80 transition-transform duration-300 group-data-[state=open]:scale-105">
-              <FileText className="h-3.5 w-3.5 text-emerald-600" />
-            </div>
-            <span className="text-sm font-medium text-emerald-900">Cover Letter</span>
+    <div className={cn(
+      "p-4 backdrop-blur-xl rounded-lg shadow-lg bg-white/80 border border-emerald-600/50",
+      "space-y-6"
+    )}>
+      <div className="flex items-center gap-2 mb-4">
+        <div className="p-1.5 rounded-md bg-emerald-100/80">
+          <FileText className="h-4 w-4 text-emerald-600" />
+        </div>
+        <h3 className="text-lg font-semibold text-emerald-900">Cover Letter</h3>
+      </div>
+
+      {resume.has_cover_letter ? (
+        <div className="space-y-6">
+          <div className={cn(
+            "w-full p-4",
+            "bg-emerald-50",
+            "border-2 border-emerald-300",
+            "shadow-sm",
+            "rounded-lg"
+          )}>
+            <AIImprovementPrompt
+              value={customPrompt}
+              onChange={setCustomPrompt}
+              isLoading={isGenerating}
+              placeholder="e.g., Focus on leadership experience and technical skills"
+              hideSubmitButton
+            />
           </div>
-        </AccordionTrigger>
-        <AccordionContent className="px-4 pt-2 pb-4">
 
-          {/* Cover Letter */}
-          {resume.has_cover_letter ? (
-            <div className="space-y-4">
-              {/* Write with AI */}
-              <div className="space-y-3">
-                <div className={cn(
-                  "w-full p-3",
-                  "bg-emerald-50",
-                  "border-2 border-emerald-300",
-                  "shadow-sm",
-                  "rounded-lg"
-                )}>
-                  <AIImprovementPrompt
-                    value={customPrompt}
-                    onChange={setCustomPrompt}
-                    isLoading={isGenerating}
-                    placeholder="e.g., Focus on leadership experience and technical skills"
-                    hideSubmitButton
-                  />
-                </div>
+          <div className="space-y-3">
+            <Button
+              variant="default"
+              size="sm"
+              className={cn(
+                "w-full",
+                "bg-emerald-600 hover:bg-emerald-700",
+                "text-white",
+                "border border-emerald-200/60",
+                "shadow-sm",
+                "transition-all duration-300",
+                "hover:scale-[1.02] hover:shadow-md",
+                "hover:-translate-y-0.5"
+              )}
+              onClick={generateCoverLetter}
+              disabled={isGenerating || !job}
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Generate with AI
+                </>
+              )}
+            </Button>
 
-                <Button
-                  variant="default"
-                  size="sm"
-                  className={cn(
-                    "w-full",
-                    "bg-emerald-600 hover:bg-emerald-700",
-                    "text-white",
-                    "border border-emerald-200/60",
-                    "shadow-sm",
-                    "transition-all duration-300",
-                    "hover:scale-[1.02] hover:shadow-md",
-                    "hover:-translate-y-0.5"
-                  )}
-                  onClick={generateCoverLetter}
-                  disabled={isGenerating || !job}
-                >
-                  {isGenerating ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Generating...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Generate with AI
-                    </>
-                  )}
-                </Button>
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full"
+              onClick={() => onResumeChange('has_cover_letter', false)}
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Cover Letter
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="p-4 rounded-lg bg-muted/50 border border-muted">
+            <p className="text-sm text-muted-foreground">No cover letter has been created for this resume yet.</p>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
+            onClick={() => onResumeChange('has_cover_letter', true)}
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Cover Letter
+          </Button>
+        </div>
+      )}
 
-                {/* Delete Cover Letter */}
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  className="w-full"
-                  onClick={() => onResumeChange('has_cover_letter', false)}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Delete Cover Letter
-                </Button>
-              </div>
-            </div>
-          ) : (
-            // No Cover Letter
-            <div className="space-y-4">
-              <div className="p-4 rounded-lg bg-muted/50 border border-muted">
-                <p className="text-sm text-muted-foreground">No cover letter has been created for this resume yet.</p>
-              </div>
-              <Button
-                variant="outline"
-                size="sm"
-                className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
-                onClick={() => onResumeChange('has_cover_letter', true)}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Create Cover Letter
-              </Button>
-            </div>
-          )}
-        </AccordionContent>
-      </AccordionItem>
-
-      {/* Error Dialog */}
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
         <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-red-200/40">
           <AlertDialogHeader>
@@ -264,6 +252,6 @@ export function CoverLetterPanel({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
+    </div>
   );
 } 

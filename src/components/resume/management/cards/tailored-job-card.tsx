@@ -249,14 +249,6 @@ export function TailoredJobCard({
   if (!jobId) {
     return (
       <Card className="relative group">
-        {/* Animated background gradients */}
-        <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-rose-50/50 rounded-xl transition-opacity duration-500 group-hover:opacity-70" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,192,203,0.1),transparent_70%)] rounded-xl" />
-        
-        {/* Decorative elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-pink-400/10 via-rose-400/10 to-red-400/10 blur-3xl rounded-full translate-x-1/3 -translate-y-1/3" />
-        <div className="absolute bottom-0 left-0 w-64 h-64 bg-gradient-to-tr from-rose-400/10 via-pink-400/10 to-red-400/10 blur-3xl rounded-full -translate-x-1/3 translate-y-1/3" />
-
         <div className="relative p-8 flex flex-col items-center justify-center space-y-6 text-center">
           <div className="p-4 rounded-2xl bg-gradient-to-br from-pink-500/5 to-rose-500/5 border border-pink-200/20 group-hover:scale-110 transition-transform duration-500">
             <Plus className="w-8 h-8 text-pink-500" />
@@ -390,15 +382,7 @@ export function TailoredJobCard({
 
   return (
     <Card className={cn(
-      "relative group",
-      "bg-gradient-to-br from-pink-50/50 to-rose-50/50",
-      "hover:from-pink-50/60 hover:to-rose-50/60",
-      "border-2 border-pink-200/40",
-      "hover:border-pink-200/60",
-      "rounded-xl",
-      "overflow-hidden",
-      "transition-all duration-500 ease-out",
-      "hover:shadow-lg hover:shadow-pink-500/10"
+      "relative group border-none px-8",
     )}>
 
       <div className="relative">
@@ -415,7 +399,7 @@ export function TailoredJobCard({
               className="p-4 space-y-6"
             >
               {/* Job Details Grid */}
-              <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+              <div className="grid grid-cols-2 gap-x-2 gap-y-3">
                 {[
                   { icon: MapPin, text: effectiveJob.location || 'Location not specified', color: 'pink' },
                   { icon: Briefcase, text: formatWorkLocation(effectiveJob.work_location), color: 'rose' },
@@ -451,7 +435,7 @@ export function TailoredJobCard({
               )}
               
               {/* Keywords */}
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 bg-red-500">
                 {effectiveJob.keywords?.map((keyword, index) => (
                   <motion.div
                     key={keyword}
@@ -526,7 +510,7 @@ export function TailoredJobAccordion({
 
   return (
     <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-pink-600/50 border-2">
-      <div className="px-4 py-2">
+      <div className="px-4">
         <AccordionTrigger className="hover:no-underline group">
           <div className="flex items-center gap-2">
             <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", "bg-pink-100/80")}>
@@ -541,8 +525,8 @@ export function TailoredJobAccordion({
           </div>
         </AccordionTrigger>
       </div>
-      <AccordionContent className="px-4 pt-2 pb-4">
-        <div className="space-y-4">
+      <AccordionContent className=" ">
+        <div className="">
           <TailoredJobCard 
             jobId={resume.job_id || null}
             job={job}

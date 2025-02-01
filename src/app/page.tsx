@@ -13,19 +13,15 @@
 
 import { redirect } from "next/navigation";
 
-import { getDashboardData, deleteResume, copyResume } from "../utils/actions";
-import { FileText, Sparkles, User, Trash2, Copy } from "lucide-react";
+import { getDashboardData } from "../utils/actions";
+import {User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { MiniResumePreview } from "@/components/resume/shared/mini-resume-preview";
 import { ProfileRow } from "@/components/dashboard/profile-row";
-import Link from "next/link";
-import { CreateResumeDialog } from "@/components/resume/management/dialogs/create-resume-dialog";
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { cn, getGreeting } from "@/lib/utils";
+import { getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
-import { ResumeSortControls, type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
+import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { Resume } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
