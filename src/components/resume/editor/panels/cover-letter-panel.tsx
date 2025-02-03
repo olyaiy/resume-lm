@@ -64,9 +64,7 @@ export function CoverLetterPanel({
       4. Use actual values directly, not placeholders
       5. Format the header EXACTLY like this (but without the brackets, using real data):
          <p>
-         [Date]<br /><br />
-         
-         [Recipient Name/Title]<br />
+         [Date]<br />
          [Company Name]<br />
          [Company Address]<br />
          [City, Province/State, Country]<br />
@@ -74,8 +72,7 @@ export function CoverLetterPanel({
 
       6. Format the signature EXACTLY like this (but without the brackets, using real data):
          <p>
-         Sincerely,<br /><br />
-         
+         Sincerely,<br />
          [Full Name]<br />
          </p>
          
@@ -83,7 +80,6 @@ export function CoverLetterPanel({
          [Email Address]<br />
          [Phone Number]<br />
          [LinkedIn URL]<br />
-         [Other URLs]<br />
          </p>
 
       7. NEVER combine information on the same line

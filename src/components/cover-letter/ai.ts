@@ -18,17 +18,15 @@ export async function generate(input: string, config?: AIConfig) {
     - Maintaining authenticity
     - aim for 600-700 words
 
-    
     Ensure that your output is in an HTML format, but do NOT start with html tags.
 
     start the text with this template:
 
-    <p>
-    [Current Date] 
-    [Company Name] \n
-    [Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided) \n
-    [City, Province, Postal Code] (If provided, otherwise omit) \n
-    </p><h4>RE: [Job Title and Reference Number]</h4>
+    <p>[Current Date]</p>
+    <p>[Company Name]</p>
+    <p>[Address] (If provided, otherwise omit, DO NOT INCLUDE [ADDRESS] but write the address if provided)</p>
+    <p>[City, Province, Postal Code] (If provided, otherwise omit)</p>
+    <h4>RE: [Job Title and Reference Number]</h4>
 
     <p>Dear Hiring Managers at [Company Name],</p>
     IMPORTANT: DO NOT USE ANY OTHER SALUTATION FORMAT. ALWAYS USE "Dear Hiring Managers at [Company Name]" 
@@ -56,7 +54,6 @@ export async function generate(input: string, config?: AIConfig) {
 
     [Closing Paragraph: Reiterate your enthusiasm for the role and the value you would bring. Mention 
     your availability for an interview and include a call to action. Keep to 3-4 sentences.]
-
 
     Sincerely,
     [Applicant Name]
