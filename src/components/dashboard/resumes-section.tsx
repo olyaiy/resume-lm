@@ -10,7 +10,7 @@ import { CreateResumeDialog } from '@/components/resume/management/dialogs/creat
 import { ResumeSortControls, type SortOption, type SortDirection } from '@/components/resume/management/resume-sort-controls';
 import type { Profile, Resume } from '@/lib/types';
 import { deleteResume, copyResume } from '@/utils/actions';
-import { Pagination, PaginationContent, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
 import { useState } from 'react';
 
 interface ResumesSectionProps {

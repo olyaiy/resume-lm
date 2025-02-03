@@ -61,9 +61,8 @@ export async function tailorResumeToJob(
     - Require 1:1 mapping between JD technical requirements and resume content  
     - If no direct match exists: "Legacy system modernization → Cloud migration patterns [JD concept]"  
     - Force metric anchoring: "Improved performance → 3.2x throughput increase via Go profiling"  
+    - Remove all [JD...] annotations from final content - these are for your internal reference only. IT IS CRUICAL THAT THESE JD REFRENCES DO NOT MAKE IT INTO THE FINAL OUTPUT.
 
-
-    
     Resume:
     ${JSON.stringify(resume, null, 2)}
     
