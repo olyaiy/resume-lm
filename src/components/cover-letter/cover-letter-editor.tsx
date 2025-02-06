@@ -24,9 +24,15 @@ interface CoverLetterEditorProps {
   initialData: Record<string, unknown>;
   onChange?: (data: Record<string, unknown>) => void;
   containerWidth: number;
+  isPrintVersion?: boolean;
 }
 
-function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLetterEditorProps) {
+function CoverLetterEditor({ 
+  initialData, 
+  onChange, 
+  containerWidth,
+  isPrintVersion = false 
+}: CoverLetterEditorProps) {
   // Calculate scale based on container width
   // 816 is our base width for a letter size paper (8.5 inches * 96 DPI)
   const scale = containerWidth / 816;
@@ -55,13 +61,11 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
     }
   })
 
-  // Update effect to handle partial updates
+  // Update effect to handle content changes
   useEffect(() => {
     if (editor && initialData?.content) {
       const currentContent = editor.getHTML()
       const newContent = initialData.content as string
-      
-      // Allow partial updates if new content is longer
       if (newContent !== currentContent) {
         editor.commands.setContent(newContent)
       }
@@ -76,12 +80,12 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
   }, [editor])
 
   return (
-    <div className="relative w-full max-w-[816px] mx-auto  shadow-lg  overflow-hidden mb-12 bg-white">
+    <div className="relative w-full max-w-[816px] mx-auto shadow-lg overflow-hidden mb-12 bg-white">
       {editor && (
         <BubbleMenu 
           editor={editor} 
           tippyOptions={{ duration: 100 }}
-          className="flex overflow-hidden rounded-lg border border-gray-300 border-2 bg-white shadow-xl"
+          className="flex overflow-hidden rounded-lg border border-gray-300 bg-white shadow-xl"
         >
           {/* Text Style */}
           <div className="flex items-center">
@@ -205,22 +209,31 @@ function CoverLetterEditor({ initialData, onChange, containerWidth }: CoverLette
           </div>
         </BubbleMenu>
       )}
-      <div 
-        className="relative pb-[129.41%] " // 11/8.5 = 1.2941
-        style={{ aspectRatio: '8.5 / 11' }}
-      >
+      <div className={cn(
+        "relative pb-[129.41%] print:!pb-0",
+        isPrintVersion && "!pb-0 !relative !shadow-none"
+      )}>
         <div 
-          className="absolute inset-0 origin-top-left  h-ful;l"
-          style={{
-            transform: `scale(${scale})`,
-            width: `${(100 / scale)}%`,
-            height: `${(100 / scale)}%`,
-          }}
+          className={cn(
+            "absolute inset-0 origin-top-left h-full print:!relative",
+            isPrintVersion && "!relative !transform-none !w-full !h-auto"
+          )}
+          style={!isPrintVersion ? {
+            transform: `scale(${containerWidth / 816})`,
+            width: `${(100 / (containerWidth / 816))}%`,
+            height: `${(100 / (containerWidth / 816))}%`,
+          } : {}}
         >
-          <div className="absolute inset-0 my-12 mx-16 overflow-hidden ">
+          <div className={cn(
+            "absolute inset-0 my-12 mx-16 overflow-hidden",
+            isPrintVersion && "!my-0 !mx-8"
+          )}>
             <EditorContent 
               editor={editor} 
-              className="h-full focus:outline-none prose prose-xxs max-w-none flex flex-col "
+              className={cn(
+                "h-full focus:outline-none prose prose-xxs max-w-none flex flex-col",
+                isPrintVersion && "!prose-sm !text-[12pt]"
+              )}
             />
           </div>
         </div>

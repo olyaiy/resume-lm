@@ -159,10 +159,15 @@ export function ResumeEditorActions({
                         margin: [0, 0, -0.5, 0],
                         filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: { 
-                          scale: 2,
+                        html2canvas: {
+                          backgroundColor: 'red',
                           useCORS: true,
-                          letterRendering: true
+                          letterRendering: true,
+                          // width: 700,
+                          // height: 1000,
+                          // windowWidth: 700,
+                          logging: true,
+                          // windowHeight: 2000
                         },
                         jsPDF: { 
                           unit: 'in', 

@@ -1,5 +1,5 @@
 import CoverLetterEditor from "./cover-letter-editor";
-import { useRef } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { useResumeContext } from '@/components/resume/editor/resume-editor-context';
@@ -27,6 +27,18 @@ export default function CoverLetter({
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 
+  // Create a single source of truth for the content
+  const [content, setContent] = useState(coverLetterData?.content || '');
+
+  const handleContentChange = useCallback((data: Record<string, unknown>) => {
+    setContent(data.content as string);
+    onCoverLetterChange?.({
+      ...data,
+      content: data.content,
+      lastUpdated: new Date().toISOString()
+    });
+  }, [onCoverLetterChange]);
+
   const handleExportPDF = async () => {
     if (!contentRef.current) return;
 
@@ -40,9 +52,9 @@ export default function CoverLetter({
         filename: `cover-letter-${resumeId}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
-          scale: 2,
+          // scale: 2,
           useCORS: true,
-          letterRendering: true
+          letterRendering: true,
         },
         jsPDF: { 
           unit: 'in', 
@@ -94,23 +106,36 @@ export default function CoverLetter({
   // If cover letter exists, render it
   return (
     <div className="">
+      {/* Print version (static snapshot) */}
+      <div 
+        ref={contentRef} 
+        id="cover-letter-content"
+        className="absolute -left-[9999px] w-[816px]"
+      >
+        <div 
+          className="p-16 prose prose-sm !max-w-none"
+          dangerouslySetInnerHTML={{ __html: content as string }} 
+        />
+      </div>
       
-        <div ref={contentRef} id="cover-letter-content" className="">
-          <CoverLetterEditor 
-            initialData={coverLetterData || {}}
-            onChange={onCoverLetterChange}
-            containerWidth={containerWidth}
-          />
-        </div>
-        <Button
-          variant="outline"
-          size="sm"
-          className="w-full border-blue-600/50 text-blue-700 hover:bg-blue-50"
-          onClick={handleExportPDF}
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Export as PDF
-        </Button>
+      {/* Interactive editor */}
+      <div className="[&_.print-hidden]:hidden">
+        <CoverLetterEditor 
+          initialData={{ content }}
+          onChange={handleContentChange}
+          containerWidth={containerWidth}
+        />
+      </div>
+      
+      <Button
+        variant="outline"
+        size="sm"
+        className="w-full border-blue-600/50 text-blue-700 hover:bg-blue-50"
+        onClick={handleExportPDF}
+      >
+        <Download className="h-4 w-4 mr-2" />
+        Export as PDF
+      </Button>
     </div>
   );
 }

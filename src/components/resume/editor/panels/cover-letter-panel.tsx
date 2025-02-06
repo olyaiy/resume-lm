@@ -72,7 +72,7 @@ export function CoverLetterPanel({
 
       6. Format the signature EXACTLY like this (but without the brackets, using real data):
          <p>
-         Sincerely,<br />
+         Sincerely,
          [Full Name]<br />
          </p>
          
