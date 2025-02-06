@@ -15,7 +15,7 @@ interface DashboardData {
 
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
-  const { data: { session }, error } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     return {
@@ -404,7 +404,7 @@ export async function createBaseResume(
   }
 ): Promise<Resume> {
   const supabase = await createClient();
-  const { data: { session }, error } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');
@@ -501,7 +501,7 @@ export async function createTailoredResume(
   tailoredContent: z.infer<typeof simplifiedResumeSchema>
 ) {
   const supabase = await createClient();
-  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');
@@ -546,7 +546,7 @@ export async function createTailoredResume(
 
 export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
   const supabase = await createClient();
-  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');
@@ -579,12 +579,11 @@ export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>)
 
 export async function deleteJob(jobId: string): Promise<void> {
   const supabase = await createClient();
-  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');
   }
-  const user = session.user;
 
   // First, get all resumes that reference this job
   const { data: affectedResumes } = await supabase
@@ -687,7 +686,7 @@ export async function deleteTailoredJob(jobId: string): Promise<void> {
 
 export async function createEmptyJob(): Promise<Job> {
   const supabase = await createClient();
-  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');
@@ -725,7 +724,7 @@ export async function createEmptyJob(): Promise<Job> {
 
 export async function copyResume(resumeId: string): Promise<Resume> {
   const supabase = await createClient();
-  const { data: { session }, error: userError } = await supabase.auth.getSession()
+  const { data: { session } } = await supabase.auth.getSession()
   
   if (!session?.user) {
     throw new Error('User not authenticated');

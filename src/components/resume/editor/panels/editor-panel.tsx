@@ -2,7 +2,7 @@
 
 import { Resume, Profile, Job, DocumentSettings } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion, AccordionTrigger } from "@/components/ui/accordion";
+import { Accordion } from "@/components/ui/accordion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Suspense, useRef } from "react";
 import { cn } from "@/lib/utils";
@@ -22,13 +22,7 @@ import {
 import {LucideIcon } from "lucide-react";
 import { ResumeEditorTabs } from "../header/resume-editor-tabs";
 
-interface AccordionHeaderProps {
-  icon: LucideIcon;
-  label: string;
-  iconColor: string;
-  bgColor: string;
-  textColor: string;
-}
+
 
 
 
