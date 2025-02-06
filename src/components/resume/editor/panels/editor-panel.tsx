@@ -30,18 +30,7 @@ interface AccordionHeaderProps {
   textColor: string;
 }
 
-function AccordionHeader({ icon: Icon, label, iconColor, bgColor, textColor }: AccordionHeaderProps) {
-  return (
-    <AccordionTrigger className="px-4 py-2 hover:no-underline group">
-      <div className="flex items-center gap-2">
-        <div className={cn("p-1 rounded-md transition-transform duration-300 group-data-[state=open]:scale-105", bgColor)}>
-          <Icon className={cn("h-3.5 w-3.5", iconColor)} />
-        </div>
-        <span className={cn("text-sm font-medium", textColor)}>{label}</span>
-      </div>
-    </AccordionTrigger>
-  );
-}
+
 
 interface EditorPanelProps {
   resume: Resume;

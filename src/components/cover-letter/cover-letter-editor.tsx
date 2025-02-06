@@ -33,9 +33,7 @@ function CoverLetterEditor({
   containerWidth,
   isPrintVersion = false 
 }: CoverLetterEditorProps) {
-  // Calculate scale based on container width
-  // 816 is our base width for a letter size paper (8.5 inches * 96 DPI)
-  const scale = containerWidth / 816;
+
 
   const editor = useEditor({
     immediatelyRender: false,

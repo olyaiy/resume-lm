@@ -44,7 +44,7 @@ export default async function Home({
     data: { user },
   } = await supabase.auth.getUser()
 
-  const userId = user?.id;
+
   
   
   
