@@ -23,7 +23,6 @@ import { getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { Resume } from "@/lib/types";
-import { createClient } from "@/utils/supabase/server";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 
 
@@ -38,7 +37,6 @@ export default async function Home({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  const supabase = await createClient();
 
 
 

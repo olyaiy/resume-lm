@@ -19,7 +19,6 @@ import {
   CertificationsForm,
   DocumentSettingsForm
 } from '../dynamic-components';
-import {LucideIcon } from "lucide-react";
 import { ResumeEditorTabs } from "../header/resume-editor-tabs";
 
 
