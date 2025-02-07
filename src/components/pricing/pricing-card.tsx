@@ -97,7 +97,7 @@ export function PricingCard({
             )}
             variant={isProVariant ? 'default' : 'outline'}
             onClick={() => onAction(plan)}
-            disabled={isLoading}
+            disabled={isLoading || isCurrentPlan}
           >
             {isLoading && isCurrentPlan ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -214,7 +214,7 @@ export async function POST(req: Request) {
         await handleSubscriptionChange(
           subscription.customer as string,
           {
-            subscriptionId: "",
+            subscriptionId: subscription.id,
             planId: 'free',
             status: 'canceled',
             currentPeriodEnd: null,

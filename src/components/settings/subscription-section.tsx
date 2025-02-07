@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Sparkles, Star, Trophy, Rocket, Clock, Zap } from "lucide-react"
@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { createPortalSession, postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { PricingCard, type Plan } from '../pricing/pricing-card';
 import { useRouter } from 'next/navigation';
+import { getSubscriptionStatus } from '@/utils/actions';
 
 const plans = [
   {
@@ -37,20 +38,41 @@ const plans = [
   }
 ];
 
-interface SubscriptionSectionProps {
-  subscription_plan?: string | null;
-  subscription_status?: string | null;
-  current_period_end?: string | null;
+interface Profile {
+  subscription_plan: string | null;
+  subscription_status: string | null;
+  current_period_end: string | null;
+  trial_end: string | null;
+  stripe_customer_id: string | null;
+  stripe_subscription_id: string | null;
 }
 
-export function SubscriptionSection({ 
-  subscription_plan = 'free',
-  subscription_status,
-  current_period_end
-}: SubscriptionSectionProps) {
+export function SubscriptionSection() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+
+  useEffect(() => {
+    async function fetchSubscriptionStatus() {
+      try {
+        const data = await getSubscriptionStatus();
+        setProfile(data);
+      } catch (error) {
+        console.error('Error fetching subscription status:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    }
+
+    fetchSubscriptionStatus();
+  }, []);
+
+  const subscription_plan = profile?.subscription_plan;
+  const subscription_status = profile?.subscription_status;
+  const current_period_end = profile?.current_period_end;
+  
   const isPro = subscription_plan?.toLowerCase() === 'pro';
   const isCanceling = subscription_status === 'canceled';
 
@@ -86,6 +108,18 @@ export function SubscriptionSection({
   const daysRemaining = current_period_end
     ? Math.max(0, Math.ceil((new Date(current_period_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
+
+  if (isLoadingProfile) {
+    return (
+      <div className="space-y-16 relative min-h-[600px] flex items-center justify-center">
+        <div className="animate-pulse flex flex-col items-center gap-4">
+          <div className="h-16 w-16 bg-muted rounded-2xl" />
+          <div className="h-8 w-48 bg-muted rounded-full" />
+          <div className="h-4 w-64 bg-muted rounded-full" />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-16 relative">

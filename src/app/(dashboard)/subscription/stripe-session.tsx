@@ -27,7 +27,7 @@ export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
             email: user.email
         });
 
-        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/checkout-return?session_id={CHECKOUT_SESSION_ID}`;
+        const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/subscription/checkout-return?session_id={CHECKOUT_SESSION_ID}`;
 
         const session = await stripe.checkout.sessions.create({
             customer: customerId,
