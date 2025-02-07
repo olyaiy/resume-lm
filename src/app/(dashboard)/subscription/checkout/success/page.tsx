@@ -8,7 +8,7 @@ const SuccessPage = () => {
                     Payment Successful!
                 </h1>
                 <p className="text-muted-foreground">
-                    Your subscription has been activated. You now have full access to ResumeLM's premium features.
+                    Your subscription has been activated. You now have full access to ResumeLM&apos;s premium features.
                 </p>
             </div>
             

@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PricingCard, type Plan } from './pricing-card';
 import { motion } from 'framer-motion';
@@ -44,7 +43,6 @@ interface FreePlanDisplayProps {
 
 export function FreePlanDisplay({ initialProfile }: FreePlanDisplayProps) {
   const router = useRouter();
-  const [isCheckingOut, setIsCheckingOut] = useState(false);
   const subscriptionPlan = initialProfile?.subscription_plan?.toLowerCase() || 'free';
 
   const handleCheckout = async (plan: Plan) => {
@@ -169,7 +167,6 @@ export function FreePlanDisplay({ initialProfile }: FreePlanDisplayProps) {
               key={plan.title}
               plan={plan}
               isCurrentPlan={plan.title.toLowerCase() === subscriptionPlan}
-              isLoading={isCheckingOut}
               onAction={handleCheckout}
               variant={plan.title === 'Pro' ? 'pro' : 'default'}
               className={cn(
@@ -180,6 +177,7 @@ export function FreePlanDisplay({ initialProfile }: FreePlanDisplayProps) {
                   "transition-all duration-500"
                 ]
               )}
+              isLoading={false}
             />
           </motion.div>
         ))}

@@ -1,9 +1,8 @@
 'use client'
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
-import { getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
 import { useSearchParams } from 'next/navigation'
 
 import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
@@ -34,13 +33,26 @@ export function CheckoutForm() {
     const searchParams = useSearchParams()
     const priceId = searchParams.get('price_id')!
 
-    // Remove unused state declarations
     const fetchClientSecret = useCallback(async () => {
         const stripeResponse = await postStripeSession({ priceId });
         return stripeResponse.clientSecret;
     }, [priceId]);
 
-    // Remove useEffect that's setting unused state
+    React.useEffect(() => {
+        async function checkStatuses() {
+            try {
+                // Remove unused Promise.all call
+                await Promise.all([
+                    // DELETE THIS BLOCK
+                ]);
+            } finally {
+                // Empty finally block can remain
+            }
+        }
+
+        checkStatuses();
+    }, []);
+
     const options = { fetchClientSecret };
 
     return (

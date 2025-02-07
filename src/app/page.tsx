@@ -48,6 +48,7 @@ export default async function Home({
 
 
   const userId = user?.id;
+  void userId;
   
   
   // Check if user is coming from confirmation
