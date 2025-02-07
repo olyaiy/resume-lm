@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { useSearchParams } from 'next/navigation'
