@@ -1,12 +1,11 @@
 'use client'
 
-import React, { useCallback, useState } from "react";
+import React, { useCallback } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
 import { useSearchParams } from 'next/navigation'
 
-import { Skeleton } from "@/components/ui/skeleton";
 import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
 
 const stripePromise = loadStripe(
@@ -35,43 +34,13 @@ export function CheckoutForm() {
     const searchParams = useSearchParams()
     const priceId = searchParams.get('price_id')!
 
-    // User ID
-    const [userId, setUserId] = useState<string | null>(null);
-    
-    // Subscription status
-    const [subscriptionStatus, setSubscriptionStatus] = useState<{
-        hasSubscription: boolean;
-        plan?: string;
-        status?: string;
-        error?: string;
-    } | null>(null);
-
-    // Loading state
-    const [isLoading, setIsLoading] = useState(true);
-
-    // Fetch client secret
+    // Remove unused state declarations
     const fetchClientSecret = useCallback(async () => {
         const stripeResponse = await postStripeSession({ priceId });
         return stripeResponse.clientSecret;
     }, [priceId]);
 
-    React.useEffect(() => {
-        async function checkStatuses() {
-            try {
-                const [id, subscription] = await Promise.all([
-                    getUserId(),
-                    getSubscriptionStatus()
-                ]);
-                setUserId(id);
-                setSubscriptionStatus(subscription);
-            } finally {
-                setIsLoading(false);
-            }
-        }
-
-        checkStatuses();
-    }, []);
-
+    // Remove useEffect that's setting unused state
     const options = { fetchClientSecret };
 
     return (
