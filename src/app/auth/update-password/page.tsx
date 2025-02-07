@@ -21,8 +21,8 @@ export default function UpdatePasswordPage() {
   useEffect(() => {
     // Check if user is in password reset flow
     const checkSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
         router.push("/auth/login");
       }
     };

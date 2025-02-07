@@ -149,6 +149,7 @@ export function SignupForm() {
                 id="email"
                 name="email"
                 type="email"
+                autoComplete="username"
                 value={formData.email}
                 onChange={(e) => handleInputChange('email', e.target.value)}
                 onBlur={() => setFieldTouched('email')}
@@ -170,6 +171,7 @@ export function SignupForm() {
                 id="password"
                 name="password"
                 type="password"
+                autoComplete="new-password"
                 value={formData.password}
                 onChange={(e) => handleInputChange('password', e.target.value)}
                 onBlur={() => setFieldTouched('password')}
@@ -192,6 +194,7 @@ export function SignupForm() {
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 onBlur={() => setFieldTouched('confirmPassword')}

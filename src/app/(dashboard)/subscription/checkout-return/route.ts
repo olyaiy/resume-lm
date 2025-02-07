@@ -20,15 +20,12 @@ export const GET = async (request: NextRequest) => {
   const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
 
   if (session.status === "complete") {
-    
-    return redirect(`/subscription/checkout/success`);
+    return redirect(`/subscription/checkout/success?session_id=${stripeSessionId}`);
   }
 
   if (session.status === "open") {
-    // Here you'll likely want to head back to some pre-payment page in your checkout 
-    // so the user can try again
     return redirect(
-      `/subscription/checkout`,
+      `/subscription/checkout?price_id=${session.metadata?.price_id}`,
     );
   }
 

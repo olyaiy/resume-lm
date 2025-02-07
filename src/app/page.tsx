@@ -24,6 +24,8 @@ import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { Resume } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
+import { createClient } from "@/utils/supabase/server";
+
 
 
 
@@ -38,10 +40,14 @@ export default async function Home({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
 
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
 
-
-  
+  const userId = user?.id;
   
   
   // Check if user is coming from confirmation

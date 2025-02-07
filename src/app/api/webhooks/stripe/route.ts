@@ -3,6 +3,7 @@
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { manageSubscriptionStatusChange } from '@/utils/stripe/actions'
+import { createServiceClient } from '@/utils/supabase/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-12-18.acacia'
@@ -15,16 +16,17 @@ const relevantEvents = new Set([
   'invoice.paid',
   'customer.subscription.created',
   'customer.subscription.updated',
-  'customer.subscription.deleted'
+  'customer.subscription.deleted',
+  'customer.deleted'
 ]);
 
 async function handleSubscriptionChange(
   stripeCustomerId: string,
   subscriptionData: {
-    subscriptionId: string;
+    subscriptionId: string | null;
     planId: string;
     status: 'active' | 'canceled';
-    currentPeriodEnd: Date;
+    currentPeriodEnd: Date | null;
     trialEnd?: Date | null;
     cancelAtPeriodEnd?: boolean;
   }
@@ -39,13 +41,13 @@ async function handleSubscriptionChange(
       currentStatus: subscriptionData.status,
       cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
       planId: subscriptionData.planId,
-      accessUntil: subscriptionData.currentPeriodEnd.toISOString(),
+      accessUntil: subscriptionData.currentPeriodEnd ? subscriptionData.currentPeriodEnd.toISOString() : null,
       trialStatus: subscriptionData.trialEnd ? 'Active' : 'Not Active'
     });
 
     // Update subscription in database
     await manageSubscriptionStatusChange(
-      subscriptionData.subscriptionId,
+      subscriptionData.subscriptionId ?? '',
       stripeCustomerId,
       subscriptionData.status === 'active' && !subscriptionData.cancelAtPeriodEnd
     );
@@ -56,7 +58,7 @@ async function handleSubscriptionChange(
       subscriptionId: subscriptionData.subscriptionId,
       status: subscriptionData.status,
       cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
-      accessUntil: subscriptionData.currentPeriodEnd.toISOString(),
+      accessUntil: subscriptionData.currentPeriodEnd ? subscriptionData.currentPeriodEnd.toISOString() : null,
       note: subscriptionData.cancelAtPeriodEnd 
         ? 'Subscription is cancelled but remains active until period end'
         : subscriptionData.status === 'active' 
@@ -110,11 +112,11 @@ export async function POST(req: Request) {
     }
 
     if (!relevantEvents.has(event.type)) {
-      console.log(`⚠️ Unhandled event type: ${event.type}`);
+      console.log(`ℹ️ Skipping unhandled event type: ${event.type}`);
       return new Response(
-        JSON.stringify({ error: `Unhandled event type: ${event.type}` }),
+        JSON.stringify({ received: true, processed: false, message: `Event type ${event.type} was received but not processed` }),
         { 
-          status: 400,
+          status: 200,
           headers: { 'Content-Type': 'application/json' }
         }
       );
@@ -212,13 +214,37 @@ export async function POST(req: Request) {
         await handleSubscriptionChange(
           subscription.customer as string,
           {
-            subscriptionId: subscription.id,
+            subscriptionId: "",
             planId: 'free',
             status: 'canceled',
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
-            trialEnd: null
+            currentPeriodEnd: null,
+            trialEnd: null,
+            cancelAtPeriodEnd: false
           }
         );
+        break;
+      }
+
+      case 'customer.deleted': {
+        const customer = event.data.object as Stripe.Customer;
+        const supabase = await createServiceClient();
+
+        try {
+          const { error } = await supabase
+            .from('subscriptions')
+            .delete()
+            .eq('stripe_customer_id', customer.id);
+
+          if (error) throw error;
+          
+          console.log('🗑️ Deleted subscription record for customer:', {
+            customerId: customer.id,
+            supabaseUUID: customer.metadata.supabaseUUID
+          });
+        } catch (error) {
+          console.error('❌ Failed to clear Stripe customer data:', error);
+          throw error;
+        }
         break;
       }
 

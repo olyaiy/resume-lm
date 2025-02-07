@@ -121,6 +121,7 @@ export function LoginForm() {
             className="pl-10"
             validation={validations.email}
             isTouched={touchedFields.email}
+            autoComplete="username"
           />
         </div>
       </div>
@@ -149,6 +150,7 @@ export function LoginForm() {
             className="pl-10"
             validation={validations.password}
             isTouched={touchedFields.password}
+            autoComplete="current-password"
           />
         </div>
       </div>

@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PricingCard, type Plan } from './pricing-card';
-import { postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { motion } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Sparkles, Rocket, Zap } from 'lucide-react';
@@ -50,15 +49,8 @@ export function FreePlanDisplay({ initialProfile }: FreePlanDisplayProps) {
 
   const handleCheckout = async (plan: Plan) => {
     if (!plan.priceId) return;
-
-    try {
-      setIsCheckingOut(true);
-      const { clientSecret } = await postStripeSession({ priceId: plan.priceId });
-      router.push(`/subscription/checkout?session_id=${clientSecret}`);
-    } catch (error) {
-      console.error(`Error during checkout:`, error);
-      setIsCheckingOut(false);
-    }
+    
+    router.push(`/subscription/checkout?price_id=${plan.priceId}`);
   };
 
   return (

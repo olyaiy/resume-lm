@@ -2,11 +2,9 @@
 
 import React, { useCallback, useState } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import {
-    EmbeddedCheckoutProvider,
-    EmbeddedCheckout,
-} from "@stripe/react-stripe-js";
-import { checkAuth, getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
+import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
+import { getUserId, getSubscriptionStatus } from "@/app/auth/login/actions";
+import { useSearchParams } from 'next/navigation'
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
@@ -15,40 +13,43 @@ const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
 );
 
-interface AuthStatus {
-    authenticated: boolean;
-    user?: { id: string; email?: string } | null;
-}
+// function StatusCard({ title, children, isLoading }: { 
+//     title: string; 
+//     children: React.ReactNode; 
+//     isLoading: boolean;
+// }) {
+//     return (
+//         <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
+//             <h3 className="text-lg font-semibold mb-2">{title}</h3>
+//             {isLoading ? (
+//                 <div className="space-y-2">
+//                     <Skeleton className="h-4 w-3/4" />
+//                     <Skeleton className="h-4 w-1/2" />
+//                 </div>
+//             ) : children}
+//         </div>
+//     );
+// }
 
-function StatusCard({ title, children, isLoading }: { 
-    title: string; 
-    children: React.ReactNode; 
-    isLoading: boolean;
-}) {
-    return (
-        <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
-            <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            {isLoading ? (
-                <div className="space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                </div>
-            ) : children}
-        </div>
-    );
-}
+export function CheckoutForm() {
+    const searchParams = useSearchParams()
+    const priceId = searchParams.get('price_id')!
 
-function CheckoutContent({ priceId }: { priceId: string }) {
-    const [authStatus, setAuthStatus] = useState<AuthStatus | null>(null);
+    // User ID
     const [userId, setUserId] = useState<string | null>(null);
+    
+    // Subscription status
     const [subscriptionStatus, setSubscriptionStatus] = useState<{
         hasSubscription: boolean;
         plan?: string;
         status?: string;
         error?: string;
     } | null>(null);
+
+    // Loading state
     const [isLoading, setIsLoading] = useState(true);
 
+    // Fetch client secret
     const fetchClientSecret = useCallback(async () => {
         const stripeResponse = await postStripeSession({ priceId });
         return stripeResponse.clientSecret;
@@ -57,16 +58,12 @@ function CheckoutContent({ priceId }: { priceId: string }) {
     React.useEffect(() => {
         async function checkStatuses() {
             try {
-                const [status, id, subscription] = await Promise.all([
-                    checkAuth(),
+                const [id, subscription] = await Promise.all([
                     getUserId(),
                     getSubscriptionStatus()
                 ]);
-                setAuthStatus(status);
                 setUserId(id);
                 setSubscriptionStatus(subscription);
-            } catch (error) {
-                console.error('Error checking statuses:', error);
             } finally {
                 setIsLoading(false);
             }
@@ -85,32 +82,7 @@ function CheckoutContent({ priceId }: { priceId: string }) {
                 </EmbeddedCheckoutProvider>
             </div>
 
-            <div className="mt-8 space-y-4">
-                <StatusCard title="Full Auth Status" isLoading={isLoading}>
-                    <div className="space-y-2">
-                        <p>
-                            <span className="font-medium">Status:</span>{' '}
-                            {authStatus?.authenticated ? (
-                                <span className="text-green-600">Authenticated</span>
-                            ) : (
-                                <span className="text-red-600">Not Authenticated</span>
-                            )}
-                        </p>
-                        {authStatus?.authenticated && authStatus.user && (
-                            <>
-                                <p>
-                                    <span className="font-medium">User ID:</span>{' '}
-                                    {authStatus.user.id}
-                                </p>
-                                <p>
-                                    <span className="font-medium">Email:</span>{' '}
-                                    {authStatus.user.email}
-                                </p>
-                            </>
-                        )}
-                    </div>
-                </StatusCard>
-
+            {/* <div className="mt-8 space-y-4">
                 <StatusCard title="Simple User ID Check" isLoading={isLoading}>
                     <div className="space-y-2">
                         <p>
@@ -158,11 +130,8 @@ function CheckoutContent({ priceId }: { priceId: string }) {
                         )}
                     </div>
                 </StatusCard>
-            </div>
+            </div> */}
         </div>
     );
 }
 
-export function CheckoutForm({ priceId }: { priceId: string }) {
-    return <CheckoutContent priceId={priceId} />;
-}
