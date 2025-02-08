@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getResumeById } from "@/utils/actions";
+import { getResumeById } from "@/utils/actions/resumes/actions";
 import { ResumeEditorClient } from "@/components/resume/editor/resume-editor-client";
 import { Metadata } from "next";
 import { Resume } from "@/lib/types";

@@ -13,7 +13,8 @@
 
 import { redirect } from "next/navigation";
 
-import { checkSubscriptionPlan, countResumes, getDashboardData } from "../utils/actions";
+import { checkSubscriptionPlan, getDashboardData } from "../utils/actions";
+import { countResumes } from "../utils/actions/resumes/actions";
 import {User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -43,13 +44,6 @@ export default async function Home({
 
   const supabase = await createClient();
   
-  // Check if user is on Pro plan
-  const subscription = await checkSubscriptionPlan();
-  const isProPlan = subscription.plan === 'Pro';
-  
-  // Count resumes for base and tailored sections
-  const baseResumesCount = await countResumes('base');
-  const tailoredResumesCount = await countResumes('tailored');
 
   const {
     data: { user },
@@ -106,6 +100,16 @@ export default async function Home({
   // Sort both resume lists
   const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
   const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
+  
+  // Check if user is on Pro plan
+  const subscription = await checkSubscriptionPlan();
+  const isProPlan = subscription.plan === 'pro';
+  
+  // Count resumes for base and tailored sections
+  const baseResumesCount = await countResumes('base');
+  const tailoredResumesCount = await countResumes('tailored');
+  console.log(baseResumesCount, tailoredResumesCount);
+  console.log(isProPlan);
   
 
   // Free plan limits

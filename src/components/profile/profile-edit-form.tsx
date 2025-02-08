@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
-import { updateProfile, importResume } from "@/utils/actions";
+
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -30,6 +30,7 @@ import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 // import { ProfileEditorHeader } from "./profile-editor-header";
 import { formatProfileWithAI } from "./ai/profile-editor-ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { importResume, updateProfile } from "@/utils/actions/index";
 
 interface ProfileEditFormProps {
   profile: Profile;

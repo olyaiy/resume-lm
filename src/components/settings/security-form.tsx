@@ -70,15 +70,6 @@ export function SecurityForm({ user }: SecurityFormProps) {
     }
   };
 
-//   async function handleTestApiKey() {
-//     try {
-//       const result = await testApiKey();
-//       console.log('API Test Result:', result);
-//     } catch (error) {
-//       console.error('Error:', error);
-//     }
-//   }
-
   return (
     
     <div className="space-y-8">

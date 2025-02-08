@@ -9,7 +9,7 @@ import { MiniResumePreview } from '@/components/resume/shared/mini-resume-previe
 import { CreateResumeDialog } from '@/components/resume/management/dialogs/create-resume-dialog';
 import { ResumeSortControls, type SortOption, type SortDirection } from '@/components/resume/management/resume-sort-controls';
 import type { Profile, Resume } from '@/lib/types';
-import { deleteResume, copyResume } from '@/utils/actions';
+import { deleteResume, copyResume } from '@/utils/actions/resumes/actions';
 import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
 import { useState } from 'react';
 

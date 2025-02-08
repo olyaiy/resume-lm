@@ -10,7 +10,7 @@ import { Profile, WorkExperience, Education, Skill, Project, Resume } from "@/li
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Copy, Wand2, Plus, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createBaseResume } from "@/utils/actions";
+import { createBaseResume } from "@/utils/actions/resumes/actions";
 import pdfToText from "react-pdftotext";
 
 import { Badge } from "@/components/ui/badge";

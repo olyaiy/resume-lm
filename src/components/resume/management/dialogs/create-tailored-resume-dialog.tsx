@@ -9,7 +9,7 @@ import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Sparkles,ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { createTailoredResume } from "@/utils/actions";
+import { createTailoredResume } from "@/utils/actions/resumes/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
