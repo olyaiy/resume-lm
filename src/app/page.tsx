@@ -87,7 +87,8 @@ export default async function Home({
         case 'createdAt':
         default:
           return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      }
+      
+    }
     });
   }
 
