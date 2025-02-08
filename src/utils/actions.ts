@@ -3,7 +3,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
-import { z } from 'zod';
 
 interface DashboardData {
   profile: Profile | null;
@@ -233,4 +232,5 @@ export async function checkSubscriptionPlan() {
     currentPeriodEnd: data?.current_period_end || ''
   };
 }
+
 

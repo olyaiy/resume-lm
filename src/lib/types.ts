@@ -200,6 +200,6 @@ export type ServiceName =
   // | 'fireworks'
   // | 'deepinfra'
   // | 'groq'
-  | 'deepseek';
+  // | 'deepseek';
 
 

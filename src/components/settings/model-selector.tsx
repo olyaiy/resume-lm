@@ -26,7 +26,7 @@ interface AIModel {
 const MODEL_ICONS = {
   anthropic: '/claude.webp',
   openai: '/chatgpt.png',
-  deepseek: '/deepseek.png',
+  // deepseek: '/deepseek.png',
 } as const
 
 // Add ModelIcon component at the top of the file
@@ -73,12 +73,12 @@ const AI_MODELS: AIModel[] = [
     shortName: 'GPT 4o mini',
     provider: 'openai'
   },
-  { 
-    id: 'deepseek-chat', 
-    name: 'DeepSeek Chat', 
-    shortName: 'DeepSeek V3',
-    provider: 'deepseek'
-  },
+  // { 
+  //   id: 'deepseek-chat', 
+  //   name: 'DeepSeek Chat', 
+  //   shortName: 'DeepSeek V3',
+  //   provider: 'deepseek'
+  // },
 ]
 
 export function ModelSelector() {
@@ -173,12 +173,14 @@ export function ModelSelector() {
           className="h-7 px-2 text-xs border-none bg-transparent hover:bg-purple-500/5 transition-colors"
         >
           <div className="flex items-center gap-1">
-            {selectedModel && (
-              <ModelIcon provider={selectedModel.provider} size={20} />
+            {selectedModel ? (
+              <>
+                <ModelIcon provider={selectedModel.provider} size={20} />
+                <span className="text-purple-600">{selectedModel.shortName}</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">No model available</span>
             )}
-            <span className="text-purple-600">
-              {selectedModel?.shortName || "No Model Available"}
-            </span>
           </div>
         </SelectTrigger>
         <SelectContent align="end">

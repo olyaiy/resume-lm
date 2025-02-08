@@ -42,19 +42,19 @@ const PROVIDERS: {
     id: 'openai', 
     name: 'OpenAI',
     apiLink: 'https://platform.openai.com/api-keys'
-  },
-  {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    apiLink: 'https://platform.deepseek.com/'
   }
+  // {
+  //   id: 'deepseek',
+  //   name: 'DeepSeek',
+  //   apiLink: 'https://platform.deepseek.com/'
+  // }
 ]
 
 const AI_MODELS: AIModel[] = [
   { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
+  // { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
 
   // FOR NOW, SIMPLY FOCUS ON OPENAI AND ANTHROPIC
   // WE WILL IMPLEMENT THESE LATER
@@ -136,8 +136,8 @@ export function ApiKeysForm() {
           return 'claude-3-sonnet-20240229'
         case 'openai':
           return 'gpt-4o'
-        case 'deepseek':
-          return 'deepseek-chat'
+        // case 'deepseek':
+        //   return 'deepseek-chat'
         default:
           return defaultModel
       }
@@ -166,9 +166,19 @@ export function ApiKeysForm() {
 
     // Check if current default model requires this API key
     const currentModel = AI_MODELS.find(m => m.id === defaultModel)
-    if (currentModel && currentModel.provider === service && currentModel.id !== 'gpt-4o-mini') {
-      setDefaultModel('gpt-4o-mini')
-      toast.info('Default model reset to GPT-4o Mini (free model)')
+    if (currentModel?.provider === service) {
+      // Find first available model that has API key
+      const firstAvailableModel = AI_MODELS.find(m => 
+        apiKeys.some(k => k.service === m.provider && k.service !== service)
+      )
+      
+      if (firstAvailableModel) {
+        setDefaultModel(firstAvailableModel.id)
+        toast.info(`Switched to ${firstAvailableModel.name}`)
+      } else {
+        setDefaultModel('')
+        toast.info('No models available. Please add an API key')
+      }
     }
 
     toast.success('API key removed successfully')
