@@ -2,7 +2,7 @@
 
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
-import { manageSubscriptionStatusChange } from '@/utils/stripe/actions'
+import { manageSubscriptionStatusChange } from '@/utils/actions/stripe/actions'
 import { createServiceClient } from '@/utils/supabase/server'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {

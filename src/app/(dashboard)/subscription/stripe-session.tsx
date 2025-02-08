@@ -2,7 +2,7 @@
 
 import { Stripe } from "stripe";
 import { checkAuth } from "@/app/auth/login/actions";
-import { createOrRetrieveCustomer } from "@/utils/stripe/actions";
+import { createOrRetrieveCustomer } from "@/utils/actions/stripe/actions";
 
 const apiKey = process.env.STRIPE_SECRET_KEY as string;
 const stripe = new Stripe(apiKey);

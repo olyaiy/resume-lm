@@ -7,7 +7,9 @@ import {
   simplifiedResumeSchema, 
 } from "@/lib/zod-schemas";
 import { Job, Resume } from "@/lib/types";
-import { initializeAIClient, type AIConfig } from './ai-tools';
+import { AIConfig } from '@/utils/ai-tools';
+import { initializeAIClient } from '@/utils/ai-tools';
+
 
 export async function tailorResumeToJob(
   resume: Resume, 

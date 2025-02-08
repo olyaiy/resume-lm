@@ -358,7 +358,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         `}</style>
         {/* Header Section with Icon */}
         <div className={cn(
-          "relative px-8 pt-6 pb-4 border-b sticky top-0 z-10 bg-white/50 backdrop-blur-xl",
+          "relative px-8 pt-6 pb-4 border-b top-0 z-10 bg-white/50 backdrop-blur-xl",
           "border-purple-200/20"
         )}>
           <div className="flex items-center gap-4">
