@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus } from "lucide-react";
+import { Loader2, Sparkles,ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
@@ -17,7 +17,9 @@ import { createJob } from "@/utils/actions";
 import { MiniResumePreview } from "../../shared/mini-resume-preview";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LoadingOverlay, type CreationStep } from "../loading-overlay";
-import { BaseResumeSelector } from "../base-resume-selector";
+import { BaseResumeSelector } from "../base-resume-selector"; 
+import { ImportMethodRadioGroup } from "../import-method-radio-group";
+import { JobDescriptionInput } from "../job-description-input";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -326,104 +328,16 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 )}
               </div>
 
-              <div className="space-y-3">
-                <Label 
-                  htmlFor="job-description"
-                  className="text-base font-medium text-pink-950"
-                >
-                  Job Description <span className="text-red-500">*</span>
-                </Label>
-                <textarea
-                  id="job-description"
-                  placeholder="Paste the job description here..."
-                  value={jobDescription}
-                  onChange={(e) => setJobDescription(e.target.value)}
-                  className={cn(
-                    "w-full min-h-[120px] rounded-md bg-white/80 border-gray-200 text-base",
-                    "focus:border-pink-500 focus:ring-pink-500/20 placeholder:text-gray-400",
-                    "resize-y p-4",
-                    isJobDescriptionInvalid && "border-red-500 shake"
-                  )}
-                  required
-                />
-              </div>
+              <JobDescriptionInput
+                value={jobDescription}
+                onChange={setJobDescription}
+                isInvalid={isJobDescriptionInvalid}
+              />
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="h-full">
-                  <input
-                    type="radio"
-                    id="ai-tailor"
-                    name="tailorOption"
-                    value="ai"
-                    checked={importOption === 'ai'}
-                    onChange={() => setImportOption('ai')}
-                    className="sr-only peer"
-                  />
-                  <Label
-                    htmlFor="ai-tailor"
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-xl p-4",
-                      "bg-white/80 border-2 shadow-sm h-full",
-                      "hover:border-pink-200 hover:bg-pink-50/50",
-                      "transition-all duration-300 cursor-pointer",
-                      "peer-checked:border-pink-500 peer-checked:bg-pink-50",
-                      "peer-checked:shadow-md peer-checked:shadow-pink-100"
-                    )}
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-3">
-                        <Brain className="h-6 w-6 text-pink-600" />
-                      </div>
-                      <div className="font-semibold text-sm text-pink-950 mb-1.5">Tailor with AI</div>
-                      <span className="text-xs leading-relaxed text-gray-600">
-                        Let AI analyze the job description and optimize your resume for the best match
-                      </span>
-                    </div>
-                  </Label>
-                </div>
-
-                <div className="h-full">
-                  <input
-                    type="radio"
-                    id="manual-tailor"
-                    name="tailorOption"
-                    value="import-profile"
-                    checked={importOption === 'import-profile'}
-                    onChange={() => setImportOption('import-profile')}
-                    className="sr-only peer"
-                  />
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    onClick={() => setImportOption('import-profile')}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') {
-                        e.preventDefault();
-                        setImportOption('import-profile');
-                      }
-                    }}
-                    className={cn(
-                      "flex flex-col items-center justify-center rounded-xl p-4",
-                      "bg-white/80 border-2 shadow-sm h-full",
-                      "hover:border-pink-200 hover:bg-pink-50/50",
-                      "transition-all duration-300 cursor-pointer",
-                      "peer-checked:border-pink-500 peer-checked:bg-pink-50",
-                      "peer-checked:shadow-md peer-checked:shadow-pink-100",
-                      "focus:outline-none focus:ring-2 focus:ring-pink-500/50"
-                    )}
-                  >
-                    <div className="flex flex-col items-center text-center">
-                      <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-3">
-                        <Copy className="h-6 w-6 text-pink-600" />
-                      </div>
-                      <div className="font-semibold text-sm text-pink-950 mb-1.5">Copy Base Resume</div>
-                      <span className="text-xs leading-relaxed text-gray-600">
-                        Create an exact copy of your base resume and make your own modifications
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <ImportMethodRadioGroup
+                value={importOption}
+                onChange={setImportOption}
+              />
             </div>
           </div>
 
