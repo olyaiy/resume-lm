@@ -5,21 +5,19 @@ import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus, CheckCircle2 } from "lucide-react";
+import { Loader2, Sparkles, Brain, Copy, ArrowRight, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
 import { createJob } from "@/utils/actions";
-import { Progress } from "@/components/ui/progress";
-import { LoadingDots } from "@/components/ui/loading-dots";
 import { MiniResumePreview } from "../../shared/mini-resume-preview";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { LoadingOverlay, CREATION_STEPS, type CreationStep } from "../loading-overlay";
+import { LoadingOverlay, type CreationStep } from "../loading-overlay";
+import { BaseResumeSelector } from "../base-resume-selector";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -292,31 +290,12 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 >
                   Select Base Resume <span className="text-red-500">*</span>
                 </Label>
-                <Select 
-                  value={selectedBaseResume} 
-                  onValueChange={setSelectedBaseResume}
-                >
-                  <SelectTrigger 
-                    id="base-resume" 
-                    className={cn(
-                      "bg-white/80 border-gray-200 h-10 text-sm focus:border-pink-500 focus:ring-pink-500/20",
-                      isBaseResumeInvalid && "border-red-500 shake"
-                    )}
-                  >
-                    <SelectValue placeholder="Select a base resume" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {baseResumes?.map((resume) => (
-                      <SelectItem 
-                        key={resume.id} 
-                        value={resume.id}
-                        className="focus:bg-pink-50 text-sm"
-                      >
-                        {resume.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <BaseResumeSelector
+                  baseResumes={baseResumes}
+                  selectedResumeId={selectedBaseResume}
+                  onResumeSelect={setSelectedBaseResume}
+                  isInvalid={isBaseResumeInvalid}
+                />
               </div>
 
               {/* Resume Selection Visualization */}
