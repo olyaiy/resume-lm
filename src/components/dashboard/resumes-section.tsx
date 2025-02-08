@@ -22,6 +22,7 @@ interface ResumesSectionProps {
   currentSort: SortOption;
   currentDirection: SortDirection;
   baseResumes?: Resume[]; // Only needed for tailored type
+  canCreateMore?: boolean;
 }
 
 interface PaginationState {
@@ -37,7 +38,8 @@ export function ResumesSection({
   directionParam,
   currentSort,
   currentDirection,
-  baseResumes = []
+  baseResumes = [],
+  canCreateMore
 }: ResumesSectionProps) {
   const config = {
     base: {
@@ -87,7 +89,7 @@ export function ResumesSection({
           <h2 className={`text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
             {type === 'base' ? 'Base' : 'Tailored'} Resumes
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 mb-4">
             <ResumeSortControls 
               sortParam={sortParam}
               directionParam={directionParam}
@@ -98,7 +100,7 @@ export function ResumesSection({
         </div>
 
         {resumes.length > pagination.itemsPerPage && (
-          <div className="w-full flex items-start justify-start ">
+          <div className="w-full flex items-start justify-start -mt-4">
             <Pagination className=" flex justify-end">
               <PaginationContent className="gap-1">
                 <PaginationItem>
@@ -173,71 +175,142 @@ export function ResumesSection({
 
       <div className="relative pb-6">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
-          <CreateResumeDialog 
-            type={type} 
-            profile={profile}
-            {...(type === 'tailored' && { baseResumes })}
-          >
-            <button className={cn(
-              "aspect-[8.5/11] rounded-lg",
-              "relative overflow-hidden",
-              "border-2 border-dashed transition-all duration-500",
-              "group/new-resume flex flex-col items-center justify-center gap-4",
-              type === 'base' 
-                ? "border-purple-300/70 hover:border-purple-400"
-                : "border-pink-300/70 hover:border-pink-400",
-              type === 'base'
-                ? "bg-gradient-to-br from-purple-50/80 via-purple-50/40 to-purple-100/60"
-                : "bg-gradient-to-br from-pink-50/80 via-pink-50/40 to-pink-100/60",
-              "hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1",
-              "after:absolute after:inset-0 after:bg-gradient-to-br",
-              type === 'base'
-                ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
-                : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
-              "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500"
-            )}>
-              <div className={cn(
-                "relative z-10 flex flex-col items-center",
-                "transform transition-all duration-500",
-                "group-hover/new-resume:scale-105"
+          {canCreateMore ? (
+            <CreateResumeDialog 
+              type={type} 
+              profile={profile}
+              {...(type === 'tailored' && { baseResumes })}
+            >
+              <button className={cn(
+                "aspect-[8.5/11] rounded-lg",
+                "relative overflow-hidden",
+                "border-2 border-dashed transition-all duration-500",
+                "group/new-resume flex flex-col items-center justify-center gap-4",
+                type === 'base' 
+                  ? "border-purple-300/70 hover:border-purple-400"
+                  : "border-pink-300/70 hover:border-pink-400",
+                type === 'base'
+                  ? "bg-gradient-to-br from-purple-50/80 via-purple-50/40 to-purple-100/60"
+                  : "bg-gradient-to-br from-pink-50/80 via-pink-50/40 to-pink-100/60",
+                "hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1",
+                "after:absolute after:inset-0 after:bg-gradient-to-br",
+                type === 'base'
+                  ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
+                  : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
+                "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500"
               )}>
                 <div className={cn(
-                  "h-12 w-12 rounded-xl",
-                  "flex items-center justify-center",
+                  "relative z-10 flex flex-col items-center",
                   "transform transition-all duration-500",
-                  "shadow-sm group-hover/new-resume:shadow-md",
-                  type === 'base'
-                    ? "bg-gradient-to-br from-purple-100 to-purple-50"
-                    : "bg-gradient-to-br from-pink-100 to-pink-50",
-                  "group-hover/new-resume:scale-110"
+                  "group-hover/new-resume:scale-105"
                 )}>
-                  <config.icon className={cn(
-                    "h-5 w-5 transition-all duration-500",
-                    type === 'base' ? "text-purple-600" : "text-pink-600",
+                  <div className={cn(
+                    "h-12 w-12 rounded-xl",
+                    "flex items-center justify-center",
+                    "transform transition-all duration-500",
+                    "shadow-sm group-hover/new-resume:shadow-md",
+                    type === 'base'
+                      ? "bg-gradient-to-br from-purple-100 to-purple-50"
+                      : "bg-gradient-to-br from-pink-100 to-pink-50",
                     "group-hover/new-resume:scale-110"
-                  )} />
+                  )}>
+                    <config.icon className={cn(
+                      "h-5 w-5 transition-all duration-500",
+                      type === 'base' ? "text-purple-600" : "text-pink-600",
+                      "group-hover/new-resume:scale-110"
+                    )} />
+                  </div>
+                  
+                  <span className={cn(
+                    "mt-4 text-sm font-medium",
+                    "transition-all duration-500",
+                    type === 'base' ? "text-purple-600" : "text-pink-600",
+                    "group-hover/new-resume:font-semibold"
+                  )}>
+                    Create {type === 'base' ? 'Base' : 'Tailored'} Resume
+                  </span>
+                  
+                  <span className={cn(
+                    "mt-2 text-xs",
+                    "transition-all duration-500 opacity-0",
+                    type === 'base' ? "text-purple-500" : "text-pink-500",
+                    "group-hover/new-resume:opacity-70"
+                  )}>
+                    Click to start
+                  </span>
                 </div>
-                
-                <span className={cn(
-                  "mt-4 text-sm font-medium",
-                  "transition-all duration-500",
-                  type === 'base' ? "text-purple-600" : "text-pink-600",
-                  "group-hover/new-resume:font-semibold"
+              </button>
+            </CreateResumeDialog>
+          ) : (
+            <Link 
+              href="/subscription"
+              className={cn(
+                "group/limit block",
+                "cursor-pointer",
+                "transition-all duration-500",
+                "hover:-translate-y-1",
+              )}
+            >
+              <div className={cn(
+                "aspect-[8.5/11] rounded-lg",
+                "relative overflow-hidden",
+                "border-2 border-dashed",
+                "flex flex-col items-center justify-center gap-4",
+                "border-amber-600/80",
+                "bg-gradient-to-br from-amber-50/80 via-amber-50/40 to-amber-100/60",
+                "transition-all duration-500",
+                "hover:shadow-xl hover:shadow-amber-200/20",
+                "hover:border-amber-600/90",
+                "after:absolute after:inset-0 after:bg-gradient-to-br",
+                "after:from-amber-600/[0.03] after:to-orange-600/[0.03]",
+                "after:opacity-40 after:transition-opacity after:duration-500",
+                "hover:after:opacity-60"
+              )}>
+                <div className={cn(
+                  "relative z-10 flex flex-col items-center",
+                  "transform transition-all duration-500",
+                  "group-hover/limit:scale-105"
                 )}>
-                  Create {type === 'base' ? 'Base' : 'Tailored'} Resume
-                </span>
-                
-                <span className={cn(
-                  "mt-2 text-xs",
-                  "transition-all duration-500 opacity-0",
-                  type === 'base' ? "text-purple-500" : "text-pink-500",
-                  "group-hover/new-resume:opacity-70"
-                )}>
-                  Click to start
-                </span>
+                  <div className={cn(
+                    "h-12 w-12 rounded-xl",
+                    "flex items-center justify-center",
+                    "bg-gradient-to-br from-amber-100 to-amber-50",
+                    "text-amber-600",
+                    "shadow-md",
+                    "transition-all duration-500",
+                    "group-hover/limit:shadow-lg",
+                    "group-hover/limit:bg-gradient-to-br",
+                    "group-hover/limit:from-amber-200",
+                    "group-hover/limit:to-amber-100",
+                    "group-hover/limit:-translate-y-1"
+                  )}>
+                    <config.icon className={cn(
+                      "h-5 w-5",
+                      "transition-all duration-500",
+                      "group-hover/limit:scale-110"
+                    )} />
+                  </div>
+                  <span className={cn(
+                    "mt-4 text-sm font-medium",
+                    "text-amber-600",
+                    "transition-all duration-500",
+                    "group-hover/limit:text-amber-700"
+                  )}>
+                    {type === 'base' ? 'Base' : 'Tailored'} Limit Reached
+                  </span>
+                  <span className={cn(
+                    "mt-2 text-xs",
+                    "text-amber-600/70",
+                    "underline underline-offset-4",
+                    "transition-all duration-300",
+                    "group-hover/limit:text-amber-700/90"
+                  )}>
+                    Upgrade to create more
+                  </span>
+                </div>
               </div>
-            </button>
-          </CreateResumeDialog>
+            </Link>
+          )}
 
           {paginatedResumes.map((resume) => (
             <div key={resume.id} className="group relative">

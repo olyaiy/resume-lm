@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { simplifiedResumeSchema } from "@/lib/zod-schemas";
 
 
 
@@ -695,5 +695,50 @@ export async function cancelSubscription() {
   revalidatePath('/', 'layout');
   revalidatePath('/settings', 'layout');
   revalidatePath('/plans', 'layout');
+}
+
+export async function checkSubscriptionPlan() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return { plan: '', status: '', currentPeriodEnd: '' };
+
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('subscription_plan, subscription_status, current_period_end')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return {
+    plan: data?.subscription_plan || '',
+    status: data?.subscription_status || '',
+    currentPeriodEnd: data?.current_period_end || ''
+  };
+}
+
+export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<number> {
+  const supabase = await createClient();
+  const { data: { user }, error } = await supabase.auth.getUser();
+  
+  if (error || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  let query = supabase
+    .from('resumes')
+    .select('*', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+
+  if (type !== 'all') {
+    query = query.eq('is_base_resume', type === 'base');
+  }
+
+  const { count, error: countError } = await query;
+
+  if (countError) {
+    throw new Error('Failed to count resumes');
+  }
+
+  return count || -1;
 }
 
