@@ -13,7 +13,7 @@ import { createTailoredResume } from "@/utils/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/ai";
 import { formatJobListing } from "@/utils/ai";
-import { createJob } from "@/utils/actions";
+import { createJob } from "@/utils/actions/jobs/actions";
 import { MiniResumePreview } from "../../shared/mini-resume-preview";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LoadingOverlay, type CreationStep } from "../loading-overlay";

@@ -29,6 +29,7 @@ import { createClient } from "@/utils/supabase/server";
 
 
 
+
 // import ResumeRow from "@/components/dashboard/resume-row";
 
 
@@ -42,9 +43,13 @@ export default async function Home({
 
   const supabase = await createClient();
 
+
+
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
 
 
   const userId = user?.id;
@@ -91,6 +96,7 @@ export default async function Home({
     }
     });
   }
+
 
   // Sort both resume lists
   const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);

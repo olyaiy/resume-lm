@@ -7,7 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
 import { Job, Resume } from "@/lib/types";
 import { createClient } from "@/utils/supabase/client";
-import { createJob, deleteJob, updateResume } from "@/utils/actions";
+import { updateResume } from "@/utils/actions";
+import { createJob, deleteJob } from "@/utils/actions/jobs/actions";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -509,7 +510,7 @@ export function TailoredJobAccordion({
   };
 
   return (
-    <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border border-pink-600/50 border-2">
+    <AccordionItem value="job" className="mb-4 backdrop-blur-xl rounded-lg shadow-lg bg-white border-pink-600/50 border-2">
       <div className="px-4">
         <AccordionTrigger className="hover:no-underline group">
           <div className="flex items-center gap-2">

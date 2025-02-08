@@ -36,17 +36,12 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+  
 
   // Create a new headers object with the existing headers
+  // Given an incoming request...
   const requestHeaders = new Headers(request.headers)
-  
-  if (user) {
-    // Add user context to headers
-    requestHeaders.set('x-user-id', user.id)
-    requestHeaders.set('x-user-email', user.email || '')
-    // Add a session marker for caching
-    requestHeaders.set('x-request-id', crypto.randomUUID())
-  }
+
 
   // Create new response with enriched headers
   supabaseResponse = NextResponse.next({
@@ -55,6 +50,9 @@ export async function updateSession(request: NextRequest) {
       headers: requestHeaders,
     },
   })
+
+  supabaseResponse.cookies.set('show-banner', 'false')
+
 
   if (
     !user &&
