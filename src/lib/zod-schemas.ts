@@ -255,7 +255,7 @@ export const workExperienceBulletPointsSchema = z.object({
   analysis: z.object({
     impact_score: z.number().min(1).max(10).describe("Score indicating the overall impact of these achievements (1-10)"),
     improvement_suggestions: z.array(z.string().describe("A suggestion for improvement"))
-  })
+  }).optional()
 });
 
 // Project Analysis Schema
@@ -264,7 +264,7 @@ export const projectAnalysisSchema = z.object({
   analysis: z.object({
     impact_score: z.number().min(1).max(10).describe("Score indicating the overall impact of these achievements (1-10)"),
     improvement_suggestions: z.array(z.string().describe("A suggestion for improvement"))
-  })
+  }).optional()
 });
 
 // Work Experience Items Schema

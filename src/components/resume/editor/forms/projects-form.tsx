@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
 import Tiptap from "@/components/ui/tiptap";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
+import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 
 interface AISuggestion {
   id: string;
@@ -671,55 +672,32 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                       Add Point
                     </Button>
 
-                    <TooltipProvider delayDuration={0}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => generateAIPoints(index)}
-                            disabled={loadingAI[index]}
-                            className={cn(
-                              "flex-1 text-violet-600 hover:text-violet-700 transition-colors text-[10px] sm:text-xs",
-                              "border-violet-200 hover:border-violet-300 hover:bg-violet-50/50"
-                            )}
-                          >
-                            {loadingAI[index] ? (
-                              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
-                            ) : (
-                              <Sparkles className="h-4 w-4 mr-1" />
-                            )}
-                            {loadingAI[index] ? 'Generating...' : 'Write points with AI'}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent 
-                          side="bottom" 
-                          align="start"
-                          sideOffset={2}
-                          className={cn(
-                            "w-72 p-3.5",
-                            "bg-violet-50",
-                            "border-2 border-violet-300",
-                            "shadow-lg shadow-violet-100/50",
-                            "rounded-lg"
-                          )}
-                        >
-                          <AIGenerationSettings
-                            numPoints={aiConfig[index]?.numPoints || 3}
-                            customPrompt={aiConfig[index]?.customPrompt || ''}
-                            onNumPointsChange={(value) => setAiConfig(prev => ({
-                              ...prev,
-                              [index]: { ...prev[index], numPoints: value }
-                            }))}
-                            onCustomPromptChange={(value) => setAiConfig(prev => ({
-                              ...prev,
-                              [index]: { ...prev[index], customPrompt: value }
-                            }))}
-                            promptPlaceholder="e.g., Focus on technical implementation details and performance metrics"
-                          />
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
+                    
+                    <AIGenerationSettingsTooltip
+                      index={index}
+                      loadingAI={loadingAI[index]}
+                      generateAIPoints={generateAIPoints}
+                      aiConfig={aiConfig[index] || { numPoints: 3, customPrompt: '' }}
+                      onNumPointsChange={(value) => setAiConfig(prev => ({
+                        ...prev,
+                        [index]: { ...prev[index], numPoints: value }
+                      }))}
+                      onCustomPromptChange={(value) => setAiConfig(prev => ({
+                        ...prev,
+                        [index]: { ...prev[index], customPrompt: value }
+                      }))}
+                      colorClass={{
+                        button: "text-violet-600",
+                        border: "border-violet-200",
+                        hoverBorder: "hover:border-violet-300",
+                        hoverBg: "hover:bg-violet-50/50",
+                        tooltipBg: "bg-violet-50",
+                        tooltipBorder: "border-2 border-violet-300",
+                        tooltipShadow: "shadow-lg shadow-violet-100/50",
+                        text: "text-violet-600",
+                        hoverText: "hover:text-violet-700"
+                      }}
+                    />
                   </div>
                 </div>
 
