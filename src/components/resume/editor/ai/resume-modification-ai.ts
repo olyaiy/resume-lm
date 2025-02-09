@@ -8,8 +8,9 @@ import { workExperienceBulletPointsSchema } from "@/lib/zod-schemas";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { textImportSchema } from "@/lib/zod-schemas";
 import { WorkExperience, Resume } from "@/lib/types";
+import { getSubscriptionPlan } from "@/utils/actions";
 
-    // WORK EXPERIENCE BULLET POINTS
+    // NEW WORK EXPERIENCE BULLET POINTS
     export async function generateWorkExperiencePoints(
     position: string,
     company: string,
@@ -19,8 +20,10 @@ import { WorkExperience, Resume } from "@/lib/types";
     customPrompt: string = '',
     config?: AIConfig
   ) {
-    const aiClient = initializeAIClient(config);
-    
+    const subscriptionPlan = await getSubscriptionPlan();
+    const isPro = subscriptionPlan === 'pro';
+    const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+
     const { object } = await generateObject({
       model: aiClient,
       schema: z.object({
@@ -39,7 +42,9 @@ import { WorkExperience, Resume } from "@/lib/types";
   
     // WORK EXPERIENCE BULLET POINTS IMPROVEMENT
     export async function improveWorkExperience(point: string, customPrompt?: string, config?: AIConfig) {
-        const aiClient = initializeAIClient(config);
+        const subscriptionPlan = await getSubscriptionPlan();
+        const isPro = subscriptionPlan === 'pro';
+        const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
         
         const { object } = await generateObject({
         model: aiClient,
@@ -55,8 +60,13 @@ import { WorkExperience, Resume } from "@/lib/types";
   
     // PROJECT BULLET POINTS IMPROVEMENT
     export async function improveProject(point: string, customPrompt?: string, config?: AIConfig) {
-        const aiClient = initializeAIClient(config);
         
+        const subscriptionPlan = await getSubscriptionPlan();
+        const isPro = subscriptionPlan === 'pro';
+        const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+   
+        console.log(aiClient);
+
         const { object } = await generateObject({
         model: aiClient,
         schema: z.object({
@@ -69,7 +79,7 @@ import { WorkExperience, Resume } from "@/lib/types";
         return object.content;
     }
     
-    // PROJECT BULLET POINTS
+    // NEW PROJECT BULLET POINTS
     export async function generateProjectPoints(
         projectName: string,
         technologies: string[],
@@ -78,7 +88,9 @@ import { WorkExperience, Resume } from "@/lib/types";
         customPrompt: string = '',
         config?: AIConfig
     ) {
-        const aiClient = initializeAIClient(config);
+        const subscriptionPlan = await getSubscriptionPlan();
+        const isPro = subscriptionPlan === 'pro';
+        const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
         
         const { object } = await generateObject({
         model: aiClient,
@@ -117,7 +129,9 @@ import { WorkExperience, Resume } from "@/lib/types";
         prompt: string,
         config?: AIConfig
     ) {
-        const aiClient = initializeAIClient(config);
+        const subscriptionPlan = await getSubscriptionPlan();
+        const isPro = subscriptionPlan === 'pro';
+        const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
         
         const { object } = await generateObject({
         model: aiClient,

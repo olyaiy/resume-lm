@@ -22,6 +22,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean) {
 
   // Handle Pro subscription with environment variables
   if (isPro && config) {
+
   
     const { model } = config;
     
@@ -29,15 +30,14 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean) {
       if (!process.env.ANTHROPIC_API_KEY) throw new Error('Anthropic API key not found');
       return createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY })(model);
     }
-
-    if (model.startsWith('deepseek')) {
-      if (!process.env.DEEPSEEK_API_KEY) throw new Error('DeepSeek API key not found');
-      return createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })(model);
-    }
+    // if (model.startsWith('deepseek')) {
+    //   if (!process.env.DEEPSEEK_API_KEY) throw new Error('DeepSeek API key not found');
+    //   return createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })(model);
+    // }
 
     // Default to OpenAI for Pro
     if (!process.env.OPENAI_API_KEY) throw new Error('OpenAI API key not found');
-    return createOpenAI({ apiKey: process.env.OPENAI_API_KEY })(model);
+    return createOpenAI({ apiKey: process.env.OPENAI_API_KEY })('gpt-4o-mini');
   }
 
   // Existing logic for free users
@@ -53,11 +53,11 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean) {
     return createAnthropic({ apiKey: anthropicKey })(model);
   }
 
-  if (model.startsWith('deepseek')) {
-    const deepseekKey = apiKeys.find(k => k.service === 'deepseek')?.key;
-    if (!deepseekKey) throw new Error('DeepSeek API key not found');
-    return createDeepSeek({ apiKey: deepseekKey })(model);
-  }
+  // if (model.startsWith('deepseek')) {
+  //   const deepseekKey = apiKeys.find(k => k.service === 'deepseek')?.key;
+  //   if (!deepseekKey) throw new Error('DeepSeek API key not found');
+  //   return createDeepSeek({ apiKey: deepseekKey })(model);
+  // }
   
   const openaiKey = apiKeys.find(k => k.service === 'openai')?.key;
   if (!openaiKey) throw new Error('OpenAI API key not found');
