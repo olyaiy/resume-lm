@@ -2,7 +2,7 @@ import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
-import { getSubscriptionPlan } from '@/utils/actions';
+import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
 
 interface Message {
   role: 'user' | 'assistant';
