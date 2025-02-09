@@ -78,6 +78,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
+  const [isAlertOpen, setIsAlertOpen] = React.useState(false);
 
   // Load settings from local storage
   useEffect(() => {
@@ -343,19 +344,21 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
               </div>
             </AccordionTrigger>
 
-            <AlertDialog>
+            <AlertDialog open={isAlertOpen} onOpenChange={setIsAlertOpen}>
               <AlertDialogTrigger asChild>
                 <Button
                   className={cn(
                     "absolute right-8 top-1/2 -translate-y-1/2",
-                    "px-3 py-1.5 rounded-lg",
-                    "bg-purple-100/40 text-purple-500/80",
+                    "px-3 py-1 rounded-lg",
+                    "bg-purple-100/40 text-purple-500/80 border border-purple-500",
                     "hover:bg-purple-200/60 hover:text-purple-600",
                     "transition-all duration-300",
                     "focus:outline-none focus:ring-2 focus:ring-purple-400/40",
                     "disabled:opacity-50",
-                    accordionValue !== "chat" && "hidden",
-                    "flex items-center gap-1.5"
+                    "flex items-center gap-2",
+                    (accordionValue !== "chat" || isAlertOpen) && "hidden",
+                    
+                
                   )}
                   disabled={messages.length === 0}
                   aria-label="Clear chat history"
