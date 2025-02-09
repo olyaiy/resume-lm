@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
+import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 import { useState, useRef, useEffect, memo } from "react";
 import {
@@ -678,30 +679,19 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
       </div>
       
       {/* Add Error Alert Dialog at the end */}
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-red-200/40">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">
-              {errorMessage.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              {errorMessage.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => setShowErrorDialog(false)}
-              className={cn(
-                "bg-gradient-to-r from-red-600 to-rose-600",
-                "hover:from-red-700 hover:to-rose-700",
-                "text-white shadow-lg hover:shadow-xl transition-all duration-500"
-              )}
-            >
-              Got it
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ApiErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        errorMessage={errorMessage}
+        onUpgrade={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/subscription';
+        }}
+        onSettings={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/settings';
+        }}
+      />
     </>
   );
 }, areWorkExperiencePropsEqual); 

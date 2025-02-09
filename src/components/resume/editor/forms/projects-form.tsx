@@ -18,15 +18,13 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { AISuggestions } from "../../shared/ai-suggestions";
-import { AIGenerationSettings } from "../../shared/ai-generation-settings";
 import { generateProjectPoints, improveProject } from "../ai/resume-modification-ai";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
 import Tiptap from "@/components/ui/tiptap";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
-import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
+import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 interface AISuggestion {
   id: string;
@@ -767,64 +765,19 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
       </div>
 
       {/* Add Error Alert Dialog at the end */}
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className={cn(
-          "mt-2 text-sm",
-          "bg-white/80 backdrop-blur-md",
-          "border border-red-200",
-          "shadow-sm",
-          "p-0 gap-0"
-        )}>
-          <div className={cn(
-            "flex flex-col items-center gap-4 p-6",
-            "text-red-500 text-center",
-            "bg-white/80 backdrop-blur-md",
-            "rounded-xl",
-            "border border-red-200",
-            "shadow-sm"
-          )}>
-            <div className="flex flex-col items-center gap-3">
-              <div className="p-3 rounded-full bg-red-50">
-                <AlertTriangle className="w-6 h-6 text-red-500" />
-              </div>
-              <div className="font-medium text-red-600">
-                {errorMessage.title}
-              </div>
-              <div className="text-sm text-gray-600">
-                {errorMessage.description}
-              </div>
-            </div>
-
-            <div className="w-full h-px bg-red-100" />
-            
-            <div className="text-sm text-red-400 mb-2">
-              Unlock premium features and advanced AI capabilities
-            </div>
-            
-            <div className="flex flex-col items-center gap-2 w-full">
-              <ProUpgradeButton />
-              
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => {
-                  setShowErrorDialog(false);
-                  window.location.href = '/settings';
-                }}
-                className={cn(
-                  "",
-                  "text-xs text-gray-500 hover:text-gray-600",
-                  "hover:bg-gray-50/50 bg-gray-200",
-                  "border border-gray-400",
-                  "h-8"
-                )}
-              >
-                Set API Keys
-              </Button>
-            </div>
-          </div>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ApiErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        errorMessage={errorMessage}
+        onUpgrade={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/subscription';
+        }}
+        onSettings={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/settings';
+        }}
+      />
     </>
   );
 }, areProjectsPropsEqual); 
