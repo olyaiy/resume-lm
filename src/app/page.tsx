@@ -105,7 +105,7 @@ export default async function Home({
   const subscription = await checkSubscriptionPlan();
   const isProPlan = subscription.plan === 'pro';
 
-  console.log(subscription);
+  // console.log(subscription);
   
   // Count resumes for base and tailored sections
   const baseResumesCount = await countResumes('base');

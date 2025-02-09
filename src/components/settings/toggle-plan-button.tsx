@@ -17,8 +17,6 @@ export function TogglePlanButton() {
     checkProStatus()
   }, [])
 
-  console.log('IS PRO CLIENT',isPro);
-
   const handleToggle = async () => {
     setIsLoading(true);
     try {
