@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X, AlertTriangle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 
@@ -26,6 +26,7 @@ import { KeyboardEvent } from "react";
 import Tiptap from "@/components/ui/tiptap";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
+import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 
 interface AISuggestion {
   id: string;
@@ -767,27 +768,61 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
 
       {/* Add Error Alert Dialog at the end */}
       <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-red-200/40">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">
-              {errorMessage.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              {errorMessage.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => setShowErrorDialog(false)}
-              className={cn(
-                "bg-gradient-to-r from-red-600 to-rose-600",
-                "hover:from-red-700 hover:to-rose-700",
-                "text-white shadow-lg hover:shadow-xl transition-all duration-500"
-              )}
-            >
-              Got it
-            </AlertDialogAction>
-          </AlertDialogFooter>
+        <AlertDialogContent className={cn(
+          "mt-2 text-sm",
+          "bg-white/80 backdrop-blur-md",
+          "border border-red-200",
+          "shadow-sm",
+          "p-0 gap-0"
+        )}>
+          <div className={cn(
+            "flex flex-col items-center gap-4 p-6",
+            "text-red-500 text-center",
+            "bg-white/80 backdrop-blur-md",
+            "rounded-xl",
+            "border border-red-200",
+            "shadow-sm"
+          )}>
+            <div className="flex flex-col items-center gap-3">
+              <div className="p-3 rounded-full bg-red-50">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="font-medium text-red-600">
+                {errorMessage.title}
+              </div>
+              <div className="text-sm text-gray-600">
+                {errorMessage.description}
+              </div>
+            </div>
+
+            <div className="w-full h-px bg-red-100" />
+            
+            <div className="text-sm text-red-400 mb-2">
+              Unlock premium features and advanced AI capabilities
+            </div>
+            
+            <div className="flex flex-col items-center gap-2 w-full">
+              <ProUpgradeButton />
+              
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setShowErrorDialog(false);
+                  window.location.href = '/settings';
+                }}
+                className={cn(
+                  "",
+                  "text-xs text-gray-500 hover:text-gray-600",
+                  "hover:bg-gray-50/50 bg-gray-200",
+                  "border border-gray-400",
+                  "h-8"
+                )}
+              >
+                Set API Keys
+              </Button>
+            </div>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </>
