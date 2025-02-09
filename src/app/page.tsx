@@ -12,8 +12,6 @@
  */
 
 import { redirect } from "next/navigation";
-
-import { checkSubscriptionPlan, getDashboardData } from "../utils/actions";
 import { countResumes } from "../utils/actions/resumes/actions";
 import {User } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -26,6 +24,8 @@ import { type SortOption, type SortDirection } from "@/components/resume/managem
 import type { Resume } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { createClient } from "@/utils/supabase/server";
+import { getDashboardData } from "@/utils/actions";
+import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
 
 
 

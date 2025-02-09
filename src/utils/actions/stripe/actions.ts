@@ -1,8 +1,9 @@
 'use server';
 
 import { Stripe } from "stripe";
-import { createServiceClient } from '@/utils/supabase/server';
+import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
+import { revalidatePath } from "next/cache";
 
 // Initialize stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -194,16 +195,180 @@ export async function deleteCustomerAndData(uuid: string) {
 }
 
 // Helper to get subscription status
-export async function getSubscriptionStatus(uuid: string) {
-  const supabase = await createServiceClient();
+export async function getSubscriptionStatus() {
+  const supabase = await createClient();
 
-  const { data: subscription, error } = await supabase
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const { data: subscription, error: subscriptionError } = await supabase
     .from('subscriptions')
-    .select('*')
-    .eq('user_id', uuid)
+    .select(`
+      subscription_plan,
+      subscription_status,
+      current_period_end,
+      trial_end,
+      stripe_customer_id,
+      stripe_subscription_id
+    `)
+    .eq('user_id', user.id)
     .single();
 
-  if (error) throw error;
+  if (subscriptionError) {
+    // If no subscription found, return a default free plan instead of throwing
+    void subscriptionError
+    if (subscriptionError.code === 'PGRST116') {
+      return {
+        subscription_plan: 'Free',
+        subscription_status: 'active',
+        current_period_end: null,
+        trial_end: null,
+        stripe_customer_id: null,
+        stripe_subscription_id: null
+      };
+    }
+    throw new Error('Failed to fetch subscription status');
+  }
 
   return subscription;
+}
+
+
+
+export async function createCheckoutSession(priceId: string) {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const response = await fetch('/api/create-checkout-session', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      priceId,
+      userId: user.id,
+      email: user.email,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to create checkout session');
+  }
+
+  const { sessionId } = await response.json();
+  return { sessionId };
+}
+
+export async function cancelSubscription() {
+  const supabase = await createClient();
+
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+  
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
+
+  const response = await fetch('/api/cancel-subscription', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      userId: user.id,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to cancel subscription');
+  }
+
+  // Update the profile subscription status
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({
+      subscription_status: 'canceled',
+    })
+    .eq('user_id', user.id);
+
+  if (updateError) {
+    throw new Error('Failed to update subscription status');
+  }
+
+  revalidatePath('/', 'layout');
+  revalidatePath('/settings', 'layout');
+  revalidatePath('/plans', 'layout');
+}
+
+export async function checkSubscriptionPlan() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return { plan: '', status: '', currentPeriodEnd: '' };
+
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('subscription_plan, subscription_status, current_period_end')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return {
+    plan: data?.subscription_plan || '',
+    status: data?.subscription_status || '',
+    currentPeriodEnd: data?.current_period_end || ''
+  };
+}
+
+export async function getSubscriptionPlan() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return '';
+
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('subscription_plan')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return data?.subscription_plan || '';
+}
+
+export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {
+  
+  const supabase = await createServiceClient();
+  
+
+
+  try {
+
+    // Upsert the new plan
+    const { error: upsertError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: "db2686c0-2003-4c90-87b0-cbc20e9d6b3c",
+        subscription_plan: newPlan,
+        subscription_status: 'active',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      });
+
+    if (upsertError) {
+      throw new Error('Failed to update subscription');
+    }
+
+    revalidatePath('/');
+    return newPlan;
+  } catch (error) {
+    console.error('Subscription toggle error:', error);
+    throw new Error('Failed to toggle subscription plan');
+  }
 }

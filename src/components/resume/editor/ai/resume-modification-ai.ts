@@ -8,7 +8,8 @@ import { workExperienceBulletPointsSchema } from "@/lib/zod-schemas";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { textImportSchema } from "@/lib/zod-schemas";
 import { WorkExperience, Resume } from "@/lib/types";
-import { getSubscriptionPlan } from "@/utils/actions";
+import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
+
 
     // NEW WORK EXPERIENCE BULLET POINTS
     export async function generateWorkExperiencePoints(

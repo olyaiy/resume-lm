@@ -4,7 +4,7 @@ import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
 import { AppHeader } from "@/components/layout/app-header";
 import { createClient } from "@/utils/supabase/server";
-import { getSubscriptionStatus } from '@/utils/actions';
+import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 import { Metadata } from "next";
 
 const inter = Inter({ subsets: ["latin"] });

@@ -5,7 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 import { toast } from "sonner"
 import { ServiceName } from "@/lib/types"
 import Image from 'next/image'
-import { getSubscriptionPlan } from "@/utils/actions"
+import { getSubscriptionPlan } from "@/utils/actions/stripe/actions"
+
 
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
