@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { Profile, Resume } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 
@@ -231,6 +231,53 @@ export async function checkSubscriptionPlan() {
     status: data?.subscription_status || '',
     currentPeriodEnd: data?.current_period_end || ''
   };
+}
+
+export async function getSubscriptionPlan() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  if (!user) return '';
+
+  const { data } = await supabase
+    .from('subscriptions')
+    .select('subscription_plan')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  return data?.subscription_plan || '';
+}
+
+export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {
+  
+  const supabase = await createServiceClient();
+  
+
+
+  try {
+
+    // Upsert the new plan
+    const { error: upsertError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: "db2686c0-2003-4c90-87b0-cbc20e9d6b3c",
+        subscription_plan: newPlan,
+        subscription_status: 'active',
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: 'user_id'
+      });
+
+    if (upsertError) {
+      throw new Error('Failed to update subscription');
+    }
+
+    revalidatePath('/');
+    return newPlan;
+  } catch (error) {
+    console.error('Subscription toggle error:', error);
+    throw new Error('Failed to toggle subscription plan');
+  }
 }
 
 

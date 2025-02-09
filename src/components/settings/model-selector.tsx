@@ -5,6 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger } from "@/components/u
 import { toast } from "sonner"
 import { ServiceName } from "@/lib/types"
 import Image from 'next/image'
+import { getSubscriptionPlan } from "@/utils/actions"
 
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
@@ -84,6 +85,7 @@ const AI_MODELS: AIModel[] = [
 export function ModelSelector() {
   const [defaultModel, setDefaultModel] = useState<string>('')
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  const [subscriptionPlan, setSubscriptionPlan] = useState<string>('')
 
   // Load stored data on mount
   useEffect(() => {
@@ -125,6 +127,8 @@ export function ModelSelector() {
 
   // Watch for API key changes
   useEffect(() => {
+    if (subscriptionPlan === 'pro') return // Skip key checks for Pro users
+    
     const currentModel = AI_MODELS.find(m => m.id === defaultModel)
     if (currentModel && !apiKeys.some(k => k.service === currentModel.provider)) {
       // Current model's API key was removed, switch to first available model
@@ -141,16 +145,28 @@ export function ModelSelector() {
         toast.info('No AI models available. Please add an API key in settings.')
       }
     }
-  }, [apiKeys, defaultModel])
+  }, [apiKeys, defaultModel, subscriptionPlan])
+
+  // Add useEffect to fetch subscription status
+  useEffect(() => {
+    const checkPlan = async () => {
+      const plan = await getSubscriptionPlan()
+      setSubscriptionPlan(plan)
+    }
+    checkPlan()
+  }, [])
 
   const handleModelChange = (modelId: string) => {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
     if (!selectedModel) return
 
-    const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
-    if (!hasRequiredKey) {
-      toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
-      return
+    // Skip API key check for Pro users
+    if (subscriptionPlan !== 'pro') {
+      const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
+      if (!hasRequiredKey) {
+        toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
+        return
+      }
     }
 
     setDefaultModel(modelId)
@@ -159,9 +175,9 @@ export function ModelSelector() {
   }
 
   const isModelSelectable = (modelId: string) => {
+    if (subscriptionPlan === 'pro') return true // Bypass API check for Pro users
     const model = AI_MODELS.find(m => m.id === modelId)
-    if (!model) return false
-    return apiKeys.some(k => k.service === model.provider)
+    return model ? apiKeys.some(k => k.service === model.provider) : false
   }
 
   const selectedModel = AI_MODELS.find(m => m.id === defaultModel)
@@ -179,7 +195,9 @@ export function ModelSelector() {
                 <span className="text-purple-600">{selectedModel.shortName}</span>
               </>
             ) : (
-              <span className="text-muted-foreground">No model available</span>
+              <span className="text-muted-foreground">
+                {subscriptionPlan === 'pro' ? 'Please select a model' : 'No model available'}
+              </span>
             )}
           </div>
         </SelectTrigger>

@@ -104,12 +104,14 @@ export default async function Home({
   // Check if user is on Pro plan
   const subscription = await checkSubscriptionPlan();
   const isProPlan = subscription.plan === 'pro';
+
+  console.log(subscription);
   
   // Count resumes for base and tailored sections
   const baseResumesCount = await countResumes('base');
   const tailoredResumesCount = await countResumes('tailored');
-  console.log(baseResumesCount, tailoredResumesCount);
-  console.log(isProPlan);
+  // console.log(baseResumesCount, tailoredResumesCount);
+  // console.log(isProPlan);
   
 
   // Free plan limits

@@ -9,6 +9,7 @@ import Link from "next/link";
 import { User, Sparkles } from "lucide-react";
 import { PageTitle } from "./page-title";
 import { motion } from "framer-motion";
+import { TogglePlanButton } from '@/components/settings/toggle-plan-button';
 
 interface AppHeaderProps {
   children?: React.ReactNode;
@@ -76,6 +77,8 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                   <div className="h-4 w-px bg-purple-200/50 ml-3" />
                 </>
               )}
+              <TogglePlanButton />
+
               <Link 
                 href="/profile" 
                 className={cn(
@@ -87,6 +90,7 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Profile</span>
               </Link>
+              <div className="h-4 w-px bg-purple-200/50" />
               <div className="h-4 w-px bg-purple-200/50" />
               <div className="flex items-center px-3 py-1">
                 <ModelSelector />

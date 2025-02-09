@@ -13,13 +13,14 @@ import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { formatJobListing } from "@/utils/ai";
+
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../../editor/resume-editor-context";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { BriefcaseIcon } from "lucide-react";
+import { formatJobListing } from "@/utils/actions/ai/actions";
 
 interface TailoredJobCardProps {
   jobId: string | null;

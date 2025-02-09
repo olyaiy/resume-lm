@@ -2,6 +2,7 @@ import { ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
+import { getSubscriptionPlan } from '@/utils/actions';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,7 +22,10 @@ export async function POST(req: Request) {
   try {
     const { messages, resume, target_role, config, job }: ChatRequest = await req.json();
 
-    const aiClient = initializeAIClient(config);
+    const subscriptionPlan = await getSubscriptionPlan();
+    const isPro = subscriptionPlan === 'pro';
+
+    const aiClient = initializeAIClient(config, isPro);
 
     // Create resume sections object
     const personalInfo = {
