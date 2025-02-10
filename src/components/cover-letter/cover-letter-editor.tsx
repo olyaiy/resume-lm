@@ -34,7 +34,6 @@ function CoverLetterEditor({
   isPrintVersion = false 
 }: CoverLetterEditorProps) {
 
-
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [

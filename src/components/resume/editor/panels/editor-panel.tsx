@@ -23,8 +23,6 @@ import { ResumeEditorTabs } from "../header/resume-editor-tabs";
 
 
 
-
-
 interface EditorPanelProps {
   resume: Resume;
   profile: Profile;
@@ -60,6 +58,8 @@ export function EditorPanel({
               </div>
             </div>
 
+
+            {/* Tailored Job Accordion */}
             <Accordion type="single" collapsible defaultValue="basic" className="mt-6">
               <TailoredJobAccordion
                 resume={resume}
@@ -68,13 +68,18 @@ export function EditorPanel({
               />
             </Accordion>
 
+            {/* Tabs */}  
             <Tabs defaultValue="basic" className="mb-4">
               <ResumeEditorTabs />
+
+              {/* Basic Info Form */}
               <TabsContent value="basic">
                 <BasicInfoForm
                   profile={profile}
                 />
               </TabsContent>
+
+              {/* Work Experience Form */}
               <TabsContent value="work">
                 <Suspense fallback={
                   <div className="space-y-4 animate-pulse">
@@ -91,6 +96,8 @@ export function EditorPanel({
                   />
                 </Suspense>
               </TabsContent>
+
+              {/* Projects Form */}
               <TabsContent value="projects">
                 <Suspense fallback={
                   <div className="space-y-4 animate-pulse">
@@ -105,6 +112,8 @@ export function EditorPanel({
                   />
                 </Suspense>
               </TabsContent>
+
+              {/* Education Form */}
               <TabsContent value="education">
                 <Suspense fallback={
                   <div className="space-y-4 animate-pulse">
@@ -123,6 +132,8 @@ export function EditorPanel({
                   />
                 </Suspense>
               </TabsContent>
+
+              {/* Skills Form */}
               <TabsContent value="skills">
                 <Suspense fallback={
                   <div className="space-y-4 animate-pulse">
@@ -137,6 +148,8 @@ export function EditorPanel({
                   />
                 </Suspense>
               </TabsContent>
+
+              {/* Document Settings Form */}
               <TabsContent value="settings">
                 <Suspense fallback={
                   <div className="space-y-4 animate-pulse">
@@ -152,11 +165,12 @@ export function EditorPanel({
                   />
                 </Suspense>
               </TabsContent>
+
+              {/* Cover Letter Form */}
               <TabsContent value="cover-letter">
                 <CoverLetterPanel
                   resume={resume}
                   job={job}
-                  onResumeChange={onResumeChange}
                 />
               </TabsContent>
             </Tabs>

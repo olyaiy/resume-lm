@@ -1,5 +1,5 @@
 import CoverLetterEditor from "./cover-letter-editor";
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus, Download } from "lucide-react";
 import { useResumeContext } from '@/components/resume/editor/resume-editor-context';
@@ -7,49 +7,36 @@ import { useToast } from "@/hooks/use-toast";
 
 
 interface CoverLetterProps {
-    resumeId: string;
-    hasCoverLetter: boolean;
-    coverLetterData?: Record<string, unknown> | null;
-    onCoverLetterChange?: (data: Record<string, unknown>) => void;
     containerWidth: number;
 }
 
 
-export default function CoverLetter({ 
-  onCoverLetterChange,
-  containerWidth 
-}: CoverLetterProps) {
-
-  const { state } = useResumeContext();
-  const resumeId = state.resume.id;
-  const hasCoverLetter = state.resume.has_cover_letter;
-  const coverLetterData = state.resume.cover_letter;
+export default function CoverLetter({ containerWidth }: CoverLetterProps) {
+  const { state, dispatch } = useResumeContext();
   const { toast } = useToast();
   const contentRef = useRef<HTMLDivElement>(null);
 
-  // Create a single source of truth for the content
-  const [content, setContent] = useState(coverLetterData?.content || '');
-
   const handleContentChange = useCallback((data: Record<string, unknown>) => {
-    setContent(data.content as string);
-    onCoverLetterChange?.({
-      ...data,
-      content: data.content,
-      lastUpdated: new Date().toISOString()
+    dispatch({
+      type: 'UPDATE_FIELD',
+      field: 'cover_letter',
+      value: {
+        content: data.content,
+        lastUpdated: new Date().toISOString()
+      }
     });
-  }, [onCoverLetterChange]);
+  }, [dispatch]);
 
   const handleExportPDF = async () => {
     if (!contentRef.current) return;
 
     try {
       const element = contentRef.current;
-      // Dynamically import html2pdf only when needed
       const html2pdf = (await import('html2pdf.js')).default;
       
       const opt = {
         margin: [0, 0, -0.5, 0],
-        filename: `cover-letter-${resumeId}.pdf`,
+        filename: `cover-letter-${state.resume.id}.pdf`,
         image: { type: 'jpeg', quality: 0.98 },
         html2canvas: { 
           // scale: 2,
@@ -79,20 +66,17 @@ export default function CoverLetter({
     }
   };
 
-  // If no cover letter exists, render empty state
-  if (!hasCoverLetter) {
+  if (!state.resume.has_cover_letter) {
     return (
       <div className="space-y-4">
         <Button
           variant="outline"
           size="sm"
           className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
-          onClick={() => onCoverLetterChange?.({
-            has_cover_letter: true,
-            cover_letter: {
-              content: '',
-              lastUpdated: new Date().toISOString()
-            }
+          onClick={() => dispatch({
+            type: 'UPDATE_FIELD',
+            field: 'has_cover_letter',
+            value: true
           })}
         >
           <Plus className="h-4 w-4 mr-2" />
@@ -102,11 +86,9 @@ export default function CoverLetter({
     );
   }
 
-
-  // If cover letter exists, render it
   return (
     <div className="">
-      {/* Print version (static snapshot) */}
+      {/* Print version */}
       <div 
         ref={contentRef} 
         id="cover-letter-content"
@@ -114,14 +96,14 @@ export default function CoverLetter({
       >
         <div 
           className="p-16 prose prose-sm !max-w-none"
-          dangerouslySetInnerHTML={{ __html: content as string }} 
+          dangerouslySetInnerHTML={{ __html: state.resume.cover_letter?.content || '' }} 
         />
       </div>
       
       {/* Interactive editor */}
       <div className="[&_.print-hidden]:hidden">
         <CoverLetterEditor 
-          initialData={{ content }}
+          initialData={{ content: state.resume.cover_letter?.content || '' }}
           onChange={handleContentChange}
           containerWidth={containerWidth}
         />

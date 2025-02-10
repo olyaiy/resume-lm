@@ -22,8 +22,6 @@ const ResumeContext = createContext<{
 function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
   switch (action.type) {
     case 'UPDATE_FIELD':
- 
-
       const newState = {
         ...state,
         resume: {
@@ -31,9 +29,7 @@ function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
           [action.field]: action.value
         }
       };
-
-  
-
+      console.log('newState', newState);
       return newState;
 
 

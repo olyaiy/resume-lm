@@ -41,7 +41,7 @@ export function PreviewPanel({
           if ('has_cover_letter' in data) {
             onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
           }
-          if ('cover_letter' in data) {
+          if ('cover_letter' in data) {    
             onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
           }
         }}

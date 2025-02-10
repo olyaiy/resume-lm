@@ -6,6 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedResumeSchema } from "@/lib/zod-schemas";
 
+
+//  SUPABASE ACTIONS
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();

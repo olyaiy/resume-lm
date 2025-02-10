@@ -8,24 +8,33 @@ import type { AIConfig } from "@/utils/ai-tools";
 import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { generate } from "@/utils/actions/cover-letter/actions";
+import { useResumeContext } from "../resume-editor-context";
+
 
 interface CoverLetterPanelProps {
   resume: Resume;
   job: Job | null;
-  onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
   aiConfig?: AIConfig;
 }
 
 export function CoverLetterPanel({
   resume,
   job,
-  onResumeChange,
   aiConfig,
 }: CoverLetterPanelProps) {
+  const { dispatch } = useResumeContext();
   const [isGenerating, setIsGenerating] = useState(false);
   const [customPrompt, setCustomPrompt] = useState('');
   const [showErrorDialog, setShowErrorDialog] = useState(false);
   const [errorMessage, setErrorMessage] = useState({ title: '', description: '' });
+
+  const updateField = (field: keyof Resume, value: Resume[keyof Resume]) => {
+    dispatch({ 
+      type: 'UPDATE_FIELD',
+      field,
+      value
+    });
+  };
 
   const generateCoverLetter = async () => {
     if (!job) return;
@@ -47,7 +56,7 @@ export function CoverLetterPanel({
         console.error('Error parsing API keys:', error);
       }
 
-      
+      // Prompt
       const prompt = `Write a professional cover letter for the following job:
       ${JSON.stringify(job)}
       
@@ -56,35 +65,6 @@ export function CoverLetterPanel({
       
       The cover letter should be formal, professional, and highlight relevant experience and skills.
       Today's date is ${new Date().toLocaleDateString()}.
-
-      CRITICAL FORMATTING REQUIREMENTS - YOU MUST FOLLOW THESE EXACTLY:
-      1. Do NOT use any square brackets [] in the output
-      2. Only include information that is available in the job or resume data
-      3. Each piece of information MUST be on its own separate line using <br /> tags
-      4. Use actual values directly, not placeholders
-      5. Format the header EXACTLY like this (but without the brackets, using real data):
-         <p>
-         [Date]<br />
-         [Company Name]<br />
-         [Company Address]<br />
-         [City, Province/State, Country]<br />
-         </p>
-
-      6. Format the signature EXACTLY like this (but without the brackets, using real data):
-         <p>
-         Sincerely,
-         [Full Name]<br />
-         </p>
-         
-         <p>
-         [Email Address]<br />
-         [Phone Number]<br />
-         [LinkedIn URL]<br />
-         </p>
-
-      7. NEVER combine information on the same line
-      8. ALWAYS use <br /> tags between each piece of information
-      9. Add an extra <br /> after the date and after "Sincerely,"
 
       Please use my contact information in the letter:
       Full Name: ${resume.first_name} ${resume.last_name}
@@ -95,18 +75,24 @@ export function CoverLetterPanel({
 
       ${customPrompt ? `\nAdditional requirements: ${customPrompt}` : ''}`;
       
+
+      // Call The Model
       const { output } = await generate(prompt, {
         ...aiConfig,
         model: selectedModel || '',
         apiKeys
       });
 
+      // Generated Content
       let generatedContent = '';
-      
+
+
+      // Update Resume Context
       for await (const delta of readStreamableValue(output)) {
         generatedContent += delta;
         // Update resume context directly
-        onResumeChange('cover_letter', {
+        // console.log('Generated Content:', generatedContent);
+        updateField('cover_letter', {
           content: generatedContent,
         });
       }
@@ -200,7 +186,7 @@ export function CoverLetterPanel({
               variant="destructive"
               size="sm"
               className="w-full"
-              onClick={() => onResumeChange('has_cover_letter', false)}
+              onClick={() => updateField('has_cover_letter', false)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete Cover Letter
@@ -216,7 +202,7 @@ export function CoverLetterPanel({
             variant="outline"
             size="sm"
             className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
-            onClick={() => onResumeChange('has_cover_letter', true)}
+            onClick={() => updateField('has_cover_letter', true)}
           >
             <Plus className="h-4 w-4 mr-2" />
             Create Cover Letter
