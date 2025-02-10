@@ -31,7 +31,6 @@ import { formatProfileWithAI } from "../../utils/actions/profiles/ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { importResume, updateProfile } from "@/utils/actions/index";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
-import { cn } from "@/lib/utils";
 import { AlertTriangle } from "lucide-react";
 
 interface ProfileEditFormProps {

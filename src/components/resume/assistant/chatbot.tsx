@@ -4,7 +4,7 @@
 import React, { useEffect, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { Card } from "@/components/ui/card";
-import { Bot, Trash2, Pencil, ChevronDown, RefreshCw, AlertTriangle } from "lucide-react";
+import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
 import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
@@ -33,7 +33,6 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { ApiKeyErrorAlert } from '@/components/ui/api-key-error-alert';
 
 

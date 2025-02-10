@@ -5,7 +5,6 @@ import { cn } from "@/lib/utils";
 import { useState } from 'react';
 import { readStreamableValue } from 'ai/rsc';
 import type { AIConfig } from "@/utils/ai-tools";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { generate } from "@/utils/actions/cover-letter/actions";
 import { useResumeContext } from "../resume-editor-context";

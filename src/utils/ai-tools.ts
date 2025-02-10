@@ -1,6 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
-import { createDeepSeek } from '@ai-sdk/deepseek';
+// import { createDeepSeek } from '@ai-sdk/deepseek';
 
 export type ApiKey = {
   service: string;

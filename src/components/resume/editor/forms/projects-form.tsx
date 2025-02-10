@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X, AlertTriangle } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { useState, useRef, useEffect, memo } from "react";

@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/tooltip";
 import Tiptap from "@/components/ui/tiptap";
 import { generateWorkExperiencePoints, improveWorkExperience } from "../ai/resume-modification-ai";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 import { AISuggestions } from "../../shared/ai-suggestions";

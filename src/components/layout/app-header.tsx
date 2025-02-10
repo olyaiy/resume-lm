@@ -6,9 +6,8 @@ import { ModelSelector } from "@/components/settings/model-selector";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { User, Sparkles } from "lucide-react";
+import { User } from "lucide-react";
 import { PageTitle } from "./page-title";
-import { motion } from "framer-motion";
 import { TogglePlanButton } from '@/components/settings/toggle-plan-button';
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 

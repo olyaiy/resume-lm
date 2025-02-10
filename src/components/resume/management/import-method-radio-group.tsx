@@ -14,7 +14,6 @@ function ImportMethodRadioItem({
   title,
   description,
   icon,
-  checked,
   ...props
 }: ImportMethodRadioItemProps) {
   return (
