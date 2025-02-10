@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import { useResumeContext } from "../../editor/resume-editor-context";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { BriefcaseIcon } from "lucide-react";
-import { formatJobListing } from "@/utils/actions/ai/actions";
+import { formatJobListing } from "@/utils/actions/jobs/ai";
 
 interface TailoredJobCardProps {
   jobId: string | null;

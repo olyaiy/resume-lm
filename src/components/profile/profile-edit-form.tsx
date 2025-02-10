@@ -27,7 +27,7 @@ import { ProfileProjectsForm } from "@/components/profile/profile-projects-form"
 import { ProfileEducationForm } from "@/components/profile/profile-education-form";
 import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 // import { ProfileEditorHeader } from "./profile-editor-header";
-import { formatProfileWithAI } from "./ai/profile-editor-ai";
+import { formatProfileWithAI } from "../../utils/actions/profiles/ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { importResume, updateProfile } from "@/utils/actions/index";
 
