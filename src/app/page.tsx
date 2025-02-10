@@ -115,7 +115,7 @@ export default async function Home({
   
 
   // Free plan limits
-  const canCreateBase = isProPlan || baseResumesCount < 5;
+  const canCreateBase = isProPlan || baseResumesCount < 2;
   const canCreateTailored = isProPlan || tailoredResumesCount < 4;
 
 

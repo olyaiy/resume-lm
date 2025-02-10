@@ -15,11 +15,11 @@ import { tailorResumeToJob } from "@/utils/actions/jobs/ai";
 import { formatJobListing } from "@/utils/actions/jobs/ai";
 import { createJob } from "@/utils/actions/jobs/actions";
 import { MiniResumePreview } from "../../shared/mini-resume-preview";
-import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { LoadingOverlay, type CreationStep } from "../loading-overlay";
 import { BaseResumeSelector } from "../base-resume-selector"; 
 import { ImportMethodRadioGroup } from "../import-method-radio-group";
 import { JobDescriptionInput } from "../job-description-input";
+import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -381,30 +381,20 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       </Dialog>
 
       {/* Error Alert Dialog */}
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-red-200/40">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">
-              {errorMessage.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              {errorMessage.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => setShowErrorDialog(false)}
-              className={cn(
-                "bg-gradient-to-r from-red-600 to-rose-600",
-                "hover:from-red-700 hover:to-rose-700",
-                "text-white shadow-lg hover:shadow-xl transition-all duration-500"
-              )}
-            >
-              Got it
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ApiErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        errorMessage={errorMessage}
+        onUpgrade={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/subscription';
+        }}
+        onSettings={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/settings';
+        }}
+      />
+
     </>
   );
 } 
