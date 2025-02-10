@@ -92,13 +92,13 @@ export function ApiErrorDialog({
             </Button>
           </div>
 
-          <div className="absolute bottom-2 right-2">
+          <div className="absolute top-2 right-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={() => onOpenChange(false)}
               className={cn(
-                "text-xs text-gray-700 hover:text-gray-900",
+                " text-xs text-gray-700 hover:text-gray-900",
                 "h-7 px-2",
                 "hover:bg-gray-50/50",
                 "transition-colors duration-200 border border-gray-500 bg-gray-200" 

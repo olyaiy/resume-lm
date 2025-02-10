@@ -11,6 +11,7 @@ import {
 import { generateObject } from "ai";
 import { z } from "zod";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
 
 // AI ACTIONS FOR RESUME MANAGEMENT
 
@@ -45,7 +46,10 @@ import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 
 // TEXT CONTENT -> RESUME
 export async function convertTextToResume(prompt: string, existingResume: Resume, targetRole: string, config?: AIConfig) {
-  const aiClient = initializeAIClient(config);
+  const subscriptionPlan = await getSubscriptionPlan();
+  const isPro = subscriptionPlan === 'pro';
+  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+
   
   const { object } = await generateObject({
     model: aiClient,

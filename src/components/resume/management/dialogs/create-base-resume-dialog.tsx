@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
 import { convertTextToResume } from "../ai/resume-management-ai";
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogAction } from "@/components/ui/alert-dialog";
+import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 interface CreateBaseResumeDialogProps {
   children: React.ReactNode;
@@ -803,21 +803,19 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         </div>
 
         {/* Error Dialog */}
-        <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{errorMessage.title}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {errorMessage.description}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogAction onClick={() => setShowErrorDialog(false)}>
-                OK
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+        <ApiErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        errorMessage={errorMessage}
+        onUpgrade={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/subscription';
+        }}
+        onSettings={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/settings';
+        }}
+      />
 
         {/* Footer Section */}
         <div className={cn(
