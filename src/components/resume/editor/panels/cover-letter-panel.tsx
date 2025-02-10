@@ -9,6 +9,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogContent, AlertDialogDescript
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { generate } from "@/utils/actions/cover-letter/actions";
 import { useResumeContext } from "../resume-editor-context";
+import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 
 interface CoverLetterPanelProps {
@@ -210,30 +211,19 @@ export function CoverLetterPanel({
         </div>
       )}
 
-      <AlertDialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <AlertDialogContent className="bg-white/95 backdrop-blur-xl border-red-200/40">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-red-600">
-              {errorMessage.title}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-gray-600">
-              {errorMessage.description}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction
-              onClick={() => setShowErrorDialog(false)}
-              className={cn(
-                "bg-gradient-to-r from-red-600 to-rose-600",
-                "hover:from-red-700 hover:to-rose-700",
-                "text-white shadow-lg hover:shadow-xl transition-all duration-500"
-              )}
-            >
-              Got it
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ApiErrorDialog
+        open={showErrorDialog}
+        onOpenChange={setShowErrorDialog}
+        errorMessage={errorMessage}
+        onUpgrade={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/subscription';
+        }}
+        onSettings={() => {
+          setShowErrorDialog(false);
+          window.location.href = '/settings';
+        }}
+      />
     </div>
   );
 } 
