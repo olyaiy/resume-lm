@@ -93,9 +93,10 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="relative min-h-screen flex flex-col">
+        <div className="relative min-h-screen h-screen flex flex-col">
           {user && <AppHeader showUpgradeButton={showUpgradeButton} />}
-          <main className="">
+          {/* Padding for header and footer */}
+          <main className="py-14 h-full">
             {children}
           </main>
           <Footer />

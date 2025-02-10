@@ -72,7 +72,7 @@ export function ResizablePanels({
             updatePixelWidth();
           }}
           className={cn(
-            "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)]",
+            "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)] overflow-y-scroll",
             isBaseResume
               ? "shadow-purple-200/50"
               : "shadow-pink-200/50"

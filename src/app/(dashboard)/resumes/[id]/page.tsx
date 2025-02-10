@@ -85,7 +85,7 @@ export default async function Page({
     const normalizedResume = normalizeResumeData(rawResume);
     const component = (
       <div 
-        className=""
+        className="h-full flex flex-col "
         data-page-title={normalizedResume.name}
         data-resume-type={normalizedResume.is_base_resume ? "Base Resume" : "Tailored Resume"}
       >

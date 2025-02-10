@@ -6,9 +6,7 @@ export default function ResumeEditorLayout({
   children: ReactNode;
 }) {
   return (
-    <div className=" relative 
-    
-    overflow-hidden">
+    <div className="flex  h-full  max-h-screen overflow-none">
       {/* Background Layer */}
       {/* <BackgroundEffects /> */}
 
