@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
-
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -40,9 +39,11 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const [profile, setProfile] = useState(initialProfile);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
+  const [isResumeDialogOpen, setIsResumeDialogOpen] = useState(false);
+  const [isTextImportDialogOpen, setIsTextImportDialogOpen] = useState(false);
   const [resumeContent, setResumeContent] = useState("");
+  const [textImportContent, setTextImportContent] = useState("");
   const [isProcessingResume, setIsProcessingResume] = useState(false);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const router = useRouter();
 
   // Sync with server state when initialProfile changes
@@ -128,7 +129,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     });
   };
 
-  const handleResumeUpload = async () => {
+  const handleResumeUpload = async (content: string) => {
     try {
       setIsProcessingResume(true);
       
@@ -146,7 +147,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         console.error('Error parsing API keys:', error);
       }
       
-      const result = await formatProfileWithAI(resumeContent, {
+      const result = await formatProfileWithAI(content, {
         model: selectedModel,
         apiKeys
       });
@@ -235,8 +236,10 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
           position: "bottom-right",
           className: "bg-gradient-to-r from-emerald-500 to-green-500 text-white border-none",
         });
-        setIsDialogOpen(false);
+        setIsResumeDialogOpen(false);
+        setIsTextImportDialogOpen(false);
         setResumeContent("");
+        setTextImportContent("");
       }
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -349,12 +352,16 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         <div className="relative mb-6">
           <div className="bg-white/40 backdrop-blur-md rounded-2xl border border-white/40 p-6 shadow-xl">
             <div className="flex flex-col gap-4">
+              
+              {/* Import Options Text */}
               <div className="flex items-center gap-2 text-sm text-purple-600/60">
                 <div className="flex items-center gap-2">
                   <span className="inline-block w-2 h-2 rounded-full bg-gradient-to-r from-purple-500 to-indigo-500 shadow-sm shadow-purple-500/20" />
                   <span className="font-medium">Import Options</span>
                 </div>
               </div>
+
+
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {/* LinkedIn Import Button */}
                 <Button
@@ -375,7 +382,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 </Button>
 
                 {/* Resume Upload Button */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isResumeDialogOpen} onOpenChange={setIsResumeDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -416,13 +423,13 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <DialogFooter className="gap-3">
                       <Button
                         variant="outline"
-                        onClick={() => setIsDialogOpen(false)}
+                        onClick={() => setIsResumeDialogOpen(false)}
                         className="bg-white/50 hover:bg-white/60 transition-all duration-300"
                       >
                         Cancel
                       </Button>
                       <Button
-                        onClick={handleResumeUpload}
+                        onClick={() => handleResumeUpload(resumeContent)}
                         disabled={isProcessingResume || !resumeContent.trim()}
                         className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
                       >
@@ -443,7 +450,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 </Dialog>
 
                 {/* Import From Text Button */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                <Dialog open={isTextImportDialogOpen} onOpenChange={setIsTextImportDialogOpen}>
                   <DialogTrigger asChild>
                     <Button
                       variant="outline"
@@ -475,8 +482,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
                       <Textarea
-                        value={resumeContent}
-                        onChange={(e) => setResumeContent(e.target.value)}
+                        value={textImportContent}
+                        onChange={(e) => setTextImportContent(e.target.value)}
                         placeholder="Paste your text content here..."
                         className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
                       />
@@ -484,14 +491,14 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <DialogFooter className="gap-3">
                       <Button
                         variant="outline"
-                        onClick={() => setIsDialogOpen(false)}
+                        onClick={() => setIsTextImportDialogOpen(false)}
                         className="bg-white/50 hover:bg-white/60 transition-all duration-300"
                       >
                         Cancel
                       </Button>
                       <Button
-                        onClick={handleResumeUpload}
-                        disabled={isProcessingResume || !resumeContent.trim()}
+                        onClick={() => handleResumeUpload(textImportContent)}
+                        disabled={isProcessingResume || !textImportContent.trim()}
                         className="bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-90 transition-all duration-500 hover:scale-[1.02] disabled:hover:scale-100"
                       >
                         {isProcessingResume ? (

@@ -3,6 +3,8 @@ import { generateObject } from 'ai';
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
+import { sanitizeUnknownStrings } from '@/lib/utils';
 
 // TEXT RESUME -> PROFILE
 export async function formatProfileWithAI(
@@ -10,7 +12,10 @@ export async function formatProfileWithAI(
   config?: AIConfig
 ) {
     try {
-      const aiClient = initializeAIClient(config);
+      const subscriptionPlan = await getSubscriptionPlan();
+      const isPro = subscriptionPlan === 'pro';
+      const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+  
       
       const { object } = await generateObject({
         model: aiClient,
@@ -77,7 +82,7 @@ export async function formatProfileWithAI(
     //   console.dir(object.content, { depth: null, colors: true });
       console.log('USING THE MODEL: ', aiClient);
   
-      return object.content;
+      return sanitizeUnknownStrings(object.content);
     } catch (error) {
       throw error;
     }
