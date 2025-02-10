@@ -30,6 +30,9 @@ import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 import { formatProfileWithAI } from "../../utils/actions/profiles/ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { importResume, updateProfile } from "@/utils/actions/index";
+import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
+import { cn } from "@/lib/utils";
+import { AlertTriangle } from "lucide-react";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -44,12 +47,20 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const [resumeContent, setResumeContent] = useState("");
   const [textImportContent, setTextImportContent] = useState("");
   const [isProcessingResume, setIsProcessingResume] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState("");
   const router = useRouter();
 
   // Sync with server state when initialProfile changes
   useEffect(() => {
     setProfile(initialProfile);
   }, [initialProfile]);
+
+  // Add useEffect to clear error when dialogs close
+  useEffect(() => {
+    if (!isResumeDialogOpen && !isTextImportDialogOpen) {
+      setApiKeyError("");
+    }
+  }, [isResumeDialogOpen, isTextImportDialogOpen]);
 
   const updateField = (field: keyof Profile, value: unknown) => {
     setProfile(prev => ({ ...prev, [field]: value }));
@@ -244,13 +255,15 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     } catch (error: unknown) {
       if (error instanceof Error) {
         console.error('Resume upload error:', error);
-        toast.error("Failed to process content: " + error.message, {
-          position: "bottom-right",
-        });
-      } else {
-        toast.error("Failed to process content: Unknown error", {
-          position: "bottom-right",
-        });
+        if (error.message.toLowerCase().includes('api key')) {
+          setApiKeyError(
+            'API key required. Please add your OpenAI API key in settings or upgrade to our Pro Plan.'
+          );
+        } else {
+          toast.error("Failed to process content: " + error.message, {
+            position: "bottom-right",
+          });
+        }
       }
     } finally {
       setIsProcessingResume(false);
@@ -259,15 +272,10 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
 
   return (
     <div className="relative mx-auto">
-      {/* Animated Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[40%] -left-[20%] w-[80%] h-[80%] rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl animate-blob opacity-70" />
-        <div className="absolute top-[20%] -right-[20%] w-[70%] h-[70%] rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl animate-blob animation-delay-2000 opacity-70" />
-        <div className="absolute -bottom-[40%] left-[20%] w-[75%] h-[75%] rounded-full bg-gradient-to-br from-pink-200/20 to-rose-200/20 blur-3xl animate-blob animation-delay-4000 opacity-70" />
-      </div>
+      
 
       {/* Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 z-50">
+      <div className="z-50 mt-4">
         <div className="max-w-[2000px] mx-auto">
           <div className="mx-6 mb-6">
             <div className="bg-white/80 backdrop-blur-xl border border-white/40 shadow-lg rounded-2xl p-4 flex items-center justify-between gap-4">
@@ -417,9 +425,34 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                         value={resumeContent}
                         onChange={(e) => setResumeContent(e.target.value)}
                         placeholder="Paste your resume content here..."
-                        className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
+                        className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
                       />
                     </div>
+                    {apiKeyError && (
+                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
+                        <div className="p-1.5 rounded-full bg-red-100">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">API Key Required</p>
+                          <p className="text-red-500/90">{apiKeyError}</p>
+                          <div className="mt-2 flex flex-col gap-2 justify-start">
+                            <div className="w-auto mx-auto">
+                              <ProUpgradeButton />
+                            </div>
+                            <div className="text-center text-xs text-red-400">or</div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
+                              onClick={() => window.location.href = '/settings'}
+                            >
+                              Set API Keys in Settings
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <DialogFooter className="gap-3">
                       <Button
                         variant="outline"
@@ -485,9 +518,34 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                         value={textImportContent}
                         onChange={(e) => setTextImportContent(e.target.value)}
                         placeholder="Paste your text content here..."
-                        className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
+                        className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
                       />
                     </div>
+                    {apiKeyError && (
+                      <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
+                        <div className="p-1.5 rounded-full bg-red-100">
+                          <AlertTriangle className="w-4 h-4 text-red-500" />
+                        </div>
+                        <div className="flex-1">
+                          <p className="font-medium">API Key Required</p>
+                          <p className="text-red-500/90">{apiKeyError}</p>
+                          <div className="mt-2 flex flex-col gap-2 justify-start">
+                            <div className="w-auto mx-auto">
+                              <ProUpgradeButton />
+                            </div>
+                            <div className="text-center text-xs text-red-400">or</div>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
+                              onClick={() => window.location.href = '/settings'}
+                            >
+                              Set API Keys in Settings
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <DialogFooter className="gap-3">
                       <Button
                         variant="outline"
