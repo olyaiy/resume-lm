@@ -1,16 +1,17 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2, Upload } from "lucide-react";
+import { Loader2, Upload, AlertTriangle } from "lucide-react";
 import { Resume } from "@/lib/types";
 
 import { toast } from "@/hooks/use-toast";
 import { addTextToResume } from "../../editor/ai/resume-modification-ai";
 import pdfToText from "react-pdftotext";
 import { cn } from "@/lib/utils";
+import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 
 interface TextImportDialogProps {
   resume: Resume;
@@ -27,6 +28,13 @@ export function TextImportDialog({
   const [content, setContent] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState("");
+
+  useEffect(() => {
+    if (!open) {
+      setApiKeyError("");
+    }
+  }, [open]);
 
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
@@ -85,6 +93,7 @@ export function TextImportDialog({
   };
 
   const handleImport = async () => {
+    setApiKeyError("");
     if (!content.trim()) {
       toast({
         title: "No content",
@@ -111,11 +120,18 @@ export function TextImportDialog({
       setContent("");
     } catch (error) {
       console.error('Import error:', error);
-      toast({
-        title: "Import failed",
-        description: "Failed to process the text. Please try again.",
-        variant: "destructive",
-      });
+      const errorMessage = error instanceof Error ? error.message : 'An unknown error occurred';
+      if (errorMessage.includes('API key')) {
+        setApiKeyError(
+          'API key required. Please add your OpenAI API key in settings or upgrade to our Pro Plan.'
+        );
+      } else {
+        toast({
+          title: "Import failed",
+          description: "Failed to process the text. Please try again.",
+          variant: "destructive",
+        });
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -151,7 +167,7 @@ export function TextImportDialog({
               "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
               isDragging
                 ? "border-violet-500 bg-violet-50/50"
-                : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
+                : "border-violet-500/80 hover:border-violet-500 hover:bg-violet-50/10"
             )}
           >
             <input
@@ -178,10 +194,35 @@ export function TextImportDialog({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               placeholder="Start pasting your resume content here..."
-              className="min-h-[300px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+              className="min-h-[100px] bg-white/50 border-black/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
             />
           </div>
         </div>
+        {apiKeyError && (
+          <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
+            <div className="p-1.5 rounded-full bg-red-100">
+              <AlertTriangle className="w-4 h-4 text-red-500" />
+            </div>
+            <div className="flex-1">
+              <p className="font-medium">API Key Required</p>
+              <p className="text-red-500/90">{apiKeyError}</p>
+              <div className="mt-2 flex flex-col gap-2 justify-start">
+                <div className="w-auto mx-auto">
+                <ProUpgradeButton />
+                </div>
+                <div className="text-center text-xs text-red-400">or</div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
+                  onClick={() => window.location.href = '/settings'}
+                >
+                  Set API Keys in Settings
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
         <DialogFooter>
           <Button
             variant="outline"

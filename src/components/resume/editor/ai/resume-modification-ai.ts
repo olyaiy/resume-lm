@@ -30,11 +30,11 @@ import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
       schema: z.object({
         content: workExperienceBulletPointsSchema
       }),
-      prompt: `Position: ${position}
-  Company: ${company}
-  Technologies: ${technologies.join(', ')}
-  Target Role: ${targetRole}
-  Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
+    prompt: `Position: ${position}
+    Company: ${company}
+    Technologies: ${technologies.join(', ')}
+    Target Role: ${targetRole}
+    Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
       system: WORK_EXPERIENCE_GENERATOR_MESSAGE.content as string,
     });
   
@@ -151,7 +151,10 @@ import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
     
     // ADDING TEXT CONTENT TO RESUME
     export async function addTextToResume(prompt: string, existingResume: Resume, config?: AIConfig) {
-        const aiClient = initializeAIClient(config);
+        const subscriptionPlan = await getSubscriptionPlan();
+        const isPro = subscriptionPlan === 'pro';
+        const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+
         
         const { object } = await generateObject({
         model: aiClient,
