@@ -9,7 +9,7 @@ import { cn } from '@/lib/utils';
 import { createPortalSession, postStripeSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { PricingCard, type Plan } from '../pricing/pricing-card';
 import { useRouter } from 'next/navigation';
-import { getSubscriptionStatus } from '@/utils/actions';
+import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 
 const plans = [
   {

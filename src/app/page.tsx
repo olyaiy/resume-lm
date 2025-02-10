@@ -75,9 +75,9 @@ export default async function Home({
 
   // Get sort parameters for both sections
   const baseSort = (params.baseSort as SortOption) || 'createdAt';
-  const baseDirection = (params.baseDirection as SortDirection) || 'desc';
+  const baseDirection = (params.baseDirection as SortDirection) || 'asc';
   const tailoredSort = (params.tailoredSort as SortOption) || 'createdAt';
-  const tailoredDirection = (params.tailoredDirection as SortDirection) || 'desc';
+  const tailoredDirection = (params.tailoredDirection as SortDirection) || 'asc';
 
   // Sort function
   function sortResumes(resumes: Resume[], sort: SortOption, direction: SortDirection) {
