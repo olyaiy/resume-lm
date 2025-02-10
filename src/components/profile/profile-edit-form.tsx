@@ -29,9 +29,10 @@ import { ProfileSkillsForm } from "@/components/profile/profile-skills-form";
 // import { ProfileEditorHeader } from "./profile-editor-header";
 import { formatProfileWithAI } from "../../utils/actions/profiles/ai";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-import { importResume, updateProfile } from "@/utils/actions/index";
+
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { AlertTriangle } from "lucide-react";
+import { importResume, updateProfile } from "@/utils/actions/profiles/actions";
 
 interface ProfileEditFormProps {
   profile: Profile;
