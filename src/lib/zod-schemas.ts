@@ -282,4 +282,55 @@ export const workExperienceItemsSchema = z.object({
 // Add type inference helpers for new schemas
 export type WorkExperienceBulletPoints = z.infer<typeof workExperienceBulletPointsSchema>;
 export type ProjectAnalysis = z.infer<typeof projectAnalysisSchema>;
-export type WorkExperienceItems = z.infer<typeof workExperienceItemsSchema>; 
+export type WorkExperienceItems = z.infer<typeof workExperienceItemsSchema>;
+
+// Add to existing zod schemas in this file
+export const resumeScoreSchema = z.object({
+  overallScore: z.object({
+    score: z.number().min(0).max(100),
+    reason: z.string()
+  }),
+  completeness: z.object({
+    contactInformation: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    }),
+    detailLevel: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    })
+  }),
+  impactScore: z.object({
+    activeVoiceUsage: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    }),
+    quantifiedAchievements: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    })
+  }),
+  roleMatch: z.object({
+    skillsRelevance: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    }),
+    experienceAlignment: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    }),
+    educationFit: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    })
+  }),
+  miscellaneous: z.record(
+    z.union([z.number(), z.object({
+      score: z.number().min(0).max(100).optional(),
+      reason: z.string().optional()
+    })]).optional()
+  ).optional(),
+  overallImprovements: z.array(z.string())
+});
+
+export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>; 

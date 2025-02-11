@@ -9,6 +9,8 @@ export function ResumeEditorTabs() {
       {/* Enhanced second row with Resume Score and Cover Letter */}
       <div className="my-2">
         <TabsList className="h-full w-full relative bg-white/80 backdrop-blur-xl border border-white/40 rounded-lg overflow-hidden grid grid-cols-2 gap-0.5 p-0.5 shadow-lg">
+          
+          {/* Resume Score */}
           <TabsTrigger 
             value="resume-score" 
             className="group flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium relative transition-all duration-300
@@ -28,6 +30,7 @@ export function ResumeEditorTabs() {
             </span>
           </TabsTrigger>
 
+          {/* Cover Letter */}
           <TabsTrigger 
             value="cover-letter" 
             className="group flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium relative transition-all duration-300

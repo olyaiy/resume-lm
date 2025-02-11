@@ -4,7 +4,12 @@ import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { AIConfig } from "@/utils/ai-tools";
+import { generateObject } from "ai";
+import { initializeAIClient } from "@/utils/ai-tools";
+import { resumeScoreSchema } from "@/lib/zod-schemas";
+import { getSubscriptionPlan } from "../stripe/actions";
 
 
 //  SUPABASE ACTIONS
@@ -351,4 +356,49 @@ export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<n
   }
 
   return count || -1;
+}
+
+
+export async function generateResumeScore(
+  resume: Resume, 
+  config?: AIConfig
+) {
+  
+
+
+  const subscriptionPlan = await getSubscriptionPlan();
+  const isPro = subscriptionPlan === 'pro';
+  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+
+
+  console.log("RESUME IS", resume);
+  // console.log("AICLIENT IS", aiClient);
+
+  try {
+    const { object } = await generateObject({
+      model: aiClient,
+      schema: resumeScoreSchema,
+      prompt: `
+      Generate a score for this resume: ${JSON.stringify(resume)}
+      MUST include a 'miscellaneous' field with 2-3 metrics following this format:
+      {
+        "metricName": {
+          "score": number,
+          "reason": "string explanation"
+        }
+      }
+      Example: 
+      "keywordOptimization": {
+        "score": 85,
+        "reason": "Good use of industry keywords but could add more variation"
+      }
+      `
+    });
+
+    // console.log("THE OUTPUTTED object", object);
+    return object
+  } catch (error) {
+    console.error('Error SCORING resume:', error);
+    throw error;
+  }
 }

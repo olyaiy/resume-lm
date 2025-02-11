@@ -20,6 +20,7 @@ import {
   DocumentSettingsForm
 } from '../dynamic-components';
 import { ResumeEditorTabs } from "../header/resume-editor-tabs";
+import ResumeScorePanel from "./resume-score-panel";
 
 
 
@@ -171,6 +172,15 @@ export function EditorPanel({
                 <CoverLetterPanel
                   resume={resume}
                   job={job}
+                />
+              </TabsContent>
+
+
+              {/* Resume Score Form */}
+              <TabsContent value="resume-score">
+                <ResumeScorePanel
+                  resume={resume}
+                  // job={job}
                 />
               </TabsContent>
             </Tabs>
