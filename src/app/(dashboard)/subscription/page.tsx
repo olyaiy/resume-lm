@@ -27,7 +27,7 @@ export default async function PlansPage() {
   const isCanceling = profile?.subscription_status === 'canceled';
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4">
+    <div className="flex flex-col items-center justify-center h-full gap-4 my-14">
       {isPro ? (
         isCanceling ? (
           <CancelingPlanDisplay initialProfile={profile} />

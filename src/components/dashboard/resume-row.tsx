@@ -5,7 +5,7 @@ import { ResumeSortControls, type SortOption, type SortDirection } from '../resu
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from '@radix-ui/react-alert-dialog';
 import { Copy, FileText, Link, Trash2 } from 'lucide-react';
 import { MiniResumePreview } from '../resume/shared/mini-resume-preview';
-import { copyResume, deleteResume } from '@/utils/actions';
+import { copyResume, deleteResume } from '@/utils/actions/resumes/actions';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { AlertDialogFooter } from '../ui/alert-dialog';
