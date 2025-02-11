@@ -9,6 +9,7 @@ import {
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
 import { initializeAIClient } from '@/utils/ai-tools';
+import { getSubscriptionPlan } from '../stripe/actions';
 
 
 export async function tailorResumeToJob(
@@ -16,12 +17,10 @@ export async function tailorResumeToJob(
   jobListing: z.infer<typeof simplifiedJobSchema>,
   config?: AIConfig
 ) {
-  const aiClient = initializeAIClient({
-    ...(config || {}),
-    model: 'gpt-4o-mini',
-    apiKeys: config?.apiKeys || []
-  });
-  try {
+  const subscriptionPlan = await getSubscriptionPlan();
+  const isPro = subscriptionPlan === 'pro';
+  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+try {
     const { object } = await generateObject({
       model: aiClient,
       schema: z.object({
@@ -87,12 +86,10 @@ export async function tailorResumeToJob(
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
-  const aiClient = initializeAIClient({
-    ...(config || {}),
-    model: 'gpt-4o-mini',
-    apiKeys: config?.apiKeys || []
-  });
-  try {
+  const subscriptionPlan = await getSubscriptionPlan();
+  const isPro = subscriptionPlan === 'pro';
+  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+try {
     const { object } = await generateObject({
       model: aiClient,
       schema: z.object({

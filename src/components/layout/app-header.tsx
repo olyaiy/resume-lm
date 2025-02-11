@@ -52,7 +52,7 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                   <div className="h-4 w-px bg-purple-200/50 ml-3" />
                 </>
               )}
-              <TogglePlanButton />
+              {/* <TogglePlanButton /> */}
 
               <Link 
                 href="/profile" 

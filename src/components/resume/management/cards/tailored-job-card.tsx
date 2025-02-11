@@ -437,7 +437,7 @@ export function TailoredJobCard({
               )}
               
               {/* Keywords */}
-              <div className="flex flex-wrap gap-2 bg-red-500">
+              <div className="flex flex-wrap gap-2 ">
                 {effectiveJob.keywords?.map((keyword, index) => (
                   <motion.div
                     key={keyword}
