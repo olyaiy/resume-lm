@@ -34,6 +34,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ApiKeyErrorAlert } from '@/components/ui/api-key-error-alert';
+import { Textarea } from '@/components/ui/textarea';
 
 
 
@@ -435,7 +436,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                               )}>
                                 {editingMessageId === m.id ? (
                                   <div className="flex flex-col gap-2">
-                                    <textarea
+                                    <Textarea
                                       value={editContent}
                                       onChange={(e) => setEditContent(e.target.value)}
                                       className={cn(
