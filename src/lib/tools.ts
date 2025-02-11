@@ -24,10 +24,10 @@ export const suggestWorkExperienceTool = createTool({
   parameters: z.object({
     index: z.number().describe('Index of the work experience entry to improve'),
     improved_experience: z.object({
-      company: z.string(),
-      position: z.string(),
-      location: z.string().optional(),
       date: z.string(),
+      company: z.string(),
+      location: z.string().optional(),
+      position: z.string(),
       description: z.array(z.string()),
       technologies: z.array(z.string()).optional(),
     }).describe('Improved version of the work experience entry. For important keywords, format them as bold, like this: **keyword**. Put two asterisks around the keyword or phrase.'),

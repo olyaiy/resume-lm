@@ -434,6 +434,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                   "backdrop-blur-sm pb-0"
                                 ]
                               )}>
+
+                                {/* Edit Message */}
                                 {editingMessageId === m.id ? (
                                   <div className="flex flex-col gap-2">
                                     <Textarea
@@ -500,21 +502,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                         {/* Tool Invocations as Separate Bubbles */}
                         {m.toolInvocations?.map((toolInvocation: ToolInvocation) => {
                           const { toolName, toolCallId, state, args } = toolInvocation;
-
-                          // TEST DEV TOOL
-                          // if (toolName === 'devTestTool') {
-                          //   const parsedArgs = typeof args === 'string' ? JSON.parse(args) : args;
-                          //   return (
-                          //     <div key={toolCallId} className="mt-2 w-[90%]">
-                          //       <div className="bg-red-500  rounded-lg">
-                          //         {parsedArgs.sentance1}
-                          //         {parsedArgs.sentance2}
-                          //         {parsedArgs.sentance3}
-                          //       </div>
-                          //     </div>
-                          //   );
-                          // }
-
                           switch (state) {
                             case 'partial-call':
                             case 'call':
@@ -636,6 +623,10 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                       )}
                                       onReject={() => {}}
                                     />
+                                    <pre>
+                                    <p> Current Content: {JSON.stringify(resume[config.field][args.index], null, 2)}</p>
+                                    <p> New Content: {JSON.stringify(args[config.content], null, 2)}</p>
+                                    </pre>
                                   </div>
                                 </div>
                               );
