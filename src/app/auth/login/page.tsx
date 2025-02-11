@@ -63,7 +63,7 @@ export default async function LoginPage({
   const showErrorDialog = params?.error === 'email_confirmation';
 
   return (
-    <main className="relative overflow-x-hidden selection:bg-violet-200/50">
+    <main className="relative overflow-x-hidden selection:bg-violet-200/50 -my-14">
       {/* Error Dialog */}
       <ErrorDialog isOpen={!!showErrorDialog} />
 

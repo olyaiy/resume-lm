@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 
 interface CoverLetterProps {
     containerWidth: number;
+    
 }
 
 
