@@ -33,18 +33,18 @@ export function PreviewPanel({
       </div>
 
       <CoverLetter 
-        resumeId={resume.id} 
-        hasCoverLetter={resume.has_cover_letter}
-        coverLetterData={resume.cover_letter}
+        // resumeId={resume.id} 
+        // hasCoverLetter={resume.has_cover_letter}
+        // coverLetterData={resume.cover_letter}
         containerWidth={width}
-        onCoverLetterChange={(data: Record<string, unknown>) => {
-          if ('has_cover_letter' in data) {
-            onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
-          }
-          if ('cover_letter' in data) {    
-            onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
-          }
-        }}
+        // onCoverLetterChange={(data: Record<string, unknown>) => {
+        //   if ('has_cover_letter' in data) {
+        //     onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
+        //   }
+        //   if ('cover_letter' in data) {    
+        //     onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
+        //   }
+        // }}
       />
     </ScrollArea>
   );
