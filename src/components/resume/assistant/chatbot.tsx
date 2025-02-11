@@ -623,10 +623,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                       )}
                                       onReject={() => {}}
                                     />
-                                    <pre>
-                                    <p> Current Content: {JSON.stringify(resume[config.field][args.index], null, 2)}</p>
-                                    <p> New Content: {JSON.stringify(args[config.content], null, 2)}</p>
-                                    </pre>
                                   </div>
                                 </div>
                               );

@@ -117,26 +117,38 @@ function ProjectSuggestion({ content: project, currentContent: currentProject }:
         )}
       </div>
       <div className="space-y-2">
-        {project.description.map((point, index) => (
-          <div 
-            key={index} 
-            className="flex items-start gap-2"
-          >
-            <span className="text-gray-800 mt-1">•</span>
-            <div className="flex-1">
-              <Tiptap
-                content={point}
-                readOnly={true}
-                onChange={() => {}}
-                className={cn(
-                  "min-h-[60px] text-xs text-gray-800",
-                  !currentProject || isNewItem(currentProject.description, project.description, point) && DIFF_HIGHLIGHT_CLASSES,
-                  "border-none shadow-none"
-                )}
-              />
+        {project.description.map((point, index) => {
+          const currentPoint = currentProject?.description?.[index];
+          const comparedWords = currentPoint 
+            ? compareDescriptions(currentPoint, point)
+            : [{ text: point.replace(/\*\*/g, ''), isNew: true, isBold: false, isStart: true, isEnd: true }];
+
+          return (
+            <div key={index} className="flex items-start gap-1.5">
+              <span className="text-gray-800 mt-0.5 text-xs">•</span>
+              <p className="text-xs text-gray-800 flex-1 flex flex-wrap">
+                {comparedWords.map((word, wordIndex) => (
+                  <span
+                    key={wordIndex}
+                    className={cn(
+                      "inline-flex items-center",
+                      word.isNew && "bg-green-300",
+                      word.isStart && "rounded-l-sm pl-1",
+                      word.isEnd && "rounded-r-sm pr-1",
+                      wordIndex < comparedWords.length - 1 && "mr-1"
+                    )}
+                  >
+                    {word.isBold ? (
+                      <strong>{word.text}</strong>
+                    ) : (
+                      word.text
+                    )}
+                  </span>
+                ))}
+              </p>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
       {project.technologies && (
         <div className="flex flex-wrap gap-1.5 mt-2">
