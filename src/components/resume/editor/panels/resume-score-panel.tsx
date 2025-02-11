@@ -79,7 +79,7 @@ function getStoredScores(resumeId: string): ResumeScoreMetrics | null {
     if (!stored) return null;
     
     const scores = new Map(JSON.parse(stored));
-    return scores.get(resumeId) || null;
+    return scores.get(resumeId) as ResumeScoreMetrics | null;
   } catch (error) {
     console.error('Error reading stored scores:', error);
     return null;
