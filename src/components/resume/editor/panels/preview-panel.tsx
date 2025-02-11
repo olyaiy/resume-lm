@@ -16,7 +16,7 @@ interface PreviewPanelProps {
 
 export function PreviewPanel({
   resume,
-  onResumeChange,
+  // onResumeChange,
   width
 }: PreviewPanelProps) {
   return (
