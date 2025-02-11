@@ -2,7 +2,8 @@
 import { ProPlanDisplay } from '@/components/pricing/pro-plan-display';
 import { FreePlanDisplay } from '@/components/pricing/free-plan-display';
 import { CancelingPlanDisplay } from '@/components/pricing/canceling-plan-display';
-import { getSubscriptionStatus } from '@/utils/actions/subscriptions/actions';
+import { getSubscriptionStatus} from '@/utils/actions/stripe/actions';
+
 
 interface Profile {
   subscription_plan: string | null;
