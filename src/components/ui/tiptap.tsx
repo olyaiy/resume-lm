@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils'
 
 interface TiptapProps {
   content: string;
-  oldContent?: string;
   onChange: (content: string) => void;
   className?: string;
   readOnly?: boolean;
@@ -27,7 +26,7 @@ interface TiptapProps {
 }
 
 const Tiptap = memo(
-  ({ content, oldContent, onChange, className, readOnly, variant = 'default', editorProps: customEditorProps }: TiptapProps) => {
+  ({ content, onChange, className, readOnly, variant = 'default', editorProps: customEditorProps }: TiptapProps) => {
     // Transform content to HTML before loading
     const transformContent = useCallback((content: string) => {
       return content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');

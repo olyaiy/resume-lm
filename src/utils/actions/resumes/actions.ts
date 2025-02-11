@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { simplifiedJobSchema, simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { simplifiedResumeSchema } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
 import { generateObject } from "ai";
 import { initializeAIClient } from "@/utils/ai-tools";

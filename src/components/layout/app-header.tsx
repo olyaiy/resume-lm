@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { User } from "lucide-react";
 import { PageTitle } from "./page-title";
-import { TogglePlanButton } from '@/components/settings/toggle-plan-button';
+// import { TogglePlanButton } from '@/components/settings/toggle-plan-button';
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 
 interface AppHeaderProps {

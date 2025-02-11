@@ -10,10 +10,10 @@ const DIFF_HIGHLIGHT_CLASSES = "bg-green-300 px-1 rounded-sm";
 interface WorkExperienceSuggestionProps {
   currentWork: WorkExperience;
   modifiedField: keyof WorkExperience;
-  newValue: any;
+  newValue: WorkExperience[keyof WorkExperience];
 }
 
-function getHighlightClass(currentValue: any, newValue: any, fieldValue: any): string {
+function getHighlightClass<T>(currentValue: T, newValue: T, fieldValue: T): string {
   return JSON.stringify(currentValue) !== JSON.stringify(newValue) && fieldValue === newValue 
     ? DIFF_HIGHLIGHT_CLASSES 
     : '';
@@ -50,8 +50,8 @@ export function WorkExperienceSuggestion({
 
   const highlightedDescription = modifiedField === 'description'
     ? descriptionComparison(
-        currentWork?.description ?? [], // Add nullish coalescing
-        Array.isArray(newValue) ? newValue : [newValue] // Handle non-array values
+        currentWork?.description ?? [],
+        (newValue as string[]) // Type assertion since we know modifiedField='description'
       )
     : currentWork.description ?? [];
 

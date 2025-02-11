@@ -126,8 +126,8 @@ export default function ResumeScorePanel({ resume }: ResumeScorePanelProps) {
         const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
   
         const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
-        const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
-        let apiKeys: string[] = [];
+        // const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+        const apiKeys: string[] = [];
         
       // Call the generateResumeScore action with current resume
       const newScore = await generateResumeScore({
