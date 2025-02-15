@@ -107,7 +107,7 @@ export function LoginForm() {
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+          {/* <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 " /> */}
           <Input
             ref={emailInputRef}
             id="login-email"
@@ -118,7 +118,7 @@ export function LoginForm() {
             onBlur={() => setFieldTouched('email')}
             placeholder="you@example.com"
             required
-            className="pl-10"
+            // className="pl-10"
             validation={validations.email}
             isTouched={touchedFields.email}
             autoComplete="username"
@@ -136,7 +136,7 @@ export function LoginForm() {
           </Link>
         </div>
         <div className="relative">
-          <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+          {/* <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-black" /> */}
           <Input
             id="login-password"
             name="password"
@@ -147,7 +147,7 @@ export function LoginForm() {
             placeholder="••••••••"
             required
             minLength={6}
-            className="pl-10"
+            // className="pl-10"
             validation={validations.password}
             isTouched={touchedFields.password}
             autoComplete="current-password"

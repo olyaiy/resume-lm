@@ -8,6 +8,9 @@ import { PricingSection } from "@/components/landing/pricing-section";
 import { ErrorDialog } from "@/components/auth/error-dialog";
 import { CreatorStory } from "@/components/landing/creator-story";
 import { HowItWorks } from "@/components/landing/how-it-works";
+import { HeroVideoSection } from "@/components/landing/hero-video-section";
+import { Footer } from "@/components/layout/footer";
+
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
 export const metadata: Metadata = {
@@ -63,7 +66,8 @@ export default async function LoginPage({
   const showErrorDialog = params?.error === 'email_confirmation';
 
   return (
-    <main className="relative overflow-x-hidden selection:bg-violet-200/50 -my-14">
+    <>
+    <main className="relative overflow-x-hidden selection:bg-violet-200/50 -my-14 mb-6">
       {/* Error Dialog */}
       <ErrorDialog isOpen={!!showErrorDialog} />
 
@@ -93,8 +97,8 @@ export default async function LoginPage({
       {/* Enhanced Content with better spacing and animations */}
       <div className="relative z-10">
         {/* Hero Section with Split Layout */}
-        <div className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 py-8 lg:py-16">
+        <div className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
+          <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 py-8 lg:py-16 max-h-[80vh]">
             {/* Left Column - Content */}
             <div className="flex flex-col gap-6 lg:gap-10 lg:pr-12">
               <div className="space-y-6 lg:space-y-8">
@@ -221,6 +225,8 @@ export default async function LoginPage({
               </div>
             </div>
           </div>
+          
+          <HeroVideoSection />
         </div>
 
         {/* Pricing Section */}
@@ -233,6 +239,8 @@ export default async function LoginPage({
         <CreatorStory />
       </div>
     </main>
+    <Footer variant="static"/>
+    </>
   );
 }
   

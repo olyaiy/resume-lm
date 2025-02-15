@@ -99,7 +99,7 @@ export default async function RootLayout({
           <main className="py-14 h-full">
             {children}
           </main>
-          <Footer />
+          {user && <Footer /> }
         </div>
         <Toaster 
           richColors 
