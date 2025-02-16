@@ -71,6 +71,93 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       setIsBaseResumeInvalid(false);
       setIsJobDescriptionInvalid(false);
 
+      if (importOption === 'import-profile') {
+        // Direct copy logic
+        const baseResume = baseResumes?.find(r => r.id === selectedBaseResume);
+        if (!baseResume) throw new Error("Base resume not found");
+
+        let jobId: string | null = null;
+        let jobTitle = 'Copied Resume';
+        let companyName = '';
+
+        if (jobDescription.trim()) {
+          // Get model and API key from local storage
+          const MODEL_STORAGE_KEY = 'resumelm-default-model';
+          const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
+
+          const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+          const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
+          let apiKeys = [];
+
+          try {
+            apiKeys = storedKeys ? JSON.parse(storedKeys) : [];
+          } catch (error) {
+            console.error('Error parsing API keys:', error);
+          }
+
+          try {
+            setCurrentStep('analyzing');
+            const formattedJobListing = await formatJobListing(jobDescription, {
+              model: selectedModel || '',
+              apiKeys
+            });
+
+            setCurrentStep('formatting');
+            const jobEntry = await createJob(formattedJobListing);
+            if (!jobEntry?.id) throw new Error("Failed to create job entry");
+            
+            jobId = jobEntry.id;
+            jobTitle = formattedJobListing.position_title || 'Copied Resume';
+            companyName = formattedJobListing.company_name || '';
+          } catch (error: Error | unknown) {
+            if (error instanceof Error && (
+                error.message.toLowerCase().includes('api key') || 
+                error.message.toLowerCase().includes('unauthorized') ||
+                error.message.toLowerCase().includes('invalid key'))
+            ) {
+              setErrorMessage({
+                title: "API Key Error",
+                description: "There was an issue with your API key. Please check your settings and try again."
+              });
+            } else {
+              setErrorMessage({
+                title: "Error",
+                description: "Failed to process job description. Please try again."
+              });
+            }
+            setShowErrorDialog(true);
+            setIsCreating(false);
+            return;
+          }
+        }
+
+        const resume = await createTailoredResume(
+          baseResume,
+          jobId,
+          jobTitle,
+          companyName,
+          {
+            work_experience: baseResume.work_experience,
+            education: baseResume.education.map(edu => ({
+              ...edu,
+              gpa: edu.gpa?.toString()
+            })),
+            skills: baseResume.skills,
+            projects: baseResume.projects,
+            target_role: baseResume.target_role
+          }
+        );
+
+        toast({
+          title: "Success",
+          description: "Resume created successfully",
+        });
+
+        router.push(`/resumes/${resume.id}`);
+        setOpen(false);
+        return;
+      }
+
       // Get model and API key from local storage
       const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
@@ -292,6 +379,8 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 >
                   Select Base Resume <span className="text-red-500">*</span>
                 </Label>
+
+                {/* Base Resume Selector */}
                 <BaseResumeSelector
                   baseResumes={baseResumes}
                   selectedResumeId={selectedBaseResume}

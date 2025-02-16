@@ -194,7 +194,6 @@ export async function createBaseResume(
     projects: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
       ? selectedContent.projects
       : [],
-    certifications: [],
     section_order: [
       'work_experience',
       'education',
@@ -207,7 +206,6 @@ export async function createBaseResume(
       education: { visible: (selectedContent?.education?.length ?? 0) > 0 },
       skills: { visible: (selectedContent?.skills?.length ?? 0) > 0 },
       projects: { visible: (selectedContent?.projects?.length ?? 0) > 0 },
-      certifications: { visible: false }
     }
   };
 
@@ -237,11 +235,15 @@ export async function createBaseResume(
 
 export async function createTailoredResume(
   baseResume: Resume,
-  jobId: string,
+  jobId: string | null,
   jobTitle: string,
   companyName: string,
   tailoredContent: z.infer<typeof simplifiedResumeSchema>
 ) {
+  console.log('[createTailoredResume] Received jobId:', jobId);
+  console.log('[createTailoredResume] baseResume ID:', baseResume?.id);
+  console.log('[createTailoredResume] Is jobId valid UUID?:', /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(jobId || ''));
+
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   

@@ -31,14 +31,7 @@ export interface Skill {
   items: string[];
 }
 
-export interface Certification {
-  name: string;
-  issuer: string;
-  date_acquired?: string;
-  expiry_date?: string;
-  credential_id?: string;
-  url?: string;
-}
+
 
 
 export interface Job {
@@ -83,7 +76,6 @@ export interface Resume {
   education: Education[];
   skills: Skill[];
   projects: Project[];
-  certifications: Certification[];
   created_at: string;
   updated_at: string;
   document_settings?: DocumentSettings;
@@ -149,7 +141,6 @@ export interface Profile {
   education: Education[];
   skills: Skill[];
   projects: Project[];
-  certifications: Certification[];
   created_at: string;
   updated_at: string;
 }

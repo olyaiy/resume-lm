@@ -8,29 +8,31 @@ interface ImportMethodRadioItemProps extends ComponentPropsWithoutRef<'input'> {
   description: string;
   icon: React.ReactNode;
   checked?: boolean;
+  id: string;
 }
 
 function ImportMethodRadioItem({
   title,
   description,
   icon,
+  id,
   ...props
 }: ImportMethodRadioItemProps) {
   return (
-    <div className="h-full">
+    <label htmlFor={id} className="h-full cursor-pointer">
       <input
         type="radio"
         className="sr-only peer"
+        id={id}
         {...props}
       />
       <div
-        role="button"
         tabIndex={0}
         className={cn(
           "flex flex-col items-center justify-center rounded-xl p-4",
           "bg-white/80 border-2 shadow-sm h-full",
           "hover:border-pink-200 hover:bg-pink-50/50",
-          "transition-all duration-300 cursor-pointer",
+          "transition-all duration-300",
           "peer-checked:border-pink-500 peer-checked:bg-pink-50",
           "peer-checked:shadow-md peer-checked:shadow-pink-100",
           "focus:outline-none focus:ring-2 focus:ring-pink-500/50"
@@ -44,7 +46,7 @@ function ImportMethodRadioItem({
           <span className="text-xs leading-relaxed text-gray-600">{description}</span>
         </div>
       </div>
-    </div>
+    </label>
   );
 }
 
@@ -74,7 +76,7 @@ export function ImportMethodRadioGroup({ value, onChange }: ImportMethodRadioGro
         checked={value === 'import-profile'}
         onChange={() => onChange('import-profile')}
         title="Copy Base Resume"
-        description="Create an exact copy of your base resume and make your own modifications"
+        description="Create a copy of your base resume. Add a job description to link it to a specific position."
         icon={<Copy className="h-6 w-6 text-pink-600" />}
       />
     </div>
