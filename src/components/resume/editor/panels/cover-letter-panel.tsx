@@ -1,4 +1,4 @@
-import { Resume, Job, Profile } from "@/lib/types";
+import { Resume, Job } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2, Plus, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -139,7 +139,6 @@ export function CoverLetterPanel({
         </p>
         
         <CreateTailoredResumeDialog 
-          // profile={profile} 
           baseResumes={[resume]}
         >
           <Button
