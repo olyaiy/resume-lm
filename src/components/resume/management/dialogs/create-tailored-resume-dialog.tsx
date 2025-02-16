@@ -24,7 +24,7 @@ import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
   baseResumes?: Resume[];
-  profile: Profile;
+  profile?: Profile;
 }
 
 export function CreateTailoredResumeDialog({ children, baseResumes, profile }: CreateTailoredResumeDialogProps) {
@@ -305,18 +305,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 You need to create a base resume first before you can create a tailored version.
               </p>
             </div>
-            <CreateBaseResumeDialog profile={profile}>
-              <Button
-                className={cn(
-                  "mt-2 text-white shadow-lg hover:shadow-xl transition-all duration-500",
-                  "bg-gradient-to-r from-purple-600 to-indigo-600",
-                  "hover:from-purple-700 hover:to-indigo-700"
-                )}
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Base Resume
+            {profile ? (
+              <CreateBaseResumeDialog profile={profile}>
+                <Button
+                  className={cn(
+                    "mt-2 text-white shadow-lg hover:shadow-xl transition-all duration-500",
+                    "bg-gradient-to-r from-purple-600 to-indigo-600",
+                    "hover:from-purple-700 hover:to-indigo-700"
+                  )}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Base Resume
+                </Button>
+              </CreateBaseResumeDialog>
+            ) : (
+              <Button disabled className="mt-2">
+                No profile available to create base resume
               </Button>
-            </CreateBaseResumeDialog>
+            )}
           </div>
         </DialogContent>
       </Dialog>

@@ -1,4 +1,4 @@
-import { Resume, Job } from "@/lib/types";
+import { Resume, Job, Profile } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2, Plus, Sparkles, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -9,7 +9,7 @@ import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { generate } from "@/utils/actions/cover-letter/actions";
 import { useResumeContext } from "../resume-editor-context";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
-import Link from "next/link";
+import { CreateTailoredResumeDialog } from "@/components/resume/management/dialogs/create-tailored-resume-dialog";
 
 
 interface CoverLetterPanelProps {
@@ -140,17 +140,19 @@ export function CoverLetterPanel({
           To generate a cover letter, please first tailor this base resume to a specific job.
         </p>
         
-        <Button
-          variant="outline"
-          size="sm"
-          className="mt-2 border-purple-300 text-purple-700 hover:bg-purple-50"
-          asChild
+        <CreateTailoredResumeDialog 
+          // profile={profile} 
+          baseResumes={[resume]}
         >
-          <Link href="#">
+          <Button
+            variant="outline"
+            size="sm"
+            className="mt-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+          >
             <Plus className="h-4 w-4 mr-2" />
-            Create Tailored Resume
-          </Link>
-        </Button>
+            Tailor This Resume
+          </Button>
+        </CreateTailoredResumeDialog>
       </div>
     );
   }
