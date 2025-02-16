@@ -9,6 +9,7 @@ import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { generate } from "@/utils/actions/cover-letter/actions";
 import { useResumeContext } from "../resume-editor-context";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
+import Link from "next/link";
 
 
 interface CoverLetterPanelProps {
@@ -121,6 +122,38 @@ export function CoverLetterPanel({
       setIsGenerating(false);
     }
   };
+
+  if (resume.is_base_resume) {
+    return (
+      <div className={cn(
+        "p-4 backdrop-blur-xl rounded-lg shadow-lg bg-purple-50/80 border border-purple-200",
+        "space-y-4 text-center"
+      )}>
+        <div className="flex items-center gap-2 justify-center">
+          <div className="p-1.5 rounded-md bg-purple-100/80">
+            <FileText className="h-4 w-4 text-purple-600" />
+          </div>
+          <h3 className="text-lg font-semibold text-purple-900">Cover Letter</h3>
+        </div>
+        
+        <p className="text-sm text-purple-700">
+          To generate a cover letter, please first tailor this base resume to a specific job.
+        </p>
+        
+        <Button
+          variant="outline"
+          size="sm"
+          className="mt-2 border-purple-300 text-purple-700 hover:bg-purple-50"
+          asChild
+        >
+          <Link href="#">
+            <Plus className="h-4 w-4 mr-2" />
+            Create Tailored Resume
+          </Link>
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className={cn(
