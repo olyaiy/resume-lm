@@ -63,6 +63,9 @@ async function upsertCustomerToSupabase(uuid: string, customerId: string) {
       subscription_status: 'active',
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
+    }, {
+      onConflict: 'user_id',
+      ignoreDuplicates: false
     });
 
   if (subscriptionError) throw subscriptionError;
@@ -148,17 +151,26 @@ export async function manageSubscriptionStatusChange(
       }
       console.log('✅ Subscription updated successfully');
     } else {
-      console.log('\n➕ Creating new subscription record');
-      // Insert new subscription if none exists
+      console.log('\n🔄 Upserting subscription record');
+      // Upsert subscription data
       const { error } = await supabase
         .from('subscriptions')
-        .insert([{ ...subscriptionData, created_at: new Date().toISOString() }]);
+        .upsert(
+          { 
+            ...subscriptionData, 
+            created_at: new Date().toISOString() 
+          },
+          { 
+            onConflict: 'user_id',  // This is the unique constraint column
+            ignoreDuplicates: false 
+          }
+        );
 
       if (error) {
-        console.error('\n❌ Error creating subscription:', error);
+        console.error('\n❌ Error upserting subscription:', error);
         throw error;
       }
-      console.log('✅ Subscription created successfully');
+      console.log('✅ Subscription upserted successfully');
     }
 
     console.log('\n🎉 Subscription management completed successfully!\n');

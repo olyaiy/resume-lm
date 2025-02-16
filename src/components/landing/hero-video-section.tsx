@@ -37,6 +37,8 @@ export function HeroVideoSection() {
                   src="/thumbnail.png"
                   alt="ResumeLM Demo Video"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
+                  width={1000}
+                  height={1000}
                 />
                 
                 {/* Enhanced Gradient Overlays */}

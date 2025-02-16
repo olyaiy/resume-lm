@@ -155,7 +155,6 @@ export interface Profile {
 }
 
 export interface Subscription {
-  id: string;
   user_id: string;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
