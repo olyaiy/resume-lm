@@ -202,14 +202,4 @@ export type ServiceName =
   // | 'groq'
   // | 'deepseek';
 
-export type DashboardResume = Pick<Resume, 
-  'id' | 
-  'user_id' | 
-  'name' | 
-  'target_role' | 
-  'created_at' | 
-  'is_base_resume' | 
-  'has_cover_letter'
-> & { type: 'base' | 'tailored' };
-
 

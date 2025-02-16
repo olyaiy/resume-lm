@@ -1,12 +1,12 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume, DashboardResume } from "@/lib/types";
+import { Profile, Resume } from "@/lib/types";
 
 interface DashboardData {
   profile: Profile | null;
-  baseResumes: DashboardResume[];
-  tailoredResumes: DashboardResume[];
+  baseResumes: Resume[];
+  tailoredResumes: Resume[];
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -65,15 +65,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     // Fetch resumes data
     const { data: resumes, error: resumesError } = await supabase
       .from('resumes')
-      .select(`
-        id,
-        user_id,
-        name,
-        target_role,
-        created_at,
-        is_base_resume,
-        has_cover_letter
-      `)
+      .select('*')
       .eq('user_id', user.id);
 
     if (resumesError) {

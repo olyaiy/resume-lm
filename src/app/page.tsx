@@ -21,7 +21,7 @@ import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
-import type { DashboardResume, Resume } from "@/lib/types";
+import type { Resume } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { createClient } from "@/utils/supabase/server";
 import { getDashboardData } from "@/utils/actions";
@@ -80,7 +80,7 @@ export default async function Home({
   const tailoredDirection = (params.tailoredDirection as SortDirection) || 'asc';
 
   // Sort function
-  function sortResumes(resumes: DashboardResume[], sort: SortOption, direction: SortDirection) {
+  function sortResumes(resumes: Resume[], sort: SortOption, direction: SortDirection) {
     return [...resumes].sort((a, b) => {
       const modifier = direction === 'asc' ? 1 : -1;
       switch (sort) {
@@ -91,14 +91,15 @@ export default async function Home({
         case 'createdAt':
         default:
           return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      }
+      
+    }
     });
   }
 
 
   // Sort both resume lists
-  const baseResumes: DashboardResume[] = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
-  const tailoredResumes: DashboardResume[] = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
+  const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
+  const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
   
   // Check if user is on Pro plan
   const subscription = await checkSubscriptionPlan();
