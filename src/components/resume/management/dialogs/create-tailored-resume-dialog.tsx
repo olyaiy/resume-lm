@@ -53,7 +53,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       return;
     }
 
-    if (!jobDescription.trim()) {
+    if (!jobDescription.trim() && importOption === 'ai') {
       setIsJobDescriptionInvalid(true);
       toast({
         title: "Error",
