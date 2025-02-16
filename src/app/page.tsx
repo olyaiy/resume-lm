@@ -164,7 +164,7 @@ export default async function Home({
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
-            <ApiKeyAlert />
+            { !isProPlan && <ApiKeyAlert />}
             
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
