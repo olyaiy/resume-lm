@@ -26,12 +26,12 @@ export const projectSchema = z.object({
   date: z.string().optional(),
   technologies: z.array(z.string()).optional(),
   url: z.string()
-    .transform((str) => (!str ? str : str.startsWith('http') ? str : `https://${str}`))
-    .pipe(z.string().url())
+    .transform(str => str || '')
+    .pipe(z.string().url().optional().or(z.literal('')))
     .optional(),
   github_url: z.string()
-    .transform((str) => (!str ? str : str.startsWith('http') ? str : `https://${str}`))
-    .pipe(z.string().url())
+    .transform(str => str || '')
+    .pipe(z.string().url().optional().or(z.literal('')))
     .optional(),
 });
 

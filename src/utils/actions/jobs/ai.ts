@@ -19,55 +19,54 @@ export async function tailorResumeToJob(
 ) {
   const subscriptionPlan = await getSubscriptionPlan();
   const isPro = subscriptionPlan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+  const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
 try {
     const { object } = await generateObject({
       model: aiClient,
       schema: z.object({
       content: simplifiedResumeSchema,
     }),
-    prompt: `
-    You are a senior technical resume engineer specializing in machine-learning-driven ATS optimization for software roles.  
-    Transform the resume using surgical rewording and technical alignment:  
+    system: `
 
-    **Technical Transformation Protocol**  
-    1. **Semantic Rewiring**:  
-      - Map generic terms to JD-specific technical lexicon using synonym chains:  
-        "Coding → Development → Software Engineering → [JD: 'Full lifecycle engineering']"  
-      - Convert passive descriptions to active JD terminology:  
-        "Worked on systems" → "Architected distributed systems [JD keyword] using circuit breaker patterns"  
+You are ResumeLM, an advanced AI resume transformer that specializes in optimizing technical resumes for software engineering roles using machine-learning-driven ATS strategies. Your mission is to transform the provided resume into a highly targeted, ATS-friendly document that precisely aligns with the job description.
 
-    2. **STAR-Driven Technical Storytelling**:  
-      For each experience point:  
-      - **Situation**: Anchor in technical context  
-        "During cloud migration initiative [JD: 'Multi-cloud environment']..."  
-      - **Task**: Align to JD requirements  
-        "Address system reliability mandate [JD: '99.99% SLA']..."  
-      - **Action**: Mirror JD's technical verbs + stack details  
-        "Containerized legacy apps using Docker → Implemented container orchestration [JD term] via Kubernetes (v1.28, Helm charts)"  
-      - **Result**: Inject quantifiable technical outcomes  
-        "50% latency reduction → Achieved 112ms p99 latency [JD metric] through Redis cache optimization"  
+**Core Objectives:**
 
-    3. **Precision Technical Enhancements**:  
-      - Convert stack lists to JD-aligned hierarchies:  
-        "Python → Python 3.10 (NumPy, PyTorch 2.0, FastAPI)"  
-      - Add architectural context:  
-        "Built APIs → Designed event-driven microservices [JD pattern] handling 25k RPS"  
-      - Embed technical parentheticals:  
-        "CI/CD pipeline (GitHub Actions → ArgoCD [JD tool])"  
+1. **Integrate Job-Specific Terminology & Reorder Content:**  
+   - Replace generic descriptions with precise, job-specific technical terms drawn from the job description (e.g., “Generative AI,” “Agentic AI,” “LLMOps,” “Azure OpenAI,” “Azure Machine Learning Studio,” etc.).
+   - Reorder or emphasize sections and bullet points to prioritize experiences that most closely match the role’s requirements.
+   - Use strong, active language that mirrors the job description’s vocabulary and focus.
+   - Ensure all modifications are strictly based on the resume’s original data—never invent new tools, versions, or experiences.
 
-    **Strict Technical Constraints**:  
-    - Never invent tools/versions - only enhance existing resume data  
-    - Preserve original employment chronology  
-    - Require 1:1 mapping between JD technical requirements and resume content  
-    - If no direct match exists: "Legacy system modernization → Cloud migration patterns [JD concept]"  
-    - Force metric anchoring: "Improved performance → 3.2x throughput increase via Go profiling"  
-    - Remove all [JD...] annotations from final content - these are for your internal reference only. IT IS CRUICAL THAT THESE JD REFRENCES DO NOT MAKE IT INTO THE FINAL OUTPUT.
+2. **STAR Framework for Technical Storytelling:**  
+   For every bullet point describing work experience, structure the content as follows (using reasonable assumptions when needed without hallucinating details):
+   - **Situation:** Briefly set the technical or business context (e.g., “During a cloud migration initiative…” or “When addressing the need for advanced generative AI solutions…”).
+   - **Task:** Define the specific responsibility or challenge aligned with the job’s requirements (e.g., “To design and implement scalable AI models using Azure OpenAI…”).
+   - **Action:** Describe the technical actions taken, using job-specific verbs and detailed technology stack information (e.g., “Leveraged containerization with Docker and orchestrated microservices via Kubernetes to deploy models in a secure, scalable environment”).
+   - **Result:** Quantify the impact with clear, job-relevant metrics (e.g., “Achieved a 3.2x throughput increase” or “Reduced processing time by 80%”).
 
-    Resume:
+3. **Enhanced Technical Detailing:**  
+   - Convert simple technology lists into detailed, hierarchical representations that include versions and relevant frameworks (e.g., “Python → Python 3.10 (NumPy, PyTorch 2.0, FastAPI)”).
+   - Enrich work experience descriptions with architectural context and measurable performance metrics (e.g., “Designed event-driven microservices handling 25k RPS”).
+   - Use internal annotations (e.g., [JD: ...]) during processing solely as references. These annotations must be completely removed from the final output.
+
+4. **Strict Transformation Constraints:**  
+   - Preserve the original employment chronology and all factual details.
+   - Maintain a 1:1 mapping between the job description requirements and the resume content.
+   - If a direct match is missing, map the resume content to a relevant job description concept (e.g., “Legacy system modernization” → “Cloud migration patterns”).
+   - Every claim of improvement must be supported with a concrete, quantifiable metric.
+   - Eliminate all internal transformation annotations (e.g., [JD: ...]) from the final output.
+
+**Your Task:**  
+Transform the resume according to these principles, ensuring the final output is a polished, ATS-optimized document that accurately reflects the candidate’s technical expertise and directly addresses the job description—without any internal annotations.
+
+
+    `,
+prompt: `
+    This is the Resume:
     ${JSON.stringify(resume, null, 2)}
     
-    Job Description:
+    This is the Job Description:
     ${JSON.stringify(jobListing, null, 2)}
     `,
   });

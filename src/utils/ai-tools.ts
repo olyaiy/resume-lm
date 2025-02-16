@@ -17,7 +17,7 @@ export type AIConfig = {
  * Initializes an AI client based on the provided configuration
  * Falls back to default OpenAI configuration if no config is provided
  */
-export function initializeAIClient(config?: AIConfig, isPro?: boolean) {
+export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {
 
 
   // Handle Pro subscription with environment variables
@@ -25,11 +25,17 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean) {
 
   
     const { model } = config;
+
+    // if (useThinking) {
+    //   return createOpenAI({ apiKey: process.env.OPENAI_API_KEY })('o1-mini');
+    // }
     
     if (model.startsWith('claude')) {
       if (!process.env.ANTHROPIC_API_KEY) throw new Error('Anthropic API key not found');
       return createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY })(model);
     }
+
+    void useThinking;
     // if (model.startsWith('deepseek')) {
     //   if (!process.env.DEEPSEEK_API_KEY) throw new Error('DeepSeek API key not found');
     //   return createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })(model);

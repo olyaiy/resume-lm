@@ -2,7 +2,7 @@
 
 import { LogoutButton } from "@/components/auth/logout-button";
 import { SettingsButton } from "@/components/settings/settings-button";
-import { ModelSelector } from "@/components/settings/model-selector";
+// import { ModelSelector } from "@/components/settings/model-selector";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -68,7 +68,7 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
               <div className="h-4 w-px bg-purple-200/50" />
               <div className="h-4 w-px bg-purple-200/50" />
               <div className="flex items-center px-3 py-1">
-                <ModelSelector />
+                {/* <ModelSelector /> */}
                 <div className="mx-2 h-4 w-px bg-purple-200/50" />
                 <SettingsButton />
                 <div className="mx-2 h-4 w-px bg-purple-200/50" />
