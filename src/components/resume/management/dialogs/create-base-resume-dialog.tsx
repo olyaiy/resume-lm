@@ -17,7 +17,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { Textarea } from "@/components/ui/textarea";
-import { convertTextToResume } from "../ai/resume-management-ai";
+import { convertTextToResume } from "@/utils/actions/resumes/ai";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
 interface CreateBaseResumeDialogProps {
@@ -176,7 +176,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           const resume = await createBaseResume(
             targetRole,
             'import-resume',
-            selectedContent
+            selectedContent as Resume
           );
           
           toast({

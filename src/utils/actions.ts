@@ -65,7 +65,15 @@ export async function getDashboardData(): Promise<DashboardData> {
     // Fetch resumes data
     const { data: resumes, error: resumesError } = await supabase
       .from('resumes')
-      .select('*')
+      .select(`
+        id,
+        user_id,
+        name,
+        target_role,
+        created_at,
+        is_base_resume,
+        has_cover_letter
+      `)
       .eq('user_id', user.id);
 
     if (resumesError) {

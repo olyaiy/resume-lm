@@ -73,8 +73,8 @@ export const textImportSchema = z.object({
   education: z.array(z.object({
     school: z.string(),
     degree: z.string(),
-    field: z.string(),
-    date: z.string(),
+    field: z.string().optional(),
+    date: z.string().optional(),
     description: z.array(z.string()).optional(),
     gpa: z.string().optional(),
     location: z.string().optional(),
@@ -93,8 +93,8 @@ export const textImportSchema = z.object({
     github_url: z.string().optional(),
   })).optional(),
   certifications: z.array(z.object({
-    name: z.string(),
-    issuer: z.string(),
+    name: z.string().optional(),
+    issuer: z.string().optional(),
     date_acquired: z.string().optional(),
     expiry_date: z.string().optional(),
     credential_id: z.string().optional(),
