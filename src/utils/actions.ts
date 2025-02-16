@@ -1,12 +1,12 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume } from "@/lib/types";
+import { Profile, Resume, DashboardResume } from "@/lib/types";
 
 interface DashboardData {
   profile: Profile | null;
-  baseResumes: Resume[];
-  tailoredResumes: Resume[];
+  baseResumes: DashboardResume[];
+  tailoredResumes: DashboardResume[];
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
