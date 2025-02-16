@@ -108,8 +108,8 @@ export function TextImportDialog({
       const updatedResume = await addTextToResume(content, resume);
       
       // Update each field of the resume
-      Object.keys(updatedResume).forEach((key) => {
-        onResumeChange(key as keyof Resume, updatedResume[key as keyof Resume]);
+      (Object.keys(updatedResume) as Array<keyof Resume>).forEach((key) => {
+        onResumeChange(key, updatedResume[key] as Resume[keyof Resume]);
       });
 
       toast({
