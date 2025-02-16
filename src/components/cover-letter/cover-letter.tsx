@@ -28,44 +28,44 @@ export default function CoverLetter({ containerWidth }: CoverLetterProps) {
     });
   }, [dispatch]);
 
-  const handleExportPDF = async () => {
-    if (!contentRef.current) return;
+  // const handleExportPDF = async () => {
+  //   if (!contentRef.current) return;
 
-    try {
-      const element = contentRef.current;
-      const html2pdf = (await import('html2pdf.js')).default;
+  //   try {
+  //     const element = contentRef.current;
+  //     const html2pdf = (await import('html2pdf.js')).default;
       
-      const opt = {
-        margin: [0, 0, -0.5, 0],
-        filename: `cover-letter-${state.resume.id}.pdf`,
-        image: { type: 'jpeg', quality: 0.98 },
-        html2canvas: { 
-          // scale: 2,
-          useCORS: true,
-          letterRendering: true,
-        },
-        jsPDF: { 
-          unit: 'in', 
-          format: 'letter', 
-          orientation: 'portrait' 
-        }
-      };
+  //     const opt = {
+  //       margin: [0, 0, -0.5, 0],
+  //       filename: `cover-letter-${state.resume.id}.pdf`,
+  //       image: { type: 'jpeg', quality: 0.98 },
+  //       html2canvas: { 
+  //         // scale: 2,
+  //         useCORS: true,
+  //         letterRendering: true,
+  //       },
+  //       jsPDF: { 
+  //         unit: 'in', 
+  //         format: 'letter', 
+  //         orientation: 'portrait' 
+  //       }
+  //     };
 
-      await html2pdf().set(opt).from(element).save();
+  //     await html2pdf().set(opt).from(element).save();
       
-      toast({
-        title: "Success",
-        description: "Cover letter exported as PDF",
-      });
-    } catch (error) {
-      console.error('Error exporting PDF:', error);
-      toast({
-        title: "Error",
-        description: "Failed to export PDF. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  //     toast({
+  //       title: "Success",
+  //       description: "Cover letter exported as PDF",
+  //     });
+  //   } catch (error) {
+  //     console.error('Error exporting PDF:', error);
+  //     toast({
+  //       title: "Error",
+  //       description: "Failed to export PDF. Please try again.",
+  //       variant: "destructive",
+  //     });
+  //   }
+  // };
 
   if (!state.resume.has_cover_letter) {
     return (
@@ -110,7 +110,7 @@ export default function CoverLetter({ containerWidth }: CoverLetterProps) {
         />
       </div>
       
-      <Button
+      {/* <Button
         variant="outline"
         size="sm"
         className="w-full border-blue-600/50 text-blue-700 hover:bg-blue-50"
@@ -118,7 +118,7 @@ export default function CoverLetter({ containerWidth }: CoverLetterProps) {
       >
         <Download className="h-4 w-4 mr-2" />
         Export as PDF
-      </Button>
+      </Button> */}
     </div>
   );
 }

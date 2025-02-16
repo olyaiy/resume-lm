@@ -42,3 +42,6 @@ next-env.d.ts
 
 .cursorrules
 .aider*
+
+.__tests__
+/tests
