@@ -45,7 +45,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`
     }
   }
-  const { data: signupData, error: signupError } = await supabase.auth.signUp(data);
+  const { error: signupError } = await supabase.auth.signUp(data);
 
   if (signupError) {
     // Log detailed error information

@@ -7,7 +7,7 @@ import { signup } from "@/app/auth/login/actions";
 import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { User, Mail, Lock, CheckCircle2, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useAuth } from "./auth-context";
 
 function SubmitButton() {

@@ -9,7 +9,7 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 import { PlayCircle, Sparkles } from 'lucide-react';
-
+import Image from 'next/image';
 export function HeroVideoSection() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -33,7 +33,7 @@ export function HeroVideoSection() {
             <div className="relative rounded-2xl overflow-hidden border border-white/20 bg-gradient-to-br from-violet-50/30 via-white/30 to-blue-50/30 backdrop-blur-xl shadow-2xl">
               {/* Video Thumbnail */}
               <div className="relative aspect-video">
-                <img
+                <Image
                   src="/thumbnail.png"
                   alt="ResumeLM Demo Video"
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.02]"
