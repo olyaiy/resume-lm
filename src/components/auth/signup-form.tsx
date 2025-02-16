@@ -121,7 +121,7 @@ export function SignupForm() {
           <div className="space-y-2">
             <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
             <div className="relative">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              {/* <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" /> */}
               <Input
                 id="name"
                 name="name"
@@ -133,7 +133,7 @@ export function SignupForm() {
                 required
                 minLength={2}
                 maxLength={50}
-                className="pl-10"
+                // className="pl-10"
                 validation={validations.name}
                 isTouched={touchedFields.name}
                 autoFocus
@@ -144,7 +144,7 @@ export function SignupForm() {
           <div className="space-y-2">
             <Label htmlFor="email" className="text-sm font-medium">Email</Label>
             <div className="relative">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              {/* <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" /> */}
               <Input
                 id="email"
                 name="email"
@@ -156,7 +156,7 @@ export function SignupForm() {
                 placeholder="you@example.com"
                 required
                 pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$"
-                className="pl-10"
+                // className="pl-10"
                 validation={validations.email}
                 isTouched={touchedFields.email}
               />
@@ -166,7 +166,7 @@ export function SignupForm() {
           <div className="space-y-2">
             <Label htmlFor="password" className="text-sm font-medium">Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              {/* <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" /> */}
               <Input
                 id="password"
                 name="password"
@@ -179,7 +179,7 @@ export function SignupForm() {
                 required
                 minLength={6}
                 maxLength={100}
-                className="pl-10"
+                // className="pl-10"
                 validation={validations.password}
                 isTouched={touchedFields.password}
               />
@@ -189,8 +189,9 @@ export function SignupForm() {
           <div className="space-y-2">
             <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
             <div className="relative">
-              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" />
+              {/* <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" /> */}
               <Input
+                autoFocus
                 id="confirmPassword"
                 name="confirmPassword"
                 type="password"
@@ -202,7 +203,7 @@ export function SignupForm() {
                 required
                 minLength={6}
                 maxLength={100}
-                className="pl-10"
+                // className="pl-10"
                 validation={validations.confirmPassword}
                 isTouched={touchedFields.confirmPassword}
               />

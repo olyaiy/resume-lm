@@ -126,6 +126,8 @@ export function AuthDialog({ children }: AuthDialogProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
+
+      {/* AUTH DIALOG TRIGGER BUTTON */}
       <DialogTrigger asChild>
         {children || (
           <Button 
@@ -140,7 +142,7 @@ export function AuthDialog({ children }: AuthDialogProps) {
       </DialogTrigger>
 
       <DialogContent 
-        className="sm:max-w-[425px] p-0 bg-white/95 border-white/40 shadow-2xl animate-in fade-in-0 zoom-in-95 relative z-50 fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
+        className="sm:max-w-[425px] p-0 bg-white/95 border-white/40 shadow-2xl animate-in fade-in-0 zoom-in-95 z-50 fixed top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
       >
         <AuthProvider>
           <DialogTitle className="px-8 pt-8 text-center relative">

@@ -7,7 +7,7 @@ import { login } from "@/app/auth/login/actions";
 import { useState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Mail, Lock, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useAuth } from "./auth-context";
 
@@ -43,14 +43,7 @@ export function LoginForm() {
     touchedFields,
     setFieldTouched 
   } = useAuth();
-  const emailInputRef = useRef<HTMLInputElement>(null);
-
-  // Autofocus email input on mount
-  useEffect(() => {
-    if (emailInputRef.current) {
-      emailInputRef.current.focus();
-    }
-  }, []);
+ 
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -81,7 +74,7 @@ export function LoginForm() {
       
       const result = await login(formDataToSend);
       if (!result.success) {
-        setError("Invalid credentials");
+        setError("Invalid credentials. If you just signed up, please check your email for a verification link.");
       }
     } catch (error: unknown) {
       setError("An error occurred during login");
@@ -108,8 +101,8 @@ export function LoginForm() {
         <Label htmlFor="login-email" className="text-sm font-medium">Email</Label>
         <div className="relative">
           {/* <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 " /> */}
-          <Input
-            ref={emailInputRef}
+          <Input 
+            autoFocus
             id="login-email"
             name="email"
             type="email"

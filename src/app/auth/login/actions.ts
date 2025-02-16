@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from "@/utils/supabase/server";
+import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
 interface AuthResult {
@@ -33,7 +33,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
 // Signup
 export async function signup(formData: FormData): Promise<AuthResult> {
-  const supabase = await createClient();
+  const supabase = await createServiceClient();
 
   const data = {
     email: formData.get('email') as string,
@@ -45,10 +45,16 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`
     }
   }
-
-  const { error: signupError } = await supabase.auth.signUp(data)
+  const { data: signupData, error: signupError } = await supabase.auth.signUp(data);
 
   if (signupError) {
+    // Log detailed error information
+    console.error('Signup Error Details:', {
+      code: signupError.code,
+      message: signupError.message,
+      status: signupError.status,
+      name: signupError.name
+    });
     return { success: false, error: signupError.message }
   }
 
