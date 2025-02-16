@@ -43,22 +43,12 @@ const PROVIDERS: {
     name: 'OpenAI',
     apiLink: 'https://platform.openai.com/api-keys'
   }
-  // {
-  //   id: 'deepseek',
-  //   name: 'DeepSeek',
-  //   apiLink: 'https://platform.deepseek.com/'
-  // }
 ]
 
 const AI_MODELS: AIModel[] = [
   { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
-  // { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
-
-  // FOR NOW, SIMPLY FOCUS ON OPENAI AND ANTHROPIC
-  // WE WILL IMPLEMENT THESE LATER
-  // { id: 'gemini-2.0-flash-exp', name: 'Gemini 2.0 Flash Exp', provider: 'google' },
 ]
 
 export function ApiKeysForm() {
@@ -67,6 +57,7 @@ export function ApiKeysForm() {
   const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
   const [defaultModel, setDefaultModel] = useState<string>('')
   const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
+  const [hasLoaded, setHasLoaded] = useState(false)
 
   // Load stored data on mount
   useEffect(() => {
@@ -85,15 +76,17 @@ export function ApiKeysForm() {
     if (storedModel) {
       setDefaultModel(storedModel)
     }
+
+    // Mark initial load as complete
+    setHasLoaded(true)
   }, [])
 
   // Save API keys to local storage whenever they change
   useEffect(() => {
-    // Only save if we have keys (prevents overwriting on initial mount)
-    if (apiKeys.length > 0) {
+    if (hasLoaded) { // Only save after initial load
       localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(apiKeys))
     }
-  }, [apiKeys])
+  }, [apiKeys, hasLoaded])
 
   // Save default model to local storage whenever it changes
   useEffect(() => {
