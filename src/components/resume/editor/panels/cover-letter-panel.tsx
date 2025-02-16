@@ -58,13 +58,11 @@ export function CoverLetterPanel({
       }
 
       // Prompt
-      const prompt = `Write a professional cover letter for the following job:
+      const prompt = `Write a professional cover letter for the following job using my resume information:
       ${JSON.stringify(job)}
       
-      Using my resume information:
       ${JSON.stringify(resume)}
       
-      The cover letter should be formal, professional, and highlight relevant experience and skills.
       Today's date is ${new Date().toLocaleDateString()}.
 
       Please use my contact information in the letter:
