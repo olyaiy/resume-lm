@@ -45,7 +45,6 @@ export async function POST(req: Request) {
       education: resume.education,
       skills: resume.skills,
       projects: resume.projects,
-      certifications: resume.certifications,
     };
 
     // Create job details section if available
