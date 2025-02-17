@@ -11,6 +11,7 @@ import { HowItWorks } from "@/components/landing/how-it-works";
 import { HeroVideoSection } from "@/components/landing/hero-video-section";
 import { Footer } from "@/components/layout/footer";
 import { SplitContent } from "@/components/ui/split-content";
+import { NavLinks } from "@/components/layout/nav-links";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -87,10 +88,11 @@ export default async function LoginPage({
       </div>
 
       {/* Enhanced Navigation with backdrop blur and border */}
-      <nav className="  border-b border-white/40 backdrop-blur-xl  shadow-md fixed top-0 w-full bg-white/15 z-[1000]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
-          <div className="flex items-center h-14">
+      <nav className="border-b border-white/40 backdrop-blur-xl shadow-md fixed top-0 w-full bg-white/15 z-[1000]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14">
             <Logo />
+            <NavLinks />
           </div>
         </div>
       </nav>
@@ -234,7 +236,7 @@ export default async function LoginPage({
          
         </div>
 
-<div className="flex flex-col gap-20 py-16">
+<div className="flex flex-col gap-20 py-16" id="features">
         <SplitContent
             imageSrc="/SS Chat.png"
             heading="AI-Powered Resume Assistant"
@@ -269,14 +271,19 @@ export default async function LoginPage({
           </div>
 
         {/* Pricing Section */}
-        <PricingSection />
+        <div id="pricing">
+          <PricingSection />
+        </div>
 
         {/* How It Works Section */}
-       
-        <HowItWorks />
+        <div id="how-it-works">
+          <HowItWorks />
+        </div>
 
         {/* Creator Story */}
-        <CreatorStory />
+        <div id="about">
+          <CreatorStory />
+        </div>
       </div>
     </main>
     <Footer variant="static"/>

@@ -1,5 +1,8 @@
 import Image from "next/image";
 import { cn } from "@/lib/utils";
+import { ShineBorder } from "../magicui/shine-border";
+
+
 
 interface SplitContentProps {
   imageSrc: string;
@@ -21,6 +24,7 @@ export function SplitContent({
   children,
 }: SplitContentProps) {
   return (
+   
     <div className={cn(
       "relative w-full  overflow-hidden",
       "before:absolute before:inset-0 before:bg-gradient-to-br before:from-violet-50/80 before:via-blue-50/80 before:to-indigo-50/80 before:opacity-75",
@@ -67,6 +71,7 @@ export function SplitContent({
             </div>
           )}
 
+          
           {/* Image Section - Enhanced for Screenshots */}
           <div className={cn(
             "relative group lg:col-span-3",
@@ -84,21 +89,30 @@ export function SplitContent({
               <div className="absolute inset-0 bg-gradient-to-br from-white/40 to-white/20 backdrop-blur-[2px] rounded-2xl border border-white/50" />
               
               {/* Main image */}
+            
               <div className="relative h-full w-full p-2">
+               
                 <Image
                   src={imageSrc}
                   alt={heading}
                   fill
                   className="object-cover rounded-xl transition-all duration-700 group-hover:scale-[1.02]"
-                  sizes="(min-width: 1024px) 60vw, 100vw"
-                  quality={95}
+                  sizes="(min-width: 1440px) 50vw, (min-width: 1024px) 60vw, (min-width: 768px) 80vw, 100vw"
+                  quality={100}
                   priority
+                  loading="eager"
+                  style={{
+                    objectFit: 'cover',
+                    transform: 'translate3d(0, 0, 0)',
+                  }}
                 />
                 
                 {/* Subtle shine effect */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/30 to-white/0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-xl" />
               </div>
+
             </div>
+
           </div>
 
           {/* Content Section - Enhanced Typography and Layout */}
@@ -134,5 +148,6 @@ export function SplitContent({
         </div>
       </div>
     </div>
+ 
   );
 } 

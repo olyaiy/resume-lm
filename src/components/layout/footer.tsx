@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Github, Linkedin, Twitter } from "lucide-react";
+import { Github, Linkedin, Twitter, Mail } from "lucide-react";
 
 interface FooterProps {
   variant?: 'fixed' | 'static';
@@ -17,7 +17,14 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
             Made with ❤️ in Vancouver, BC
           </span>
         </div>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-6">
+          <Link
+            href="mailto:resumelm@pm.me"
+            className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors underline-offset-4 hover:underline"
+          >
+            <Mail className="h-4 w-4" />
+            <span>Contact Support</span>
+          </Link>
           <Link
             href="https://x.com/alexanfromvan"
             target="_blank"
