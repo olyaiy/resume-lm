@@ -5,7 +5,7 @@ import React, { useEffect, useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { Card } from "@/components/ui/card";
 import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
-import { Certification, Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
+import { Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
 import { cn } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
@@ -143,7 +143,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
           education: resume.education,
           skills: resume.skills,
           projects: resume.projects,
-          certifications: resume.certifications,
         };
 
         const result = params.sections.includes('all')
@@ -617,7 +616,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                       content={args[config.content]}
                                       currentContent={resume[config.field][args.index]}
                                       onAccept={() => onResumeChange(config.field, 
-                                        resume[config.field].map((item: WorkExperience | Education | Project | Skill | Certification, i: number) => 
+                                        resume[config.field].map((item: WorkExperience | Education | Project | Skill, i: number) => 
                                           i === args.index ? args[config.content] : item
                                         )
                                       )}
