@@ -101,7 +101,7 @@ export default async function LoginPage({
         {/* Enhanced Content with better spacing and animations */}
         <div className="relative z-10">
           {/* Hero Section with Split Layout */}
-          <div className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="mb-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-16 py-8 lg:py-16 max-h-[80vh]">
               {/* Left Column - Content */}
               <div className="flex flex-col gap-6 lg:gap-10 lg:pr-12">
