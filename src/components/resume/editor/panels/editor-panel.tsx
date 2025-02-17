@@ -16,7 +16,6 @@ import {
   EducationForm,
   SkillsForm,
   ProjectsForm,
-  CertificationsForm,
   DocumentSettingsForm
 } from '../dynamic-components';
 import { ResumeEditorTabs } from "../header/resume-editor-tabs";
@@ -126,10 +125,6 @@ export function EditorPanel({
                     education={resume.education}
                     onChange={(education) => onResumeChange('education', education)}
                     profile={profile}
-                  />
-                  <CertificationsForm
-                    certifications={resume.certifications}
-                    onChange={(certifications) => onResumeChange('certifications', certifications)}
                   />
                 </Suspense>
               </TabsContent>
