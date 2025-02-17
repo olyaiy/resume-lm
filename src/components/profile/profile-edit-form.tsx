@@ -1,11 +1,11 @@
 'use client';
 
-import { Profile, WorkExperience, Education, Project, Certification } from "@/lib/types";
+import { Profile, WorkExperience, Education, Project } from "@/lib/types";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ProfileCertificationsForm } from "@/components/profile/profile-certifications-form";
+
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -105,7 +105,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
         education: [],
         skills: [],
         projects: [],
-        certifications: [],
         created_at: profile.created_at,
         updated_at: profile.updated_at
       };
@@ -223,16 +222,6 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 url: proj.url || undefined,
                 github_url: proj.github_url || undefined,
                 date: proj.date || ''
-              }))
-            : [],
-          certifications: Array.isArray(result.certifications)
-            ? result.certifications.map((cert: Partial<Certification>) => ({
-                name: cert.name || '',
-                issuer: cert.issuer || '',
-                date_acquired: cert.date_acquired || '',
-                expiry_date: cert.expiry_date || undefined,
-                credential_id: cert.credential_id || undefined,
-                url: cert.url || undefined
               }))
             : []
         };
@@ -660,21 +649,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-rose-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
                   </span>
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="certifications" 
-                  className="group flex items-center gap-2.5 px-5 py-3 rounded-xl font-medium relative transition-all duration-300
-                    data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/10 data-[state=active]:to-orange-500/10
-                    data-[state=active]:border-amber-500/20 data-[state=active]:shadow-lg hover:bg-white/60
-                    data-[state=inactive]:text-gray-500 data-[state=inactive]:hover:text-gray-900"
-                >
-                  <div className="p-1.5 rounded-full bg-amber-100/80 transition-transform duration-300 group-data-[state=active]:scale-110 group-data-[state=active]:bg-amber-100">
-                    <Award className="h-4 w-4 text-amber-600 transition-colors group-data-[state=inactive]:text-amber-500/70" />
-                  </div>
-                  <span className="relative">
-                    Certifications
-                    <div className="absolute -bottom-2 left-0 right-0 h-0.5 rounded-full bg-amber-500 scale-x-0 transition-transform duration-300 group-data-[state=active]:scale-x-100"></div>
-                  </span>
-                </TabsTrigger>
+               
               </TabsList>
               <div className="relative">
                 {/* Content gradient overlay */}
@@ -746,17 +721,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                     </Card>
                   </TabsContent>
 
-                  <TabsContent value="certifications" className="mt-6 animate-in fade-in-50 slide-in-from-bottom-2 duration-500">
-                    <Card className="bg-gradient-to-br from-white/50 via-white/40 to-white/50 backdrop-blur-xl border-white/40 shadow-2xl transition-all duration-500 hover:shadow-3xl rounded-2xl overflow-hidden group">
-                      <div className="absolute inset-0 bg-gradient-to-r from-amber-500/0 via-amber-500/5 to-orange-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-1000"></div>
-                      <div className="relative p-8">
-                        <ProfileCertificationsForm
-                          certifications={profile.certifications}
-                          onChange={(certifications) => updateField('certifications', certifications)}
-                        />
-                      </div>
-                    </Card>
-                  </TabsContent>
+                 
                 </div>
               </div>
             </Tabs>
