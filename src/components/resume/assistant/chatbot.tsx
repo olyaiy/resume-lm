@@ -662,7 +662,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                       "bg-pink-50 border border-pink-200",
                       "text-pink-700"
                     )}>
-                      <p>You've used all your available messages. Please try again after:</p>
+                      <p>You&apos;ve used all your available messages. Please try again after:</p>
                       <p className="font-medium mt-2">
                         {new Date(Date.now() + 5 * 60 * 60 * 1000).toLocaleString()} {/* 5 hours from now */}
                       </p>
