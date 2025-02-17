@@ -378,7 +378,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 <AlertDialogHeader>
                   <AlertDialogTitle>Clear Chat History</AlertDialogTitle>
                   <AlertDialogDescription>
-                    This will remove all messages and reset the chat. This action cannot be undone.
+                    This will remove all messages and reset the chat. This action can&apos;t be undone.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>

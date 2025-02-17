@@ -21,7 +21,7 @@ interface ChatRequest {
 
 export async function POST(req: Request) {
   try {
-    const { messages, resume, target_role, config, job }: ChatRequest = await req.json();
+    const { messages, target_role, config, job }: ChatRequest = await req.json();
 
     // Get subscription plan and user id.
     const { plan, id } = await getSubscriptionPlan(true);
@@ -161,7 +161,7 @@ export async function POST(req: Request) {
          - Use 'modifyWholeResume' when changing multiple sections at once
 
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
-      The target role is ${target_role}.
+      The target role is ${target_role}. The job is ${job}.
       `,
       messages,
       maxSteps: 5,
