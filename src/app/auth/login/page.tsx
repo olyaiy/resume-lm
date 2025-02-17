@@ -10,6 +10,7 @@ import { CreatorStory } from "@/components/landing/creator-story";
 import { HowItWorks } from "@/components/landing/how-it-works";
 import { HeroVideoSection } from "@/components/landing/hero-video-section";
 import { Footer } from "@/components/layout/footer";
+import { SplitContent } from "@/components/ui/split-content";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -86,8 +87,8 @@ export default async function LoginPage({
       </div>
 
       {/* Enhanced Navigation with backdrop blur and border */}
-      <nav className=" z-10 border-b border-white/40 backdrop-blur-xl bg-white/15 shadow-md sticky top-0">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <nav className="  border-b border-white/40 backdrop-blur-xl  shadow-md fixed top-0 w-full bg-white/15 z-[1000]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 ">
           <div className="flex items-center h-14">
             <Logo />
           </div>
@@ -227,12 +228,51 @@ export default async function LoginPage({
           </div>
           
           <HeroVideoSection />
+          
+
+          
+         
         </div>
+
+<div className="flex flex-col gap-20 py-16">
+        <SplitContent
+            imageSrc="/SS Chat.png"
+            heading="AI-Powered Resume Assistant"
+            description="Get real-time feedback and suggestions from our advanced AI assistant. Optimize your resume content, improve your bullet points, and ensure your skills stand out to recruiters and ATS systems."
+            imageOnLeft={false}
+            imageOverflowRight={true}
+          />
+
+          <SplitContent
+            imageSrc="/Dashboard Image.png"
+            heading="Beautiful Resume Dashboard"
+            description="Manage all your resumes in one place with our intuitive dashboard. Create base resumes, generate tailored versions for specific jobs, and track your application progress with ease."
+            // imageOnLeft={true}
+            // imageOverflowRight={true}
+            imageOnLeft={false}
+          />
+
+          <SplitContent
+            imageSrc="/SS Score.png"
+            heading="Resume Performance Scoring"
+            description="Get detailed insights into your resume's effectiveness with our comprehensive scoring system. Track key metrics, identify areas for improvement, and optimize your resume to stand out to employers and ATS systems."
+            imageOnLeft={false}
+            imageOverflowRight={true}
+          />
+
+          <SplitContent
+            imageSrc="/SS Cover Letter.png"
+            heading="AI Cover Letter Generator"
+            description="Create compelling, personalized cover letters in minutes with our AI-powered generator. Tailor your message to specific job opportunities while maintaining a professional and engaging tone that captures attention."
+            imageOnLeft={false}
+          />
+          </div>
 
         {/* Pricing Section */}
         <PricingSection />
 
         {/* How It Works Section */}
+       
         <HowItWorks />
 
         {/* Creator Story */}

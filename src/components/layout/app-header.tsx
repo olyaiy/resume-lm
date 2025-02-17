@@ -54,6 +54,8 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
               )}
               {/* <TogglePlanButton /> */}
 
+              
+              <div className="flex items-center px-3 py-1">
               <Link 
                 href="/profile" 
                 className={cn(
@@ -65,10 +67,6 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                 <User className="h-4 w-4" />
                 <span className="hidden sm:inline">Profile</span>
               </Link>
-              <div className="h-4 w-px bg-purple-200/50" />
-              <div className="h-4 w-px bg-purple-200/50" />
-              <div className="flex items-center px-3 py-1">
-                {/* <ModelSelector /> */}
                 <div className="mx-2 h-4 w-px bg-purple-200/50" />
                 <SettingsButton />
                 <div className="mx-2 h-4 w-px bg-purple-200/50" />

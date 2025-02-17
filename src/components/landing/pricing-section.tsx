@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-// import { AuthDialog } from "@/components/auth/auth-dialog";
+import { AuthDialog } from "@/components/auth/auth-dialog";
 
 interface PricingFeature {
   text: string;
@@ -44,7 +44,7 @@ const tiers: PricingTier[] = [
       { text: "Unlimited tailored resumes", included: true },
       { text: "Support an independent student developer ❤️", included: true },
     ],
-    buttonText: "Coming Soon",
+    buttonText: "Get Started",
   },
 ];
 
@@ -137,7 +137,7 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                {/* <AuthDialog> */}
+                <AuthDialog>
                   <Button
                     className={cn(
                       "w-full bg-gradient-to-r text-white shadow-lg hover:shadow-xl transition-all duration-500 h-12 text-base",
@@ -146,7 +146,7 @@ export function PricingSection() {
                   >
                     {tier.buttonText}
                   </Button>
-                {/* </AuthDialog> */}
+                </AuthDialog>
               </div>
             </div>
           ))}

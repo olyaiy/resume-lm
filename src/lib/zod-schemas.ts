@@ -25,14 +25,8 @@ export const projectSchema = z.object({
   description: z.array(z.string()).optional(),
   date: z.string().optional(),
   technologies: z.array(z.string()).optional(),
-  url: z.string()
-    .transform(str => str || '')
-    .pipe(z.string().url().optional().or(z.literal('')))
-    .optional(),
-  github_url: z.string()
-    .transform(str => str || '')
-    .pipe(z.string().url().optional().or(z.literal('')))
-    .optional(),
+  url: z.string().optional(),
+  github_url: z.string().optional(),
 });
 
 export const skillSchema = z.object({
