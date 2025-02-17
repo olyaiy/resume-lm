@@ -5,9 +5,26 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Loader2 } from "lucide-react"
+import { useFormStatus } from 'react-dom'
+import { deleteUserAccount } from '@/app/auth/login/actions'
 
 interface DangerZoneProps {
   subscriptionStatus?: string;
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus()
+
+  return (
+    <AlertDialogAction
+      type="submit"
+      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+      disabled={pending}
+    >
+      {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+      Delete Account
+    </AlertDialogAction>
+  )
 }
 
 export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
@@ -36,32 +53,31 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
             </Button>
           </AlertDialogTrigger>
           <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. This will permanently delete your account
-                and remove your data from our servers.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="confirm">Type &ldquo;DELETE&rdquo; to confirm</Label>
-                <Input
-                  id="confirm"
-                  placeholder="DELETE"
-                  className="bg-white/50"
-                />
+            <form action={deleteUserAccount}>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete your account
+                  and remove your data from our servers.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="confirm">Type &ldquo;DELETE&rdquo; to confirm</Label>
+                  <Input
+                    id="confirm"
+                    name="confirm"
+                    placeholder="DELETE"
+                    className="bg-white/50"
+                    required
+                  />
+                </div>
               </div>
-            </div>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <AlertDialogAction
-                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-              >
-                <Loader2 className="mr-2 h-4 w-4 animate-spin opacity-0" />
-                Delete Account
-              </AlertDialogAction>
-            </AlertDialogFooter>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <SubmitButton />
+              </AlertDialogFooter>
+            </form>
           </AlertDialogContent>
         </AlertDialog>
       </div>

@@ -2,6 +2,7 @@
 
 import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/supabase";
 
 interface AuthResult {
   success: boolean;
@@ -233,4 +234,42 @@ export async function getSubscriptionStatus(): Promise<{
       error: error instanceof Error ? error.message : 'Unknown error' 
     };
   }
+} 
+
+export async function deleteUserAccount(formData: FormData) {
+  'use server'
+  
+  const confirmation = formData.get('confirm')
+  if (confirmation !== 'DELETE') {
+    throw new Error('Invalid confirmation text')
+  }
+
+  try {
+    const { supabase: authClient, user } = await getAuthenticatedClient()
+    const { supabase: serviceClient } = await getServiceClient()
+
+    // Delete user from auth
+    const { error: authError } = await serviceClient.auth.admin.deleteUser(user.id)
+    if (authError) throw new Error(authError.message)
+
+    // Delete user data from profiles table
+    const { error: profileError } = await serviceClient
+      .from('profiles')
+      .delete()
+      .eq('user_id', user.id)
+    
+    // Delete user's resumes
+    const { error: resumeError } = await serviceClient
+      .from('resumes')
+      .delete()
+      .eq('user_id', user.id)
+
+    // Sign out after deletion
+    await authClient.auth.signOut()
+  } catch (error) {
+    console.error('Account deletion failed:', error)
+    throw error
+  }
+
+  redirect('/auth/login')
 } 
