@@ -1,6 +1,6 @@
 'use client';
 
-import { Certification } from "@/lib/types";
+// import { Certification } from "@/lib/types"; 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, ExternalLink } from "lucide-react";
@@ -11,6 +11,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import React from "react";
+import { Certification } from "@/lib/zod-schemas";
 
 interface ProfileCertificationsFormProps {
   certifications: Certification[];
