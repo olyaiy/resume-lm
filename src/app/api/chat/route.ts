@@ -43,7 +43,7 @@ export async function POST(req: Request) {
 
       // Fetch existing bucket data.
       // We expect a hash with fields: "tokens" (current bucket level) and "last" (timestamp of last update)
-      let bucket = await redis.hgetall(redisKey);
+      const bucket = await redis.hgetall(redisKey);
 
       let tokens: number;
       let last: number;
@@ -69,16 +69,7 @@ export async function POST(req: Request) {
         const timeLeft = Math.ceil(
           ((newTokens - CAPACITY) * DURATION) / CAPACITY
         );
-        console.log('API Route - Rate limit exceeded:', {
-          newTokens,
-          CAPACITY,
-          DURATION,
-          calculatedTimeLeft: timeLeft,
-          errorResponse: {
-            error: "Rate limit exceeded. Try again later.",
-            timeLeft: timeLeft
-          }
-        });
+       
         return new Response(
           JSON.stringify({ 
             error: "Rate limit exceeded. Try again later.",
@@ -103,37 +94,37 @@ export async function POST(req: Request) {
     const aiClient = initializeAIClient(config, isPro);
 
     // Create resume sections object.
-    const personalInfo = {
-      first_name: resume.first_name,
-      last_name: resume.last_name,
-      email: resume.email,
-      phone_number: resume.phone_number,
-      location: resume.location,
-      website: resume.website,
-      linkedin_url: resume.linkedin_url,
-      github_url: resume.github_url,
-    };
+    // const personalInfo = {
+    //   first_name: resume.first_name,
+    //   last_name: resume.last_name,
+    //   email: resume.email,
+    //   phone_number: resume.phone_number,
+    //   location: resume.location,
+    //   website: resume.website,
+    //   linkedin_url: resume.linkedin_url,
+    //   github_url: resume.github_url,
+    // };
 
-    const resumeSections = {
-      personal_info: personalInfo,
-      work_experience: resume.work_experience,
-      education: resume.education,
-      skills: resume.skills,
-      projects: resume.projects,
-    };
+    // const resumeSections = {
+    //   personal_info: personalInfo,
+    //   work_experience: resume.work_experience,
+    //   education: resume.education,
+    //   skills: resume.skills,
+    //   projects: resume.projects,
+    // };
 
     // Create job details section if available.
-    const jobDetails = job
-      ? {
-          company_name: job.company_name,
-          position_title: job.position_title,
-          description: job.description,
-          location: job.location,
-          keywords: job.keywords,
-          work_location: job.work_location,
-          employment_type: job.employment_type,
-        }
-      : null;
+    // const jobDetails = job
+    //   ? {
+    //       company_name: job.company_name,
+    //       position_title: job.position_title,
+    //       description: job.description,
+    //       location: job.location,
+    //       keywords: job.keywords,
+    //       work_location: job.work_location,
+    //       employment_type: job.employment_type,
+    //     }
+    //   : null;
 
     // Build and send the AI call.
     const result = streamText({
@@ -170,6 +161,7 @@ export async function POST(req: Request) {
          - Use 'modifyWholeResume' when changing multiple sections at once
 
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
+      The target role is ${target_role}.
       `,
       messages,
       maxSteps: 5,

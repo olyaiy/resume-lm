@@ -10,17 +10,6 @@ interface ApiKeyErrorAlertProps {
 }
 
 export function ApiKeyErrorAlert({ error, router }: ApiKeyErrorAlertProps) {
-  console.log('ApiKeyErrorAlert - Error object:', {
-    errorType: typeof error,
-    errorValue: error,
-    errorStringified: JSON.stringify(error),
-    errorMessage: (error as Error)?.message,
-    timeLeft: {
-      direct: (error as any)?.timeLeft,
-      responseData: (error as any)?.response?.data?.timeLeft,
-      parsed: JSON.parse(JSON.stringify(error))?.timeLeft
-    }
-  });
 
   return (
     <div className={cn(
