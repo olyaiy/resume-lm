@@ -258,11 +258,15 @@ export async function deleteUserAccount(formData: FormData) {
       .delete()
       .eq('user_id', user.id)
     
+    if (profileError) throw new Error(profileError.message)
+
     // Delete user's resumes
     const { error: resumeError } = await serviceClient
       .from('resumes')
       .delete()
       .eq('user_id', user.id)
+
+    if (resumeError) throw new Error(resumeError.message)
 
     // Sign out after deletion
     await authClient.auth.signOut()
