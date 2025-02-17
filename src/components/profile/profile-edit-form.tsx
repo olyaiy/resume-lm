@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
-import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Award, Upload, Save, Trash2} from "lucide-react";
+import { User, Linkedin, Briefcase, GraduationCap, Wrench, FolderGit2, Upload, Save, Trash2} from "lucide-react";
 
 import {
   Dialog,
