@@ -57,19 +57,11 @@ export async function formatProfileWithAI(
               date: z.string().optional(),
               url: z.string().optional(),
               github_url: z.string().optional()
-            })).optional(),
-            certifications: z.array(z.object({
-              name: z.string(),
-              issuer: z.string(),
-              date_acquired: z.string().optional(),
-              expiry_date: z.string().optional(),
-              credential_id: z.string().optional(),
-              url: z.string().optional()
             })).optional()
           })
         }),
         prompt: `Please analyze this resume text and extract all relevant information into a structured profile format. 
-                Include all sections (personal info, work experience, education, skills, projects, certifications) if present.
+                Include all sections (personal info, work experience, education, skills, projects) if present.
                 Ensure all arrays (like description, technologies, achievements) are properly formatted as arrays.
                 For any missing or unclear information, use optional fields rather than making assumptions.
   

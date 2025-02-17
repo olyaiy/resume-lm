@@ -13,7 +13,6 @@ export const getResumeTool = createTool({
         'education',
         'skills',
         'projects',
-        'certifications'
       ]))
     ]).transform(val => Array.isArray(val) ? val : [val]),
   }),

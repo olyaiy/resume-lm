@@ -87,7 +87,7 @@ export async function POST(req: Request) {
       
       5. For viewing resume sections:
          - Use 'getResume' with 'sections' array
-         - Valid sections: 'all', 'personal_info', 'work_experience', 'education', 'skills', 'projects', 'certifications'
+         - Valid sections: 'all', 'personal_info', 'work_experience', 'education', 'skills', 'projects'
 
       6. For multiple section updates:
          - Use 'modifyWholeResume' when changing multiple sections at once

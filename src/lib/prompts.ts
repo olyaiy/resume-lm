@@ -416,11 +416,6 @@ Categories to Extract:
    - Achievements
    - Relevant coursework
 
-5. CERTIFICATIONS
-   - Names and issuers
-   - Dates
-   - Credential IDs
-   - URLs if available
 
 Output Requirements:
 - Maintain schema structure
@@ -537,7 +532,7 @@ export const TEXT_ANALYZER_SYSTEM_MESSAGE: ChatCompletionMessageParam = {
 
 Identify and Extract Key Details
 
-Locate relevant information including name, contact details, education, work history, skills, projects, certifications, achievements, and awards.
+Locate relevant information including name, contact details, education, work history, skills, projects, achievements, and awards.
 If certain critical details (e.g., name or contact info) are missing, note that they were not provided.
 Emphasize Achievements and Impact
 
@@ -562,7 +557,6 @@ Skills
 Experience
 Education
 Projects
-Certifications or Awards
 Prioritize the most relevant details for a professional profile.
 Keep a Professional Tone
 

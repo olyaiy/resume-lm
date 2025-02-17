@@ -40,14 +40,6 @@ export const skillSchema = z.object({
   items: z.array(z.string()).optional(),
 });
 
-export const certificationSchema = z.object({
-  name: z.string().optional(),
-  issuer: z.string().optional(),
-  date_acquired: z.string().optional(),
-  expiry_date: z.string().optional(),
-  credential_id: z.string().optional(),
-  url: z.string().url().optional(),
-});
 
 // Schema for text import functionality
 export const textImportSchema = z.object({
@@ -91,14 +83,6 @@ export const textImportSchema = z.object({
     date: z.string().optional(),
     url: z.string().optional(),
     github_url: z.string().optional(),
-  })).optional(),
-  certifications: z.array(z.object({
-    name: z.string().optional(),
-    issuer: z.string().optional(),
-    date_acquired: z.string().optional(),
-    expiry_date: z.string().optional(),
-    credential_id: z.string().optional(),
-    url: z.string().optional(),
   })).optional(),
 });
 
@@ -163,7 +147,7 @@ export const resumeSchema = z.object({
   education: z.array(educationSchema).optional(),
   skills: z.array(skillSchema).optional(),
   projects: z.array(projectSchema).optional(),
-  certifications: z.array(certificationSchema).optional(),
+
 //   created_at: z.string().datetime(),
 //   updated_at: z.string().datetime(),
 //   document_settings: documentSettingsSchema.optional(),
@@ -179,7 +163,6 @@ export type WorkExperience = z.infer<typeof workExperienceSchema>;
 export type Education = z.infer<typeof educationSchema>;
 export type Project = z.infer<typeof projectSchema>;
 export type Skill = z.infer<typeof skillSchema>;
-export type Certification = z.infer<typeof certificationSchema>;
 export type DocumentSettings = z.infer<typeof documentSettingsSchema>;
 export type SectionConfig = z.infer<typeof sectionConfigSchema>;
 

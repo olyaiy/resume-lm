@@ -124,7 +124,7 @@ try {
               1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
               2. Soft Skills: Extract interpersonal and professional competencies
               3. Industry Knowledge: Capture domain-specific knowledge requirements
-              4. Required Qualifications: List education, certifications, and experience levels
+              4. Required Qualifications: List education, and experience levels
               5. Responsibilities: Key job functions and deliverables
 
               Format the output according to the schema, ensuring:

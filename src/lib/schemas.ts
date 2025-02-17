@@ -175,37 +175,7 @@ export const openAiProfileSchema = {
           additionalProperties: false
         }
       },
-      certifications: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: {
-              type: "string"
-            },
-            issuer: {
-              type: "string"
-            },
-            date: {
-              type: "string"
-            },
-            expiry_date: {
-              type: "string"
-            },
-            credential_id: {
-              type: "string"
-            }
-          },
-          required: [
-            "name",
-            "issuer",
-            "date",
-            "expiry_date",
-            "credential_id"
-          ],
-          additionalProperties: false
-        }
-      }
+
     },
     required: [
       "response",
@@ -220,8 +190,7 @@ export const openAiProfileSchema = {
       "work_experience",
       "education",
       "skills",
-      "projects",
-      "certifications"
+      "projects"
     ],
     additionalProperties: false
   },
@@ -351,29 +320,6 @@ export const openAiResumeSchema = {
           additionalProperties: false
         }
       },
-      certifications: {
-        type: "array",
-        items: {
-          type: "object",
-          properties: {
-            name: { type: "string" },
-            issuer: { type: "string" },
-            date: { type: "string" },
-            expiry_date: { type: ["string", "null"] },
-            credential_id: { type: ["string", "null"] },
-            url: { type: ["string", "null"] }
-          },
-          required: [
-            "name",
-            "issuer",
-            "date",
-            "expiry_date",
-            "credential_id",
-            "url"
-          ],
-          additionalProperties: false
-        }
-      },
       section_order: {
         type: "array",
         items: { type: "string" }
@@ -433,21 +379,8 @@ export const openAiResumeSchema = {
             required: ["visible", "max_items", "style"],
             additionalProperties: false
           },
-          certifications: {
-            type: "object",
-            properties: {
-              visible: { type: "boolean" },
-              max_items: { type: ["number", "null"] },
-              style: {
-                type: ["string", "null"],
-                enum: ["grouped", "list", "grid", null]
-              }
-            },
-            required: ["visible", "max_items", "style"],
-            additionalProperties: false
-          }
         },
-        required: ["work_experience", "education", "skills", "projects", "certifications"],
+        required: ["work_experience", "education", "skills", "projects"],
         additionalProperties: false
       },
       created_at: { type: "string" },
@@ -474,7 +407,6 @@ export const openAiResumeSchema = {
       "education",
       "skills",
       "projects",
-      "certifications",
       "section_order",
       "section_configs",
       "created_at",

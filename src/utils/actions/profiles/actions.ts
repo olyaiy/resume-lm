@@ -71,7 +71,7 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
 
   // Handle array fields - append to existing arrays
   const arrayFields = ['work_experience', 'education', 'skills', 
-    'projects', 'certifications'] as const;
+    'projects'] as const;
   
   arrayFields.forEach((field) => {
     if (data[field]?.length) {
@@ -130,7 +130,6 @@ export async function resetProfile(): Promise<Profile> {
     education: [],
     skills: [],
     projects: [],
-    certifications: []
   };
 
   const { data: profile, error } = await supabase

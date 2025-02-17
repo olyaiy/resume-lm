@@ -21,7 +21,6 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
   - Education
   - Projects
   - Skills
-  - Certifications
 - 🎨 Modern, responsive design with soft gradient minimalist theme
 - 📱 Mobile-first approach with responsive layouts
 

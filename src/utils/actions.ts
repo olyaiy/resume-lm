@@ -46,7 +46,6 @@ export async function getDashboardData(): Promise<DashboardData> {
           education: [],
           skills: [],
           projects: [],
-          certifications: []
         }])
         .select()
         .single();

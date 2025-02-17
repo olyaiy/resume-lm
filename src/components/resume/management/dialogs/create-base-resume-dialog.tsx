@@ -129,7 +129,6 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           education: [],
           skills: [],
           projects: [],
-          certifications: [],
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           has_cover_letter: false,

@@ -199,7 +199,6 @@ export async function createBaseResume(
       'education',
       'skills',
       'projects',
-      'certifications'
     ],
     section_configs: {
       work_experience: { visible: (selectedContent?.work_experience?.length ?? 0) > 0 },

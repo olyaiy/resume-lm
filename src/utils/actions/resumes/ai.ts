@@ -67,7 +67,6 @@ CRITICAL DIRECTIVES:
     education: [...existingResume.education, ...(object.content.education || [])],
     skills: [...existingResume.skills, ...(object.content.skills || [])],
     projects: [...existingResume.projects, ...(object.content.projects || [])],
-    certifications: [...(existingResume.certifications || []), ...(object.content.certifications || [])],
   };
   
   return updatedResume;
