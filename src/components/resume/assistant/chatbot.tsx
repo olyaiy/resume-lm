@@ -153,6 +153,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
             }), {});
         
         addToolResult({ toolCallId: toolCall.toolCallId, result });
+        console.log('Tool call READ RESUME result:', result);
         return result;
       }
 
@@ -655,10 +656,23 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 )}
               
                 {error && (
-                  <ApiKeyErrorAlert 
-                    error={error} 
-                    router={router} 
-                  />
+                  error.message === "Rate limit exceeded. Try again later." ? (
+                    <div className={cn(
+                      "rounded-lg p-4 text-sm",
+                      "bg-pink-50 border border-pink-200",
+                      "text-pink-700"
+                    )}>
+                      <p>You've used all your available messages. Please try again after:</p>
+                      <p className="font-medium mt-2">
+                        {new Date(Date.now() + 5 * 60 * 60 * 1000).toLocaleString()} {/* 5 hours from now */}
+                      </p>
+                    </div>
+                  ) : (
+                    <ApiKeyErrorAlert 
+                      error={error} 
+                      router={router} 
+                    />
+                  )
                 )}
               </StickToBottom.Content>
 

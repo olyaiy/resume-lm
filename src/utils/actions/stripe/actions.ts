@@ -338,7 +338,7 @@ export async function checkSubscriptionPlan() {
   };
 }
 
-export async function getSubscriptionPlan() {
+export async function getSubscriptionPlan(returnId?: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
@@ -349,6 +349,13 @@ export async function getSubscriptionPlan() {
     .select('subscription_plan')
     .eq('user_id', user.id)
     .maybeSingle();
+
+  if (returnId) {
+    return {
+      plan: data?.subscription_plan || '',
+      id: user.id || ''
+    };
+  }
 
   return data?.subscription_plan || '';
 }

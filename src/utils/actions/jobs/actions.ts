@@ -8,8 +8,6 @@ import { z } from "zod";
 import { JobListingParams } from "./schema";
 
 export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>) {
-  // Add debug log
-  console.log('[createJob] Creating job with data:', JSON.stringify(jobListing, null, 2));
   
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -43,7 +41,6 @@ export async function createJob(jobListing: z.infer<typeof simplifiedJobSchema>)
     throw error;
   }
   
-  console.log('[createJob] Successfully created job with ID:', data?.id);
   return data;
 }
 

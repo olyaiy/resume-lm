@@ -60,7 +60,6 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
   const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
   const [hasLoaded, setHasLoaded] = useState(false)
 
-  console.log("isProPlan", isProPlan);
 
   // Load stored data on mount
   useEffect(() => {

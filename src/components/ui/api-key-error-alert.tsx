@@ -10,6 +10,18 @@ interface ApiKeyErrorAlertProps {
 }
 
 export function ApiKeyErrorAlert({ error, router }: ApiKeyErrorAlertProps) {
+  console.log('ApiKeyErrorAlert - Error object:', {
+    errorType: typeof error,
+    errorValue: error,
+    errorStringified: JSON.stringify(error),
+    errorMessage: (error as Error)?.message,
+    timeLeft: {
+      direct: (error as any)?.timeLeft,
+      responseData: (error as any)?.response?.data?.timeLeft,
+      parsed: JSON.parse(JSON.stringify(error))?.timeLeft
+    }
+  });
+
   return (
     <div className={cn(
       "mt-2 text-sm px-4",
@@ -41,7 +53,30 @@ export function ApiKeyErrorAlert({ error, router }: ApiKeyErrorAlertProps) {
                       : ((error as Error)?.message?.includes('Incorrect API key provided') ||
                           JSON.stringify(error).includes('invalid_api_key'))
                           ? "Your OpenAI API key is invalid. Upgrade to Pro or try updating it in settings and try again."
-                          : "An error occurred. Please try again or check your settings."}
+                          : ((error as Error)?.message?.includes('Rate limit exceeded') ||
+                              JSON.stringify(error).includes('Rate limit exceeded'))
+                              ? `You've exceeded the rate limit. Please try again after ${(() => {
+                                  try {
+                                    const errorData = JSON.parse((error as Error).message);
+                                    const expiration = errorData.expirationTimestamp 
+                                      ? new Date(errorData.expirationTimestamp)
+                                      : new Date(Date.now() + ((errorData.timeLeft || 30) * 1000));
+                                    
+                                    return expiration.toLocaleTimeString([], { 
+                                      hour: 'numeric', 
+                                      minute: '2-digit',
+                                      hour12: true 
+                                    });
+                                  } catch {
+                                    const fallbackTime = new Date(Date.now() + 30_000);
+                                    return fallbackTime.toLocaleTimeString([], {
+                                      hour: 'numeric',
+                                      minute: '2-digit',
+                                      hour12: true
+                                    });
+                                  }
+                                })()}. Upgrade to Pro for higher limits.`
+                              : "An error occurred. Please try again or check your settings."}
           </div>
         </div>
 
