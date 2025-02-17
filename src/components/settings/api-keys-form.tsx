@@ -10,6 +10,7 @@ import { toast } from "sonner"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
+import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions"
 
 interface ApiKey {
   service: ServiceName
@@ -46,18 +47,21 @@ const PROVIDERS: {
 ]
 
 const AI_MODELS: AIModel[] = [
-  { id: 'claude-3-sonnet-20240229', name: 'Claude 3.5 Sonnet (Recommended - Most Capable)', provider: 'anthropic' },
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic' },
+  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
 ]
 
-export function ApiKeysForm() {
+export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
   const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>({} as Record<ServiceName, boolean>)
   const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
   const [defaultModel, setDefaultModel] = useState<string>('')
   const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
   const [hasLoaded, setHasLoaded] = useState(false)
+
+  console.log("isProPlan", isProPlan);
 
   // Load stored data on mount
   useEffect(() => {
@@ -184,10 +188,13 @@ export function ApiKeysForm() {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
     if (!selectedModel) return
 
-    const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
-    if (!hasRequiredKey) {
-      toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
-      return
+    // Skip key check for Pro users
+    if (!isProPlan) {
+      const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
+      if (!hasRequiredKey) {
+        toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
+        return
+      }
     }
 
     setDefaultModel(modelId)
@@ -195,6 +202,7 @@ export function ApiKeysForm() {
   }
 
   const isModelSelectable = (modelId: string) => {
+    if (isProPlan) return true // Bypass check for Pro users
     const model = AI_MODELS.find(m => m.id === modelId)
     if (!model) return false
     return apiKeys.some(k => k.service === model.provider)
@@ -205,6 +213,8 @@ export function ApiKeysForm() {
     setCopiedKey(service)
     setTimeout(() => setCopiedKey(null), 1000)
   }
+
+  
 
   return (
     <div className="space-y-6">
@@ -251,8 +261,17 @@ export function ApiKeysForm() {
             Add your API keys to use premium AI models. Your keys are stored securely in your browser.
           </p>
           <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200/50 text-amber-900 text-sm">
-            <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
-            <p className="mt-1">For enhanced security, consider <a href="/pricing" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
+            {isProPlan ? (
+              <>
+                <p><strong>Pro Account Active:</strong> You have full access to all AI models without needing to manage API keys.</p>
+                <p className="mt-1">You can still add personal API keys below if you prefer to use your own credentials.</p>
+              </>
+            ) : (
+              <>
+                <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
+                <p className="mt-1">For enhanced security, consider <a href="/pricing" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
+              </>
+            )}
           </div>
         </div>
 

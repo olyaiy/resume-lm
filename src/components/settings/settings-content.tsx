@@ -18,9 +18,10 @@ const sections = [
 
 interface SettingsContentProps {
   user: User | null;
+  isProPlan: boolean;
 }
 
-export function SettingsContent({ user }: SettingsContentProps) {
+export function SettingsContent({ user, isProPlan }: SettingsContentProps) {
   const [activeSection, setActiveSection] = useState<string>("security")
 
   useEffect(() => {
@@ -120,7 +121,7 @@ export function SettingsContent({ user }: SettingsContentProps) {
             <CardDescription>Manage your API keys for different AI providers</CardDescription>
           </CardHeader>
           <CardContent>
-            <ApiKeysForm />
+            <ApiKeysForm isProPlan={isProPlan} />
           </CardContent>
         </Card>
 
