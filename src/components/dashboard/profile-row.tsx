@@ -1,7 +1,7 @@
 'use client';
 
 import { Profile } from "@/lib/types";
-import { User, Briefcase, GraduationCap, Code, Award, Pencil } from "lucide-react";
+import { User, Briefcase, GraduationCap, Code, Pencil } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -73,17 +73,6 @@ export function ProfileRow({ profile }: ProfileRowProps) {
                       border: "border-violet-200"
                     }
                   },
-                  { 
-                    icon: Award, 
-                    label: "Certifications", 
-                    count: profile.certifications.length,
-                    colors: {
-                      bg: "from-rose-50/50 to-rose-100/50",
-                      text: "text-rose-700",
-                      iconBg: "bg-rose-100",
-                      border: "border-rose-200"
-                    }
-                  }
                 ].map((stat) => (
                   <div 
                     key={stat.label} 
