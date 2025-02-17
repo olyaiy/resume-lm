@@ -19,9 +19,10 @@ const sections = [
 interface SettingsContentProps {
   user: User | null;
   isProPlan: boolean;
+  subscriptionStatus: string;
 }
 
-export function SettingsContent({ user, isProPlan }: SettingsContentProps) {
+export function SettingsContent({ user, isProPlan, subscriptionStatus }: SettingsContentProps) {
   const [activeSection, setActiveSection] = useState<string>("security")
 
   useEffect(() => {
@@ -132,7 +133,7 @@ export function SettingsContent({ user, isProPlan }: SettingsContentProps) {
             <CardDescription>Irreversible and destructive actions</CardDescription>
           </CardHeader>
           <CardContent>
-            <DangerZone />
+            <DangerZone subscriptionStatus={subscriptionStatus} />
           </CardContent>
         </Card>
       </div>
