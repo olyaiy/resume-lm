@@ -18,7 +18,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import Tiptap from "@/components/ui/tiptap";
-import { generateWorkExperiencePoints, improveWorkExperience } from "../ai/resume-modification-ai";
+import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/actions/resumes/ai";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 import { AISuggestions } from "../../shared/ai-suggestions";

@@ -16,7 +16,7 @@ import {
   TooltipProvider,
 } from "@/components/ui/tooltip";
 import { AISuggestions } from "../../shared/ai-suggestions";
-import { generateProjectPoints, improveProject } from "../ai/resume-modification-ai";
+import { generateProjectPoints, improveProject } from "@/utils/actions/resumes/ai";
 import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
 import Tiptap from "@/components/ui/tiptap";
