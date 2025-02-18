@@ -1,7 +1,6 @@
 'use client';
 
 import { Settings } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 

@@ -119,9 +119,7 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
     handleSettingsChange(newSettings);
   };
 
-  const handleRestoreDefaults = () => {
-    handleSettingsChange(defaultSettings);
-  };
+
 
   const SectionSettings = ({ title, section }: { title: string; section: 'skills' | 'experience' | 'projects' | 'education' }) => (
     <div className="space-y-4 bg-slate-50/50 rounded-lg border border-slate-200/50">
