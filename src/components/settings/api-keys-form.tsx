@@ -21,6 +21,7 @@ interface AIModel {
   id: string
   name: string
   provider: ServiceName
+  unstable: boolean
 }
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
@@ -30,45 +31,55 @@ const PROVIDERS: {
   id: ServiceName; 
   name: string; 
   apiLink: string;
+  unstable: boolean
 }[] = [
   { 
     id: 'anthropic', 
     name: 'Anthropic',
-    apiLink: 'https://console.anthropic.com/'
+    apiLink: 'https://console.anthropic.com/',
+    unstable: false
   },
   { 
     id: 'openai', 
     name: 'OpenAI',
-    apiLink: 'https://platform.openai.com/api-keys'
+    apiLink: 'https://platform.openai.com/api-keys',
+    unstable: false
   },
+  {
+    id: 'groq', 
+    name: 'Groq', 
+    apiLink: 'https://console.groq.com/keys',
+    unstable: false 
+  },
+  // Unstable providers
   {
     id: 'google',
     name: 'Google',
-    apiLink: 'https://ai.google/get-started/products/'
+    apiLink: 'https://ai.google/get-started/products/',
+    unstable: true
   },
   { 
     id: 'deepseek', 
     name: 'DeepSeek', 
-    apiLink: 'https://platform.deepseek.com/api-keys' 
-  },
-  { 
-    id: 'groq', 
-    name: 'Groq', 
-    apiLink: 'https://console.groq.com/keys' 
+    apiLink: 'https://platform.deepseek.com/api-keys',
+    unstable: true 
   }
 ]
 
 const AI_MODELS: AIModel[] = [
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic' },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
-  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google' },
-  { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 2.0 Flash Lite', provider: 'google' },
-  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
-  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', provider: 'groq' },
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', provider: 'groq' },
-  { id: 'gemma2-9b-it', name: 'Gemma 2 9B IT', provider: 'groq' },
+  // Stable models
+  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', unstable: false },
+  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', unstable: false },
+  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', unstable: false },
+  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', unstable: false },
+  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', provider: 'groq', unstable: false },
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B ', provider: 'groq', unstable: false },
+  { id: 'gemma2-9b-it', name: 'Gemma 2 9B', provider: 'groq', unstable: false },
+
+  // Unstable models
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google', unstable: true },
+  { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 2.0 Flash Lite', provider: 'google', unstable: true },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat (V3)', provider: 'deepseek', unstable: true }
 ]
 
 export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
@@ -260,7 +271,14 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                   !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
                 )}
               >
-                {model.name}
+                <div className="flex items-center gap-2">
+                  {model.name}
+                  {model.unstable && (
+                    <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
+                      Unstable
+                    </span>
+                  )}
+                </div>
                 {!isModelSelectable(model.id) && (
                   <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
                 )}
@@ -295,7 +313,8 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
         </div>
 
         <div className="space-y-4">
-          {PROVIDERS.map(provider => {
+          {/* Stable Providers */}
+          {PROVIDERS.filter(p => !p.unstable).map(provider => {
             const existingKey = getExistingKey(provider.id)
             const isVisible = visibleKeys[provider.id]
             const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
@@ -412,12 +431,149 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
 
                 {providerModels.length > 0 && (
                   <div className="text-xs text-muted-foreground mt-2">
-                    Available models: {providerModels.map(m => m.name).join(', ')}
+                    Available models: {providerModels.map(m => `${m.name}${m.unstable ? ' (Unstable)' : ''}`).join(', ')}
                   </div>
                 )}
               </div>
             )
           })}
+
+          {/* Unstable Providers Section */}
+          <div className="mt-8 pt-6 border-t border-amber-200/50">
+            <div className="mb-4 p-3 rounded-lg bg-amber-50/50 border border-amber-200/50 text-amber-900 text-sm">
+              <p className="font-medium">Experimental Providers Notice</p>
+              <p className="mt-1">The following providers are currently unstable. You may experience errors or intermittent service. We recommend using stable providers above for critical operations.</p>
+            </div>
+
+            {PROVIDERS.filter(p => p.unstable).map(provider => {
+              const existingKey = getExistingKey(provider.id)
+              const isVisible = visibleKeys[provider.id]
+              const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
+
+              return (
+                <div 
+                  key={provider.id}
+                  className={cn(
+                    "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40",
+                    "relative border-amber-200/50"
+                  )}
+                >
+                  <div className="absolute top-2 right-2 bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">
+                    Unstable
+                  </div>
+                  
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <Label className="text-sm font-medium text-gray-800">{provider.name}</Label>
+                    </div>
+                    {existingKey && (
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setVisibleKeys(prev => ({
+                            ...prev,
+                            [provider.id]: !prev[provider.id]
+                          }))}
+                          className="h-7 px-2 text-muted-foreground hover:text-gray-900 transition-colors"
+                        >
+                          {isVisible ? (
+                            <EyeOff className="h-3.5 w-3.5" />
+                          ) : (
+                            <Eye className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleCopyKey(provider.id, existingKey.key)}
+                          className={cn(
+                            "h-7 px-2 transition-colors",
+                            copiedKey === provider.id 
+                              ? "text-emerald-500 hover:text-emerald-600" 
+                              : "text-muted-foreground hover:text-gray-900"
+                          )}
+                        >
+                          {copiedKey === provider.id ? (
+                            <Check className="h-3.5 w-3.5" />
+                          ) : (
+                            <Copy className="h-3.5 w-3.5" />
+                          )}
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveKey(provider.id)}
+                          className="h-7 px-2 text-rose-500 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+                        >
+                          Remove
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+
+                  {existingKey ? (
+                    <div className="text-xs space-y-1">
+                      <div className="text-muted-foreground">
+                        Added {new Date(existingKey.addedAt).toLocaleDateString()}
+                      </div>
+                      {isVisible && (
+                        <div className="font-mono bg-white/50 px-3 py-1.5 rounded-md text-sm border border-white/40">
+                          {existingKey.key}
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <>
+                      <div className="flex gap-2">
+                        <Input
+                          type={isVisible ? "text" : "password"}
+                          placeholder="Enter API key"
+                          value={newKeyValues[provider.id] || ''}
+                          onChange={(e) => setNewKeyValues(prev => ({
+                            ...prev,
+                            [provider.id]: e.target.value
+                          }))}
+                          className="bg-white/50 flex-1 h-9 text-sm border-black/20 focus:border-black/30 hover:border-black/25 transition-colors"
+                        />
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => setVisibleKeys(prev => ({
+                            ...prev,
+                            [provider.id]: !prev[provider.id]
+                          }))}
+                          className="bg-white/50 h-9 w-9 hover:bg-white/60 transition-colors"
+                        >
+                          {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                        </Button>
+                        <Button 
+                          className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 h-9 px-4 text-sm transition-colors"
+                          onClick={() => handleUpdateKey(provider.id)}
+                        >
+                          Save
+                        </Button>
+                      </div>
+                      <a 
+                        href={provider.apiLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
+                      >
+                        Get your {provider.name} API key →
+                      </a>
+                    </>
+                  )}
+
+                  {providerModels.length > 0 && (
+                    <div className="text-xs text-muted-foreground mt-2">
+                      Available models: {providerModels.map(m => `${m.name}${m.unstable ? ' (Unstable)' : ''}`).join(', ')}
+                    </div>
+                  )}
+                </div>
+              )
+            })}
+          </div>
         </div>
       </div>
     </div>
