@@ -21,7 +21,7 @@ export async function tailorResumeToJob(
   const isPro = subscriptionPlan === 'pro';
   const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
 try {
-    const { object, usage } = await generateObject({
+    const { object } = await generateObject({
       model: aiClient,
       schema: z.object({
       content: simplifiedResumeSchema,
