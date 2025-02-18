@@ -6,7 +6,7 @@ import { SettingsButton } from "@/components/settings/settings-button";
 import { Logo } from "@/components/ui/logo";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Menu, User, X } from "lucide-react";
+import { Menu, User } from "lucide-react";
 import { PageTitle } from "./page-title";
 // import { TogglePlanButton } from '@/components/settings/toggle-plan-button';
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";

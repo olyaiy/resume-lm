@@ -4,7 +4,6 @@ import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 
 interface ProUpgradeButtonProps {
   className?: string;

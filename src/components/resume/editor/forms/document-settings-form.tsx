@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronUp, ChevronDown } from "lucide-react"
 import { Switch } from "@/components/ui/switch";
 import { SavedStylesDialog } from "./saved-styles-dialog";
+import { LayoutTemplate } from "lucide-react";
 
 interface DocumentSettingsFormProps {
   // resume: Resume;
@@ -263,8 +264,8 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
         <Card className="">
 
         {/* Buttons */}
-        <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center space-x-2 w-full flex-wrap gap-2">
+        <CardHeader className="flex flex-col space-y-4">
+          <div className="flex items-center space-x-2 w-full">
             <SavedStylesDialog
               currentSettings={documentSettings || defaultSettings}
               onApplyStyle={(settings) => handleSettingsChange(settings)}
@@ -277,14 +278,37 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
             >
               Restore Defaults
             </Button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 pt-2">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleSettingsChange({...defaultSettings})}
-              className="text-xs bg-gradient-to-r from-teal-600/10 to-cyan-600/10 text-teal-600 hover:text-teal-700 border-teal-600/20 hover:border-teal-600/40"
+              className="relative h-32 group p-0 overflow-hidden border-slate-200 hover:border-teal-600/40 transition-colors"
             >
-              Default Layout
+              <div className="absolute inset-0 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative h-full w-full flex flex-col items-center">
+                <div className="w-full p-2 text-xs font-medium text-teal-600 border-b border-slate-200 bg-slate-50/80">
+                  <LayoutTemplate className="w-3 h-3 inline-block mr-1" />
+                  Default Layout
+                </div>
+                <div className="flex-1 w-full p-2 flex flex-col justify-between">
+                  {/* Mock resume content - Default */}
+                  <div className="w-3/4 h-1.5 bg-slate-200/80 rounded" />
+                  <div className="space-y-3 py-2">
+                    <div className="w-full h-1 bg-slate-200/80 rounded" />
+                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
+                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-full h-1 bg-slate-200/80 rounded" />
+                    <div className="w-4/5 h-1 bg-slate-200/80 rounded" />
+                  </div>
+                </div>
+              </div>
             </Button>
+
             <Button
               variant="outline"
               size="sm"
@@ -315,9 +339,31 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                 education_margin_horizontal: 0,
                 experience_margin_horizontal: 0
               })}
-              className="text-xs bg-gradient-to-r from-pink-600/10 to-rose-600/10 text-pink-600 hover:text-pink-700 border-pink-600/20 hover:border-pink-600/40"
+              className="relative h-32 group p-0 overflow-hidden border-slate-200 hover:border-pink-600/40 transition-colors"
             >
-              Compact Layout
+              <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="relative h-full w-full flex flex-col items-center">
+                <div className="w-full p-2 text-xs font-medium text-pink-600 border-b border-slate-200 bg-slate-50/80">
+                  <LayoutTemplate className="w-3 h-3 inline-block mr-1" />
+                  Compact Layout
+                </div>
+                <div className="flex-1 w-full p-2 flex flex-col justify-start space-y-1.5">
+                  {/* Mock resume content - Compact */}
+                  <div className="w-2/3 h-1.5 bg-slate-200/80 rounded" />
+                  <div className="space-y-1.5 py-1">
+                    <div className="w-full h-1 bg-slate-200/80 rounded" />
+                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
+                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
+                    <div className="w-full h-1 bg-slate-200/80 rounded" />
+                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
+                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
+                  </div>
+                  <div className="space-y-1">
+                    <div className="w-full h-1 bg-slate-200/80 rounded" />
+                    <div className="w-4/5 h-1 bg-slate-200/80 rounded" />
+                  </div>
+                </div>
+              </div>
             </Button>
           </div>
         </CardHeader>

@@ -1,7 +1,6 @@
 'use client';
 
 import { Settings } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -11,7 +10,6 @@ interface SettingsButtonProps {
 }
 
 export function SettingsButton({ className }: SettingsButtonProps) {
-  const router = useRouter();
 
   return (
     <Link 
