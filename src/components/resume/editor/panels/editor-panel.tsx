@@ -41,9 +41,9 @@ export function EditorPanel({
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="flex flex-col mr-4 relative h-full max-h-full">
+    <div className="flex flex-col sm:mr-4 relative h-full max-h-full  ">
       <div className="flex-1 flex flex-col overflow-scroll">
-        <ScrollArea className="flex-1 pr-2" ref={scrollAreaRef}>
+        <ScrollArea className="flex-1 sm:pr-2" ref={scrollAreaRef}>
           <div className="relative pb-12">
             <div className={cn(
               "sticky top-0 z-20 backdrop-blur-sm",

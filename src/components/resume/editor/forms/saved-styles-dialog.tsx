@@ -77,7 +77,7 @@ export function SavedStylesDialog({ currentSettings, onApplyStyle }: SavedStyles
           variant="outline"
           size="sm"
           className="text-xs bg-white/80 hover:bg-gradient-to-r from-teal-500/10 to-cyan-500/10 
-          border-teal-200/40 hover:border-teal-400 text-teal-700 hover:text-teal-800 
+          border-teal-600 hover:border-teal-800 text-teal-700 hover:text-teal-800 
           backdrop-blur-sm transition-all duration-500 hover:-translate-y-[1px] w-full 
           shadow-sm hover:shadow-md"
         >
