@@ -96,7 +96,6 @@ try {
       schema: z.object({
       content: simplifiedJobSchema
     }),
-    structuredOutputs: false,
 
     system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
               and must adhere to it strictly. When processing the given job listing, follow these steps:
