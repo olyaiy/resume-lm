@@ -6,6 +6,7 @@ import { AppHeader } from "@/components/layout/app-header";
 import { createClient } from "@/utils/supabase/server";
 import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 import { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/react"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -98,6 +99,7 @@ export default async function RootLayout({
           {/* Padding for header and footer */}
           <main className="py-14 h-full">
             {children}
+            <Analytics />
           </main>
           {user && <Footer /> }
         </div>

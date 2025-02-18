@@ -71,7 +71,6 @@ prompt: `
     `,
   });
 
-    console.log('usage from tailoring resume:', usage);
 
     return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
   } catch (error) {
@@ -85,7 +84,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const isPro = subscriptionPlan === 'pro';
   const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
 try {
-    const { object, usage } = await generateObject({
+    const { object } = await generateObject({
       model: aiClient,
       schema: z.object({
       content: simplifiedJobSchema
@@ -138,7 +137,6 @@ try {
               - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,});
 
 
-    // console.log('usage from formatting job listing:', usage);
     return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);
