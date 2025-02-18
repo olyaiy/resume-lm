@@ -1,5 +1,5 @@
 'use server';
-import { generateObject } from 'ai';
+import { generateObject, LanguageModelV1 } from 'ai';
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
@@ -18,7 +18,7 @@ export async function formatProfileWithAI(
   
       
       const { object } = await generateObject({
-        model: aiClient,
+        model: aiClient as LanguageModelV1,
         schema: z.object({
           content: z.object({
             first_name: z.string().optional(),
