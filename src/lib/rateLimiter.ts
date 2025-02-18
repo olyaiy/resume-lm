@@ -11,7 +11,7 @@ import redis from '@/lib/redis';
  */
 export async function checkRateLimit(
   userId: string,
-  capacity: number = 2,
+  capacity: number = 80,
   duration: number = 5 * 60 * 60 // 5 hours in seconds
 ): Promise<void> {
   const LEAK_RATE = capacity / duration; // tokens leaked per second
