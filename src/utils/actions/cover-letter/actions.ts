@@ -1,6 +1,6 @@
 'use server';
 
-import { streamText } from 'ai';
+import { LanguageModelV1, streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
@@ -90,7 +90,7 @@ export async function generate(input: string, config?: AIConfig) {
 
     (async () => {
       const { textStream } = streamText({
-        model: aiClient,
+        model: aiClient as LanguageModelV1,
         system,
         prompt: input,
         onFinish: ({ usage }) => {
