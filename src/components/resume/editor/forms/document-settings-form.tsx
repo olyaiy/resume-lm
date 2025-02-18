@@ -270,14 +270,6 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
               currentSettings={documentSettings || defaultSettings}
               onApplyStyle={(settings) => handleSettingsChange(settings)}
             />
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleRestoreDefaults}
-              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-400 hover:border-teal-600 transition-colors"
-            >
-              Restore Defaults
-            </Button>
           </div>
           
           <div className="grid grid-cols-2 gap-4 pt-2">
@@ -285,7 +277,7 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
               variant="outline"
               size="sm"
               onClick={() => handleSettingsChange({...defaultSettings})}
-              className="relative h-32 group p-0 overflow-hidden border-slate-200 hover:border-teal-600/40 transition-colors"
+              className="relative h-60 group p-0 overflow-hidden border-slate-200 hover:border-teal-600/40 transition-colors"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-teal-50/50 to-cyan-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative h-full w-full flex flex-col items-center">
@@ -295,15 +287,41 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                 </div>
                 <div className="flex-1 w-full p-2 flex flex-col justify-between">
                   {/* Mock resume content - Default */}
-                  <div className="w-3/4 h-1.5 bg-slate-200/80 rounded" />
-                  <div className="space-y-3 py-2">
-                    <div className="w-full h-1 bg-slate-200/80 rounded" />
-                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
-                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
+                  <div>
+                    <div className="w-3/4 h-2 bg-slate-300 rounded mb-6" />
+                    <div className="flex space-x-2 mb-4">
+                      <div className="w-1/3 h-1 bg-slate-300 rounded" />
+                      <div className="w-1/3 h-1 bg-slate-300 rounded" />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <div className="w-full h-1 bg-slate-200/80 rounded" />
-                    <div className="w-4/5 h-1 bg-slate-200/80 rounded" />
+                  
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="w-1/3 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1.5">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-10/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="w-1/3 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1.5">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-10/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="w-1/3 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1.5">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-10/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -339,7 +357,7 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                 education_margin_horizontal: 0,
                 experience_margin_horizontal: 0
               })}
-              className="relative h-32 group p-0 overflow-hidden border-slate-200 hover:border-pink-600/40 transition-colors"
+              className="relative h-60 group p-0 overflow-hidden border-slate-200 hover:border-pink-600/40 transition-colors"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-pink-50/50 to-rose-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative h-full w-full flex flex-col items-center">
@@ -347,20 +365,54 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
                   <LayoutTemplate className="w-3 h-3 inline-block mr-1" />
                   Compact Layout
                 </div>
-                <div className="flex-1 w-full p-2 flex flex-col justify-start space-y-1.5">
+                <div className="flex-1 w-full p-2 flex flex-col justify-start space-y-2">
                   {/* Mock resume content - Compact */}
-                  <div className="w-2/3 h-1.5 bg-slate-200/80 rounded" />
-                  <div className="space-y-1.5 py-1">
-                    <div className="w-full h-1 bg-slate-200/80 rounded" />
-                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
-                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
-                    <div className="w-full h-1 bg-slate-200/80 rounded" />
-                    <div className="w-11/12 h-1 bg-slate-200/80 rounded" />
-                    <div className="w-10/12 h-1 bg-slate-200/80 rounded" />
+                  <div>
+                    <div className="w-2/3 h-2 bg-slate-300 rounded mb-3" />
+                    <div className="flex space-x-1.5 mb-2">
+                      <div className="w-1/4 h-1 bg-slate-300 rounded" />
+                      <div className="w-1/4 h-1 bg-slate-300 rounded" />
+                      <div className="w-1/4 h-1 bg-slate-300 rounded" />
+                    </div>
                   </div>
-                  <div className="space-y-1">
-                    <div className="w-full h-1 bg-slate-200/80 rounded" />
-                    <div className="w-4/5 h-1 bg-slate-200/80 rounded" />
+                  
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <div className="w-1/4 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-10/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="w-1/4 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-10/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-9/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="w-1/4 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-9/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-1">
+                      <div className="w-1/4 h-1.5 bg-slate-300 rounded" />
+                      <div className="space-y-1">
+                        <div className="w-full h-1 bg-slate-300 rounded" />
+                        <div className="w-11/12 h-1 bg-slate-300 rounded" />
+                        <div className="w-9/12 h-1 bg-slate-300 rounded" />
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
