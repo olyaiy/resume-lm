@@ -4,14 +4,19 @@ import { cn } from "@/lib/utils";
 import { Sparkles } from "lucide-react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
 
-export function ProUpgradeButton() {
+interface ProUpgradeButtonProps {
+  className?: string;
+}
+
+export function ProUpgradeButton({ className }: ProUpgradeButtonProps) {
   return (
     <motion.div
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className="relative group"
+      className={cn("relative group", className)}
     >
       {/* Outer glow effect */}
       <div className="absolute -inset-[3px] bg-gradient-to-r from-amber-500/0 via-orange-500/0 to-red-500/0 rounded-lg opacity-75 blur-md group-hover:from-amber-500/50 group-hover:via-orange-500/50 group-hover:to-red-500/50 transition-all duration-300 ease-in-out" />

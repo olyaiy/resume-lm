@@ -5,8 +5,13 @@ import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
+import { cn } from "@/lib/utils";
 
-export function LogoutButton() {
+interface LogoutButtonProps {
+  className?: string;
+}
+
+export function LogoutButton({ className }: LogoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
@@ -25,16 +30,19 @@ export function LogoutButton() {
   };
 
   return (
-    <Button 
-      variant="ghost" 
+    <Button
+      variant="ghost"
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1",
+        "text-sm font-medium text-purple-600/80 hover:text-purple-800",
+        "transition-colors duration-200",
+        className
+      )}
       onClick={handleLogout}
       disabled={isLoading}
-      className="relative group px-4 py-2 hover:bg-transparent"
     >
-      <span className="relative z-10 flex items-center gap-2 text-purple-600/80 group-hover:text-purple-700 transition-colors duration-500">
-        <LogOut className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-        <span>{isLoading ? 'Signing out...' : 'Logout'}</span>
-      </span>
+      <LogOut className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
+      <span className="hidden sm:inline">{isLoading ? 'Signing out...' : 'Logout'}</span>
     </Button>
   );
 } 

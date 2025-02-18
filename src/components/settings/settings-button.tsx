@@ -3,20 +3,28 @@
 import { Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+import Link from "next/link";
 
-export function SettingsButton() {
+interface SettingsButtonProps {
+  className?: string;
+}
+
+export function SettingsButton({ className }: SettingsButtonProps) {
   const router = useRouter();
 
   return (
-    <Button 
-      variant="ghost" 
-      className="relative group px-4 py-2 hover:bg-transparent"
-      onClick={() => router.push('/settings')}
+    <Link 
+      href="/settings" 
+      className={cn(
+        "flex items-center gap-1.5 px-3 py-1",
+        "text-sm font-medium text-purple-600/80 hover:text-purple-800",
+        "transition-colors duration-200",
+        className
+      )}
     >
-      <span className="relative z-10 flex items-center gap-2 text-purple-600/80 group-hover:text-purple-700 transition-colors duration-500">
-        <Settings className="w-4 h-4" />
-        <span>Settings</span>
-      </span>
-    </Button>
+      <Settings className="h-4 w-4" />
+      <span className="hidden sm:inline">Settings</span>
+    </Link>
   );
 } 

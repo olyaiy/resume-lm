@@ -106,7 +106,7 @@ export function ResumesSection({
         type === 'base'
           ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
           : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
-        "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500"
+        "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500 w-full sm:w-auto mr-8 sm:mr-0"
       )}>
         <div className={cn(
           "relative z-10 flex flex-col items-center",
@@ -225,7 +225,7 @@ export function ResumesSection({
   );
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <div className="flex flex-col gap-4 w-full">
         <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <h2 className={`text-2xl sm:text-3xl font-semibold tracking-tight bg-gradient-to-r ${config.gradient} bg-clip-text text-transparent`}>
@@ -321,7 +321,7 @@ export function ResumesSection({
         <div className="md:hidden w-full space-y-6">
           {/* Mobile Create Resume Button Row */}
           {canCreateMore ? (
-            <div className="px-4 w-full">
+            <div className="px-2 w-full  flex">
               <CreateResumeCard />
             </div>
           ) : (

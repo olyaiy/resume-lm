@@ -141,7 +141,7 @@ export default async function Home({
 
   return (
     
-    <main className="min-h-screen relative pb-12">
+    <main className="min-h-screen relative sm:pb-12 pb-40">
 
       {/* Welcome Dialog for New Signups */}
       <WelcomeDialog isOpen={!!isNewSignup} />
@@ -160,7 +160,7 @@ export default async function Home({
       {/* Profile Row Component */}
       <ProfileRow profile={profile} />
         
-        <div className="container max-w-7xl mx-auto  lg:px-8 md:px-8 sm:px-6 pt-4 ">  
+        <div className="pl-2 sm:pl-0 sm:container sm:max-none  max-w-7xl mx-auto  lg:px-8 md:px-8 sm:px-6 pt-4 ">  
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
