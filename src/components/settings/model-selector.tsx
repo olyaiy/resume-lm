@@ -35,7 +35,7 @@ const MODEL_ICONS = {
 function ModelIcon({ provider, size = 24 }: { provider: ServiceName; size?: number }) {
   return (
     <Image
-      src={MODEL_ICONS[provider]}
+      src={MODEL_ICONS[provider as keyof typeof MODEL_ICONS]}
       alt={provider}
       width={size}
       height={size}

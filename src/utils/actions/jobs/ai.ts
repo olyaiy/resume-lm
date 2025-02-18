@@ -10,6 +10,7 @@ import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
 import { initializeAIClient } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
+import { checkRateLimit } from '@/lib/rateLimiter';
 
 
 export async function tailorResumeToJob(
@@ -17,9 +18,12 @@ export async function tailorResumeToJob(
   jobListing: z.infer<typeof simplifiedJobSchema>,
   config?: AIConfig
 ) {
-  const subscriptionPlan = await getSubscriptionPlan();
-  const isPro = subscriptionPlan === 'pro';
+  const { plan, id } = await getSubscriptionPlan(true);
+  const isPro = plan === 'pro';
   const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
+// Check rate limit
+  await checkRateLimit(id);
+
 try {
     const { object } = await generateObject({
       model: aiClient,
@@ -80,9 +84,12 @@ prompt: `
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
-  const subscriptionPlan = await getSubscriptionPlan();
-  const isPro = subscriptionPlan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+  const { plan, id } = await getSubscriptionPlan(true);
+  const isPro = plan === 'pro';
+  const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
+// Check rate limit
+  await checkRateLimit(id);
+
 try {
     const { object } = await generateObject({
       model: aiClient,
