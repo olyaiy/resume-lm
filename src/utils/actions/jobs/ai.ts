@@ -1,6 +1,6 @@
 'use server';
 
-import { generateObject } from 'ai';
+import { generateObject, LanguageModelV1 } from 'ai';
 import { z } from 'zod';
 import { 
   simplifiedJobSchema, 
@@ -26,7 +26,7 @@ export async function tailorResumeToJob(
 
 try {
     const { object } = await generateObject({
-      model: aiClient,
+      model: aiClient as LanguageModelV1, 
       schema: z.object({
       content: simplifiedResumeSchema,
     }),
@@ -92,7 +92,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
 
 try {
     const { object } = await generateObject({
-      model: aiClient,
+      model: aiClient as LanguageModelV1,
       schema: z.object({
       content: simplifiedJobSchema
     }),
