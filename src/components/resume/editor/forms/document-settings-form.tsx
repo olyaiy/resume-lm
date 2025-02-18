@@ -264,7 +264,7 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
 
         {/* Buttons */}
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
-          <div className="flex items-center space-x-2  w-full">
+          <div className="flex items-center space-x-2 w-full flex-wrap gap-2">
             <SavedStylesDialog
               currentSettings={documentSettings || defaultSettings}
               onApplyStyle={(settings) => handleSettingsChange(settings)}
@@ -273,9 +273,51 @@ export function DocumentSettingsForm({ documentSettings, onChange }: DocumentSet
               variant="outline"
               size="sm"
               onClick={handleRestoreDefaults}
-              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-400 hover:border-teal-600 transition-colors w-full"
+              className="text-xs text-muted-foreground hover:text-teal-600 border-slate-400 hover:border-teal-600 transition-colors"
             >
               Restore Defaults
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSettingsChange({...defaultSettings})}
+              className="text-xs bg-gradient-to-r from-teal-600/10 to-cyan-600/10 text-teal-600 hover:text-teal-700 border-teal-600/20 hover:border-teal-600/40"
+            >
+              Default Layout
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleSettingsChange({
+                ...documentSettings,
+                footer_width: 0,
+                show_ubc_footer: false,
+                header_name_size: 24,
+                skills_margin_top: 0,
+                document_font_size: 10,
+                projects_margin_top: 0,
+                skills_item_spacing: 0,
+                document_line_height: 1.2,
+                education_margin_top: 0,
+                skills_margin_bottom: 2,
+                experience_margin_top: 2,
+                projects_item_spacing: 0,
+                education_item_spacing: 0,
+                projects_margin_bottom: 0,
+                education_margin_bottom: 0,
+                experience_item_spacing: 1,
+                document_margin_vertical: 20,
+                experience_margin_bottom: 0,
+                skills_margin_horizontal: 0,
+                document_margin_horizontal: 28,
+                header_name_bottom_spacing: 16,
+                projects_margin_horizontal: 0,
+                education_margin_horizontal: 0,
+                experience_margin_horizontal: 0
+              })}
+              className="text-xs bg-gradient-to-r from-pink-600/10 to-rose-600/10 text-pink-600 hover:text-pink-700 border-pink-600/20 hover:border-pink-600/40"
+            >
+              Compact Layout
             </Button>
           </div>
         </CardHeader>
