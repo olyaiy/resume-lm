@@ -29,19 +29,32 @@ const MODEL_STORAGE_KEY = 'resumelm-default-model'
 const PROVIDERS: { 
   id: ServiceName; 
   name: string; 
-  recommended?: boolean;
   apiLink: string;
 }[] = [
   { 
     id: 'anthropic', 
-    name: 'Anthropic', 
-    recommended: true,
+    name: 'Anthropic',
     apiLink: 'https://console.anthropic.com/'
   },
   { 
     id: 'openai', 
     name: 'OpenAI',
     apiLink: 'https://platform.openai.com/api-keys'
+  },
+  {
+    id: 'google',
+    name: 'Google',
+    apiLink: 'https://ai.google/get-started/products/'
+  },
+  { 
+    id: 'deepseek', 
+    name: 'DeepSeek', 
+    apiLink: 'https://platform.deepseek.com/api-keys' 
+  },
+  { 
+    id: 'groq', 
+    name: 'Groq', 
+    apiLink: 'https://console.groq.com/keys' 
   }
 ]
 
@@ -50,6 +63,12 @@ const AI_MODELS: AIModel[] = [
   { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic' },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai' },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google' },
+  { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 2.0 Flash Lite', provider: 'google' },
+  { id: 'deepseek-chat', name: 'DeepSeek Chat', provider: 'deepseek' },
+  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B Instant', provider: 'groq' },
+  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B Versatile', provider: 'groq' },
+  { id: 'gemma2-9b-it', name: 'Gemma 2 9B IT', provider: 'groq' },
 ]
 
 export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
@@ -131,8 +150,10 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
           return 'claude-3-sonnet-20240229'
         case 'openai':
           return 'gpt-4o'
-        // case 'deepseek':
-        //   return 'deepseek-chat'
+        case 'deepseek':
+          return 'deepseek-chat'
+        case 'groq':
+          return 'llama-3.1-8b-instruct'
         default:
           return defaultModel
       }
@@ -283,25 +304,12 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
               <div 
                 key={provider.id}
                 className={cn(
-                  "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40",
-                  provider.recommended 
-                    ? "border-purple-200 bg-purple-50/30" 
-                    : "border-white/40"
+                  "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40"
                 )}
               >
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <Label className="text-sm font-medium text-gray-800">{provider.name}</Label>
-                    {provider.recommended && (
-                      <>
-                        <span className="px-2 py-0.5 text-xs font-medium rounded-full bg-purple-100 text-purple-600">
-                          Recommended
-                        </span>
-                        <p className="text-xs text-purple-600 mt-1">
-                          In our testing, Claude 3.5 Sonnet is the smartest and gives the best results.
-                        </p>
-                      </>
-                    )}
                   </div>
                   {existingKey && (
                     <div className="flex items-center gap-1">

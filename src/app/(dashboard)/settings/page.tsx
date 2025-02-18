@@ -15,7 +15,6 @@ export default async function SettingsPage() {
     // Check if user is on Pro plan
     const subscription = await checkSubscriptionPlan();
     const isProPlan = subscription.plan === 'pro';
-  console.log(subscription);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">

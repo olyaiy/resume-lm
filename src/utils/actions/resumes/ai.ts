@@ -119,7 +119,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
           
-          const { object, usage } = await generateObject({
+          const { object, usage, experimental_providerMetadata } = await generateObject({
           model: aiClient,
           schema: z.object({
               content: z.string().describe("The improved work experience bullet point")
@@ -129,6 +129,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           });
       
           console.log('usage from improving work experience:', usage);
+          console.log('cachedPromptTokens:', experimental_providerMetadata?.openai?.cachedPromptTokens);
+          console.log('metadata:', experimental_providerMetadata);
+
           return object.content;
       }
     

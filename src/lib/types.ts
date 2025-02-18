@@ -181,7 +181,7 @@ export type ServiceName =
   // | 'azure'
   | 'anthropic'
   // | 'bedrock'
-  // | 'google'
+  | 'google'
   // | 'vertex'
   // | 'mistral'
   // | 'xai'
@@ -189,7 +189,7 @@ export type ServiceName =
   // | 'cohere'
   // | 'fireworks'
   // | 'deepinfra'
-  // | 'groq'
-  // | 'deepseek';
+  | 'groq'
+  | 'deepseek';
 
 

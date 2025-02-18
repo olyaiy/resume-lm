@@ -34,7 +34,7 @@ export async function POST(req: Request) {
 
       // Leaky bucket parameters:
       // Capacity: 40 messages per 5 hours.
-      const CAPACITY = 40;
+      const CAPACITY = 80;
       const DURATION = 5 * 60 * 60; // 5 hours in seconds (i.e. 18,000 seconds)
       const LEAK_RATE = CAPACITY / DURATION; // tokens per second
 
@@ -93,38 +93,6 @@ export async function POST(req: Request) {
     // Initialize the AI client using the provided config and plan.
     const aiClient = initializeAIClient(config, isPro);
 
-    // Create resume sections object.
-    // const personalInfo = {
-    //   first_name: resume.first_name,
-    //   last_name: resume.last_name,
-    //   email: resume.email,
-    //   phone_number: resume.phone_number,
-    //   location: resume.location,
-    //   website: resume.website,
-    //   linkedin_url: resume.linkedin_url,
-    //   github_url: resume.github_url,
-    // };
-
-    // const resumeSections = {
-    //   personal_info: personalInfo,
-    //   work_experience: resume.work_experience,
-    //   education: resume.education,
-    //   skills: resume.skills,
-    //   projects: resume.projects,
-    // };
-
-    // Create job details section if available.
-    // const jobDetails = job
-    //   ? {
-    //       company_name: job.company_name,
-    //       position_title: job.position_title,
-    //       description: job.description,
-    //       location: job.location,
-    //       keywords: job.keywords,
-    //       work_location: job.work_location,
-    //       employment_type: job.employment_type,
-    //     }
-    //   : null;
 
     // Build and send the AI call.
     const result = streamText({
@@ -167,6 +135,15 @@ export async function POST(req: Request) {
       maxSteps: 5,
       tools,
       experimental_transform: smoothStream(),
+      onFinish: async ({ usage }) => {
+        const { promptTokens, completionTokens, totalTokens } = usage;
+        const metadata = await result.experimental_providerMetadata;
+        console.log('Prompt tokens:', promptTokens);
+        console.log('Completion tokens:', completionTokens);
+        console.log('Total tokens:', totalTokens);
+        console.log('Cached prompt tokens:', metadata?.openai?.cachedPromptTokens);
+      },
+  
     });
 
     return result.toDataStreamResponse({

@@ -90,6 +90,7 @@ try {
       schema: z.object({
       content: simplifiedJobSchema
     }),
+    structuredOutputs: false,
 
     system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
               and must adhere to it strictly. When processing the given job listing, follow these steps:
@@ -134,10 +135,10 @@ try {
               - Adhere to the schema you have been provided, and format your response accordingly (e.g., JSON fields must match exactly).
               - Avoid exposing your internal reasoning.
               - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
-              Job Listing Text: ${jobListing}`,});
+              - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,});
 
 
-    console.log('usage from formatting job listing:', usage);
+    // console.log('usage from formatting job listing:', usage);
     return object.content satisfies Partial<Job>;
   } catch (error) {
     console.error('Error formatting job listing:', error);
