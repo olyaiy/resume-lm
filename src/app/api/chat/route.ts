@@ -1,4 +1,4 @@
-import { ToolInvocation, smoothStream, streamText } from 'ai';
+import { LanguageModelV1, ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
@@ -96,7 +96,7 @@ export async function POST(req: Request) {
 
     // Build and send the AI call.
     const result = streamText({
-      model: aiClient,
+      model: aiClient as LanguageModelV1,
       system: `
       You are ResumeLM, an expert technical resume consultant 
       specializing in computer science and software 
