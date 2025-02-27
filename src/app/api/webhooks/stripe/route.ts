@@ -68,11 +68,17 @@ async function handleSubscriptionChange(
   } catch (error) {
     console.error('❌ Subscription Update Failed:', {
       error: error instanceof Error ? error.message : 'Unknown error',
+      errorObject: error,
       timestamp: new Date().toISOString(),
       customerId: stripeCustomerId,
-      subscriptionId: subscriptionData.subscriptionId
+      subscriptionId: subscriptionData.subscriptionId,
+      planId: subscriptionData.planId,
+      data: subscriptionData
     });
-    throw error;
+    
+    // Log but don't throw the error to prevent webhook failure response
+    // This allows the webhook to acknowledge receipt even if DB update fails
+    console.error('Continuing webhook processing despite error...');
   }
 }
 
@@ -211,17 +217,35 @@ export async function POST(req: Request) {
       case 'customer.subscription.deleted': {
         const subscription = event.data.object as Stripe.Subscription;
         
-        await handleSubscriptionChange(
-          subscription.customer as string,
-          {
+        console.log('🗑️ Processing subscription deletion:', {
+          subscriptionId: subscription.id,
+          customerId: subscription.customer,
+          canceledAt: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+          endedAt: subscription.ended_at ? new Date(subscription.ended_at * 1000).toISOString() : null,
+          status: subscription.status
+        });
+        
+        try {
+          await handleSubscriptionChange(
+            subscription.customer as string,
+            {
+              subscriptionId: subscription.id,
+              planId: 'free',
+              status: 'canceled',
+              currentPeriodEnd: null,
+              trialEnd: null,
+              cancelAtPeriodEnd: false
+            }
+          );
+          console.log('✅ Subscription deletion processed successfully');
+        } catch (error) {
+          console.error('❌ Failed to process subscription deletion:', {
+            error: error instanceof Error ? error.message : 'Unknown error',
             subscriptionId: subscription.id,
-            planId: 'free',
-            status: 'canceled',
-            currentPeriodEnd: null,
-            trialEnd: null,
-            cancelAtPeriodEnd: false
-          }
-        );
+            customerId: subscription.customer
+          });
+          // Continue processing the webhook even if this fails
+        }
         break;
       }
 
@@ -261,7 +285,14 @@ export async function POST(req: Request) {
       }
     )
   } catch (err) {
-    console.error('🔥 Webhook error:', err)
+    const error = err instanceof Error ? err : new Error(String(err));
+    console.error('🔥 Webhook handler failed:', {
+      error: error.message,
+      stack: error.stack,
+      type: error.name,
+      timestamp: new Date().toISOString()
+    });
+    
     return new Response(
       JSON.stringify({ error: 'Webhook handler failed' }),
       { 
