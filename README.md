@@ -21,8 +21,10 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
   - Education
   - Projects
   - Skills
-- 🎨 Modern, responsive design with soft gradient minimalist theme
+- 📊 Resume scoring system to measure effectiveness
+- 🗂️ Resume sorting and organization
 - 📱 Mobile-first approach with responsive layouts
+- 🎨 Modern, responsive design with soft gradient minimalist theme
 
 ![Resume Editor](public/images/ss2.webp)
 
@@ -32,8 +34,22 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
 - 🎯 Intelligent job description analysis
 - 💬 Interactive AI assistant for resume writing guidance
 - ✨ Real-time content enhancement suggestions
+- 🔄 Multiple AI model support (OpenAI, Claude, Gemini, DeepSeek, Groq)
 
 ![AI Assistant](public/images/ss4.webp)
+
+### Cover Letter Generation
+- 📝 Integrated cover letter editor
+- 🤖 AI-assisted cover letter creation
+- 🔄 Synchronized with resume data
+- 📁 Export capabilities
+
+### Profile Management
+- 👤 User profile creation and management
+- 🎓 Education history tracking
+- 💼 Work experience management
+- 🛠️ Skills inventory
+- 🚀 Projects showcase
 
 ### Technical Features
 - 🔒 Row Level Security (RLS) for data protection
@@ -41,6 +57,12 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
 - 📄 PDF generation and preview
 - 🎨 Custom design system with consistent UI/UX
 - 🔄 Real-time updates and preview
+
+### Subscription Features
+- 🆓 Free tier with limited functionality
+- ⭐ Pro subscription plan with enhanced features
+- 💳 Stripe integration for payment processing
+- 🔄 Plan upgrade/downgrade capabilities
 
 ## 🎨 Design System
 
