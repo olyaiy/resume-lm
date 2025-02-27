@@ -122,7 +122,24 @@ Required environment variables:
 - `DATABASE_URL`: For data storage
 - `NEXT_PUBLIC_APP_URL`: Your application URL
 
-4. Start the development server:
+4. Set up the database:
+
+This application uses Supabase for authentication and database features. You need to create a Supabase project and set up the required tables.
+
+**Option 1: Using the SQL Editor in Supabase Dashboard**
+   - Copy the contents of `schema.sql` from this repository
+   - Open your Supabase project dashboard
+   - Go to SQL Editor
+   - Paste and run the SQL script
+
+**Option 2: Using the Supabase CLI**
+   - Install the Supabase CLI
+   - Run the following command:
+   ```bash
+   supabase db push --db-url=your_supabase_db_url schema.sql
+   ```
+
+5. Start the development server:
 ```bash
 npm run dev
 # or
@@ -130,6 +147,17 @@ pnpm dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) to view the application.
+
+### Database Schema
+
+This application requires several tables in your Supabase database:
+
+- **profiles**: Stores user profile information including work experience, education, and skills
+- **resumes**: Stores user-created resumes and their content
+- **jobs**: Tracks job descriptions for resume tailoring
+- **subscriptions**: Manages user subscription status
+
+The complete schema with all required fields is provided in the `schema.sql` file.
 
 ## 🏗️ Project Status
 
