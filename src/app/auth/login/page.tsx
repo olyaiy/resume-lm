@@ -229,7 +229,9 @@ export default async function LoginPage({
             </div>
           </div>
           
-          <HeroVideoSection />
+          <div className="py-24 sm:py-0">
+            <HeroVideoSection />
+          </div>
           
           <ModelShowcase />
 

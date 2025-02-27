@@ -132,11 +132,19 @@ export function AuthDialog({ children }: AuthDialogProps) {
         {children || (
           <Button 
             size="lg" 
-            className={`${gradientClasses.base} ${gradientClasses.hover} ${gradientClasses.shadow} px-8 ${gradientClasses.animation} group`}
+            className={`${gradientClasses.base} ${gradientClasses.hover} text-white font-semibold 
+            text-lg py-6 px-10 ${gradientClasses.animation} group
+            shadow-xl shadow-violet-500/30 hover:shadow-violet-500/40
+            ring-2 ring-white/20 hover:ring-white/30
+            scale-105 hover:scale-110 transition-all duration-300
+            rounded-xl relative overflow-hidden`}
             aria-label="Open authentication dialog"
           >
-            Customize Now
-            <ArrowRight className="ml-2.5 w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+            <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <span className="relative z-10 flex items-center justify-center">
+              Start Now
+              <ArrowRight className="ml-3 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </span>
           </Button>
         )}
       </DialogTrigger>
