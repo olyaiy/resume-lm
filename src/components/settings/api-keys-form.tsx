@@ -107,11 +107,16 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
     if (storedModel) {
       setDefaultModel(storedModel)
+    } else if (isProPlan) {
+      // Set default model to llama-3.3-70b-versatile for pro users if they haven't chosen one
+      setDefaultModel('llama-3.3-70b-versatile')
+      // Save to local storage so this preference persists
+      localStorage.setItem(MODEL_STORAGE_KEY, 'llama-3.3-70b-versatile')
     }
 
     // Mark initial load as complete
     setHasLoaded(true)
-  }, [])
+  }, [isProPlan])
 
   // Save API keys to local storage whenever they change
   useEffect(() => {
