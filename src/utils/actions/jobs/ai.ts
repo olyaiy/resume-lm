@@ -93,11 +93,9 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1,
-      response: {
-        schema: z.object({
-          content: simplifiedJobSchema
-        })
-      },
+      schema: z.object({
+        content: simplifiedJobSchema
+      }),
       system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
               and must adhere to it strictly. When processing the given job listing, follow these steps:
               IMPORTANT: For any missing or uncertain information, you must return an empty string ("") - never return "<UNKNOWN>" or similar placeholders.
@@ -115,9 +113,7 @@ try {
             2. After the bullet points, include the full job description stripped of:
                - Any non-job-related content
             3. Format the full description as a clean paragraph, maintaining proper grammar and flow.`,
-            
-            
-    prompt: `Analyze this job listing carefully and extract structured information.
+      prompt: `Analyze this job listing carefully and extract structured information.
 
               TASK 1 - ESSENTIAL INFORMATION:
               Extract the basic details (company, position, URL, location, salary).
@@ -141,7 +137,8 @@ try {
               - Adhere to the schema you have been provided, and format your response accordingly (e.g., JSON fields must match exactly).
               - Avoid exposing your internal reasoning.
               - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
-              - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,});
+              - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,
+    });
 
 
     return object.content satisfies Partial<Job>;
