@@ -26,6 +26,8 @@ export default async function PlansPage() {
   const isPro = profile?.subscription_plan?.toLowerCase() === 'pro';
   const isCanceling = profile?.subscription_status === 'canceled';
 
+  console.log('profile', profile);
+
   return (
     <div className="flex flex-col items-center justify-center h-full gap-4 my-14">
       {isPro ? (

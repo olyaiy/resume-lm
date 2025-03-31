@@ -84,10 +84,17 @@ async function handleSubscriptionChange(
 
 export async function POST(req: Request) {
   try {
+    console.log('🌐 Incoming Webhook Request:', {
+      method: req.method,
+      url: req.url,
+      timestamp: new Date().toISOString()
+    });
+
     const body = await req.text()
     const signature = (await headers()).get('stripe-signature')
 
     if (!signature) {
+      console.error('❌ Missing Stripe Signature Header');
       return new Response(
         JSON.stringify({ error: 'Missing stripe-signature header' }),
         { 
@@ -99,15 +106,21 @@ export async function POST(req: Request) {
 
     const idempotencyKey = (await headers()).get('stripe-idempotency-key');
     if (idempotencyKey) {
-      console.log('📦 Processing webhook with idempotency key:', idempotencyKey);
+      console.log('🔑 Processing webhook with idempotency key:', idempotencyKey);
     }
 
     let event: Stripe.Event
     try {
+      console.log('🔍 Verifying webhook signature...');
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+      console.log('✅ Webhook signature verified successfully');
     } catch (err: unknown) {
       const error = err as Error
-      console.error(`⚠️ Webhook signature verification failed: ${error.message}`)
+      console.error('❌ Webhook signature verification failed:', {
+        error: error.message,
+        stack: error.stack,
+        timestamp: new Date().toISOString()
+      });
       return new Response(
         JSON.stringify({ error: error.message }),
         { 
@@ -117,8 +130,14 @@ export async function POST(req: Request) {
       )
     }
 
+    console.log('📨 Received Stripe Event:', {
+      type: event.type,
+      id: event.id,
+      created: new Date(event.created * 1000).toISOString()
+    });
+
     if (!relevantEvents.has(event.type)) {
-      console.log(`ℹ️ Skipping unhandled event type: ${event.type}`);
+      console.log('ℹ️ Skipping unhandled event type:', event.type);
       return new Response(
         JSON.stringify({ received: true, processed: false, message: `Event type ${event.type} was received but not processed` }),
         { 
@@ -276,6 +295,11 @@ export async function POST(req: Request) {
         console.log(`⚠️ Unhandled event type: ${event.type}`);
       }
     }
+
+    console.log('✅ Webhook processed successfully:', {
+      eventType: event.type,
+      timestamp: new Date().toISOString()
+    });
 
     return new Response(
       JSON.stringify({ received: true }),

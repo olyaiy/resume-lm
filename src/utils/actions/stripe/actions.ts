@@ -77,40 +77,38 @@ export async function manageSubscriptionStatusChange(
   customerId: string,
   isSubscriptionNew: boolean
 ) {
-  console.log('\n🔄 Starting subscription status change...');
-  console.log('📝 Input Data:', {
+  console.log('🔄 Starting subscription status change:', {
     subscriptionId,
     customerId,
-    isSubscriptionNew
+    isNew: isSubscriptionNew,
+    timestamp: new Date().toISOString()
   });
 
   const supabase = await createServiceClient();
 
   // Get customer's UUID from Stripe metadata
+  console.log('🔍 Retrieving customer data from Stripe...');
   const customerData = await stripe.customers.retrieve(customerId);
   if ('deleted' in customerData) {
-    console.error('\n❌ Customer has been deleted');
+    console.error('❌ Customer has been deleted');
     throw new Error('Customer has been deleted');
   }
   const uuid = customerData.metadata.supabaseUUID;
-  console.log('\n👤 Retrieved customer UUID:', uuid);
+  console.log('✅ Retrieved customer UUID:', uuid);
 
+  console.log('📦 Retrieving subscription details from Stripe...');
   const subscription = await stripe.subscriptions.retrieve(subscriptionId, {
     expand: ['default_payment_method', 'items.data.price']
   });
-  console.log('\n📦 Retrieved Stripe subscription:', {
+  console.log('✅ Retrieved subscription details:', {
     id: subscription.id,
     status: subscription.status,
-    currentPeriod: {
-      start: new Date(subscription.current_period_start * 1000),
-      end: new Date(subscription.current_period_end * 1000)
-    },
-    priceId: subscription.items.data[0].price.id
+    currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
   });
 
   // Map price ID to plan
   const priceIdToPlan: Record<string, 'free' | 'pro'> = {
-    'price_1QiNgyCv6RlaQFiM9CI8wPgA': 'pro'
+    [process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!]: 'pro'
   };
   const plan = priceIdToPlan[subscription.items.data[0].price.id] || 'free';
 
@@ -130,7 +128,7 @@ export async function manageSubscriptionStatusChange(
   console.log('\n📋 Prepared subscription data:', subscriptionData);
 
   try {
-    // First try to update existing subscription
+    console.log('🔍 Checking for existing subscription in database...');
     const { data: existingSubscription } = await supabase
       .from('subscriptions')
       .select('id')
@@ -138,21 +136,19 @@ export async function manageSubscriptionStatusChange(
       .single();
 
     if (existingSubscription) {
-      console.log('\n🔄 Updating existing subscription:', existingSubscription.id);
-      // Update existing subscription
+      console.log('🔄 Updating existing subscription:', existingSubscription.id);
       const { error } = await supabase
         .from('subscriptions')
         .update(subscriptionData)
         .eq('user_id', uuid);
 
       if (error) {
-        console.error('\n❌ Error updating subscription:', error);
+        console.error('❌ Error updating subscription:', error);
         throw error;
       }
       console.log('✅ Subscription updated successfully');
     } else {
-      console.log('\n🔄 Upserting subscription record');
-      // Upsert subscription data
+      console.log('➕ Creating new subscription record');
       const { error } = await supabase
         .from('subscriptions')
         .upsert(
@@ -161,22 +157,24 @@ export async function manageSubscriptionStatusChange(
             created_at: new Date().toISOString() 
           },
           { 
-            onConflict: 'user_id',  // This is the unique constraint column
+            onConflict: 'user_id',
             ignoreDuplicates: false 
           }
         );
 
       if (error) {
-        console.error('\n❌ Error upserting subscription:', error);
+        console.error('❌ Error creating subscription:', error);
         throw error;
       }
-      console.log('✅ Subscription upserted successfully');
+      console.log('✅ Subscription created successfully');
     }
 
-    console.log('\n🎉 Subscription management completed successfully!\n');
-
+    console.log('🎉 Subscription management completed successfully!');
   } catch (error) {
-    console.error('\n💥 Error managing subscription:', error);
+    console.error('💥 Error managing subscription:', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+      timestamp: new Date().toISOString()
+    });
     throw error;
   }
 }
@@ -215,6 +213,8 @@ export async function getSubscriptionStatus() {
   if (userError || !user) {
     throw new Error('User not authenticated');
   }
+
+  console.log(' looking for user ', user.id);
 
   const { data: subscription, error: subscriptionError } = await supabase
     .from('subscriptions')
