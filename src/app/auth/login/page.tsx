@@ -229,7 +229,7 @@ export default async function LoginPage({
             </div>
           </div>
           
-          <div className="py-24 sm:py-0">
+          <div className=" bg-red-500">
             <HeroVideoSection />
           </div>
           
@@ -287,4 +287,3 @@ export default async function LoginPage({
     </>
   );
 }
-  
