@@ -7,6 +7,7 @@ const nextConfig: NextConfig = {
     },
   },
   productionBrowserSourceMaps: false,
+  reactStrictMode: false,
 }
  
 export default nextConfig
