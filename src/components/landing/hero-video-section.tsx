@@ -14,7 +14,7 @@ export function HeroVideoSection() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <section className="relative py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-green-500">
+    <section className="relative py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto ">
       {/* Section Header */}
       <div className="text-center mb-12 max-w-3xl mx-auto">
         <h2 className="text-2xl sm:text-3xl font-semibold mb-4 bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent">
