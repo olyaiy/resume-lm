@@ -102,7 +102,7 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/resumelm.git
+git clone https://github.com/olyaiy/resumelm.git
 ```
 
 2. Install dependencies:
