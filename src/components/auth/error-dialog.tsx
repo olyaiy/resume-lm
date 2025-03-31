@@ -6,10 +6,12 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
 interface ErrorDialogProps {
   isOpen: boolean;
@@ -17,10 +19,17 @@ interface ErrorDialogProps {
 
 export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     setIsOpen(initialIsOpen);
   }, [initialIsOpen]);
+
+  const errorMessage = isOpen ? (
+    searchParams.get('error') === 'auth_code_missing' 
+      ? 'We couldn\'t complete your sign-in. Please try again.' 
+      : 'There was an issue with your email confirmation. Please check your inbox and try again.'
+  ) : null;
 
   return (
     <Dialog 
@@ -33,8 +42,9 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
             <AlertCircle className="w-6 h-6 text-red-600" />
           </div>
           <DialogTitle className="text-center text-2xl font-semibold text-red-600">
-            Email Confirmation Failed
+            Authentication Error
           </DialogTitle>
+          <DialogDescription>{errorMessage}</DialogDescription>
         </DialogHeader>
         
         <div className="pt-4 space-y-4">
