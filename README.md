@@ -72,12 +72,6 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
 - **Purposeful White Space**: Generous spacing improves content digestion
 - **Consistent Interaction**: Predictable hover and active states
 
-### Visual Elements
-- Soft gradient backgrounds with floating orbs
-- Glass-morphism effects with backdrop blur
-- Responsive grid layouts
-- Interactive hover states with smooth transitions
-
 ## 🛠️ Tech Stack
 
 ### Frontend
@@ -102,7 +96,7 @@ Check out the live demo at [resumelm.com](https://resumelm.com)
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/olyaiy/resumelm.git
+git clone https://github.com/olyaiy/resume-lm.git
 ```
 
 2. Install dependencies:
@@ -117,10 +111,7 @@ pnpm install
 cp .env.example .env.local
 ```
 
-Required environment variables:
-- `OPENAI_API_KEY`: For AI features
-- `DATABASE_URL`: For data storage
-- `NEXT_PUBLIC_APP_URL`: Your application URL
+Required environment variables: Look in the `.env.example` file for the full list of required variables.
 
 4. Set up the database:
 
