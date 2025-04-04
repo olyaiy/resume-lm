@@ -4,16 +4,42 @@ import { createServiceClient } from "@/utils/supabase/server";
 
 export async function getAllUsers() {
   const supabase = await createServiceClient();
-  
-  // Get all users from auth.users table
-  const { data: users, error: usersError } = await supabase.auth.admin.listUsers();
-  
-  if (usersError) {
-    console.error('Error fetching users:', usersError);
-    throw new Error('Failed to fetch users');
+  const allUsers = [];
+  let page = 1;
+  const perPage = 1000; // Max allowed by Supabase
+
+  try {
+    while (true) {
+      const { data, error } = await supabase.auth.admin.listUsers({
+        page: page,
+        perPage: perPage,
+      });
+
+      if (error) {
+        console.error(`Error fetching users (page ${page}):`, error);
+        throw new Error(`Failed to fetch users on page ${page}`);
+      }
+
+      if (data && data.users) {
+        allUsers.push(...data.users);
+        // If the number of users fetched is less than perPage, we've reached the last page
+        if (data.users.length < perPage) {
+          break;
+        }
+      } else {
+        // Should not happen if there's no error, but good to handle
+        break;
+      }
+      
+      page++;
+    }
+  } catch (error) {
+    console.error('Error in getAllUsers pagination loop:', error);
+    // Re-throw the error after logging
+    throw error;
   }
-  
-  return users.users;
+
+  return allUsers;
 }
 
 export async function getUsersWithProfilesAndSubscriptions() {

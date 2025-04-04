@@ -192,4 +192,10 @@ export type ServiceName =
   | 'groq'
   | 'deepseek';
 
+export type SortDirection = 'ascending' | 'descending';
+
+export interface SortDescriptor<T> {
+  column: T;
+  direction: SortDirection;
+}
 
