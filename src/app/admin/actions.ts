@@ -87,3 +87,62 @@ export async function getUsersWithProfilesAndSubscriptions() {
   
   return mergedData;
 }
+
+export async function getUserDetailsById(userId: string) {
+  if (!userId) {
+    throw new Error('User ID is required');
+  }
+
+  const supabase = await createServiceClient();
+
+  // 1. Fetch User Auth Info
+  const { data: userData, error: userError } = await supabase.auth.admin.getUserById(userId);
+  if (userError) {
+    console.error(`Error fetching user auth info for ${userId}:`, userError);
+    // Handle specific errors like user not found gracefully if needed
+    if (userError.message.includes('User not found')) {
+       return null; // Or throw a specific "NotFound" error
+    }
+    throw new Error(`Failed to fetch user auth info for ${userId}`);
+  }
+  const user = userData.user;
+
+  // 2. Fetch Profile
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle(); // Use maybeSingle as profile might not exist
+
+  if (profileError) {
+    console.error(`Error fetching profile for ${userId}:`, profileError);
+    // Decide if this is critical. Maybe return partial data?
+    throw new Error(`Failed to fetch profile for ${userId}`);
+  }
+
+  // 3. Fetch Subscription
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from('subscriptions')
+    .select('*')
+    .eq('user_id', userId)
+    .maybeSingle(); // Use maybeSingle as subscription might not exist
+
+  if (subscriptionError) {
+    console.error(`Error fetching subscription for ${userId}:`, subscriptionError);
+    // Decide if this is critical. Maybe return partial data?
+    throw new Error(`Failed to fetch subscription for ${userId}`);
+  }
+
+  // 4. Combine and return
+  // Ensure user is not null before proceeding
+  if (!user) {
+      console.warn(`User data was unexpectedly null after fetch for ID: ${userId}`);
+      return null; // Or handle as appropriate
+  }
+  
+  return {
+    user,
+    profile,
+    subscription,
+  };
+}
