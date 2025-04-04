@@ -4,12 +4,13 @@ import UsersTable from "./components/users-table";
 import {
     getTotalUserCount,
     getTotalResumeCount,
-    getTotalSubscriptionCount, // Import new action
-    getBaseResumeCount,        // Import new action
-    getTailoredResumeCount     // Import new action
+    getTotalSubscriptionCount,
+    getBaseResumeCount,
+    getTailoredResumeCount,
+    getProUserCount // Import new action
 } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Users, FileText, CreditCard, FileCheck, FilePlus, UsersRound } from "lucide-react"; // Import new icons
+import { Users, FileText, CreditCard, FileCheck, FilePlus, Star } from "lucide-react"; // Import Star, remove UsersRound
 
 export default async function AdminPage() {
     // Get the current user ID
@@ -25,31 +26,32 @@ export default async function AdminPage() {
     const [
         totalUsers,
         totalResumes,
-        totalSubscriptions,
+        totalSubscriptions, // This might represent total *ever* subscriptions depending on the table
         baseResumes,
-        tailoredResumes
+        tailoredResumes,
+        proUsers // Fetch pro user count
     ] = await Promise.all([
         getTotalUserCount(),
         getTotalResumeCount(),
-        getTotalSubscriptionCount(),
+        getTotalSubscriptionCount(), // Keep or remove based on whether it's distinct from proUsers
         getBaseResumeCount(),
-        getTailoredResumeCount()
+        getTailoredResumeCount(),
+        getProUserCount() // Call the new action
     ]);
 
-    // Calculate average resumes per user (handle division by zero)
-    const averageResumesPerUser = totalUsers > 0 ? (totalResumes / totalUsers).toFixed(1) : 0;
+    // Removed averageResumesPerUser calculation
 
     return (
-        <div className="container mx-auto py-10 px-4 md:px-6 lg:px-8"> {/* Consistent padding */}
-            <div className="mb-8"> {/* Increased margin bottom */}
+        <div className="container mx-auto py-10 px-4 md:px-6 lg:px-8">
+            <div className="mb-8">
                 <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Admin Dashboard</h1>
                 <p className="text-muted-foreground mt-1">Overview of platform usage and user management.</p>
             </div>
 
             {/* Stats Section */}
-            <section className="mb-10"> {/* Increased margin bottom */}
+            <section className="mb-10">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Platform Statistics</h2>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"> {/* Adjusted grid for more stats */}
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                     {/* Total Users Card */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -102,24 +104,26 @@ export default async function AdminPage() {
                         </CardContent>
                     </Card>
 
-                    {/* Average Resumes Per User Card */}
+                    {/* Pro Users Card */}
                      <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Avg Resumes/User
+                                Pro Users
                             </CardTitle>
-                            <UsersRound className="h-4 w-4 text-muted-foreground" />
+                            <Star className="h-4 w-4 text-muted-foreground" /> {/* Changed Icon */}
                         </CardHeader>
                         <CardContent>
-                            <div className="text-2xl font-bold">{averageResumesPerUser}</div>
+                            <div className="text-2xl font-bold">{proUsers.toLocaleString()}</div> {/* Display pro users */}
                         </CardContent>
                     </Card>
 
-                    {/* Total Subscriptions Card */}
+                    {/* Total Subscriptions Card - Keep or remove? Depends if it's different from Pro Users */}
+                    {/* If getTotalSubscriptionCount counts *all* subscriptions (active/inactive), keep it. */}
+                    {/* If it's the same as getProUserCount, remove this card. */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
-                                Active Subscriptions
+                                Total Subscriptions
                             </CardTitle>
                             <CreditCard className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>

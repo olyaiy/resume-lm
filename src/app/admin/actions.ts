@@ -347,6 +347,24 @@ export async function getBaseResumeCount(): Promise<number> {
     console.error('Error fetching base resume count:', error);
     return 0; // Return 0 on error
   }
+  
+  return count ?? 0;
+}
+
+// Action to get the total count of active subscriptions (Pro Users)
+export async function getProUserCount(): Promise<number> {
+  const supabase = await createServiceClient();
+  const { count, error } = await supabase
+    .from('subscriptions')
+    .select('*', { count: 'exact', head: true })
+    // Check for 'pro' plan and 'active' status
+    .eq('subscription_plan', 'pro')
+    .eq('subscription_status', 'active');
+
+  if (error) {
+    console.error('Error fetching pro user count:', error);
+    return 0; // Return 0 on error
+  }
 
   return count ?? 0;
 }
