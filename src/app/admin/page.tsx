@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getUserId } from "../auth/login/actions";
+import UsersTable from "./components/users-table";
 
 export default async function AdminPage() {
     // Get the current user ID
@@ -12,9 +13,17 @@ export default async function AdminPage() {
     }
     
     return (
-        <div>
-            <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-            <p>Welcome to the admin area.</p>
+        <div className="container py-8 space-y-6">
+            <div className="flex justify-between items-center">
+                <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+            </div>
+            
+            <div className="space-y-8">
+                <section>
+                    <h2 className="text-xl font-semibold mb-4">User Management</h2>
+                    <UsersTable />
+                </section>
+            </div>
         </div>
     );
 }
