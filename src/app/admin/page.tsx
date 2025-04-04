@@ -1,35 +1,56 @@
 import { redirect } from "next/navigation";
 import { getUserId } from "../auth/login/actions";
 import UsersTable from "./components/users-table";
-import { getTotalUserCount, getTotalResumeCount } from "./actions"; // Import new actions
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Import Card components
-import { Users, FileText } from "lucide-react"; // Import icons
+import {
+    getTotalUserCount,
+    getTotalResumeCount,
+    getTotalSubscriptionCount, // Import new action
+    getBaseResumeCount,        // Import new action
+    getTailoredResumeCount     // Import new action
+} from "./actions";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Users, FileText, CreditCard, FileCheck, FilePlus, UsersRound } from "lucide-react"; // Import new icons
+
 export default async function AdminPage() {
     // Get the current user ID
     const userId = await getUserId();
-    
+
     // Check if user is authenticated and is the admin
     if (!userId || userId !== process.env.ADMIN_ID) {
         // Redirect to home page if not admin
         redirect('/');
     }
 
-    // Fetch stats concurrently
-    const [totalUsers, totalResumes] = await Promise.all([
+    // Fetch all stats concurrently
+    const [
+        totalUsers,
+        totalResumes,
+        totalSubscriptions,
+        baseResumes,
+        tailoredResumes
+    ] = await Promise.all([
         getTotalUserCount(),
-        getTotalResumeCount()
+        getTotalResumeCount(),
+        getTotalSubscriptionCount(),
+        getBaseResumeCount(),
+        getTailoredResumeCount()
     ]);
-    
+
+    // Calculate average resumes per user (handle division by zero)
+    const averageResumesPerUser = totalUsers > 0 ? (totalResumes / totalUsers).toFixed(1) : 0;
+
     return (
-        <div className="container py-8 space-y-8"> {/* Increased spacing */}
-            <div className="flex justify-between items-center mb-6"> {/* Added margin bottom */}
-                <h1 className="text-3xl font-bold">Admin Dashboard</h1> {/* Increased size */}
+        <div className="container mx-auto py-10 px-4 md:px-6 lg:px-8"> {/* Consistent padding */}
+            <div className="mb-8"> {/* Increased margin bottom */}
+                <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white">Admin Dashboard</h1>
+                <p className="text-muted-foreground mt-1">Overview of platform usage and user management.</p>
             </div>
 
             {/* Stats Section */}
-            <section>
-                <h2 className="text-xl font-semibold mb-4">Overview</h2>
-                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <section className="mb-10"> {/* Increased margin bottom */}
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">Platform Statistics</h2>
+                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6"> {/* Adjusted grid for more stats */}
+                    {/* Total Users Card */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
@@ -39,11 +60,10 @@ export default async function AdminPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{totalUsers.toLocaleString()}</div>
-                            {/* <p className="text-xs text-muted-foreground">
-                                +20.1% from last month
-                            </p> */}
                         </CardContent>
                     </Card>
+
+                    {/* Total Resumes Card */}
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">
@@ -53,21 +73,68 @@ export default async function AdminPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">{totalResumes.toLocaleString()}</div>
-                             {/* <p className="text-xs text-muted-foreground">
-                                +180 since last hour
-                            </p> */}
                         </CardContent>
                     </Card>
-                     {/* Add more stats cards here if needed */}
+
+                    {/* Base Resumes Card */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Base Resumes
+                            </CardTitle>
+                            <FileCheck className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{baseResumes.toLocaleString()}</div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Tailored Resumes Card */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Tailored Resumes
+                            </CardTitle>
+                            <FilePlus className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{tailoredResumes.toLocaleString()}</div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Average Resumes Per User Card */}
+                     <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Avg Resumes/User
+                            </CardTitle>
+                            <UsersRound className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{averageResumesPerUser}</div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Total Subscriptions Card */}
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">
+                                Active Subscriptions
+                            </CardTitle>
+                            <CreditCard className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">{totalSubscriptions.toLocaleString()}</div>
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
-            
-            <div className="space-y-8">
-                <section>
-                    <h2 className="text-xl font-semibold mb-4">User Management</h2>
-                    <UsersTable />
-                </section>
-            </div>
+
+            {/* User Management Section */}
+            <section>
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">User Management</h2>
+                <UsersTable />
+            </section>
         </div>
     );
 }

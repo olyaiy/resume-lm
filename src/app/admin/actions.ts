@@ -317,3 +317,52 @@ export async function getTotalResumeCount(): Promise<number> {
   // Assuming the RPC returns the count directly
   return typeof data === 'number' ? data : 0;
 }
+
+// Action to get the total count of subscriptions
+export async function getTotalSubscriptionCount(): Promise<number> {
+  const supabase = await createServiceClient();
+  const { count, error } = await supabase
+    .from('subscriptions')
+    .select('*', { count: 'exact', head: true })
+    // Add filtering if needed, e.g., filter by active status if there's a 'status' column
+    // .eq('status', 'active');
+
+  if (error) {
+    console.error('Error fetching total subscription count:', error);
+    return 0; // Return 0 on error
+  }
+
+  return count ?? 0;
+}
+
+// Action to get the total count of base resumes
+export async function getBaseResumeCount(): Promise<number> {
+  const supabase = await createServiceClient();
+  const { count, error } = await supabase
+    .from('resumes')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_base_resume', true);
+
+  if (error) {
+    console.error('Error fetching base resume count:', error);
+    return 0; // Return 0 on error
+  }
+
+  return count ?? 0;
+}
+
+// Action to get the total count of tailored resumes
+export async function getTailoredResumeCount(): Promise<number> {
+  const supabase = await createServiceClient();
+  const { count, error } = await supabase
+    .from('resumes')
+    .select('*', { count: 'exact', head: true })
+    .eq('is_base_resume', false);
+
+  if (error) {
+    console.error('Error fetching tailored resume count:', error);
+    return 0; // Return 0 on error
+  }
+
+  return count ?? 0;
+}
