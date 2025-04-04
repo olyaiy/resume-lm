@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo } from 'react';
+import { useRouter } from 'next/navigation'; // Import useRouter
 import { getUsersWithProfilesAndSubscriptions } from '../actions';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -78,6 +79,7 @@ type SortableColumns =
   | 'current_period_end';
 
 export default function UsersTable() {
+  const router = useRouter(); // Initialize router
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -358,7 +360,11 @@ export default function UsersTable() {
               </TableHeader>
               <TableBody>
                 {sortedUsers.map((item) => (
-                  <TableRow key={item.user.id}>
+                  <TableRow
+                    key={item.user.id}
+                    onClick={() => router.push(`/admin/${item.user.id}`)}
+                    className="cursor-pointer hover:bg-muted/50"
+                  >
                     <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
                     <TableCell>{formatDate(item.user.created_at)}</TableCell>
                     <TableCell>{formatDate(item.user.last_sign_in_at)}</TableCell>
@@ -432,7 +438,11 @@ export default function UsersTable() {
               </TableHeader>
               <TableBody>
                 {sortedUsers.map((item) => (
-                  <TableRow key={item.user.id}>
+                  <TableRow
+                    key={item.user.id}
+                    onClick={() => router.push(`/admin/${item.user.id}`)}
+                    className="cursor-pointer hover:bg-muted/50"
+                  >
                     <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
                     <TableCell>
                       {item.profile?.first_name && item.profile?.last_name 
@@ -504,7 +514,11 @@ export default function UsersTable() {
               </TableHeader>
               <TableBody>
                 {sortedUsers.map((item) => (
-                  <TableRow key={item.user.id}>
+                  <TableRow
+                    key={item.user.id}
+                    onClick={() => router.push(`/admin/${item.user.id}`)}
+                    className="cursor-pointer hover:bg-muted/50"
+                  >
                     <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
                     <TableCell>
                       {item.subscription?.subscription_plan ? (

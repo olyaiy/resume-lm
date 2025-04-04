@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getUserId } from '@/app/auth/login/actions';
-import { getUserDetailsById } from '../actions';
+import { getUserDetailsById, getResumeCountForUser } from '../actions';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -64,6 +64,9 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
 
   const { user, profile, subscription } = userData;
 
+  // 4. Fetch Resume Count (in parallel potentially, or after user data)
+  const resumeCount = await getResumeCountForUser(targetUserId);
+
   return (
     <div className="container py-8 space-y-6">
       <div className="flex items-center gap-4">
@@ -89,7 +92,8 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
             <DetailItem label="Created At" value={formatDate(user.created_at)} />
             <DetailItem label="Last Sign In" value={formatDate(user.last_sign_in_at)} />
             <DetailItem label="Email Confirmed" value={user.email_confirmed_at ? `Yes (${formatDate(user.email_confirmed_at)})` : 'No'} />
-            {/* Add other relevant auth fields if needed */}
+            <Separator className="my-2" />
+            <DetailItem label="Resume Count" value={resumeCount.toString()} />
           </CardContent>
         </Card>
 

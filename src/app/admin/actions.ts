@@ -146,3 +146,25 @@ export async function getUserDetailsById(userId: string) {
     subscription,
   };
 }
+
+export async function getResumeCountForUser(userId: string): Promise<number> {
+  if (!userId) {
+    console.error('Attempted to get resume count without user ID.');
+    return 0; // Or throw an error if preferred
+  }
+
+  const supabase = await createServiceClient();
+
+  const { count, error } = await supabase
+    .from('resumes')
+    .select('*', { count: 'exact', head: true }) // Use head: true for count only
+    .eq('user_id', userId);
+
+  if (error) {
+    console.error(`Error fetching resume count for user ${userId}:`, error);
+    // Decide how to handle error, returning 0 for now
+    return 0;
+  }
+
+  return count ?? 0;
+}
