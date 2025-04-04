@@ -63,6 +63,7 @@ interface UserData {
     current_period_end?: string;
     stripe_customer_id?: string;
   } | null;
+  resume_count: number; // Added resume count
 }
 
 type SortableColumns =
@@ -76,7 +77,8 @@ type SortableColumns =
   | 'education_count'
   | 'skills_count'
   | 'subscription_status'
-  | 'current_period_end';
+  | 'current_period_end'
+  | 'resume_count'; // Added resume_count
 
 export default function UsersTable() {
   const router = useRouter(); // Initialize router
@@ -234,7 +236,13 @@ export default function UsersTable() {
             valA = getDateValue(a.subscription?.current_period_end);
             valB = getDateValue(b.subscription?.current_period_end);
             break;
+          case 'resume_count':
+             valA = a.resume_count || 0;
+             valB = b.resume_count || 0;
+             break;
           default:
+            // Should not happen if all SortableColumns are handled
+            console.warn(`Unhandled sort column: ${column}`);
             return 0;
         }
   
@@ -313,10 +321,10 @@ export default function UsersTable() {
       </div>
       <Tabs defaultValue="overview" className="w-full">
         <div className="px-4">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+          {/* Updated grid columns and removed Subscriptions trigger */}
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="overview">Overview & Subscriptions</TabsTrigger>
             <TabsTrigger value="profiles">Profiles</TabsTrigger>
-            <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
           </TabsList>
         </div>
 
@@ -351,9 +359,26 @@ export default function UsersTable() {
                       Name {renderSortIcon('name')}
                     </Button>
                   </TableHead>
+                  {/* Moved Subscription columns here */}
                   <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('subscription_plan')} className="px-0 hover:bg-transparent">
-                      Subscription {renderSortIcon('subscription_plan')}
+                      Plan {renderSortIcon('subscription_plan')}
+                    </Button>
+                  </TableHead>
+                   <TableHead>
+                    <Button variant="ghost" onClick={() => handleSort('subscription_status')} className="px-0 hover:bg-transparent">
+                      Status {renderSortIcon('subscription_status')}
+                    </Button>
+                  </TableHead>
+                   <TableHead>
+                    <Button variant="ghost" onClick={() => handleSort('current_period_end')} className="px-0 hover:bg-transparent">
+                      Expires {renderSortIcon('current_period_end')}
+                    </Button>
+                  </TableHead>
+                   {/* Added Resume Count column */}
+                   <TableHead>
+                    <Button variant="ghost" onClick={() => handleSort('resume_count')} className="px-0 hover:bg-transparent">
+                      Resumes {renderSortIcon('resume_count')}
                     </Button>
                   </TableHead>
                 </TableRow>
@@ -373,11 +398,12 @@ export default function UsersTable() {
                         ? `${item.profile.first_name} ${item.profile.last_name}`
                         : 'Not set'}
                     </TableCell>
+                    {/* Moved Subscription cells here */}
                     <TableCell>
                       {item.subscription?.subscription_plan ? (
                         <Badge className={
-                          item.subscription.subscription_plan === 'pro' 
-                            ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' 
+                          item.subscription.subscription_plan === 'pro'
+                            ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
                             : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
                         }>
                           {item.subscription.subscription_plan.toUpperCase()}
@@ -386,6 +412,22 @@ export default function UsersTable() {
                         <Badge variant="outline">No Plan</Badge>
                       )}
                     </TableCell>
+                     <TableCell>
+                      {item.subscription?.subscription_status ? (
+                        <Badge className={
+                          item.subscription.subscription_status === 'active'
+                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                            : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                        }>
+                          {item.subscription.subscription_status.toUpperCase()}
+                        </Badge>
+                      ) : (
+                        <Badge variant="outline">N/A</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell>{formatDate(item.subscription?.current_period_end)}</TableCell>
+                    {/* Added Resume Count cell */}
+                    <TableCell className="text-center">{item.resume_count}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -478,82 +520,7 @@ export default function UsersTable() {
           </div>
         </TabsContent>
 
-        <TabsContent value="subscriptions" className="p-0">
-          <div className="rounded-md border-t">
-            <Table>
-              <TableCaption>
-                 {`Showing ${sortedUsers.filter(u => u.subscription).length} subscriptions from ${sortedUsers.length} filtered users.`}
-                 { (filterPlan !== 'all' || filterStatus !== 'all' || searchTerm) &&
-                  ` (Filtered from ${users.length} total)`
-                 }
-              </TableCaption>
-              <TableHeader>
-                <TableRow>
-                   <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort('email')} className="px-0 hover:bg-transparent">
-                      Email {renderSortIcon('email')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort('subscription_plan')} className="px-0 hover:bg-transparent">
-                      Plan {renderSortIcon('subscription_plan')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort('subscription_status')} className="px-0 hover:bg-transparent">
-                      Status {renderSortIcon('subscription_status')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button variant="ghost" onClick={() => handleSort('current_period_end')} className="px-0 hover:bg-transparent">
-                      Expires {renderSortIcon('current_period_end')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Stripe Customer ID</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedUsers.map((item) => (
-                  <TableRow
-                    key={item.user.id}
-                    onClick={() => router.push(`/admin/${item.user.id}`)}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
-                    <TableCell>
-                      {item.subscription?.subscription_plan ? (
-                        <Badge className={
-                          item.subscription.subscription_plan === 'pro' 
-                            ? 'bg-purple-100 text-purple-800 hover:bg-purple-200' 
-                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }>
-                          {item.subscription.subscription_plan.toUpperCase()}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">No Plan</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.subscription?.subscription_status ? (
-                        <Badge className={
-                          item.subscription.subscription_status === 'active' 
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200' 
-                            : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
-                        }>
-                          {item.subscription.subscription_status.toUpperCase()}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">N/A</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{formatDate(item.subscription?.current_period_end)}</TableCell>
-                    <TableCell className="max-w-[200px] truncate">{item.subscription?.stripe_customer_id || 'N/A'}</TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-        </TabsContent>
+        {/* Removed TabsContent for "subscriptions" */}
       </Tabs>
     </Card>
   );

@@ -44,48 +44,104 @@ export async function getAllUsers() {
 
 export async function getUsersWithProfilesAndSubscriptions() {
   const supabase = await createServiceClient();
-  
-  // Get all users first
+
+  // 1. Get all users first
   const users = await getAllUsers();
-  
-  // Get profiles and subscriptions for all users
+  if (!users || users.length === 0) {
+    return [];
+  }
   const userIds = users.map(user => user.id);
-  
-  // Fetch profiles
+
+  // 2. Fetch profiles
   const { data: profiles, error: profilesError } = await supabase
     .from('profiles')
     .select('*')
     .in('user_id', userIds);
-    
   if (profilesError) {
     console.error('Error fetching profiles:', profilesError);
     throw new Error('Failed to fetch profiles');
   }
-  
-  // Fetch subscriptions
+  const profilesMap = new Map(profiles?.map(p => [p.user_id, p]));
+
+  // 3. Fetch subscriptions
   const { data: subscriptions, error: subscriptionsError } = await supabase
     .from('subscriptions')
     .select('*')
     .in('user_id', userIds);
-    
   if (subscriptionsError) {
     console.error('Error fetching subscriptions:', subscriptionsError);
     throw new Error('Failed to fetch subscriptions');
   }
-  
-  // Merge data
-  const mergedData = users.map(user => {
-    const profile = profiles?.find(p => p.user_id === user.id) || null;
-    const subscription = subscriptions?.find(s => s.user_id === user.id) || null;
-    
-    return {
-      user,
-      profile,
-      subscription
-    };
-  });
-  
-  return mergedData;
+  const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]));
+
+  // 4. Fetch resume counts
+  // Using a more efficient approach to count per user_id
+  const { data: resumeCountsData, error: resumeCountsError } = await supabase
+    .rpc('count_resumes_by_user', { user_ids: userIds }); // Assuming an RPC function 'count_resumes_by_user' exists
+
+  if (resumeCountsError) {
+      // Fallback to less efficient client-side grouping if RPC fails or doesn't exist
+      console.warn('RPC function count_resumes_by_user failed or not found. Falling back to client-side counting.', resumeCountsError);
+      const { data: fallbackData, error: fallbackError } = await supabase
+          .from('resumes')
+          .select('user_id', { count: 'exact', head: false }) // Select user_id to group by
+          .in('user_id', userIds);
+
+      if (fallbackError) {
+          console.error('Error fetching resume counts (fallback):', fallbackError);
+          throw new Error('Failed to fetch resume counts');
+      }
+      
+      // Process fallback data
+      const tempCountsMap = new Map<string, number>();
+      fallbackData?.forEach((item: { user_id: string }) => {
+          tempCountsMap.set(item.user_id, (tempCountsMap.get(item.user_id) || 0) + 1);
+      });
+      // Convert Map to the expected array format [{ user_id: string, count: number }]
+      // This step is needed if the rest of the code expects the RPC format.
+      // If adapting the merge logic is easier, do that instead.
+      // For now, we'll proceed assuming the merge logic handles the Map directly later.
+      // resumeCountsData = Array.from(tempCountsMap, ([user_id, count]) => ({ user_id, count })); // Example conversion if needed
+       
+       // Let's adjust the merge logic instead to handle the map directly
+       const resumeCountsMap = tempCountsMap;
+
+        // 5. Merge data (using Maps for efficiency)
+        const mergedData = users.map(user => {
+          const profile = profilesMap.get(user.id) || null;
+          const subscription = subscriptionsMap.get(user.id) || null;
+          const resume_count = resumeCountsMap.get(user.id) || 0; // Use the map here
+
+          return {
+            user,
+            profile,
+            subscription,
+            resume_count // Add resume count here
+          };
+        });
+        return mergedData;
+
+  } else {
+      // Process successful RPC data
+      const resumeCountsMap = new Map<string, number>(
+          resumeCountsData?.map((item: { user_id: string, count: number }) => [item.user_id, item.count]) || []
+      );
+
+      // 5. Merge data (using Maps for efficiency)
+      const mergedData = users.map(user => {
+        const profile = profilesMap.get(user.id) || null;
+        const subscription = subscriptionsMap.get(user.id) || null;
+        const resume_count = resumeCountsMap.get(user.id) || 0;
+
+        return {
+          user,
+          profile,
+          subscription,
+          resume_count // Add resume count here
+        };
+      });
+      return mergedData;
+  }
 }
 
 export async function getUserDetailsById(userId: string) {
@@ -167,4 +223,28 @@ export async function getResumeCountForUser(userId: string): Promise<number> {
   }
 
   return count ?? 0;
+}
+
+export async function getResumesForUser(userId: string) {
+   if (!userId) {
+    console.error('Attempted to get resumes without user ID.');
+    return []; // Return empty array or throw error
+  }
+
+  const supabase = await createServiceClient();
+
+  const { data, error } = await supabase
+    .from('resumes')
+    .select('id, name, created_at, is_base_resume') // Select only needed fields
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false }); // Order by creation date
+
+  if (error) {
+    console.error(`Error fetching resumes for user ${userId}:`, error);
+    // Decide how to handle error, returning empty array for now
+    return [];
+  }
+
+  // Ensure data is not null before returning
+  return data ?? [];
 }

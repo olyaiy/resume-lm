@@ -1,7 +1,8 @@
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getUserId } from '@/app/auth/login/actions';
-import { getUserDetailsById, getResumeCountForUser } from '../actions';
+import { getUserDetailsById, getResumeCountForUser, getResumesForUser } from '../actions'; // Import getResumesForUser
+import UserResumeList from '../components/user-resume-list'; // Import the new component
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
@@ -46,7 +47,7 @@ function JsonDisplay({ data }: { data: unknown }) { // Changed any to unknown
 
 
 export default async function AdminUserDetailPage({ params }: AdminUserDetailPageProps) {
-  const targetUserId = params['user-id'];
+  const targetUserId = (await params)['user-id'];
 
   // 1. Admin Check
   const currentUserId = await getUserId();
@@ -65,7 +66,11 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
   const { user, profile, subscription } = userData;
 
   // 4. Fetch Resume Count (in parallel potentially, or after user data)
-  const resumeCount = await getResumeCountForUser(targetUserId);
+  // 4. Fetch Resume Count & List (can run in parallel)
+  const [resumeCount, resumes] = await Promise.all([
+      getResumeCountForUser(targetUserId),
+      getResumesForUser(targetUserId)
+  ]);
 
   return (
     <div className="container py-8 space-y-6">
@@ -154,6 +159,17 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
               <p className="text-muted-foreground italic">No subscription data found for this user.</p>
             )}
           </CardContent>
+        </Card>
+
+        {/* Resume List Card */}
+        <Card className="lg:col-span-3">
+           <CardHeader>
+            <CardTitle>Resumes ({resumeCount})</CardTitle>
+             <CardDescription>List of resumes created by this user.</CardDescription>
+          </CardHeader>
+           <CardContent>
+             <UserResumeList resumes={resumes} />
+           </CardContent>
         </Card>
       </div>
     </div>
