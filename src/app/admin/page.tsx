@@ -1,5 +1,4 @@
-import { redirect } from "next/navigation";
-import { getUserId } from "../auth/login/actions";
+// Removed getUserId import
 import UsersTable from "./components/users-table";
 import {
     getTotalUserCount,
@@ -7,20 +6,15 @@ import {
     getTotalSubscriptionCount,
     getBaseResumeCount,
     getTailoredResumeCount,
-    getProUserCount // Import new action
+    getProUserCount, // Import new action
+    ensureAdmin // Import the new admin check function
 } from "./actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, CreditCard, FileCheck, FilePlus, Star } from "lucide-react"; // Import Star, remove UsersRound
 
 export default async function AdminPage() {
-    // Get the current user ID
-    const userId = await getUserId();
-
-    // Check if user is authenticated and is the admin
-    if (!userId || userId !== process.env.ADMIN_ID) {
-        // Redirect to home page if not admin
-        redirect('/');
-    }
+    // Ensure the current user is an admin, redirect if not
+    await ensureAdmin();
 
     // Fetch all stats concurrently
     const [

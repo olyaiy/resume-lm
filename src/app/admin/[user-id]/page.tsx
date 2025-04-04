@@ -1,7 +1,7 @@
-import { redirect } from 'next/navigation';
+// Removed unused redirect import
 import Link from 'next/link';
-import { getUserId } from '@/app/auth/login/actions';
-import { getUserDetailsById, getResumeCountForUser, getResumesForUser } from '../actions'; // Import getResumesForUser
+// Removed getUserId import
+import { getUserDetailsById, getResumeCountForUser, getResumesForUser, ensureAdmin } from '../actions'; // Import getResumesForUser and ensureAdmin
 import UserResumeList from '../components/user-resume-list'; // Import the new component
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -49,11 +49,8 @@ function JsonDisplay({ data }: { data: unknown }) { // Changed any to unknown
 export default async function AdminUserDetailPage({ params }: AdminUserDetailPageProps) {
   const targetUserId = (await params)['user-id'];
 
-  // 1. Admin Check
-  const currentUserId = await getUserId();
-  if (!currentUserId || currentUserId !== process.env.ADMIN_ID) {
-    redirect('/');
-  }
+  // 1. Admin Check - Ensure the current user is an admin
+  await ensureAdmin();
 
   // 2. Fetch User Data
   const userData = await getUserDetailsById(targetUserId);

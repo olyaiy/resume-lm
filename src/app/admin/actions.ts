@@ -1,7 +1,7 @@
 'use server';
 
-import { createServiceClient } from "@/utils/supabase/server";
-
+import { createClient, createServiceClient } from "@/utils/supabase/server"; // Import createClient as well
+import { redirect } from 'next/navigation'; // Import redirect
 export async function getAllUsers() {
   const supabase = await createServiceClient();
   const allUsers = [];
@@ -40,6 +40,54 @@ export async function getAllUsers() {
   }
 
   return allUsers;
+}
+
+/**
+ * Checks if the currently authenticated user is an admin.
+ * Fetches the user ID using the server client and checks the 'admins' table.
+ * @returns {Promise<boolean>} True if the user is an admin, false otherwise.
+ */
+export async function checkAdminStatus(): Promise<boolean> {
+  // Use the regular client that can read user session cookies
+  const supabase = await createClient();
+
+  // Get the current user session
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    console.error('Admin Check: Error fetching user or user not authenticated.', authError);
+    return false; // Not authenticated, definitely not admin
+  }
+
+  // Check the admins table for this user
+  const { data: adminData, error: dbError } = await supabase
+    .from('admins')
+    .select('is_admin')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  // Detailed logging for RLS debugging
+  if (dbError) {
+      console.error(`Admin Check DB Error: Failed to query admins table for user ${user.id}. RLS issue?`, { code: dbError.code, message: dbError.message, details: dbError.details, hint: dbError.hint });
+      return false; // Error occurred, assume not admin for safety
+  } else {
+      console.log(`Admin Check DB Success: Query for user ${user.id} returned:`, adminData);
+  }
+
+  // If adminData exists and is_admin is true, return true
+  return adminData?.is_admin === true;
+}
+
+/**
+ * Ensures the current user is an admin, otherwise redirects.
+ * Calls checkAdminStatus and redirects to '/' if the user is not an admin.
+ */
+export async function ensureAdmin() {
+    const isAdmin = await checkAdminStatus();
+    if (!isAdmin) {
+        redirect('/');
+    }
+    // If isAdmin is true, execution continues normally.
 }
 
 export async function getUsersWithProfilesAndSubscriptions() {
