@@ -52,8 +52,14 @@ function ModelIcon({ provider, size = 24 }: { provider: ServiceName; size?: numb
 
 const AI_MODELS: AIModel[] = [
   { 
-    id: 'claude-3-sonnet-20240229', 
-    name: 'Claude 3.5 Sonnet (Recommended)', 
+    id: 'claude-3-7-sonnet-20250219', 
+    name: 'Claude 3.7 Sonnet', 
+    shortName: 'Sonnet 3.7',
+    provider: 'anthropic'
+  },
+  { 
+    id: 'claude-3-5-sonnet-20241022', 
+    name: 'Claude 3.5 Sonnet', 
     shortName: 'Sonnet 3.5',
     provider: 'anthropic'
   },
@@ -67,6 +73,12 @@ const AI_MODELS: AIModel[] = [
     id: 'gpt-4o', 
     name: 'GPT-4o', 
     shortName: 'GPT 4o',
+    provider: 'openai'
+  },
+  { 
+    id: 'gpt-4.1', 
+    name: 'GPT 4.1', 
+    shortName: 'GPT 4.1',
     provider: 'openai'
   },
   { 
