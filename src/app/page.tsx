@@ -1,5 +1,7 @@
 import { Background } from "@/components/landing/Background";
+import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
+
 
 export default function Page() {
   return (
@@ -12,6 +14,9 @@ export default function Page() {
         {/* Hero Section */}
         <Hero />
       </div>
+      
+      {/* Feature Highlights Section */}
+      <FeatureHighlights />
     </main>
   );
 }
