@@ -1,3 +1,5 @@
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+
 export function Hero() {
   return (
     <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16">
@@ -32,6 +34,54 @@ export function Hero() {
           <span className="px-3 py-1 rounded-full bg-white/30 backdrop-blur-sm text-sm border border-white/40">ATS-Optimized</span>
           <span className="px-3 py-1 rounded-full bg-white/30 backdrop-blur-sm text-sm border border-white/40">100% Free</span>
           <span className="px-3 py-1 rounded-full bg-white/30 backdrop-blur-sm text-sm border border-white/40">Privacy-First</span>
+        </div>
+        
+        {/* Social proof section - Enhanced with Shadcn Avatar */}
+        <div className="relative group mt-8">
+          {/* Background blur effect that animates on hover */}
+          <div className="absolute -inset-4 bg-gradient-to-r from-purple-600/5 to-indigo-600/5 rounded-xl blur-xl group-hover:blur-2xl transition-all duration-500 opacity-0 group-hover:opacity-100"></div>
+          
+          {/* Main content container */}
+          <div className="relative flex items-center p-5 rounded-xl bg-white/30 backdrop-blur-md border border-white/40 shadow-lg transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-xl overflow-hidden">
+            {/* Decorative elements */}
+            <div className="absolute -right-8 -top-8 w-24 h-24 rounded-full bg-gradient-to-br from-purple-600/20 to-indigo-600/20 blur-md"></div>
+            <div className="absolute -left-16 -bottom-16 w-32 h-32 rounded-full bg-gradient-to-tr from-indigo-600/10 to-purple-600/10 blur-lg"></div>
+            
+            {/* Stats highlight with gradient */}
+            <div className="flex-shrink-0 mr-5 relative">
+              <div className="flex items-center justify-center h-16 w-16 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-600/20 shadow-inner overflow-hidden">
+                <span className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">500+</span>
+              </div>
+            </div>
+            
+            {/* Text content */}
+            <div className="flex-1">
+              <h3 className="font-semibold text-base">Join our growing community</h3>
+              <p className="text-sm text-muted-foreground">Trusted by over 500 tech professionals</p>
+              
+              {/* Shadcn Avatar stack */}
+              <div className="flex items-center mt-3">
+                <div className="flex -space-x-2 mr-3">
+                  <Avatar className="h-7 w-7 border-2 border-background">
+                    <AvatarFallback className="bg-gradient-to-br from-purple-500 to-indigo-500 text-white text-xs">JD</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="h-7 w-7 border-2 border-background">
+                    <AvatarFallback className="bg-gradient-to-br from-pink-500 to-rose-500 text-white text-xs">SR</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="h-7 w-7 border-2 border-background">
+                    <AvatarFallback className="bg-gradient-to-br from-teal-500 to-cyan-500 text-white text-xs">KL</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="h-7 w-7 border-2 border-background">
+                    <AvatarFallback className="bg-gradient-to-br from-amber-500 to-orange-500 text-white text-xs">MP</AvatarFallback>
+                  </Avatar>
+                  <Avatar className="h-7 w-7 border-2 border-background">
+                    <AvatarFallback className="bg-white text-xs text-indigo-600 font-medium">496+</AvatarFallback>
+                  </Avatar>
+                </div>
+                <span className="text-xs text-muted-foreground">Active this month</span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
       
