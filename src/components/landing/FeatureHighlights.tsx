@@ -253,15 +253,10 @@ const FeatureHighlights = () => {
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
               <div className="relative rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer shadow-2xl transform-gpu">
-                {/* Enhanced 3D effect with multiple layers */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/60 to-white/20 opacity-70 z-10"></div>
-                <div className={`absolute -inset-0.5 bg-gradient-to-tr ${feature.gradient} opacity-20 blur-sm z-0`}></div>
-                
-                {/* Image frame with enhanced lighting effects */}
+                {/* Clean container with no overlays */}
                 <div className="relative bg-white/40 backdrop-blur-md border border-white/60 shadow-xl overflow-hidden p-1 z-20">
-                  {/* The screenshot with enhanced container */}
+                  {/* The screenshot with clean display */}
                   <div className="relative rounded-lg overflow-hidden shadow-inner" style={{ aspectRatio: '3/2' }}>
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/0 z-10"></div>
                     <Image 
                       src={feature.image} 
                       alt={feature.title} 
@@ -271,12 +266,6 @@ const FeatureHighlights = () => {
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 65vw, 900px"
                       priority
                     />
-                    
-                    {/* Enhanced hover effect with gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-white/0 to-white/0 group-hover:from-white/0 group-hover:to-white/20 transition-all duration-700 z-10"></div>
-                    
-                    {/* Reflection effect */}
-                    <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent transform -skew-y-6 z-20"></div>
                   </div>
                 </div>
               </div>
@@ -296,7 +285,7 @@ const FeatureHighlights = () => {
         <h3 className="text-xl text-muted-foreground mb-8">Trusted by professionals from companies like</h3>
         <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 max-w-4xl mx-auto opacity-80">
           {companies.map((company, index) => (
-            <div key={index} className="w-24 h-12 relative grayscale hover:grayscale-0 transition-all duration-300">
+            <div key={index} className="w-24 h-12 relative transition-all duration-300">
               <Image 
                 src={company.logo} 
                 alt={company.name} 
