@@ -180,7 +180,7 @@ const FeatureHighlights = () => {
       </div>
       
       {/* Enhanced features display */}
-      <div className="max-w-7xl mx-auto space-y-32 md:space-y-40">
+      <div className="max-w-7xl mx-auto space-y-24 md:space-y-40">
         {features.map((feature, index) => (
           <motion.div 
             key={index}
@@ -188,10 +188,10 @@ const FeatureHighlights = () => {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-10 lg:gap-20`}
+            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-10 lg:gap-10`}
           >
             {/* Enhanced feature description */}
-            <div className="w-full lg:w-2/6 space-y-6">
+            <div className="w-full lg:w-2/6 space-y-8">
               <motion.div variants={itemVariants}>
                 <div className={`inline-block px-4 py-1 rounded-full bg-gradient-to-r ${feature.lightGradient} ${feature.borderColor} ${feature.textColor} text-sm font-medium mb-3`}>
                   <div className="flex items-center">
@@ -208,7 +208,7 @@ const FeatureHighlights = () => {
               </motion.div>
 
               {/* Feature benefits list */}
-              <motion.div variants={itemVariants} className="space-y-2 mt-4">
+              <motion.div variants={itemVariants} className="space-y-2 ">
                 {feature.benefits.map((benefit, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <CheckCircle2 className={`w-5 h-5 ${feature.textColor} flex-shrink-0 mt-0.5`} />
@@ -218,7 +218,7 @@ const FeatureHighlights = () => {
               </motion.div>
 
               {/* Testimonial card */}
-              <motion.div 
+              {/* <motion.div 
                 variants={itemVariants}
                 className="mt-6 bg-white/40 backdrop-blur-sm rounded-xl p-4 border border-white/40"
               >
@@ -231,10 +231,10 @@ const FeatureHighlights = () => {
                 <p className={`text-sm font-medium ${feature.textColor} mt-2`}>
                   {feature.testimonial.author}
                 </p>
-              </motion.div>
+              </motion.div> */}
 
               {/* Feature-specific CTA */}
-              <motion.div variants={itemVariants} className="pt-4">
+              <motion.div variants={itemVariants} className="pt-2">
                 <Link 
                   href="/auth/register" 
                   className={`inline-flex items-center gap-1 px-5 py-2 rounded-lg bg-gradient-to-r ${feature.gradient} text-white font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}
@@ -252,20 +252,21 @@ const FeatureHighlights = () => {
               whileHover={{ scale: 1.03 }}
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
-              <div className="relative rounded-2xl overflow-hidden transition-all duration-500 shadow-2xl transform-gpu">
+              <div className="relative rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer shadow-2xl transform-gpu">
                 {/* Enhanced 3D effect with multiple layers */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-white/60 to-white/20 opacity-70 z-10"></div>
                 <div className={`absolute -inset-0.5 bg-gradient-to-tr ${feature.gradient} opacity-20 blur-sm z-0`}></div>
                 
                 {/* Image frame with enhanced lighting effects */}
-                <div className="relative bg-white/40 backdrop-blur-md border border-white/60 shadow-xl overflow-hidden p-3 z-20">
+                <div className="relative bg-white/40 backdrop-blur-md border border-white/60 shadow-xl overflow-hidden p-1 z-20">
                   {/* The screenshot with enhanced container */}
-                  <div className="relative aspect-video rounded-lg overflow-hidden shadow-inner">
+                  <div className="relative rounded-lg overflow-hidden shadow-inner" style={{ aspectRatio: '3/2' }}>
                     <div className="absolute inset-0 bg-gradient-to-b from-black/5 to-black/0 z-10"></div>
                     <Image 
                       src={feature.image} 
                       alt={feature.title} 
                       fill
+                      quality={100}
                       className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
                       sizes="(max-width: 768px) 100vw, (max-width: 1200px) 65vw, 900px"
                       priority
@@ -286,35 +287,25 @@ const FeatureHighlights = () => {
       
       {/* Social proof section - Trusted by companies */}
       <motion.div 
-        className="mt-28 py-16 relative"
+        className="mt-24 text-center"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-100px" }}
         transition={{ duration: 0.8 }}
       >
-        {/* Background effect */}
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-50/30 via-white/0 to-blue-50/30 rounded-3xl"></div>
-        
-        <div className="relative text-center">
-          <h3 className="text-xl text-muted-foreground mb-10">Trusted by professionals from companies like</h3>
-          <div className="flex flex-wrap justify-center items-center gap-10 md:gap-16 max-w-5xl mx-auto">
-            {companies.map((company, index) => (
-              <motion.div 
-                key={index} 
-                className="w-28 h-16 md:w-32 md:h-20 relative grayscale hover:grayscale-0 transition-all duration-500"
-                whileHover={{ scale: 1.05 }}
-                transition={{ duration: 0.3 }}
-              >
-                <Image 
-                  src={company.logo} 
-                  alt={company.name} 
-                  fill
-                  className="object-contain" 
-                  sizes="(max-width: 768px) 120px, 160px"
-                />
-              </motion.div>
-            ))}
-          </div>
+        <h3 className="text-xl text-muted-foreground mb-8">Trusted by professionals from companies like</h3>
+        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 max-w-4xl mx-auto opacity-80">
+          {companies.map((company, index) => (
+            <div key={index} className="w-24 h-12 relative grayscale hover:grayscale-0 transition-all duration-300">
+              <Image 
+                src={company.logo} 
+                alt={company.name} 
+                fill
+                className="object-contain" 
+                sizes="100px"
+              />
+            </div>
+          ))}
         </div>
       </motion.div>
       
