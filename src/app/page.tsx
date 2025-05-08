@@ -3,6 +3,7 @@ import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { VideoShowcase } from "@/components/landing/VideoShowcase";
+import { CreatorStory } from "@/components/landing/creator-story";
 
 
 export default function Page() {
@@ -22,6 +23,9 @@ export default function Page() {
       
       {/* Feature Highlights Section */}
       <FeatureHighlights />
+      
+      {/* Creator Story Section */}
+      <CreatorStory />
       
       {/* Pricing Plans Section */}
       <PricingPlans />
