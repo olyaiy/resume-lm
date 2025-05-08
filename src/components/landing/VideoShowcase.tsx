@@ -1,6 +1,6 @@
 "use client"
 import { useRef, useState, useEffect } from "react"
-import { Play, Pause, Maximize2 } from "lucide-react"
+import { Play, Maximize2 } from "lucide-react"
 
 export function VideoShowcase() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -78,27 +78,26 @@ export function VideoShowcase() {
                 ref={videoRef}
                 className="w-full h-full object-cover"
                 src="/ResumeLM.mp4"
+                poster="/video-thumbnail.jpg"
                 onEnded={() => setIsPlaying(false)}
               />
               
               {/* Overlay gradient effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
               
-              {/* Play/pause button - now hides when playing, shows on hover or when paused */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  togglePlay();
-                }}
-                className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-md border border-white/40 text-white transition-all duration-300 hover:scale-110 hover:bg-white/40 group-hover:opacity-100 ${isPlaying ? 'opacity-0' : 'opacity-90'} z-20`}
-                aria-label={isPlaying ? "Pause video" : "Play video"}
-              >
-                {isPlaying ? (
-                  <Pause className="w-8 h-8" />
-                ) : (
+              {/* Play button - Only shows when video is paused */}
+              {!isPlaying && (
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    togglePlay();
+                  }}
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-md border border-white/40 text-white transition-all duration-300 hover:scale-110 hover:bg-white/40 z-20"
+                  aria-label="Play video"
+                >
                   <Play className="w-8 h-8 ml-1" />
-                )}
-              </button>
+                </button>
+              )}
               
               {/* Controls overlay - bottom */}
               <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
