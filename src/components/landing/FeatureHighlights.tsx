@@ -2,93 +2,13 @@
 import React from 'react';
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { CheckCircle2, ChevronRight, Star } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
+import { SplitContent } from '../ui/split-content';
 
 const FeatureHighlights = () => {
   // Enhanced features with metrics, testimonials, and benefit-focused language
-  const features = [
-    {
-      title: "Get 3x More Interviews",
-      description: "Our AI analyzes thousands of successful resumes to give you personalized recommendations that highlight your strengths and match what employers are looking for.",
-      image: "/images/ss1.webp",
-      gradient: "from-purple-600 to-indigo-600",
-      lightGradient: "from-purple-600/10 to-indigo-600/10",
-      borderColor: "border-purple-200/40",
-      textColor: "text-purple-700",
-      metrics: "86% of users report higher response rates",
-      benefits: [
-        "Smart content suggestions based on your experience",
-        "Keyword optimization for ATS systems",
-        "Industry-specific recommendations"
-      ],
-      testimonial: {
-        quote: "I got interviews at 3 top tech companies after using ResumeLM to optimize my resume.",
-        author: "Michael K., Software Engineer",
-        rating: 5
-      }
-    },
-    {
-      title: "Pass Resume Screening Systems",
-      description: "Stop getting rejected by ATS. Get real-time feedback and actionable insights with our resume scoring system that analyzes what's missing from your application.",
-      image: "/images/ss2.webp",
-      gradient: "from-teal-600 to-cyan-600",
-      lightGradient: "from-teal-600/10 to-cyan-600/10",
-      borderColor: "border-teal-200/40",
-      textColor: "text-teal-700",
-      metrics: "91% improvement in ATS compatibility scores",
-      benefits: [
-        "Real-time ATS compatibility checks",
-        "Keyword gap analysis for job descriptions",
-        "Format optimization for parsing accuracy"
-      ],
-      testimonial: {
-        quote: "ResumeLM showed me exactly why my resume wasn't getting through. Fixed it in minutes!",
-        author: "Sarah L., Marketing Director",
-        rating: 5
-      }
-    },
-    {
-      title: "Save Hours on Cover Letters",
-      description: "Create personalized cover letters in seconds that highlight your relevant experience and demonstrate why you're the perfect fit for each specific role.",
-      image: "/images/ss3.webp",
-      gradient: "from-pink-600 to-rose-600",
-      lightGradient: "from-pink-600/10 to-rose-600/10",
-      borderColor: "border-pink-200/40",
-      textColor: "text-pink-700",
-      metrics: "Average 28 minutes saved per application",
-      benefits: [
-        "Tailored to match job requirements",
-        "Professional tone and structure",
-        "Highlights relevant achievements"
-      ],
-      testimonial: {
-        quote: "I applied to 12 jobs in one afternoon with customized cover letters for each one.",
-        author: "Alex J., Project Manager",
-        rating: 5
-      }
-    },
-    {
-      title: "Manage Your Job Search Efficiently",
-      description: "Keep track of all your applications, versions, and feedback in one intuitive dashboard designed to streamline your entire job search process.",
-      image: "/images/ss4.webp",
-      gradient: "from-emerald-600 to-green-600",
-      lightGradient: "from-emerald-600/10 to-green-600/10",
-      borderColor: "border-emerald-200/40",
-      textColor: "text-emerald-700",
-      metrics: "Users apply to 40% more relevant positions",
-      benefits: [
-        "Centralized resume version control",
-        "Application status tracking",
-        "Performance analytics across applications"
-      ],
-      testimonial: {
-        quote: "The dashboard completely transformed how I organize my job search. So much less stress!",
-        author: "Jamie T., Data Analyst",
-        rating: 5
-      }
-    },
-  ];
+
 
   // Trusted by logos
   const companies = [
@@ -179,99 +99,67 @@ const FeatureHighlights = () => {
         </motion.div>
       </div>
       
-      {/* Enhanced features display */}
-      <div className="max-w-7xl mx-auto space-y-24 md:space-y-40">
-        {features.map((feature, index) => (
-          <motion.div 
-            key={index}
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`flex flex-col ${index % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'} items-center gap-10 lg:gap-10`}
-          >
-            {/* Enhanced feature description */}
-            <div className="w-full lg:w-2/6 space-y-8">
-              <motion.div variants={itemVariants}>
-                <div className={`inline-block px-4 py-1 rounded-full bg-gradient-to-r ${feature.lightGradient} ${feature.borderColor} ${feature.textColor} text-sm font-medium mb-3`}>
-                  <div className="flex items-center">
-                    <span className="mr-2">{feature.metrics}</span>
-                    <Star className="w-3.5 h-3.5 fill-current" />
-                  </div>
-                </div>
-                <h3 className={`text-2xl md:text-3xl font-semibold bg-gradient-to-r ${feature.gradient} bg-clip-text text-transparent`}>
-                  {feature.title}
-                </h3>
-                <p className="text-muted-foreground text-lg mt-3">
-                  {feature.description}
-                </p>
-              </motion.div>
-
-              {/* Feature benefits list */}
-              <motion.div variants={itemVariants} className="space-y-2 ">
-                {feature.benefits.map((benefit, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <CheckCircle2 className={`w-5 h-5 ${feature.textColor} flex-shrink-0 mt-0.5`} />
-                    <span className="text-sm md:text-base">{benefit}</span>
-                  </div>
-                ))}
-              </motion.div>
-
-              {/* Testimonial card */}
-              {/* <motion.div 
-                variants={itemVariants}
-                className="mt-6 bg-white/40 backdrop-blur-sm rounded-xl p-4 border border-white/40"
-              >
-                <div className="flex gap-1 mb-2">
-                  {Array(feature.testimonial.rating).fill(0).map((_, i) => (
-                    <Star key={i} className={`w-4 h-4 fill-current ${feature.textColor}`} />
-                  ))}
-                </div>
-                <p className="text-sm italic">&ldquo;{feature.testimonial.quote}&rdquo;</p>
-                <p className={`text-sm font-medium ${feature.textColor} mt-2`}>
-                  {feature.testimonial.author}
-                </p>
-              </motion.div> */}
-
-              {/* Feature-specific CTA */}
-              <motion.div variants={itemVariants} className="pt-2">
-                <Link 
-                  href="/auth/register" 
-                  className={`inline-flex items-center gap-1 px-5 py-2 rounded-lg bg-gradient-to-r ${feature.gradient} text-white font-medium transition-all duration-300 hover:shadow-lg hover:-translate-y-0.5`}
-                >
-                  Try this feature
-                  <ChevronRight className="w-4 h-4" />
-                </Link>
-              </motion.div>
-            </div>
+      {/* Enhanced Features Section with improved card styling */}
+      <div className="flex flex-col gap-24 py-24 relative" id="features">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-50/30 to-transparent"></div>
             
-            {/* Enhanced feature image with 3D effect */}
-            <motion.div 
-              variants={itemVariants}
-              className="w-full lg:w-4/6 group"
-              whileHover={{ scale: 1.03 }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            >
-              <div className="relative rounded-2xl overflow-hidden transition-all duration-200 cursor-pointer shadow-2xl transform-gpu">
-                {/* Clean container with no overlays */}
-                <div className="relative bg-white/40 backdrop-blur-md border border-white/60 shadow-xl overflow-hidden p-1 z-20">
-                  {/* The screenshot with clean display */}
-                  <div className="relative rounded-lg overflow-hidden shadow-inner" style={{ aspectRatio: '3/2' }}>
-                    <Image 
-                      src={feature.image} 
-                      alt={feature.title} 
-                      fill
-                      quality={100}
-                      className="object-cover object-top transition-transform duration-700 group-hover:scale-110"
-                      sizes="(max-width: 768px) 100vw, (max-width: 1200px) 65vw, 900px"
-                      priority
-                    />
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        ))}
+            <SplitContent
+              imageSrc="/SS Chat.png"
+              heading="AI-Powered Resume Assistant"
+              description="Get real-time feedback and suggestions from our advanced AI assistant. Optimize your resume content, improve your bullet points, and ensure your skills stand out to recruiters and ATS systems."
+              imageOnLeft={false}
+              imageOverflowRight={true}
+              badgeText="90% more effective bullets"
+              badgeGradient="from-purple-600/10 to-indigo-600/10"
+              bulletPoints={[
+                "Smart content suggestions based on your experience",
+                "Real-time feedback on your resume",
+                "Industry-specific optimization"
+              ]}
+            />
+
+            <SplitContent
+              imageSrc="/Dashboard Image.png"
+              heading="Beautiful Resume Dashboard"
+              description="Manage all your resumes in one place with our intuitive dashboard. Create base resumes, generate tailored versions for specific jobs, and track your application progress with ease."
+              imageOnLeft={true}
+              badgeText="Organize your job search"
+              badgeGradient="from-teal-600/10 to-cyan-600/10"
+              bulletPoints={[
+                "Centralized resume management",
+                "Version control for all your resumes",
+                "Track application status"
+              ]}
+            />
+
+            <SplitContent
+              imageSrc="/SS Score.png"
+              heading="Resume Performance Scoring"
+              description="Get detailed insights into your resume's effectiveness with our comprehensive scoring system. Track key metrics, identify areas for improvement, and optimize your resume to stand out to employers and ATS systems."
+              imageOnLeft={false}
+              imageOverflowRight={true}
+              badgeText="3x higher response rates"
+              badgeGradient="from-pink-600/10 to-rose-600/10"
+              bulletPoints={[
+                "ATS compatibility scoring",
+                "Keyword optimization insights",
+                "Detailed improvement recommendations"
+              ]}
+            />
+
+            <SplitContent
+              imageSrc="/SS Cover Letter.png"
+              heading="AI Cover Letter Generator"
+              description="Create compelling, personalized cover letters in minutes with our AI-powered generator. Tailor your message to specific job opportunities while maintaining a professional and engaging tone that captures attention."
+              imageOnLeft={true}
+              badgeText="Save 30+ minutes per application"
+              badgeGradient="from-emerald-600/10 to-green-600/10"
+              bulletPoints={[
+                "Tailored to match job requirements",
+                "Professional tone and structure",
+                "Highlights your relevant achievements"
+              ]}
+            />
       </div>
       
       {/* Social proof section - Trusted by companies */}

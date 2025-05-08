@@ -17,6 +17,8 @@ export default function Page() {
       
       {/* Feature Highlights Section */}
       <FeatureHighlights />
+      
+      
     </main>
   );
 }
