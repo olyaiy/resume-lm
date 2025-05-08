@@ -1,6 +1,8 @@
 import { Background } from "@/components/landing/Background";
 import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
+import { PricingPlans } from "@/components/landing/PricingPlans";
+import { VideoShowcase } from "@/components/landing/VideoShowcase";
 
 
 export default function Page() {
@@ -15,9 +17,14 @@ export default function Page() {
         <Hero />
       </div>
       
+      {/* Video Showcase Section */}
+      <VideoShowcase />
+      
       {/* Feature Highlights Section */}
       <FeatureHighlights />
       
+      {/* Pricing Plans Section */}
+      <PricingPlans />
       
     </main>
   );

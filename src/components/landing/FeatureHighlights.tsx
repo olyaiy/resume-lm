@@ -21,7 +21,7 @@ const FeatureHighlights = () => {
 
   // Statistics counters
   const stats = [
-    { value: "50,000+", label: "Resumes Created" },
+    { value: "500+", label: "Resumes Created" },
     { value: "89%", label: "Interview Rate" },
     { value: "4.9/5", label: "User Rating" },
     { value: "15 min", label: "Average Setup Time" },
@@ -57,46 +57,117 @@ const FeatureHighlights = () => {
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-tr from-teal-200/30 to-cyan-200/30 blur-3xl"></div>
       <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-pink-200/20 to-rose-200/20 blur-3xl"></div>
  
-      {/* Section header with enhanced value proposition */}
-      <div className="text-center mb-16 max-w-3xl mx-auto">
+      {/* Redesigned heading section with enhanced visual appeal */}
+      <div className="relative z-10 max-w-5xl mx-auto">
+        {/* Decorative elements specific to the heading */}
+        <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-violet-200/15 to-indigo-200/15 blur-3xl -z-10"></div>
+        <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-gradient-to-br from-cyan-200/20 to-teal-200/20 blur-3xl -z-10"></div>
+        <div className="absolute -bottom-10 -left-20 w-72 h-72 rounded-full bg-gradient-to-tr from-rose-200/20 to-pink-200/20 blur-3xl -z-10"></div>
+        
+        {/* Leading badges - multi-color approach inspired by Hero.tsx */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+          className="flex justify-center gap-3 mb-4"
+        >
+          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-200/40 text-sm text-purple-700">
+            AI-Powered
+          </span>
+          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-teal-600/10 to-cyan-600/10 border border-teal-200/40 text-sm text-teal-700">
+            ATS-Optimized
+          </span>
+          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-600/10 to-green-600/10 border border-emerald-200/40 text-sm text-emerald-700">
+            100% Free
+          </span>
+        </motion.div>
+        
+        {/* Heading with enhanced typography */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+          className="text-center mb-4"
         >
-          <h2 className="text-3xl md:text-5xl font-bold mb-4">
-            <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-              The Resume Builder That Gets You Hired
+          <h2 className="text-4xl md:text-6xl font-bold leading-tight tracking-tight">
+            <span className="inline-block bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+              The Resume Builder
             </span>
+            <br />
+            <motion.span 
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.5 }}
+              className="inline-block mt-1 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent"
+            >
+              That Gets You Hired
+            </motion.span>
           </h2>
-          <p className="text-lg md:text-xl text-muted-foreground mb-8">
-            Smart AI tools that optimize your resume for each job, increasing your interview chances by up to 3x
-          </p>
+          
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mt-3"
+          >
+            Smart AI tools that optimize your resume for each job, increasing your interview chances by up to <span className="font-semibold text-teal-700">3x</span>
+          </motion.p>
         </motion.div>
 
-        {/* Statistics counter section */}
+        {/* Enhanced statistics with animated reveal - no cards, just colorful inline stats */}
         <motion.div 
-          className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-5 max-w-4xl mx-auto mt-10 mb-12"
+          className="flex flex-wrap justify-center gap-8 md:gap-12 mx-auto mt-8"
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, margin: "-100px" }}
         >
-          {stats.map((stat, index) => (
-            <motion.div 
-              key={index}
-              variants={itemVariants}
-              className="rounded-xl bg-white/30 backdrop-blur-sm border border-white/40 p-4 md:p-6"
-            >
-              <p className="text-2xl md:text-4xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                {stat.value}
-              </p>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">
-                {stat.label}
-              </p>
-            </motion.div>
-          ))}
+          {stats.map((stat, index) => {
+            // Different gradient colors for each stat
+            const gradients = [
+              "from-purple-600 to-indigo-600",
+              "from-teal-600 to-cyan-600", 
+              "from-pink-600 to-rose-600",
+              "from-emerald-600 to-green-600"
+            ];
+            
+            const textColors = [
+              "text-purple-700",
+              "text-teal-700",
+              "text-pink-700", 
+              "text-emerald-700"
+            ];
+            
+            return (
+              <motion.div 
+                key={index}
+                variants={itemVariants}
+                className="text-center relative"
+              >
+                <motion.p 
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.5, delay: 0.1 * index }}
+                  className="text-3xl md:text-4xl font-bold"
+                >
+                  <span className={`bg-gradient-to-r ${gradients[index]} bg-clip-text text-transparent`}>
+                    {stat.value}
+                  </span>
+                </motion.p>
+                <p className={`text-sm md:text-base ${textColors[index]} mt-1`}>
+                  {stat.label}
+                </p>
+              </motion.div>
+            );
+          })}
         </motion.div>
+        
+        {/* Colorful separators */}
+        <div className="flex justify-center my-12">
+          <div className="w-16 h-[3px] bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full mx-1"></div>
+          <div className="w-16 h-[3px] bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mx-1"></div>
+          <div className="w-16 h-[3px] bg-gradient-to-r from-pink-500 to-rose-500 rounded-full mx-1"></div>
+        </div>
       </div>
       
       {/* Enhanced Features Section with improved card styling */}
