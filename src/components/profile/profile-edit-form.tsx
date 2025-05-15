@@ -33,6 +33,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { AlertTriangle } from "lucide-react";
 import { importResume, updateProfile } from "@/utils/actions/profiles/actions";
+import { cn } from "@/lib/utils";
+import pdfToText from "react-pdftotext";
 
 interface ProfileEditFormProps {
   profile: Profile;
@@ -48,6 +50,8 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   const [textImportContent, setTextImportContent] = useState("");
   const [isProcessingResume, setIsProcessingResume] = useState(false);
   const [apiKeyError, setApiKeyError] = useState("");
+  const [isResumeDragging, setIsResumeDragging] = useState(false);
+  const [isTextImportDragging, setIsTextImportDragging] = useState(false);
   const router = useRouter();
 
   // Sync with server state when initialProfile changes
@@ -259,6 +263,58 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
     }
   };
 
+  // Add drag event handlers
+  const handleDrag = (e: React.DragEvent, isDraggingState: React.Dispatch<React.SetStateAction<boolean>>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      isDraggingState(true);
+    } else if (e.type === "dragleave") {
+      isDraggingState(false);
+    }
+  };
+
+  const handleDrop = async (e: React.DragEvent, setContent: React.Dispatch<React.SetStateAction<string>>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsResumeDragging(false);
+    setIsTextImportDragging(false);
+
+    const files = Array.from(e.dataTransfer.files);
+    const pdfFile = files.find(file => file.type === "application/pdf");
+
+    if (pdfFile) {
+      try {
+        const text = await pdfToText(pdfFile);
+        setContent(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        console.error("PDF processing error:", error);
+        toast.error("Failed to extract text from the PDF. Please try again or paste the content manually.", {
+          position: "bottom-right",
+        });
+      }
+    } else {
+      toast.error("Please drop a PDF file.", {
+        position: "bottom-right",
+      });
+    }
+  };
+
+  const handleFileInput = async (e: React.ChangeEvent<HTMLInputElement>, setContent: React.Dispatch<React.SetStateAction<string>>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type === "application/pdf") {
+      try {
+        const text = await pdfToText(file);
+        setContent(prev => prev + (prev ? "\n\n" : "") + text);
+      } catch (error) {
+        console.error("PDF processing error:", error);
+        toast.error("Failed to extract text from the PDF. Please try again or paste the content manually.", {
+          position: "bottom-right",
+        });
+      }
+    }
+  };
+
   return (
     <div className="relative mx-auto">
       
@@ -410,12 +466,47 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                      <Textarea
-                        value={resumeContent}
-                        onChange={(e) => setResumeContent(e.target.value)}
-                        placeholder="Paste your resume content here..."
-                        className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
-                      />
+                      <div className="space-y-4">
+                        <label
+                          onDragEnter={(e) => handleDrag(e, setIsResumeDragging)}
+                          onDragLeave={(e) => handleDrag(e, setIsResumeDragging)}
+                          onDragOver={(e) => handleDrag(e, setIsResumeDragging)}
+                          onDrop={(e) => handleDrop(e, setResumeContent)}
+                          className={cn(
+                            "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
+                            isResumeDragging
+                              ? "border-violet-500 bg-violet-50/50"
+                              : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
+                          )}
+                        >
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="application/pdf"
+                            onChange={(e) => handleFileInput(e, setResumeContent)}
+                          />
+                          <Upload className="w-10 h-10 text-violet-500 group-hover:scale-110 transition-transform duration-200" />
+                          <div className="text-center">
+                            <p className="text-sm font-medium text-foreground">
+                              Drop your PDF resume here
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              or click to browse files
+                            </p>
+                          </div>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute -top-3 left-3 bg-white px-2 text-sm text-muted-foreground">
+                            Or paste your resume text here
+                          </div>
+                          <Textarea
+                            value={resumeContent}
+                            onChange={(e) => setResumeContent(e.target.value)}
+                            placeholder="Paste your resume content here..."
+                            className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+                          />
+                        </div>
+                      </div>
                     </div>
                     {apiKeyError && (
                       <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
@@ -503,12 +594,47 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                       </DialogDescription>
                     </DialogHeader>
                     <div className="grid gap-4 py-4">
-                      <Textarea
-                        value={textImportContent}
-                        onChange={(e) => setTextImportContent(e.target.value)}
-                        placeholder="Paste your text content here..."
-                        className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300"
-                      />
+                      <div className="space-y-4">
+                        <label
+                          onDragEnter={(e) => handleDrag(e, setIsTextImportDragging)}
+                          onDragLeave={(e) => handleDrag(e, setIsTextImportDragging)}
+                          onDragOver={(e) => handleDrag(e, setIsTextImportDragging)}
+                          onDrop={(e) => handleDrop(e, setTextImportContent)}
+                          className={cn(
+                            "border-2 border-dashed rounded-lg p-8 flex flex-col items-center justify-center gap-3 transition-colors duration-200 cursor-pointer group",
+                            isTextImportDragging
+                              ? "border-violet-500 bg-violet-50/50"
+                              : "border-gray-200 hover:border-violet-500/50 hover:bg-violet-50/10"
+                          )}
+                        >
+                          <input
+                            type="file"
+                            className="hidden"
+                            accept="application/pdf"
+                            onChange={(e) => handleFileInput(e, setTextImportContent)}
+                          />
+                          <Upload className="w-10 h-10 text-violet-500 group-hover:scale-110 transition-transform duration-200" />
+                          <div className="text-center">
+                            <p className="text-sm font-medium text-foreground">
+                              Drop your PDF file here
+                            </p>
+                            <p className="text-sm text-muted-foreground">
+                              or click to browse files
+                            </p>
+                          </div>
+                        </label>
+                        <div className="relative">
+                          <div className="absolute -top-3 left-3 bg-white px-2 text-sm text-muted-foreground">
+                            Or paste your text content here
+                          </div>
+                          <Textarea
+                            value={textImportContent}
+                            onChange={(e) => setTextImportContent(e.target.value)}
+                            placeholder="Paste your text content here..."
+                            className="min-h-[100px] bg-white/50 border-white/40 focus:border-violet-500/40 focus:ring-violet-500/20 transition-all duration-300 pt-4"
+                          />
+                        </div>
+                      </div>
                     </div>
                     {apiKeyError && (
                       <div className="px-4 py-3 bg-red-50/50 border border-red-200/50 rounded-lg flex items-start gap-3 text-red-600 text-sm">
