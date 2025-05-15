@@ -4,6 +4,8 @@ import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { CreatorStory } from "@/components/landing/creator-story";
+import { NavLinks } from "@/components/layout/nav-links";
+import { Logo } from "@/components/ui/logo";
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
@@ -19,6 +21,16 @@ export default async function Page() {
   
   return (
     <main className="relative overflow-x-hidden selection:bg-violet-200/50">
+
+      {/* Enhanced Navigation with backdrop blur and border */}
+      <nav className="border-b border-white/50 backdrop-blur-xl shadow-md fixed top-0 w-full bg-white/20 z-[1000] transition-all duration-500">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between h-16">
+              <Logo />
+              <NavLinks />
+            </div>
+          </div>
+        </nav>
       {/* Background component */}
       <Background />
       
