@@ -4,9 +4,19 @@ import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { CreatorStory } from "@/components/landing/creator-story";
+import { createClient } from "@/utils/supabase/server";
+import { redirect } from "next/navigation";
 
-
-export default function Page() {
+export default async function Page() {
+  // Check if user is authenticated
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  
+  // If user is authenticated, redirect to home page
+  if (user) {
+    redirect("/home");
+  }
+  
   return (
     <main className="relative overflow-x-hidden selection:bg-violet-200/50">
       {/* Background component */}
