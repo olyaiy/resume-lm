@@ -1,5 +1,5 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+
+import { createClient } from '@/utils/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
 
   if (code) {
     // Ensure you pass cookies correctly. For App Router, it's a function.
-    const supabase = createRouteHandlerClient({ cookies: () => cookies() })
+    const supabase = await createClient()
     await supabase.auth.exchangeCodeForSession(code)
   }
 
