@@ -21,7 +21,7 @@ export default async function EditProfilePage() {
 
   // Display a friendly message if no profile exists
   if (!profile) {
-    redirect("/");
+    redirect("home/");
   }
 
   return (
