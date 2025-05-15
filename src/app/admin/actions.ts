@@ -92,104 +92,76 @@ export async function ensureAdmin() {
 
 export async function getUsersWithProfilesAndSubscriptions() {
   const supabase = await createServiceClient();
-
-  // 1. Get all users first
   const users = await getAllUsers();
   if (!users || users.length === 0) {
     return [];
   }
   const userIds = users.map(user => user.id);
 
-  // 2. Fetch profiles
+  console.log(`Fetching profiles, subscriptions, and resume counts for ${userIds.length} users via RPC.`);
+
+  // Define interfaces for RPC return types to help with typing
+  interface Profile {
+    user_id: string;
+    // Add other specific profile fields if directly accessed, otherwise unknown is safer than any
+    [key: string]: unknown; 
+  }
+
+  interface Subscription {
+    user_id: string;
+    // Add other specific subscription fields if directly accessed
+    [key: string]: unknown;
+  }
+
+  // 1. Fetch profiles using RPC
   const { data: profiles, error: profilesError } = await supabase
-    .from('profiles')
-    .select('*')
-    .in('user_id', userIds);
+    .rpc('get_profiles_for_users', { user_ids_array: userIds });
+
   if (profilesError) {
-    console.error('Error fetching profiles:', profilesError);
+    console.error('Error fetching profiles via RPC:', profilesError);
     throw new Error('Failed to fetch profiles');
   }
-  const profilesMap = new Map(profiles?.map(p => [p.user_id, p]));
+  const profilesMap = new Map((profiles as Profile[] | null)?.map(p => [p.user_id, p]));
 
-  // 3. Fetch subscriptions
+  // 2. Fetch subscriptions using RPC
   const { data: subscriptions, error: subscriptionsError } = await supabase
-    .from('subscriptions')
-    .select('*')
-    .in('user_id', userIds);
+    .rpc('get_subscriptions_for_users', { user_ids_array: userIds });
+
   if (subscriptionsError) {
-    console.error('Error fetching subscriptions:', subscriptionsError);
+    console.error('Error fetching subscriptions via RPC:', subscriptionsError);
     throw new Error('Failed to fetch subscriptions');
   }
-  const subscriptionsMap = new Map(subscriptions?.map(s => [s.user_id, s]));
+  const subscriptionsMap = new Map((subscriptions as Subscription[] | null)?.map(s => [s.user_id, s]));
 
-  // 4. Fetch resume counts
-  // Using a more efficient approach to count per user_id
+  // 3. Fetch resume counts using RPC
   const { data: resumeCountsData, error: resumeCountsError } = await supabase
-    .rpc('count_resumes_by_user', { user_ids: userIds }); // Assuming an RPC function 'count_resumes_by_user' exists
+    .rpc('get_resume_counts_for_users', { user_ids_array: userIds });
 
   if (resumeCountsError) {
-      // Fallback to less efficient client-side grouping if RPC fails or doesn't exist
-      console.warn('RPC function count_resumes_by_user failed or not found. Falling back to client-side counting.', resumeCountsError);
-      const { data: fallbackData, error: fallbackError } = await supabase
-          .from('resumes')
-          .select('user_id', { count: 'exact', head: false }) // Select user_id to group by
-          .in('user_id', userIds);
-
-      if (fallbackError) {
-          console.error('Error fetching resume counts (fallback):', fallbackError);
-          throw new Error('Failed to fetch resume counts');
-      }
-      
-      // Process fallback data
-      const tempCountsMap = new Map<string, number>();
-      fallbackData?.forEach((item: { user_id: string }) => {
-          tempCountsMap.set(item.user_id, (tempCountsMap.get(item.user_id) || 0) + 1);
-      });
-      // Convert Map to the expected array format [{ user_id: string, count: number }]
-      // This step is needed if the rest of the code expects the RPC format.
-      // If adapting the merge logic is easier, do that instead.
-      // For now, we'll proceed assuming the merge logic handles the Map directly later.
-      // resumeCountsData = Array.from(tempCountsMap, ([user_id, count]) => ({ user_id, count })); // Example conversion if needed
-       
-       // Let's adjust the merge logic instead to handle the map directly
-       const resumeCountsMap = tempCountsMap;
-
-        // 5. Merge data (using Maps for efficiency)
-        const mergedData = users.map(user => {
-          const profile = profilesMap.get(user.id) || null;
-          const subscription = subscriptionsMap.get(user.id) || null;
-          const resume_count = resumeCountsMap.get(user.id) || 0; // Use the map here
-
-          return {
-            user,
-            profile,
-            subscription,
-            resume_count // Add resume count here
-          };
-        });
-        return mergedData;
-
-  } else {
-      // Process successful RPC data
-      const resumeCountsMap = new Map<string, number>(
-          resumeCountsData?.map((item: { user_id: string, count: number }) => [item.user_id, item.count]) || []
-      );
-
-      // 5. Merge data (using Maps for efficiency)
-      const mergedData = users.map(user => {
-        const profile = profilesMap.get(user.id) || null;
-        const subscription = subscriptionsMap.get(user.id) || null;
-        const resume_count = resumeCountsMap.get(user.id) || 0;
-
-        return {
-          user,
-          profile,
-          subscription,
-          resume_count // Add resume count here
-        };
-      });
-      return mergedData;
+    console.error('Error fetching resume counts via RPC:', resumeCountsError);
+    // No fallback here, as the RPC should be reliable. If it fails, it's a deeper issue.
+    throw new Error('Failed to fetch resume counts');
   }
+  
+  const resumeCountsMap = new Map<string, number>(
+    resumeCountsData?.map((item: { user_id: string, resume_count: number }) => [item.user_id, Number(item.resume_count) || 0]) || []
+);
+
+
+  // 4. Merge data (using Maps for efficiency)
+  const mergedData = users.map(user => {
+    const profile = profilesMap.get(user.id) || null;
+    const subscription = subscriptionsMap.get(user.id) || null;
+    const resume_count = resumeCountsMap.get(user.id) || 0;
+
+    return {
+      user,
+      profile,
+      subscription,
+      resume_count
+    };
+  });
+  return mergedData;
 }
 
 export async function getUserDetailsById(userId: string) {
