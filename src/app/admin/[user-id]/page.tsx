@@ -12,9 +12,9 @@ import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation'; // Import notFound
 
 interface AdminUserDetailPageProps {
-  params: {
+  params: Promise<{
     'user-id': string;
-  };
+  }>;
 }
 
 // Helper function to format dates
