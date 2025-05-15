@@ -64,11 +64,11 @@ export default async function Home({
   try {
     data = await getDashboardData();
     if (!data.profile) {
-      redirect("/auth/login");
+      redirect("/");
     }
   } catch {
     // Redirect to login if error occurs
-    redirect("/auth/login");
+    redirect("/");
   }
 
   const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;

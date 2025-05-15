@@ -95,7 +95,7 @@ export function ResetPasswordForm() {
 
           <div className="text-center text-sm">
             <Link 
-              href="/auth/login"
+              href="/"
               className="text-muted-foreground hover:text-violet-600 transition-colors"
             >
               Back to login

@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { SplitContent } from '../ui/split-content';
+import { AuthDialog } from "@/components/auth/auth-dialog";
 
 const FeatureHighlights = () => {
   // Enhanced features with metrics, testimonials, and benefit-focused language
@@ -276,18 +277,21 @@ const FeatureHighlights = () => {
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <AuthDialog>
+              <button 
+                className="px-8 py-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-lg font-medium shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
+              >
+                Create Your Free Resume
+              </button>
+            </AuthDialog>
             <Link 
-              href="/auth/register" 
-              className="px-8 py-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-lg font-medium shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
-            >
-              Create Your Free Resume
-            </Link>
-            <Link 
-              href="/examples" 
+              href="https://github.com/olyaiy/resume-lm" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="px-8 py-4 rounded-lg bg-white/80 border border-purple-200/40 text-lg font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
             >
               <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                See Examples
+                Open Source on Github
               </span>
             </Link>
           </div>
@@ -301,12 +305,13 @@ const FeatureHighlights = () => {
 
       {/* Sticky mobile CTA - only visible on mobile/tablet */}
       <div className="md:hidden fixed bottom-4 left-0 right-0 z-50 px-4">
-        <Link 
-          href="/auth/register" 
-          className="flex items-center justify-center w-full py-3.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg"
-        >
-          Get Started Now
-        </Link>
+        <AuthDialog>
+          <button 
+            className="flex items-center justify-center w-full py-3.5 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium shadow-lg"
+          >
+            Get Started Now
+          </button>
+        </AuthDialog>
       </div>
     </section>
   );

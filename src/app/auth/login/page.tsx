@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ResumeLM - AI-Powered Resume Builder",
     description: "Create tailored, ATS-optimized resumes powered by AI. Land your dream tech job with personalized resume optimization.",
-    url: "https://resumelm.com/auth/login",
+    url: "https://resumelm.com//",
     siteName: "ResumeLM",
     images: [
       {

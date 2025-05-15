@@ -66,7 +66,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
 export async function logout() {
   const supabase = await createClient();
   await supabase.auth.signOut();
-  redirect('/auth/login');
+  redirect('/');
 } 
 
 // Password Reset
@@ -275,5 +275,5 @@ export async function deleteUserAccount(formData: FormData) {
     throw error
   }
 
-  redirect('/auth/login')
+  redirect('//')
 } 

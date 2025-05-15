@@ -15,7 +15,7 @@ export const GET = async (request: NextRequest) => {
 
 
   if (!stripeSessionId?.length)
-    return redirect("home/");
+    return redirect("/home");
 
   const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
 
@@ -29,5 +29,5 @@ export const GET = async (request: NextRequest) => {
     );
   }
 
-  return redirect("home/");
+  return redirect("/home");
 };

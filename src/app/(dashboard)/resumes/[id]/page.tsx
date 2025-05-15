@@ -99,7 +99,7 @@ export default async function Page({
     console.timeEnd('🔍 [Page] Total Load Time');
     console.error('❌ [Error]:', error);
     if (error instanceof Error && error.message === 'User not authenticated') {
-      redirect("/auth/login");
+      redirect("/");
     }
     redirect("/");
   }

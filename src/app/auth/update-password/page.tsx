@@ -23,7 +23,7 @@ export default function UpdatePasswordPage() {
     const checkSession = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        router.push("/auth/login");
+        router.push("/");
       }
     };
 
@@ -59,7 +59,7 @@ export default function UpdatePasswordPage() {
 
       setSuccess(true);
       setTimeout(() => {
-        router.push("/auth/login");
+        router.push("/");
       }, 2000);
     } catch (error) {
       setError("An unexpected error occurred");

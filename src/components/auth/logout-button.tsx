@@ -1,11 +1,12 @@
 'use client'
 
-import { logout } from "@/app/auth/login/actions";
+
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { logout } from "@/app/auth/login/actions";
 
 interface LogoutButtonProps {
   className?: string;

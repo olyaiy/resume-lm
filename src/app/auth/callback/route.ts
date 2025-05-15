@@ -44,7 +44,7 @@ export async function GET(request: Request) {
     }
   } else {
     console.log('❌ Callback: No code present, redirecting to login page with error');
-    return NextResponse.redirect(`${origin}/auth/login?error=auth_code_missing`);
+    return NextResponse.redirect(`${origin}//?error=auth_code_missing`);
   }
 } 
 

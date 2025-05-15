@@ -14,14 +14,14 @@ export default async function EditProfilePage() {
     data = await getDashboardData();
   } catch (error: unknown) {
     void error
-    redirect("/auth/login");
+    redirect("/");
   }
 
   const { profile } = data;
 
   // Display a friendly message if no profile exists
   if (!profile) {
-    redirect("home/");
+    redirect("/home");
   }
 
   return (

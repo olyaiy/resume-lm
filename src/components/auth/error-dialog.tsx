@@ -57,7 +57,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
             <li>The link is invalid</li>
           </ul>
           <div className="pt-4 space-y-2">
-            <Link href="/auth/login">
+            <Link href="/">
               <Button className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white">
                 Try Logging In Again
               </Button>

@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import { AuthDialog } from "@/components/auth/auth-dialog";
 
 export function Hero() {
   return (
@@ -20,23 +21,26 @@ export function Hero() {
         
         {/* CTAs with enhanced accessibility and effects */}
         <div className="flex flex-col sm:flex-row gap-4 mt-8">
+          <AuthDialog>
+            <button 
+              className="relative group px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium transition-all duration-500 hover:-translate-y-1 hover:shadow-xl flex items-center justify-center"
+              aria-label="Create your resume now"
+            >
+              <span>Create Resume</span>
+              <svg className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+              <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+            </button>
+          </AuthDialog>
           <Link 
-            href="/dashboard/new" 
-            className="relative group px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-medium transition-all duration-500 hover:-translate-y-1 hover:shadow-xl flex items-center justify-center"
-            aria-label="Create your resume now"
-          >
-            <span>Create Resume</span>
-            <svg className="ml-2 h-5 w-5 transition-transform duration-300 group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-            </svg>
-            <div className="absolute inset-0 rounded-lg bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          </Link>
-          <Link 
-            href="/examples" 
+            href="https://github.com/olyaiy/resume-lm" 
+            target="_blank"
+            rel="noopener noreferrer"
             className="px-6 py-3 rounded-lg bg-white/40 backdrop-blur-md border border-white/40 font-medium transition-all duration-500 hover:-translate-y-1 hover:bg-white/50 hover:shadow-xl"
-            aria-label="View example resumes"
+            aria-label="View source code on GitHub"
           >
-            View Examples
+            Open Source on Github
           </Link>
         </div>
         
