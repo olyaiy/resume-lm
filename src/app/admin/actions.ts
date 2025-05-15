@@ -92,7 +92,80 @@ export async function ensureAdmin() {
     // If isAdmin is true, execution continues normally.
 }
 
-export async function getUsersWithProfilesAndSubscriptions() {
+// Define interfaces for RPC return types to help with typing
+interface Profile {
+  user_id: string;
+  first_name?: string;
+  last_name?: string;
+  email?: string;
+  phone_number?: string;
+  location?: string;
+  website?: string;
+  linkedin_url?: string;
+  github_url?: string;
+  work_experience?: Array<{
+    company?: string;
+    title?: string;
+    start_date?: string;
+    end_date?: string;
+    description?: string;
+    location?: string;
+    [key: string]: unknown;
+  }>;
+  education?: Array<{
+    institution?: string;
+    degree?: string;
+    field_of_study?: string;
+    start_date?: string;
+    end_date?: string;
+    description?: string;
+    [key: string]: unknown;
+  }>;
+  skills?: Array<{
+    category?: string;
+    items?: string[];
+    [key: string]: unknown;
+  }>;
+  projects?: Array<{
+    [key: string]: unknown;
+  }>;
+  certifications?: Array<{
+    [key: string]: unknown;
+  }>;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: unknown;
+}
+
+interface Subscription {
+  user_id: string;
+  stripe_customer_id?: string;
+  stripe_subscription_id?: string;
+  subscription_plan?: string;
+  subscription_status?: string;
+  current_period_end?: string;
+  trial_end?: string;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: unknown;
+}
+
+interface User {
+  id: string;
+  email?: string;
+  created_at: string;
+  last_sign_in_at?: string;
+  [key: string]: unknown;
+}
+
+interface UserWithDetails {
+  user: User;
+  profile: Profile | null;
+  subscription: Subscription | null;
+  resume_count: number;
+}
+
+export async function getUsersWithProfilesAndSubscriptions(): Promise<UserWithDetails[]> {
   const supabase = await createServiceClient();
   const users = await getAllUsers();
   if (!users || users.length === 0) {
@@ -101,19 +174,6 @@ export async function getUsersWithProfilesAndSubscriptions() {
   const userIds = users.map(user => user.id);
 
   console.log(`Fetching profiles, subscriptions, and resume counts for ${userIds.length} users via RPC.`);
-
-  // Define interfaces for RPC return types to help with typing
-  interface Profile {
-    user_id: string;
-    // Add other specific profile fields if directly accessed, otherwise unknown is safer than any
-    [key: string]: unknown; 
-  }
-
-  interface Subscription {
-    user_id: string;
-    // Add other specific subscription fields if directly accessed
-    [key: string]: unknown;
-  }
 
   // 1. Fetch profiles using RPC
   const { data: profiles, error: profilesError } = await supabase
@@ -161,7 +221,7 @@ export async function getUsersWithProfilesAndSubscriptions() {
       profile,
       subscription,
       resume_count
-    };
+    } as UserWithDetails;
   });
   return mergedData;
 }

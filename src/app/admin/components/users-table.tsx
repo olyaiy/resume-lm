@@ -28,11 +28,18 @@ interface UserData {
     email?: string;
     created_at: string;
     last_sign_in_at?: string;
+    [key: string]: unknown;
   };
   profile: {
+    user_id: string;
     first_name?: string;
     last_name?: string;
+    email?: string;
+    phone_number?: string;
     location?: string;
+    website?: string;
+    linkedin_url?: string;
+    github_url?: string;
     work_experience?: Array<{
       company?: string;
       title?: string;
@@ -56,14 +63,19 @@ interface UserData {
       items?: string[];
       [key: string]: unknown;
     }>;
+    created_at?: string;
+    updated_at?: string;
+    [key: string]: unknown;
   } | null;
   subscription: {
+    user_id?: string;
+    stripe_customer_id?: string;
     subscription_plan?: string;
     subscription_status?: string;
     current_period_end?: string;
-    stripe_customer_id?: string;
+    [key: string]: unknown;
   } | null;
-  resume_count: number; // Added resume count
+  resume_count: number;
 }
 
 type SortableColumns =
@@ -109,7 +121,7 @@ export default function UsersTable() {
       try {
         setLoading(true);
         const data = await getUsersWithProfilesAndSubscriptions();
-        setUsers(data);
+        setUsers(data as unknown as UserData[]);
       } catch (err) {
         console.error('Error fetching users:', err);
         setError('Failed to load users. Please try again.');
