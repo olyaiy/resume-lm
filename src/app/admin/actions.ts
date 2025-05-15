@@ -221,7 +221,7 @@ export async function getUsersWithProfilesAndSubscriptions(): Promise<UserWithDe
       profile,
       subscription,
       resume_count
-    } as UserWithDetails;
+    } as unknown as UserWithDetails;
   });
   return mergedData;
 }
