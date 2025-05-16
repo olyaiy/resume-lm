@@ -76,11 +76,16 @@ export function VideoShowcase() {
             >
               <video 
                 ref={videoRef}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover border border-black/30 rounded-2xl"
                 src="/ResumeLM.mp4"
-                poster="@thumbnail.png"
+                poster="/thumbnail.png"
                 onEnded={() => setIsPlaying(false)}
               />
+              
+              {/* Gradient overlay for thumbnail */}
+              {!isPlaying && (
+                <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+              )}
               
               {/* Overlay gradient effect */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
@@ -101,7 +106,7 @@ export function VideoShowcase() {
               
               {/* Controls overlay - bottom */}
               <div className="absolute bottom-0 left-0 right-0 p-4 flex justify-between items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
-                <div className="text-white text-sm backdrop-blur-sm bg-black/10 px-3 py-1 rounded-full border border-white/10">
+                <div className="text-sm backdrop-blur-sm bg-gradient-to-r from-purple-600/10 to-indigo-600/10 text-purple-700 px-3 py-1 rounded-full border border-purple-200/40">
                   ResumeLM Demo
                 </div>
                 <button
@@ -124,13 +129,13 @@ export function VideoShowcase() {
           
           {/* Feature badges below video */}
           <div className="flex flex-wrap justify-center gap-3 mt-6">
-            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-teal-600/10 to-cyan-600/10 text-sm border border-teal-200/40 text-teal-700">
+            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 text-sm border border-purple-200/40 text-purple-700">
               Interactive Demo
             </span>
             <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 text-sm border border-purple-200/40 text-purple-700">
               User-friendly Interface
             </span>
-            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-pink-600/10 to-rose-600/10 text-sm border border-pink-200/40 text-pink-700">
+            <span className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 text-sm border border-purple-200/40 text-purple-700">
               Real-time AI Assistance
             </span>
           </div>
