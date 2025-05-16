@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 
 export function CreatorStory() {
   return (
-    <section className="py-20 md:py-24 relative overflow-hidden">
+    <section className="py-20 md:py-24 relative overflow-hidden" id="creator-story">
       {/* Decorative background elements */}
       <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-tr from-purple-200/30 to-indigo-200/30 blur-3xl"></div>
       <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-tl from-teal-200/30 to-cyan-200/30 blur-3xl"></div>

@@ -47,7 +47,7 @@ export function VideoShowcase() {
   }, [])
 
   return (
-    <section className="py-16 md:py-24 px-4 relative overflow-hidden">
+    <section className="py-16 md:py-24 px-4 relative overflow-hidden" id="how-it-works">
       {/* Decorative background elements */}
       <div className="absolute -top-40 left-1/4 w-96 h-96 rounded-full bg-gradient-to-br from-teal-200/20 to-cyan-200/20 blur-3xl"></div>
       <div className="absolute -bottom-40 right-1/4 w-96 h-96 rounded-full bg-gradient-to-tr from-purple-200/20 to-indigo-200/20 blur-3xl"></div>
