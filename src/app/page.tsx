@@ -4,6 +4,7 @@ import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
 import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { CreatorStory } from "@/components/landing/creator-story";
+import { Footer } from "@/components/layout/footer";
 import { NavLinks } from "@/components/layout/nav-links";
 import { Logo } from "@/components/ui/logo";
 import { createClient } from "@/utils/supabase/server";
@@ -51,6 +52,9 @@ export default async function Page() {
       
       {/* Pricing Plans Section */}
       <PricingPlans />
+
+      <Footer variant="static"/>
+
       
     </main>
   );
