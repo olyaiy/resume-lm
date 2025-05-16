@@ -78,7 +78,7 @@ export function VideoShowcase() {
                 ref={videoRef}
                 className="w-full h-full object-cover"
                 src="/ResumeLM.mp4"
-                poster="/video-thumbnail.jpg"
+                poster="@thumbnail.png"
                 onEnded={() => setIsPlaying(false)}
               />
               
@@ -92,7 +92,7 @@ export function VideoShowcase() {
                     e.stopPropagation();
                     togglePlay();
                   }}
-                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-white/30 backdrop-blur-md border border-white/40 text-white transition-all duration-300 hover:scale-110 hover:bg-white/40 z-20"
+                  className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 md:w-20 md:h-20 flex items-center justify-center rounded-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white transition-all duration-300 hover:scale-110 hover:bg-white/40 z-20"
                   aria-label="Play video"
                 >
                   <Play className="w-8 h-8 ml-1" />
