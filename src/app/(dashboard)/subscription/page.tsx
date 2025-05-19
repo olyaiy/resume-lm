@@ -29,7 +29,7 @@ export default async function PlansPage() {
   console.log('profile', profile);
 
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4 my-14">
+    <div className="flex flex-col items-center justify-center  gap-4 ">
       {isPro ? (
         isCanceling ? (
           <CancelingPlanDisplay initialProfile={profile} />
