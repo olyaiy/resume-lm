@@ -103,7 +103,7 @@
     "replace-special-characters": "^1.2.7",
     "rich-textarea": "^0.26.4",
     "sonner": "^1.7.1",
-    "stripe": "^17.5.0",
+    "stripe": "^18.1.0",
     "tailwind-merge": "^2.6.0",
     "tailwindcss-animate": "^1.0.7",
     "tiptap-markdown": "^0.8.10",
