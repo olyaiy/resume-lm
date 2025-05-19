@@ -103,7 +103,7 @@ export async function manageSubscriptionStatusChange(
   console.log('✅ Retrieved subscription details:', {
     id: subscription.id,
     status: subscription.status,
-    currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString()
+    currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
   });
 
   // Map price ID to plan
@@ -119,7 +119,7 @@ export async function manageSubscriptionStatusChange(
     stripe_customer_id: customerId,
     subscription_plan: plan,
     subscription_status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
-    current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+    current_period_end: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
     trial_end: subscription.trial_end 
       ? new Date(subscription.trial_end * 1000).toISOString()
       : null,
@@ -247,8 +247,6 @@ export async function getSubscriptionStatus() {
 
   return subscription;
 }
-
-
 
 export async function createCheckoutSession(priceId: string) {
   const supabase = await createClient();
