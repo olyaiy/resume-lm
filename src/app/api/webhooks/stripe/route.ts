@@ -161,7 +161,7 @@ export async function POST(req: Request) {
               subscriptionId: subscription.id,
               planId: subscription.items.data[0].price.id,
               status: 'active',
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
               trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
             }
           );
@@ -181,7 +181,7 @@ export async function POST(req: Request) {
               subscriptionId: subscription.id,
               planId: subscription.items.data[0].price.id,
               status: 'active',
-              currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+              currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
               trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
             }
           );
@@ -225,7 +225,7 @@ export async function POST(req: Request) {
             subscriptionId: subscription.id,
             planId: subscription.items.data[0].price.id,
             status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
-            currentPeriodEnd: new Date(subscription.current_period_end * 1000),
+            currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
             trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
             cancelAtPeriodEnd: subscription.cancel_at_period_end
           }
