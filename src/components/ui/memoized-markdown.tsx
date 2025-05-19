@@ -53,8 +53,8 @@ const MemoizedMarkdownBlock = memo(
                 {children}
               </ol>
             ),
-            li: ({ ordered, index, children }) => (
-              <li className="py-2" value={ordered ? index + 1 : undefined}>
+            li: ({ children, ...props }) => (
+              <li className="py-2" {...props}>
                 {children}
               </li>
             ),
@@ -70,18 +70,13 @@ const MemoizedMarkdownBlock = memo(
             h5: ({ children }) => <h5 className="text-sm font-bold mt-1.5 mb-1">{children}</h5>,
             h6: ({ children }) => <h6 className="text-xs font-bold mt-1 mb-0.5">{children}</h6>,
             // Code block styling
-            code: ({ inline, className, children }) => {
-              // If it's an inline code block
-              if (inline) {
+            code: (props) => {
+              const { inline, className, children } = props as { inline?: boolean; className?: string; children: React.ReactNode };
+              if (inline)
                 return <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>;
-              }
-              
-              // For code blocks, we return a div wrapper instead of pre directly
               return (
                 <div className="not-prose">
-                  {/* <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-xs"> */}
-                    <code className={className}>{children}</code>
-                  {/* </pre> */}
+                  <code className={className}>{children}</code>
                 </div>
               );
             },
