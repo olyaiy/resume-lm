@@ -7,7 +7,7 @@ import { revalidatePath } from "next/cache";
 
 // Initialize stripe
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-12-18.acacia'
+  apiVersion: '2025-04-30.basil'
 });
 
 // Create or retrieve a Stripe customer
