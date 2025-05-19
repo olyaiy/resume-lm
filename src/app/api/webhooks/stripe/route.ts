@@ -161,7 +161,7 @@ export async function POST(req: Request) {
               subscriptionId: subscription.id,
               planId: subscription.items.data[0].price.id,
               status: 'active',
-              currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
+              currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
               trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
             }
           );
@@ -170,7 +170,7 @@ export async function POST(req: Request) {
       }
 
       case 'invoice.paid': {
-        const invoice = event.data.object as Stripe.Invoice;
+        const invoice = event.data.object as Stripe.Invoice & { subscription?: string };
         
         if (invoice.subscription) {
           const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
@@ -181,7 +181,7 @@ export async function POST(req: Request) {
               subscriptionId: subscription.id,
               planId: subscription.items.data[0].price.id,
               status: 'active',
-              currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
+              currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
               trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
             }
           );
@@ -200,7 +200,7 @@ export async function POST(req: Request) {
           subscriptionId: subscription.id,
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          currentPeriodEnd: new Date(subscription.current_period_end * 1000).toISOString(),
+          currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
           changes: {
             willCancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
             previousCancelAtPeriodEnd: previousAttributes.cancel_at_period_end,
@@ -214,7 +214,7 @@ export async function POST(req: Request) {
         if (subscription.cancel_at_period_end) {
           console.log('🚫 Subscription Cancellation Scheduled:', {
             message: 'Subscription will remain active until period end',
-            activeUntil: new Date(subscription.current_period_end * 1000).toISOString(),
+            activeUntil: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
             willAutoRenew: false
           });
         }
@@ -225,7 +225,7 @@ export async function POST(req: Request) {
             subscriptionId: subscription.id,
             planId: subscription.items.data[0].price.id,
             status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
-            currentPeriodEnd: new Date((subscription as Stripe.Subscription).current_period_end * 1000),
+            currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
             trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
             cancelAtPeriodEnd: subscription.cancel_at_period_end
           }
