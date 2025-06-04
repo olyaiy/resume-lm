@@ -74,20 +74,7 @@ export default async function LoginPage({
         {/* Error Dialog */}
         <ErrorDialog isOpen={!!showErrorDialog} />
 
-        {/* Enhanced Gradient Background Elements */}
-        <div className="fixed inset-0 z-0 overflow-hidden">
-          {/* Primary gradient mesh with improved colors */}
-          <div className="absolute inset-0 bg-gradient-to-br from-violet-50/80 via-blue-50/80 to-indigo-50/80 animate-gradient-slow" />
-          
-          {/* Enhanced animated gradient orbs with better positioning and animations */}
-          <div className="absolute top-1/4 left-1/4 w-[300px] md:w-[800px] h-[300px] md:h-[800px] bg-gradient-to-r from-violet-200/40 to-blue-200/40 rounded-full blur-3xl animate-float-slow opacity-80 mix-blend-multiply" />
-          <div className="absolute bottom-1/3 right-1/4 w-[250px] md:w-[700px] h-[250px] md:h-[700px] bg-gradient-to-r from-blue-200/40 to-indigo-200/40 rounded-full blur-3xl animate-float-delayed opacity-80 mix-blend-multiply" />
-          <div className="absolute top-1/2 right-1/3 w-[200px] md:w-[600px] h-[200px] md:h-[600px] bg-gradient-to-r from-indigo-200/40 to-violet-200/40 rounded-full blur-3xl animate-float opacity-80 mix-blend-multiply" />
-          <div className="absolute bottom-1/4 left-1/3 w-[200px] md:w-[500px] h-[200px] md:h-[500px] bg-gradient-to-r from-teal-200/30 to-cyan-200/30 rounded-full blur-3xl animate-float-slow-reverse opacity-70 mix-blend-multiply" />
-          
-          {/* Enhanced mesh grid overlay with subtle animation */}
-          <div className="absolute inset-0 bg-[linear-gradient(to_right,#8882_1px,transparent_1px),linear-gradient(to_bottom,#8882_1px,transparent_1px)] bg-[size:14px_24px] animate-mesh-slow opacity-60" />
-        </div>
+       
 
         {/* Enhanced Navigation with backdrop blur and border */}
         <nav className="border-b border-white/50 backdrop-blur-xl shadow-md fixed top-0 w-full bg-white/20 z-[1000] transition-all duration-500">

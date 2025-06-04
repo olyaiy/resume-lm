@@ -24,7 +24,7 @@ export default async function Page() {
     <main className="relative overflow-x-hidden selection:bg-violet-200/50">
 
       {/* Enhanced Navigation with backdrop blur and border */}
-      <nav className="border-b border-white/50 backdrop-blur-xl shadow-md fixed top-0 w-full bg-white/20 z-[1000] transition-all duration-500">
+      <nav className="border-b border-white/50 backdrop-blur-sm shadow-md fixed top-0 w-full bg-white/90 z-[1000] transition-all duration-500 transform-gpu will-change-transform">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Logo />
