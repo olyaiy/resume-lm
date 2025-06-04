@@ -1,6 +1,6 @@
 export function Background() {
   return (
-    <div className="fixed inset-0 z-0 overflow-hidden">
+    <div className="fixed inset-0 z-0 overflow-hidden size-full">
       {/* Simplified gradient background */}
       <div className="absolute inset-0 bg-gradient-to-br from-violet-50/60 via-blue-50/60 to-indigo-50/60" />
 

@@ -21,8 +21,8 @@ export default async function Page() {
   }
   
   return (
-    <main className="relative overflow-x-hidden selection:bg-violet-200/50">
-
+    // <main className="relative overflow-x-hidden selection:bg-violet-200/50">
+<main>
       {/* Enhanced Navigation with backdrop blur and border */}
       <nav className="border-b border-white/50 backdrop-blur-sm shadow-md fixed top-0 w-full bg-white/90 z-[1000] transition-all duration-500 transform-gpu will-change-transform">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -36,7 +36,7 @@ export default async function Page() {
       <Background />
       
       {/* Main content */}
-      <div className="relative z-10 min-h-[100vh] container mx-auto px-4 py-8 md:py-16 flex flex-col justify-center">
+      <div className="relative z-10 mx-auto px-24  flex flex-col justify-center">
         {/* Hero Section */}
         <Hero />
       </div>

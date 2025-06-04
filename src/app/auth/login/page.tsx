@@ -70,7 +70,7 @@ export default async function LoginPage({
 
   return (
     <>
-      <main className="relative overflow-x-hidden selection:bg-violet-200/50 -my-14 mb-6">
+      <main className="relative overflow-x-hidden selection:bg-violet-200/50 ">
         {/* Error Dialog */}
         <ErrorDialog isOpen={!!showErrorDialog} />
 
