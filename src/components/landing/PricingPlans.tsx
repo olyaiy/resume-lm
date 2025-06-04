@@ -2,8 +2,8 @@
 
 import { useMemo, useRef } from "react";
 import { Check, Sparkles } from "lucide-react";
-import Link from "next/link";
 import { motion, useInView } from "framer-motion";
+import { AuthDialog } from "@/components/auth/auth-dialog";
 
 interface PlanFeature {
   text: string;
@@ -187,23 +187,24 @@ export function PricingPlans() {
             <p className="text-muted-foreground mt-2 mb-6">{plan.description}</p>
             
             {/* CTA button */}
-            <Link 
-              href={plan.ctaLink} 
-              className={`
-                block w-full py-3 rounded-lg font-medium text-center transition-all duration-300 hover:-translate-y-1 mb-8
-                ${plan.ctaSecondary 
-                  ? "bg-white/60 border border-purple-200/40 hover:shadow-md" 
-                  : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl"
-                }
-              `}
-              aria-label={`${plan.ctaText} with the ${plan.name} plan`}
-            >
-              {plan.ctaSecondary ? (
-                <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  {plan.ctaText}
-                </span>
-              ) : plan.ctaText}
-            </Link>
+            <AuthDialog>
+              <button 
+                className={`
+                  block w-full py-3 rounded-lg font-medium text-center transition-all duration-300 hover:-translate-y-1 mb-8
+                  ${plan.ctaSecondary 
+                    ? "bg-white/60 border border-purple-200/40 hover:shadow-md" 
+                    : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl"
+                  }
+                `}
+                aria-label={`${plan.ctaText} with the ${plan.name} plan`}
+              >
+                {plan.ctaSecondary ? (
+                  <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                    {plan.ctaText}
+                  </span>
+                ) : plan.ctaText}
+              </button>
+            </AuthDialog>
             
             {/* Features list */}
             <div className="space-y-3">
