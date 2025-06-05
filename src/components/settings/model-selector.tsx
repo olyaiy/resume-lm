@@ -52,6 +52,12 @@ function ModelIcon({ provider, size = 24 }: { provider: ServiceName; size?: numb
 
 const AI_MODELS: AIModel[] = [
   { 
+    id: 'claude-4-sonnet-20250514', 
+    name: 'Claude 4 Sonnet', 
+    shortName: 'Sonnet 4',
+    provider: 'anthropic'
+  },
+  { 
     id: 'claude-3-7-sonnet-20250219', 
     name: 'Claude 3.7 Sonnet', 
     shortName: 'Sonnet 3.7',
