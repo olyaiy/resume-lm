@@ -88,6 +88,18 @@ const AI_MODELS: AIModel[] = [
     provider: 'openai'
   },
   { 
+    id: 'gpt-4.1-mini', 
+    name: 'GPT 4.1 Mini', 
+    shortName: 'GPT 4.1 mini',
+    provider: 'openai'
+  },
+  { 
+    id: 'gpt-4.1-nano', 
+    name: 'GPT 4.1 Nano', 
+    shortName: 'GPT 4.1 nano',
+    provider: 'openai'
+  },
+  { 
     id: 'gpt-4o-mini', 
     name: 'GPT-4o Mini', 
     shortName: 'GPT 4o mini',
