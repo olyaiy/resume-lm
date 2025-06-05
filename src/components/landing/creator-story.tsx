@@ -5,13 +5,12 @@ import { motion } from "framer-motion";
 export function CreatorStory() {
   return (
     <section className="py-20 md:py-24 relative overflow-hidden" id="creator-story">
-      {/* Decorative background elements */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-tr from-purple-200/30 to-indigo-200/30 blur-3xl"></div>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-tl from-teal-200/30 to-cyan-200/30 blur-3xl"></div>
-      <div className="absolute top-1/2 left-1/3 w-64 h-64 rounded-full bg-gradient-to-r from-pink-200/20 to-rose-200/20 blur-3xl"></div>
+      {/* Simplified background elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 rounded-full bg-purple-100/10"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 rounded-full bg-teal-100/10"></div>
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-        {/* Section heading with gradient */}
+        {/* Section heading with simplified styling */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -22,11 +21,11 @@ export function CreatorStory() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.6 }}
-            className="px-4 py-1.5 rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-200/40 text-sm text-purple-700 inline-block mb-4"
+            className="px-4 py-1.5 rounded-full bg-indigo-50 border border-indigo-200 text-sm text-indigo-700 inline-block mb-4"
           >
             The Story Behind ResumeLM
           </motion.span>
-          <h2 className="text-4xl md:text-5xl font-bold tracking-tight bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600 bg-clip-text text-transparent">
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight text-violet-600">
             Meet the Creator
           </h2>
         </motion.div>
@@ -37,17 +36,14 @@ export function CreatorStory() {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="grid md:grid-cols-[400px_1fr] gap-10 items-center"
         >
-          {/* Image Area with enhanced styling */}
+          {/* Image Area with simplified styling */}
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.6, delay: 0.4 }}
             className="relative mx-auto md:mx-0"
           >
-            <div className="absolute inset-0 bg-gradient-to-tr from-purple-200/30 to-indigo-200/30 rounded-2xl blur-lg transform -rotate-3"></div>
-            <div className="absolute inset-0 bg-gradient-to-bl from-violet-200/20 to-indigo-200/20 rounded-2xl blur-lg transform rotate-3"></div>
-            
-            <div className="relative aspect-square w-64 md:w-96 rounded-2xl overflow-hidden bg-white/30 backdrop-blur-md border border-white/40 shadow-xl transform transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl">
+            <div className="relative aspect-square w-64 md:w-96 rounded-2xl overflow-hidden bg-white border border-gray-200 shadow-md transform transition-all duration-300 hover:-translate-y-2">
               <Image
                 src="/alex.webp"
                 alt="Alex, creator of ResumeLM"
@@ -56,23 +52,16 @@ export function CreatorStory() {
                 className="object-cover"
                 priority
               />
-              
-              {/* Decorative corner accent */}
-              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-600/20 to-indigo-600/20 transform rotate-12 -translate-x-5 translate-y-5 rounded-full blur-xl"></div>
             </div>
           </motion.div>
 
-          {/* Story Content with enhanced styling - no card background */}
+          {/* Story Content with simplified styling */}
           <motion.div 
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7, delay: 0.5 }}
             className="relative"
           >
-            {/* Decorative elements */}
-            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-tr from-indigo-600/5 to-purple-600/5 rounded-full blur-xl"></div>
-            <div className="absolute bottom-0 left-0 w-32 h-32 bg-gradient-to-br from-violet-600/5 to-indigo-600/5 rounded-full blur-xl"></div>
-            
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl text-violet-800">
                 Why I Built ResumeLM
@@ -94,7 +83,7 @@ export function CreatorStory() {
                     href="https://x.com/alexfromvan" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-200/40 text-purple-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 transition-all duration-300 hover:-translate-y-1"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >
@@ -107,7 +96,7 @@ export function CreatorStory() {
                     href="https://github.com/olyaiy" 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-teal-600/10 to-cyan-600/10 border border-teal-200/40 text-teal-700 transition-all duration-300 hover:-translate-y-1 hover:shadow-md"
+                    className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 transition-all duration-300 hover:-translate-y-1"
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                   >

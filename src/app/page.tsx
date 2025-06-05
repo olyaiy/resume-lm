@@ -65,9 +65,9 @@ export default async function Page() {
         }}
       />
     
-      <main aria-label="ResumeLM landing page" className="">
-        {/* Enhanced Navigation with backdrop blur and border */}
-        <nav aria-label="Main navigation" className="border-b border-white/50 backdrop-blur-sm shadow-md fixed top-0 w-full bg-white/90 z-[1000] transition-all duration-500 transform-gpu will-change-transform">
+      <main aria-label="ResumeLM landing page" className="relative overflow-x-hidden selection:bg-indigo-100">
+        {/* Simplified Navigation */}
+        <nav aria-label="Main navigation" className="border-b border-gray-200 fixed top-0 w-full bg-white/95 z-[1000] transition-all duration-300 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
               <Logo />

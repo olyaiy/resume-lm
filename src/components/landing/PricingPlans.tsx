@@ -62,21 +62,21 @@ export function PricingPlans() {
     }
   ], []);
 
-  // Animation variants
+  // Animation variants - simplified for performance
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.2 }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
+    hidden: { opacity: 0, y: 10 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.8, ease: "easeOut" }
+      transition: { duration: 0.5, ease: "easeOut" }
     }
   };
 
@@ -95,10 +95,9 @@ export function PricingPlans() {
       id="pricing"
       aria-labelledby="pricing-heading"
     >
-      {/* Background decoration elements with reduced opacity for better performance */}
-      <div aria-hidden="true" className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-br from-purple-200/20 to-indigo-200/20 blur-3xl"></div>
-      <div aria-hidden="true" className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-gradient-to-tr from-teal-200/20 to-cyan-200/20 blur-3xl"></div>
-      <div aria-hidden="true" className="absolute top-1/3 right-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-pink-200/15 to-rose-200/15 blur-3xl"></div>
+      {/* Background decoration elements - simplified */}
+      <div aria-hidden="true" className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-purple-100/20"></div>
+      <div aria-hidden="true" className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-teal-100/20"></div>
       
       {/* Heading */}
       <div className="relative z-10 max-w-3xl mx-auto text-center mb-16">
@@ -108,7 +107,7 @@ export function PricingPlans() {
           transition={{ duration: 0.6 }}
           className="flex justify-center gap-3 mb-4"
         >
-          <span className="px-3 py-1 rounded-full bg-gradient-to-r from-teal-600/10 to-cyan-600/10 border border-teal-200/40 text-sm text-teal-700">
+          <span className="px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-sm text-teal-700">
             Simple Pricing
           </span>
         </motion.div>
@@ -118,11 +117,9 @@ export function PricingPlans() {
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.7, delay: 0.2 }}
-          className="text-4xl md:text-5xl font-bold tracking-tight"
+          className="text-4xl md:text-5xl font-bold tracking-tight text-indigo-600"
         >
-          <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-            Choose Your Plan
-          </span>
+          Choose Your Plan
         </motion.h2>
         
         <motion.p
@@ -142,27 +139,24 @@ export function PricingPlans() {
         initial="hidden"
         animate={isInView ? "visible" : "hidden"}
       >
-        {plans.map((plan, index) => (
+        {plans.map((plan) => (
           <motion.div
             key={plan.name}
             variants={itemVariants}
             className={`
-              group relative rounded-2xl p-8 md:p-10 transition-all duration-500 hover:-translate-y-1 overflow-hidden
+              relative rounded-2xl p-8 md:p-10 transition-all duration-300 hover:-translate-y-1 overflow-hidden
               ${plan.popular 
-                ? "bg-gradient-to-br from-purple-600/5 to-indigo-600/5 backdrop-blur-md border border-purple-200/40 shadow-xl hover:shadow-2xl" 
-                : "bg-white/40 backdrop-blur-md border border-white/40 shadow-xl hover:shadow-2xl"
+                ? "bg-indigo-50/50 border border-indigo-200 shadow-md hover:shadow-lg" 
+                : "bg-white border border-gray-200 shadow-md hover:shadow-lg"
               }
             `}
             aria-label={`${plan.name} plan for ${plan.price}${plan.period || ""}`}
           >
-            {/* Decorative elements */}
-            <div aria-hidden="true" className={`absolute ${index === 0 ? "-right-20 -bottom-20" : "-left-20 -top-20"} w-40 h-40 rounded-full bg-gradient-to-br from-purple-600/5 to-indigo-600/5 blur-2xl will-change-transform`}></div>
-            
             {/* Popular plan indicator */}
             {plan.popular && (
               <>
-                <div aria-hidden="true" className="absolute right-0 top-0 w-full h-1 bg-gradient-to-r from-purple-600 to-indigo-600"></div>
-                <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-gradient-to-r from-purple-600/20 to-indigo-600/20 border border-purple-300/40 text-xs font-medium text-purple-700 flex items-center gap-1">
+                <div aria-hidden="true" className="absolute right-0 top-0 w-full h-1 bg-indigo-600"></div>
+                <div className="absolute top-3 right-3 px-2 py-1 rounded-full bg-indigo-100 border border-indigo-200 text-xs font-medium text-indigo-700 flex items-center gap-1">
                   <Sparkles className="h-3 w-3" />
                   <span>{plan.badge}</span>
                 </div>
@@ -170,16 +164,14 @@ export function PricingPlans() {
             )}
             
             {/* Plan name badge */}
-            <div className="px-3 py-1 w-fit rounded-full bg-gradient-to-r from-purple-600/10 to-indigo-600/10 border border-purple-200/40 text-sm text-purple-700 mb-4">
+            <div className="px-3 py-1 w-fit rounded-full bg-indigo-50 border border-indigo-200 text-sm text-indigo-700 mb-4">
               {plan.name}
             </div>
             
             {/* Price display */}
             <div className="flex items-baseline">
-              <h3 className="text-4xl font-bold">
-                <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                  {plan.price}
-                </span>
+              <h3 className="text-4xl font-bold text-indigo-600">
+                {plan.price}
               </h3>
               {plan.period && <span className="text-muted-foreground ml-1">{plan.period}</span>}
             </div>
@@ -192,14 +184,14 @@ export function PricingPlans() {
                 className={`
                   block w-full py-3 rounded-lg font-medium text-center transition-all duration-300 hover:-translate-y-1 mb-8
                   ${plan.ctaSecondary 
-                    ? "bg-white/60 border border-purple-200/40 hover:shadow-md" 
-                    : "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl"
+                    ? "bg-white border border-indigo-200 hover:bg-indigo-50" 
+                    : "bg-indigo-600 text-white shadow-sm hover:shadow-md"
                   }
                 `}
                 aria-label={`${plan.ctaText} with the ${plan.name} plan`}
               >
                 {plan.ctaSecondary ? (
-                  <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
+                  <span className="text-indigo-600">
                     {plan.ctaText}
                   </span>
                 ) : plan.ctaText}
