@@ -228,8 +228,8 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
     if (!selectedModel) return
 
-    // Skip key check for Pro users
-    if (!isProPlan) {
+    // Skip key check for Pro users and free models
+    if (!isProPlan && modelId !== 'gpt-4.1-nano') {
       const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
       if (!hasRequiredKey) {
         toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
@@ -243,6 +243,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
 
   const isModelSelectable = (modelId: string) => {
     if (isProPlan) return true // Bypass check for Pro users
+    if (modelId === 'gpt-4.1-nano') return true // GPT 4.1 Nano is free for everyone
     const model = AI_MODELS.find(m => m.id === modelId)
     if (!model) return false
     return apiKeys.some(k => k.service === model.provider)

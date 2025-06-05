@@ -76,6 +76,15 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
 
   const { model, apiKeys } = config;
   
+  // Special case: GPT 4.1 Nano is free for all users
+  if (model === 'gpt-4.1-nano') {
+    if (!process.env.OPENAI_API_KEY) throw new Error('OpenAI API key not found');
+    return createOpenAI({ 
+      apiKey: process.env.OPENAI_API_KEY,
+      compatibility: 'strict',
+    })(model) as LanguageModelV1;
+  }
+  
   if (model.startsWith('claude')) {
     const anthropicKey = apiKeys.find(k => k.service === 'anthropic')?.key;
     if (!anthropicKey) throw new Error('Anthropic API key not found');

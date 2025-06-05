@@ -191,8 +191,8 @@ export function ModelSelector() {
     const selectedModel = AI_MODELS.find(m => m.id === modelId)
     if (!selectedModel) return
 
-    // Skip API key check for Pro users
-    if (subscriptionPlan !== 'pro') {
+    // Skip API key check for Pro users and free models
+    if (subscriptionPlan !== 'pro' && modelId !== 'gpt-4.1-nano') {
       const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
       if (!hasRequiredKey) {
         toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
@@ -207,6 +207,7 @@ export function ModelSelector() {
 
   const isModelSelectable = (modelId: string) => {
     if (subscriptionPlan === 'pro') return true // Bypass API check for Pro users
+    if (modelId === 'gpt-4.1-nano') return true // GPT 4.1 Nano is free for everyone
     const model = AI_MODELS.find(m => m.id === modelId)
     return model ? apiKeys.some(k => k.service === model.provider) : false
   }
