@@ -12,8 +12,10 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - api/webhooks (webhook endpoints)
+     * - $ (base URL / landing page)
+     * Run on all other routes to protect them
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks/stripe|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

@@ -2,6 +2,9 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  // Debug logging
+  console.log('🔍 Middleware running on:', request.nextUrl.pathname)
+  
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -37,6 +40,8 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   
+  // Debug logging
+  console.log('👤 User authenticated:', !!user)
 
   // Create a new headers object with the existing headers
   // Given an incoming request...
@@ -53,17 +58,16 @@ export async function updateSession(request: NextRequest) {
 
   supabaseResponse.cookies.set('show-banner', 'false')
 
-
-  if (
-    !user &&
-    !request.nextUrl.pathname.startsWith('/') &&
-    !request.nextUrl.pathname.startsWith('/')
-  ) {
-    // no user, potentially respond by redirecting the user to the login page
+  // Check if user is authenticated and redirect if needed
+  if (!user) {
+    // If no user is authenticated, redirect to the landing page
+    console.log('🚫 Redirecting unauthenticated user to landing page')
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
   }
+
+  console.log('✅ User authenticated, allowing access')
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
