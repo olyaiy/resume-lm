@@ -69,8 +69,11 @@ const PROVIDERS: {
 const AI_MODELS: AIModel[] = [
   // Stable models
   { id: 'gpt-4.1', name: 'GPT 4.1', provider: 'openai', unstable: false },
+  { id: 'gpt-4.1-mini', name: 'GPT 4.1 Mini', provider: 'openai', unstable: false },
+  { id: 'gpt-4.1-nano', name: 'GPT 4.1 Nano', provider: 'openai', unstable: false },
   { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', unstable: false },
   { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', unstable: false },
+  { id: 'claude-4-sonnet-20250514', name: 'Claude 4 Sonnet', provider: 'anthropic', unstable: false },
   { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', unstable: false },
   { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', unstable: false },
   { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', unstable: false },
