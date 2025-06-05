@@ -284,6 +284,11 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
               >
                 <div className="flex items-center gap-2">
                   {model.name}
+                  {model.id === 'gpt-4.1-nano' && (
+                    <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
+                      Free
+                    </span>
+                  )}
                   {model.unstable && (
                     <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
                       Unstable
