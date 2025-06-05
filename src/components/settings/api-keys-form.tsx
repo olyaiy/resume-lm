@@ -51,13 +51,13 @@ const PROVIDERS: {
     apiLink: 'https://console.groq.com/keys',
     unstable: false 
   },
-  // Unstable providers
   {
     id: 'google',
     name: 'Google',
-    apiLink: 'https://ai.google/get-started/products/',
-    unstable: true
+    apiLink: 'https://ai.google.dev/',
+    unstable: false 
   },
+  // Unstable providers
   { 
     id: 'deepseek', 
     name: 'DeepSeek', 
@@ -80,6 +80,8 @@ const AI_MODELS: AIModel[] = [
   { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', provider: 'groq', unstable: false },
   { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B ', provider: 'groq', unstable: false },
   { id: 'gemma2-9b-it', name: 'Gemma 2 9B', provider: 'groq', unstable: false },
+  { id: 'gemini-2.5-pro-preview-05-06', name: 'Gemini 2.5 Pro preview 0506', provider: 'google', unstable: false },
+  { id: 'gemini-2.5-flash-preview-04-17', name: 'Gemini 2.5 Flash Preview', provider: 'google', unstable: false },
 
   // Unstable models
   { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google', unstable: true },

@@ -105,6 +105,18 @@ const AI_MODELS: AIModel[] = [
     shortName: 'GPT 4o mini',
     provider: 'openai'
   },
+  { 
+    id: 'gemini-2.5-pro-preview-05-06', 
+    name: 'Gemini 2.5 Pro preview 0506', 
+    shortName: 'Gemini 2.5 Pro',
+    provider: 'google'
+  },
+  { 
+    id: 'gemini-2.5-flash-preview-04-17', 
+    name: 'Gemini 2.5 Flash Preview', 
+    shortName: 'Gemini 2.5 Flash',
+    provider: 'google'
+  },
   // { 
   //   id: 'deepseek-chat', 
   //   name: 'DeepSeek Chat', 
