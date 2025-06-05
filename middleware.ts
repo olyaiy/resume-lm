@@ -15,7 +15,7 @@ export const config = {
      * - api/webhooks (webhook endpoints)
      * - $ (base URL / landing page)
      * Run on all other routes to protect them
-     */
+     g*/
     '/((?!_next/static|_next/image|favicon.ico|api/webhooks|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
