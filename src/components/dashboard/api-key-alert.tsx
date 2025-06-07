@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Sparkles, Crown, Zap, ArrowRight } from "lucide-react"
+import { Sparkles, Crown, ArrowRight } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button"
@@ -65,16 +65,13 @@ export function ApiKeyAlert() {
                 
                 <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
                   <span className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-teal-500" />
-                    Unlimited resumes
+                    🚀 Unlimited resumes
                   </span>
                   <span className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-teal-500" />
-                    All AI models
+                    🤖 Latest AI models
                   </span>
                   <span className="flex items-center gap-1">
-                    <Zap className="w-3 h-3 text-teal-500" />
-                    No API setup
+                    ⚡ Instant access
                   </span>
                 </div>
 
@@ -85,7 +82,7 @@ export function ApiKeyAlert() {
 
               {/* CTA */}
               <div className="flex-shrink-0">
-                <ProUpgradeButton className="bg-gradient-to-r from-teal-600 to-cyan-600 hover:from-teal-700 hover:to-cyan-700 text-white px-4 py-2 rounded-lg font-medium shadow-lg shadow-teal-500/25 transition-all duration-200 hover:shadow-xl hover:shadow-teal-500/30 hover:scale-105 text-sm" />
+                <ProUpgradeButton />
               </div>
             </div>
 
