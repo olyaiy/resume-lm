@@ -76,7 +76,7 @@ export function ApiKeyAlert() {
                 </div>
 
                 <p className="text-xs text-gray-500">
-                  Start your 7-day free trial • Join 1,000+ professionals using Pro
+                  Join 1,000+ professionals using Pro
                 </p>
               </div>
 
