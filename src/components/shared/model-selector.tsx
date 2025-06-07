@@ -1,5 +1,6 @@
 'use client'
 
+import Image from "next/image"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import { ServiceName } from "@/lib/types"
@@ -22,38 +23,44 @@ const PROVIDERS: {
   id: ServiceName; 
   name: string; 
   apiLink: string;
-  unstable: boolean
+  unstable: boolean;
+  logo?: string;
 }[] = [
   { 
     id: 'anthropic', 
     name: 'Anthropic',
     apiLink: 'https://console.anthropic.com/',
-    unstable: false
+    unstable: false,
+    logo: '/logos/claude.png'
   },
   { 
     id: 'openai', 
     name: 'OpenAI',
     apiLink: 'https://platform.openai.com/api-keys',
-    unstable: false
+    unstable: false,
+    logo: '/logos/chat-gpt-logo.png'
   },
   {
     id: 'groq', 
     name: 'Groq', 
     apiLink: 'https://console.groq.com/keys',
     unstable: false 
+    // No logo available
   },
   {
     id: 'google',
     name: 'Google',
     apiLink: 'https://ai.google.dev/',
-    unstable: false 
+    unstable: false,
+    logo: '/logos/gemini-logo.webp'
   },
   // Unstable providers
   { 
     id: 'deepseek', 
     name: 'DeepSeek', 
     apiLink: 'https://platform.deepseek.com/api-keys',
-    unstable: true 
+    unstable: true,
+    logo: '/logos/deepseek-logo-full.png'
   }
 ]
 
@@ -163,41 +170,66 @@ export function ModelSelector({
           <div key={group.provider}>
             <SelectGroup>
               <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
-                {group.name}
+                <div className="flex items-center gap-2">
+                  {PROVIDERS.find(p => p.id === group.provider)?.logo && (
+                    <Image
+                      src={PROVIDERS.find(p => p.id === group.provider)!.logo!}
+                      alt={`${group.name} logo`}
+                      width={14}
+                      height={14}
+                      className="rounded-sm"
+                    />
+                  )}
+                  {group.name}
+                </div>
               </SelectLabel>
-              {group.models.map((model) => (
-                <SelectItem 
-                  key={model.id} 
-                  value={model.id}
-                  disabled={!isModelSelectable(model.id)}
-                  className={cn(
-                    "transition-colors",
-                    !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    {model.name}
-                    {model.id === 'claude-4-sonnet-20250514' && (
-                      <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium">
-                        Recommended
-                      </span>
+              {group.models.map((model) => {
+                const provider = PROVIDERS.find(p => p.id === model.provider)
+                return (
+                  <SelectItem 
+                    key={model.id} 
+                    value={model.id}
+                    disabled={!isModelSelectable(model.id)}
+                    className={cn(
+                      "transition-colors",
+                      !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
                     )}
-                    {model.id === 'gpt-4.1-nano' && (
-                      <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
-                        Free
-                      </span>
-                    )}
-                    {model.unstable && (
-                      <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
-                        Unstable
-                      </span>
-                    )}
-                  </div>
-                  {!isModelSelectable(model.id) && (
-                    <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
-                  )}
-                </SelectItem>
-              ))}
+                  >
+                    <div className="flex items-center gap-3 w-full">
+                      {provider?.logo && (
+                        <Image
+                          src={provider.logo}
+                          alt={`${provider.name} logo`}
+                          width={16}
+                          height={16}
+                          className="rounded-sm flex-shrink-0"
+                        />
+                      )}
+                      <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <span className="truncate">{model.name}</span>
+                        {model.id === 'claude-4-sonnet-20250514' && (
+                          <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                            Recommended
+                          </span>
+                        )}
+                        {model.id === 'gpt-4.1-nano' && (
+                          <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                            Free
+                          </span>
+                        )}
+                        {model.unstable && (
+                          <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                            Unstable
+                          </span>
+                        )}
+                      </div>
+                      {!isModelSelectable(model.id) && (
+                        <span className="ml-1.5 text-muted-foreground flex-shrink-0">(No API Key set)</span>
+                      )}
+                    </div>
+                  </SelectItem>
+                )
+              })}
             </SelectGroup>
             {groupIndex < getModelsByProvider().length - 1 && (
               <SelectSeparator />
