@@ -10,7 +10,6 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
 import { ModelSelector, type ApiKey, AI_MODELS, PROVIDERS } from "@/components/shared/model-selector"
-import Image from "next/image"
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
