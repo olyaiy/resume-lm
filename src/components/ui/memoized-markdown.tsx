@@ -75,9 +75,7 @@ const MemoizedMarkdownBlock = memo(
               if (inline)
                 return <code className="bg-muted px-1 py-0.5 rounded text-xs">{children}</code>;
               return (
-                <div className="not-prose">
-                  <code className={className}>{children}</code>
-                </div>
+                <code className={`not-prose ${className || ''}`}>{children}</code>
               );
             },
             // Proper blockquote styling

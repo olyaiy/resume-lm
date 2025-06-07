@@ -216,26 +216,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
           }
         });
 
-        return (
-          <div key={toolCall.toolCallId} className="mt-2 w-[90%]">
-            <WholeResumeSuggestion
-              onReject={() => {
-                // Restore the original resume state
-                if (originalResume) {
-                  // Restore basic info
-                  Object.keys(originalResume).forEach((key) => {
-                    if (key !== 'id' && key !== 'created_at' && key !== 'updated_at') {
-                      onResumeChange(key as keyof Resume, originalResume[key as keyof Resume]);
-                    }
-                  });
-                  
-                  // Clear the stored original state
-                  setOriginalResume(null);
-                }
-              }}
-            />
-          </div>
-        );
+        // Add a simple, serializable result for the tool call
+        addToolResult({ toolCallId: toolCall.toolCallId, result: { success: true } });
       }
     },
     onFinish() {
@@ -586,11 +568,6 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                               }
 
                               if (config.type === 'whole_resume') {
-                                // Store original state before applying updates
-                                if (!originalResume) {
-                                  setOriginalResume({ ...resume });
-                                }
-
                                 return (
                                   <div key={toolCallId} className="mt-2 w-[90%]">
                                     <WholeResumeSuggestion
