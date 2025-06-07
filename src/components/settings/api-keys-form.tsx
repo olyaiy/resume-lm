@@ -7,7 +7,7 @@ import { Eye, EyeOff, Copy, Check } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
 
@@ -257,7 +257,26 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     setTimeout(() => setCopiedKey(null), 1000)
   }
 
-  
+  // Helper function to group models by provider
+  const getModelsByProvider = () => {
+    const providerOrder = ['anthropic', 'openai', 'groq', 'google', 'deepseek']
+    const grouped = new Map<ServiceName, AIModel[]>()
+    
+    // Group models by provider
+    AI_MODELS.forEach(model => {
+      if (!grouped.has(model.provider)) {
+        grouped.set(model.provider, [])
+      }
+      grouped.get(model.provider)!.push(model)
+    })
+    
+    // Return in ordered format
+    return providerOrder.map(provider => ({
+      provider: provider as ServiceName,
+      name: PROVIDERS.find(p => p.id === provider)?.name || provider,
+      models: grouped.get(provider as ServiceName) || []
+    })).filter(group => group.models.length > 0)
+  }
 
   return (
     <div className="space-y-6">
@@ -274,33 +293,50 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
             <SelectValue placeholder="Select an AI model" />
           </SelectTrigger>
           <SelectContent>
-            {AI_MODELS.map((model) => (
-              <SelectItem 
-                key={model.id} 
-                value={model.id}
-                disabled={!isModelSelectable(model.id)}
-                className={cn(
-                  "transition-colors",
-                  !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
+            {getModelsByProvider().map((group, groupIndex) => (
+              <div key={group.provider}>
+                <SelectGroup>
+                  <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
+                    {group.name}
+                  </SelectLabel>
+                  {group.models.map((model) => (
+                    <SelectItem 
+                      key={model.id} 
+                      value={model.id}
+                      disabled={!isModelSelectable(model.id)}
+                      className={cn(
+                        "transition-colors",
+                        !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
+                      )}
+                    >
+                      <div className="flex items-center gap-2">
+                        {model.name}
+                        {model.id === 'claude-4-sonnet-20250514' && (
+                          <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium">
+                            Recommended
+                          </span>
+                        )}
+                        {model.id === 'gpt-4.1-nano' && (
+                          <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
+                            Free
+                          </span>
+                        )}
+                        {model.unstable && (
+                          <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
+                            Unstable
+                          </span>
+                        )}
+                      </div>
+                      {!isModelSelectable(model.id) && (
+                        <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+                {groupIndex < getModelsByProvider().length - 1 && (
+                  <SelectSeparator />
                 )}
-              >
-                <div className="flex items-center gap-2">
-                  {model.name}
-                  {model.id === 'gpt-4.1-nano' && (
-                    <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
-                      Free
-                    </span>
-                  )}
-                  {model.unstable && (
-                    <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
-                      Unstable
-                    </span>
-                  )}
-                </div>
-                {!isModelSelectable(model.id) && (
-                  <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
-                )}
-              </SelectItem>
+              </div>
             ))}
           </SelectContent>
         </Select>
