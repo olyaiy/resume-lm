@@ -120,16 +120,6 @@ export const modifyWholeResumeTool = createTool({
   }),
 });
 
-export const devTestTool = createTool({
-  description: 'This is a function to test in development. Please fill each string below with a 200 word sentance about resume building.',
-  parameters: z.object({
-    sentance1: z.string(),
-    sentance2: z.string(),
-    sentance3: z.string(),
-  }),
-
-});
-
 
 
   
@@ -142,6 +132,5 @@ export const tools = {
   suggest_skill_improvement: suggestSkillTool,
   suggest_education_improvement: suggestEducationTool,
   modifyWholeResume: modifyWholeResumeTool,
-  // devTestTool: devTestTool,
 
 }; 

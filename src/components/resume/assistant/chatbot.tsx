@@ -217,7 +217,9 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
         });
 
         // Add a simple, serializable result for the tool call
-        addToolResult({ toolCallId: toolCall.toolCallId, result: { success: true } });
+        const result = { success: true };
+        addToolResult({ toolCallId: toolCall.toolCallId, result });
+        return result;
       }
     },
     onFinish() {
