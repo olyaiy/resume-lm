@@ -2,9 +2,13 @@
 
 import Image from "next/image"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
+import { Crown, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 interface ApiKey {
   service: ServiceName
@@ -97,6 +101,76 @@ interface ModelSelectorProps {
   showToast?: boolean
 }
 
+// Helper component for unavailable model popover
+function UnavailableModelPopover({ children, model }: { children: React.ReactNode; model: AIModel }) {
+  const provider = PROVIDERS.find(p => p.id === model.provider)
+  
+  return (
+    <Popover>
+      <PopoverTrigger asChild>
+        {children}
+      </PopoverTrigger>
+      <PopoverContent className="w-80" side="right" align="start">
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <h4 className="font-semibold text-sm">
+              {model.name} is not available
+            </h4>
+            <p className="text-xs text-muted-foreground">
+              To use this model, you need either a Pro subscription or a {provider?.name} API key.
+            </p>
+          </div>
+          
+          <div className="space-y-2">
+            {/* Pro Option */}
+            <div className="p-3 rounded-lg border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-purple-100/30">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown className="w-4 h-4 text-purple-600" />
+                <span className="text-sm font-medium text-purple-800">Recommended</span>
+                <span className="px-2 py-0.5 text-xs font-medium bg-purple-100 text-purple-700 rounded-full">
+                  Instant Access
+                </span>
+              </div>
+              <p className="text-xs text-purple-700 mb-2">
+                Get unlimited access to all AI models without managing API keys
+              </p>
+              <Link href="/pricing">
+                <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700 h-7 text-xs">
+                  Upgrade to Pro
+                </Button>
+              </Link>
+            </div>
+
+            {/* API Key Option */}
+            <div className="p-3 rounded-lg border border-gray-200/50 bg-gray-50/30">
+              <div className="flex items-center gap-2 mb-2">
+                <span className="text-sm font-medium text-gray-800">Alternative</span>
+              </div>
+              <p className="text-xs text-gray-600 mb-2">
+                Add your own {provider?.name} API key to use this model
+              </p>
+              <div className="flex gap-2">
+                <Link href="/settings" className="flex-1">
+                  <Button size="sm" variant="outline" className="w-full h-7 text-xs">
+                    Configure API Key
+                  </Button>
+                </Link>
+                {provider?.apiLink && (
+                  <Link href={provider.apiLink} target="_blank" rel="noopener noreferrer">
+                    <Button size="sm" variant="ghost" className="h-7 px-2">
+                      <ArrowRight className="w-3 h-3" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </PopoverContent>
+    </Popover>
+  )
+}
+
 export function ModelSelector({ 
   value, 
   onValueChange, 
@@ -185,14 +259,16 @@ export function ModelSelector({
               </SelectLabel>
               {group.models.map((model) => {
                 const provider = PROVIDERS.find(p => p.id === model.provider)
-                return (
+                const isSelectable = isModelSelectable(model.id)
+                
+                const selectItem = (
                   <SelectItem 
                     key={model.id} 
                     value={model.id}
-                    disabled={!isModelSelectable(model.id)}
+                    disabled={!isSelectable}
                     className={cn(
                       "transition-colors",
-                      !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
+                      !isSelectable ? 'opacity-50' : 'hover:bg-purple-50'
                     )}
                   >
                     <div className="flex items-center gap-3 w-full">
@@ -223,12 +299,23 @@ export function ModelSelector({
                           </span>
                         )}
                       </div>
-                      {!isModelSelectable(model.id) && (
+                      {!isSelectable && (
                         <span className="ml-1.5 text-muted-foreground flex-shrink-0">(No API Key set)</span>
                       )}
                     </div>
                   </SelectItem>
                 )
+
+                // Wrap unavailable models with popover
+                if (!isSelectable) {
+                  return (
+                    <UnavailableModelPopover key={model.id} model={model}>
+                      {selectItem}
+                    </UnavailableModelPopover>
+                  )
+                }
+
+                return selectItem
               })}
             </SelectGroup>
             {groupIndex < getModelsByProvider().length - 1 && (
