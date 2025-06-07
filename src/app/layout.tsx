@@ -79,15 +79,19 @@ export default async function RootLayout({
   const { data: { user } } = await supabase.auth.getUser();
   
   let showUpgradeButton = false;
+  let isProPlan = false;
   if (user) {
     try {
       const profile = await getSubscriptionStatus();
+      const isPro = profile?.subscription_plan?.toLowerCase()?.includes('pro') && 
+                    profile?.subscription_status !== 'canceled';
+      isProPlan = isPro || false;
       // Show upgrade button only if user is not on pro plan or has canceled
-      showUpgradeButton = !profile?.subscription_plan?.toLowerCase()?.includes('pro') || 
-                         profile?.subscription_status === 'canceled';
+      showUpgradeButton = !isPro;
     } catch {
       // If there's an error, we'll show the upgrade button by default
       showUpgradeButton = true;
+      isProPlan = false;
     }
   }
 
@@ -95,7 +99,7 @@ export default async function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <div className="relative min-h-screen h-screen flex flex-col">
-          {user && <AppHeader showUpgradeButton={showUpgradeButton} />}
+          {user && <AppHeader showUpgradeButton={showUpgradeButton} isProPlan={isProPlan} />}
           {/* Padding for header and footer */}
           <main className="py-14 h-full">
             {children}

@@ -41,7 +41,13 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
     if (storedModel) {
       setDefaultModel(storedModel);
     } else if (isProPlan) {
-      setDefaultModel('llama-3.3-70b-versatile');
+      // Set the best default model for Pro users
+      setDefaultModel('claude-4-sonnet-20250514');
+      localStorage.setItem('resumelm-default-model', 'claude-4-sonnet-20250514');
+    } else {
+      // Set free model for non-Pro users
+      setDefaultModel('gpt-4.1-nano');
+      localStorage.setItem('resumelm-default-model', 'gpt-4.1-nano');
     }
   }, [isProPlan]);
 
@@ -80,43 +86,43 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
           ) : (
             <>
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center gap-2">
+              <nav className="hidden md:flex items-center gap-1 lg:gap-2">
                 {showUpgradeButton && (
                   <>
                     <ProUpgradeButton />
-                    <div className="h-4 w-px bg-purple-200/50 ml-3" />
+                    <div className="h-4 w-px bg-purple-200/50 ml-2 lg:ml-3" />
                   </>
                 )}
                 
-                {/* Compact Model Selector */}
-                <div className="mr-3">
+                {/* Model Selector - Responsive Width */}
+                <div className="mr-2 lg:mr-3">
                   <ModelSelector
                     value={defaultModel}
                     onValueChange={handleModelChange}
                     apiKeys={apiKeys}
                     isProPlan={isProPlan}
-                    className="w-[180px] h-8 text-xs"
+                    className="w-[220px] lg:w-[260px] xl:w-[300px] h-8 text-xs"
                     placeholder="Select AI model"
                     showToast={false}
                   />
                 </div>
                 <div className="h-4 w-px bg-purple-200/50" />
                 
-                <div className="flex items-center px-3 py-1">
+                <div className="flex items-center px-2 lg:px-3 py-1">
                   <Link 
                     href="/profile" 
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1",
+                      "flex items-center gap-1.5 px-2 lg:px-3 py-1",
                       "text-sm font-medium text-purple-600/80 hover:text-purple-800",
                       "transition-colors duration-200"
                     )}
                   >
                     <User className="h-4 w-4" />
-                    <span className="hidden sm:inline">Profile</span>
+                    <span className="hidden lg:inline">Profile</span>
                   </Link>
-                  <div className="mx-2 h-4 w-px bg-purple-200/50" />
+                  <div className="mx-1 lg:mx-2 h-4 w-px bg-purple-200/50" />
                   <SettingsButton />
-                  <div className="mx-2 h-4 w-px bg-purple-200/50" />
+                  <div className="mx-1 lg:mx-2 h-4 w-px bg-purple-200/50" />
                   <LogoutButton />
                 </div>
               </nav>
@@ -142,7 +148,7 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
                         onValueChange={handleModelChange}
                         apiKeys={apiKeys}
                         isProPlan={isProPlan}
-                        className="w-full h-9"
+                        className="w-full h-10 text-sm"
                         placeholder="Select AI model"
                         showToast={false}
                       />

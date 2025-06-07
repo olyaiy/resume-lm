@@ -40,10 +40,13 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     if (storedModel) {
       setDefaultModel(storedModel)
     } else if (isProPlan) {
-      // Set default model to llama-3.3-70b-versatile for pro users if they haven't chosen one
-      setDefaultModel('llama-3.3-70b-versatile')
-      // Save to local storage so this preference persists
-      localStorage.setItem(MODEL_STORAGE_KEY, 'llama-3.3-70b-versatile')
+      // Set the best default model for Pro users
+      setDefaultModel('claude-4-sonnet-20250514')
+      localStorage.setItem(MODEL_STORAGE_KEY, 'claude-4-sonnet-20250514')
+    } else {
+      // Set free model for non-Pro users
+      setDefaultModel('gpt-4.1-nano')
+      localStorage.setItem(MODEL_STORAGE_KEY, 'gpt-4.1-nano')
     }
 
     // Mark initial load as complete
@@ -95,13 +98,15 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const autoSelectModel = () => {
       switch (service) {
         case 'anthropic':
-          return 'claude-3-sonnet-20240229'
+          return 'claude-4-sonnet-20250514'
         case 'openai':
           return 'gpt-4o'
         case 'deepseek':
           return 'deepseek-chat'
         case 'groq':
-          return 'llama-3.1-8b-instruct'
+          return 'llama-3.3-70b-versatile'
+        case 'google':
+          return 'gemini-2.5-pro-preview-05-06'
         default:
           return defaultModel
       }

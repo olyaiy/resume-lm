@@ -253,7 +253,7 @@ export function ModelSelector({
       )}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent>
+      <SelectContent className="min-w-[300px] max-w-[400px]">
         {getModelsByProvider().map((group, groupIndex) => (
           <div key={group.provider}>
             <SelectGroup>
@@ -296,19 +296,19 @@ export function ModelSelector({
                         />
                       )}
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="truncate">{model.name}</span>
+                        <span className="truncate font-medium">{model.name}</span>
                         {model.id === 'claude-4-sonnet-20250514' && (
-                          <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
                             Recommended
                           </span>
                         )}
                         {model.id === 'gpt-4.1-nano' && (
-                          <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
                             Free
                           </span>
                         )}
                         {model.unstable && (
-                          <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium flex-shrink-0">
+                          <span className="text-amber-700 bg-amber-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
                             Unstable
                           </span>
                         )}
