@@ -1,5 +1,6 @@
 'use client'
 
+import React, { useState } from "react"
 import Image from "next/image"
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
@@ -103,14 +104,27 @@ interface ModelSelectorProps {
 
 // Helper component for unavailable model popover
 function UnavailableModelPopover({ children, model }: { children: React.ReactNode; model: AIModel }) {
+  const [open, setOpen] = useState(false)
   const provider = PROVIDERS.find(p => p.id === model.provider)
   
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        {children}
+        <div
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
+          className="w-full"
+        >
+          {children}
+        </div>
       </PopoverTrigger>
-      <PopoverContent className="w-80" side="right" align="start">
+      <PopoverContent 
+        className="w-80 z-50" 
+        side="right" 
+        align="start"
+        onMouseEnter={() => setOpen(true)}
+        onMouseLeave={() => setOpen(false)}
+      >
         <div className="space-y-3">
           <div className="space-y-1">
             <h4 className="font-semibold text-sm">
