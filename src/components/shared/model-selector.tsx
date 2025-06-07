@@ -42,10 +42,10 @@ const PROVIDERS: {
   },
   {
     id: 'groq', 
-    name: 'Groq', 
+    name: 'Llama', 
     apiLink: 'https://console.groq.com/keys',
-    unstable: false 
-    // No logo available
+    unstable: false,
+    logo: '/logos/llama-logo.png'
   },
   {
     id: 'google',

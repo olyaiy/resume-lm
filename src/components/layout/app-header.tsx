@@ -10,15 +10,45 @@ import { PageTitle } from "./page-title";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ModelSelector, type ApiKey } from "@/components/shared/model-selector";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
   showUpgradeButton?: boolean;
+  isProPlan?: boolean;
 }
 
-export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps) {
+export function AppHeader({ children, showUpgradeButton = true, isProPlan = false }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [defaultModel, setDefaultModel] = useState<string>('');
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+
+  // Load stored data on mount
+  useEffect(() => {
+    // Load API keys
+    const storedKeys = localStorage.getItem('resumelm-api-keys');
+    if (storedKeys) {
+      try {
+        setApiKeys(JSON.parse(storedKeys));
+      } catch (error) {
+        console.error('Error loading API keys:', error);
+      }
+    }
+
+    // Load default model
+    const storedModel = localStorage.getItem('resumelm-default-model');
+    if (storedModel) {
+      setDefaultModel(storedModel);
+    } else if (isProPlan) {
+      setDefaultModel('llama-3.3-70b-versatile');
+    }
+  }, [isProPlan]);
+
+  const handleModelChange = (modelId: string) => {
+    setDefaultModel(modelId);
+    localStorage.setItem('resumelm-default-model', modelId);
+  };
 
   return (
     <header className="h-14 border-b backdrop-blur-xl fixed top-0 left-0 right-0 z-40 shadow-md border-purple-200/50">
@@ -58,6 +88,20 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                   </>
                 )}
                 
+                {/* Compact Model Selector */}
+                <div className="mr-3">
+                  <ModelSelector
+                    value={defaultModel}
+                    onValueChange={handleModelChange}
+                    apiKeys={apiKeys}
+                    isProPlan={isProPlan}
+                    className="w-[180px] h-8 text-xs"
+                    placeholder="Select AI model"
+                    showToast={false}
+                  />
+                </div>
+                <div className="h-4 w-px bg-purple-200/50" />
+                
                 <div className="flex items-center px-3 py-1">
                   <Link 
                     href="/profile" 
@@ -90,6 +134,20 @@ export function AppHeader({ children, showUpgradeButton = true }: AppHeaderProps
                   </SheetHeader>
                   <div className="flex flex-col gap-4 pt-6">
                     {showUpgradeButton && <ProUpgradeButton className="w-full" />}
+                    
+                    {/* Mobile Model Selector */}
+                    <div className="px-1">
+                      <ModelSelector
+                        value={defaultModel}
+                        onValueChange={handleModelChange}
+                        apiKeys={apiKeys}
+                        isProPlan={isProPlan}
+                        className="w-full h-9"
+                        placeholder="Select AI model"
+                        showToast={false}
+                      />
+                    </div>
+                    
                     <Link
                       href="/profile"
                       onClick={() => setIsOpen(false)}
