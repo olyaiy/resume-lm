@@ -7,87 +7,12 @@ import { Eye, EyeOff, Copy, Check } from "lucide-react"
 import { useState, useEffect } from "react"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, SelectGroup, SelectLabel, SelectSeparator } from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
-
-interface ApiKey {
-  service: ServiceName
-  key: string
-  addedAt: string
-}
-
-interface AIModel {
-  id: string
-  name: string
-  provider: ServiceName
-  unstable: boolean
-}
+import { ModelSelector, type ApiKey, AI_MODELS, PROVIDERS } from "@/components/shared/model-selector"
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
-
-const PROVIDERS: { 
-  id: ServiceName; 
-  name: string; 
-  apiLink: string;
-  unstable: boolean
-}[] = [
-  { 
-    id: 'anthropic', 
-    name: 'Anthropic',
-    apiLink: 'https://console.anthropic.com/',
-    unstable: false
-  },
-  { 
-    id: 'openai', 
-    name: 'OpenAI',
-    apiLink: 'https://platform.openai.com/api-keys',
-    unstable: false
-  },
-  {
-    id: 'groq', 
-    name: 'Groq', 
-    apiLink: 'https://console.groq.com/keys',
-    unstable: false 
-  },
-  {
-    id: 'google',
-    name: 'Google',
-    apiLink: 'https://ai.google.dev/',
-    unstable: false 
-  },
-  // Unstable providers
-  { 
-    id: 'deepseek', 
-    name: 'DeepSeek', 
-    apiLink: 'https://platform.deepseek.com/api-keys',
-    unstable: true 
-  }
-]
-
-const AI_MODELS: AIModel[] = [
-  // Stable models
-  { id: 'gpt-4.1', name: 'GPT 4.1', provider: 'openai', unstable: false },
-  { id: 'gpt-4.1-mini', name: 'GPT 4.1 Mini', provider: 'openai', unstable: false },
-  { id: 'gpt-4.1-nano', name: 'GPT 4.1 Nano', provider: 'openai', unstable: false },
-  { id: 'gpt-4o', name: 'GPT-4o', provider: 'openai', unstable: false },
-  { id: 'gpt-4o-mini', name: 'GPT-4o Mini', provider: 'openai', unstable: false },
-  { id: 'claude-4-sonnet-20250514', name: 'Claude 4 Sonnet', provider: 'anthropic', unstable: false },
-  { id: 'claude-3-7-sonnet-20250219', name: 'Claude 3.7 Sonnet', provider: 'anthropic', unstable: false },
-  { id: 'claude-3-5-sonnet-20241022', name: 'Claude 3.5 Sonnet', provider: 'anthropic', unstable: false },
-  { id: 'claude-3-5-haiku-20241022', name: 'Claude 3.5 Haiku', provider: 'anthropic', unstable: false },
-  { id: 'llama-3.1-8b-instant', name: 'Llama 3.1 8B', provider: 'groq', unstable: false },
-  { id: 'llama-3.3-70b-versatile', name: 'Llama 3.3 70B ', provider: 'groq', unstable: false },
-  { id: 'gemma2-9b-it', name: 'Gemma 2 9B', provider: 'groq', unstable: false },
-  { id: 'gemini-2.5-pro-preview-05-06', name: 'Gemini 2.5 Pro preview 0506', provider: 'google', unstable: false },
-  { id: 'gemini-2.5-flash-preview-04-17', name: 'Gemini 2.5 Flash Preview', provider: 'google', unstable: false },
-
-  // Unstable models
-  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash', provider: 'google', unstable: true },
-  { id: 'gemini-2.0-flash-lite-preview-02-05', name: 'Gemini 2.0 Flash Lite', provider: 'google', unstable: true },
-  { id: 'deepseek-chat', name: 'DeepSeek Chat (V3)', provider: 'deepseek', unstable: true }
-]
 
 export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
@@ -227,55 +152,13 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     apiKeys.find(k => k.service === service)
 
   const handleModelChange = (modelId: string) => {
-    const selectedModel = AI_MODELS.find(m => m.id === modelId)
-    if (!selectedModel) return
-
-    // Skip key check for Pro users and free models
-    if (!isProPlan && modelId !== 'gpt-4.1-nano') {
-      const hasRequiredKey = apiKeys.some(k => k.service === selectedModel.provider)
-      if (!hasRequiredKey) {
-        toast.error(`Please add your ${selectedModel.provider === 'openai' ? 'OpenAI' : 'Anthropic'} API key first`)
-        return
-      }
-    }
-
     setDefaultModel(modelId)
-    toast.success('Default model updated successfully')
-  }
-
-  const isModelSelectable = (modelId: string) => {
-    if (isProPlan) return true // Bypass check for Pro users
-    if (modelId === 'gpt-4.1-nano') return true // GPT 4.1 Nano is free for everyone
-    const model = AI_MODELS.find(m => m.id === modelId)
-    if (!model) return false
-    return apiKeys.some(k => k.service === model.provider)
   }
 
   const handleCopyKey = (service: ServiceName, key: string) => {
     navigator.clipboard.writeText(key)
     setCopiedKey(service)
     setTimeout(() => setCopiedKey(null), 1000)
-  }
-
-  // Helper function to group models by provider
-  const getModelsByProvider = () => {
-    const providerOrder = ['anthropic', 'openai', 'groq', 'google', 'deepseek']
-    const grouped = new Map<ServiceName, AIModel[]>()
-    
-    // Group models by provider
-    AI_MODELS.forEach(model => {
-      if (!grouped.has(model.provider)) {
-        grouped.set(model.provider, [])
-      }
-      grouped.get(model.provider)!.push(model)
-    })
-    
-    // Return in ordered format
-    return providerOrder.map(provider => ({
-      provider: provider as ServiceName,
-      name: PROVIDERS.find(p => p.id === provider)?.name || provider,
-      models: grouped.get(provider as ServiceName) || []
-    })).filter(group => group.models.length > 0)
   }
 
   return (
@@ -288,58 +171,14 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
         <p className="text-sm text-muted-foreground mt-2 mb-3">
           This model will be used for all AI operations throughout the application. All models require their respective API keys.
         </p>
-        <Select value={defaultModel} onValueChange={handleModelChange}>
-          <SelectTrigger className="w-full mt-1 bg-white/50 border-purple-600/60 hover:border-purple-600/80 focus:border-purple-600/40 transition-colors">
-            <SelectValue placeholder="Select an AI model" />
-          </SelectTrigger>
-          <SelectContent>
-            {getModelsByProvider().map((group, groupIndex) => (
-              <div key={group.provider}>
-                <SelectGroup>
-                  <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
-                    {group.name}
-                  </SelectLabel>
-                  {group.models.map((model) => (
-                    <SelectItem 
-                      key={model.id} 
-                      value={model.id}
-                      disabled={!isModelSelectable(model.id)}
-                      className={cn(
-                        "transition-colors",
-                        !isModelSelectable(model.id) ? 'opacity-50' : 'hover:bg-purple-50'
-                      )}
-                    >
-                      <div className="flex items-center gap-2">
-                        {model.name}
-                        {model.id === 'claude-4-sonnet-20250514' && (
-                          <span className="text-blue-700 bg-blue-100 px-2 py-1 rounded-full text-xs font-medium">
-                            Recommended
-                          </span>
-                        )}
-                        {model.id === 'gpt-4.1-nano' && (
-                          <span className="text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full text-xs font-medium">
-                            Free
-                          </span>
-                        )}
-                        {model.unstable && (
-                          <span className="text-amber-700 bg-amber-100 px-2 py-1 rounded-full text-xs font-medium">
-                            Unstable
-                          </span>
-                        )}
-                      </div>
-                      {!isModelSelectable(model.id) && (
-                        <span className="ml-1.5 text-muted-foreground">(No API Key set)</span>
-                      )}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-                {groupIndex < getModelsByProvider().length - 1 && (
-                  <SelectSeparator />
-                )}
-              </div>
-            ))}
-          </SelectContent>
-        </Select>
+        <ModelSelector
+          value={defaultModel}
+          onValueChange={handleModelChange}
+          apiKeys={apiKeys}
+          isProPlan={isProPlan}
+          className="w-full mt-1"
+          placeholder="Select an AI model"
+        />
       </div>
 
       {/* API Keys Card */}
