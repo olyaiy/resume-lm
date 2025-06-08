@@ -1,9 +1,10 @@
 'use client'
 
-import React from 'react'
+import React, { useOptimistic, useTransition } from 'react'
 import { ResumeSortControls, type SortOption, type SortDirection } from '../resume/management/resume-sort-controls';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogTitle, AlertDialogTrigger } from '@radix-ui/react-alert-dialog';
-import { Copy, FileText, Link, Trash2 } from 'lucide-react';
+import { Copy, FileText, Trash2 } from 'lucide-react';
+import Link from 'next/link';
 import { MiniResumePreview } from '../resume/shared/mini-resume-preview';
 import { copyResume, deleteResume } from '@/utils/actions/resumes/actions';
 import { Button } from '../ui/button';
@@ -12,6 +13,7 @@ import { AlertDialogFooter } from '../ui/alert-dialog';
 import { AlertDialogHeader } from '../ui/alert-dialog';
 import { CreateResumeDialog } from '../resume/management/dialogs/create-resume-dialog';
 import type { Resume, Profile } from '@/lib/types';
+import { toast } from 'sonner';
 
 
 interface ResumeRowProps {
@@ -21,11 +23,35 @@ interface ResumeRowProps {
   baseDirection: SortDirection;
 }
 
-const resumeRow= ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowProps) => {
+const ResumeRow = ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowProps) => {
     console.log('baseResumes', baseResumes);
     console.log('profile', profile);
     console.log('baseSort', baseSort);
     console.log('baseDirection', baseDirection);
+
+    // Optimistic state for resume deletion
+    const [optimisticResumes, setOptimisticResumes] = useOptimistic(
+      baseResumes,
+      (state, deletedResumeId: string) => 
+        state.filter(resume => resume.id !== deletedResumeId)
+    );
+
+    const [isPending, startTransition] = useTransition();
+
+    // Optimistic delete handler
+    const handleDeleteResume = async (resumeId: string) => {
+      startTransition(() => {
+        setOptimisticResumes(resumeId);
+      });
+
+      try {
+        await deleteResume(resumeId);
+        toast.success('Resume deleted successfully');
+      } catch (error) {
+        toast.error('Failed to delete resume. Please try again.');
+        console.error('Delete resume error:', error);
+      }
+    };
   return (
     <div className="relative">
     <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4">
@@ -48,7 +74,7 @@ const resumeRow= ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowPr
 
 
 
-        {baseResumes.map((resume) => (
+        {optimisticResumes.map((resume) => (
           <div key={resume.id} className="group relative">
             <AlertDialog>
               <div className="relative">
@@ -114,17 +140,13 @@ const resumeRow= ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowPr
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                  <form action={async () => {
-                    // 'use server';
-                    await deleteResume(resume.id);
-                  }}>
-                    <AlertDialogAction
-                      type="submit"
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                    >
-                      Delete
-                    </AlertDialogAction>
-                  </form>
+                  <AlertDialogAction
+                    onClick={() => handleDeleteResume(resume.id)}
+                    disabled={isPending}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
+                  >
+                    {isPending ? 'Deleting...' : 'Delete'}
+                  </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
             </AlertDialog>
@@ -142,7 +164,7 @@ const resumeRow= ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowPr
             <span className="text-sm font-medium text-purple-600">Create Base Resume</span>
           </button>
         </CreateResumeDialog>
-        {baseResumes.length === 0 && baseResumes.length + 1 < 4 && (
+        {optimisticResumes.length === 0 && optimisticResumes.length + 1 < 4 && (
           <div className="col-span-2 md:col-span-1" />
         )}
       </div>
@@ -151,4 +173,4 @@ const resumeRow= ({ baseResumes, profile, baseSort, baseDirection }: ResumeRowPr
   )
 }
 
-export default resumeRow
+export default ResumeRow

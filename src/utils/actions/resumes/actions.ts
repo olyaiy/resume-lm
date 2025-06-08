@@ -327,13 +327,16 @@ export async function copyResume(resumeId: string): Promise<Resume> {
     throw new Error('Resume not found or access denied');
   }
 
-  const { ...resumeDataToCopy } = sourceResume;
-
+  // Exclude auto-generated fields that shouldn't be copied
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: _id, created_at: _created_at, updated_at: _updated_at, ...resumeDataToCopy } = sourceResume;
 
   const newResume = {
     ...resumeDataToCopy,
     name: `${sourceResume.name} (Copy)`,
     user_id: user.id,
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString(),
   };
 
   const { data: copiedResume, error: createError } = await supabase
