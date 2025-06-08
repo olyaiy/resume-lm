@@ -110,7 +110,7 @@ interface ApiTestResult {
       });
   
       const response = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        model: "gpt-4.1-nano",
         messages: [{ role: 'user', content: 'Say this is a test!' }],
         response_format: { type: "text" },
         temperature: 1,

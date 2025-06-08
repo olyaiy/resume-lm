@@ -66,7 +66,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
       apiKey: process.env.OPENAI_API_KEY,
       compatibility: 'strict',
     
-    })('gpt-4o-mini');
+    })('gpt-4.1-nano');
   }
 
   // Existing logic for free users

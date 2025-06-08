@@ -16,9 +16,12 @@ import { WorkExperience } from "@/lib/types";
 // Base Resume Creation 
 // TEXT CONTENT -> RESUME
 export async function convertTextToResume(prompt: string, existingResume: Resume, targetRole: string, config?: AIConfig) {
-  const subscriptionPlan = await getSubscriptionPlan();
-  const isPro = subscriptionPlan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _unusedConfig = config; // Keep parameter for future use
+  
+  // Hardcode to use gpt-4.1-nano for now
+  const hardcodedConfig = { model: 'gpt-4.1-nano', apiKeys: [] };
+  const aiClient = initializeAIClient(hardcodedConfig);
 
   
   const { object } = await generateObject({

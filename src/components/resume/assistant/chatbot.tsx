@@ -74,7 +74,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
-  const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4o-mini');
+  const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4.1-nano');
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -561,8 +561,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                                         "bg-white/60 border border-purple-200/60",
                                         "shadow-sm backdrop-blur-sm"
                                       )}>
-                                        {args.message}
-                                        <p>Read Resume ✅</p>
+                                        <p>Read Resume ({args.sections?.join(', ') || 'all'}) ✅</p>
                                       </div>
                                     </div>
                                   </div>
