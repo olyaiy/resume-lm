@@ -164,7 +164,15 @@ const ExperienceSection = memo(function ExperienceSection({
           <View style={styles.experienceHeader}>
             <View>
               <Text style={styles.companyName}>{processText(experience.position, true)}</Text>
-              <Text style={styles.jobTitle}>{processText(experience.company, true)}</Text>
+              <View style={styles.companyLocationRow}>
+                <Text style={styles.jobTitle}>{processText(experience.company, true)}</Text>
+                {experience.location && (
+                  <>
+                    <Text style={styles.bulletSeparator}>•</Text>
+                    <Text style={styles.locationText}>{experience.location}</Text>
+                  </>
+                )}
+              </View>
             </View>
             <Text style={styles.dateRange}>{experience.date}</Text>
           </View>
@@ -429,6 +437,15 @@ function createResumeStyles(settings: Resume['document_settings'] = {
     jobTitle: {
       fontSize: document_font_size,
       color: '#111827',
+    },
+    companyLocationRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: 4,
+    },
+    locationText: {
+      fontSize: document_font_size,
+      color: '#374151',
     },
     dateRange: {
       fontSize: document_font_size,

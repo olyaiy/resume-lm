@@ -297,7 +297,7 @@ export function ModelSelector({
                       )}
                       <div className="flex items-center gap-2 min-w-0 flex-1">
                         <span className="truncate font-medium">{model.name}</span>
-                        {model.id === 'claude-4-sonnet-20250514' && (
+                        {(model.id === 'claude-4-sonnet-20250514' || model.id === 'gpt-4o') && (
                           <span className="text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
                             Recommended
                           </span>
