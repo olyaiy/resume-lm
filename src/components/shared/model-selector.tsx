@@ -148,7 +148,7 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
               <p className="text-xs text-purple-700 mb-2">
                 Get unlimited access to all AI models without managing API keys
               </p>
-              <Link href="/pricing">
+              <Link href="/subscription">
                 <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700 h-7 text-xs">
                   Upgrade to Pro
                 </Button>

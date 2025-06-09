@@ -27,12 +27,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   // Handle Pro subscription with environment variables
   if (isPro && config) {
 
-  
     const { model } = config;
-
-    // if (useThinking) {
-    //   return createOpenAI({ apiKey: process.env.OPENAI_API_KEY })('o1-mini');
-    // }
     
     if (model.startsWith('claude')) {
       if (!process.env.ANTHROPIC_API_KEY) throw new Error('Anthropic API key not found');

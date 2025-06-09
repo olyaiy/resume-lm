@@ -204,7 +204,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
             ) : (
               <>
                 <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
-                <p className="mt-1">For enhanced security, consider <a href="/pricing" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
+                <p className="mt-1">For enhanced security, consider <a href="/subscription" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
               </>
             )}
           </div>
