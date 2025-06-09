@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, Copy, FileText, Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Trash2, Copy, FileText, Sparkles, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -14,6 +14,12 @@ import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/p
 import { useState, useOptimistic, useTransition } from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { toast } from 'sonner';
+
+// Extended Resume type for optimistic updates
+interface OptimisticResume extends Resume {
+  isOptimistic?: boolean;
+  originalId?: string;
+}
 
 interface ResumesSectionProps {
   type: 'base' | 'tailored';
@@ -45,13 +51,30 @@ export function ResumesSection({
 }: ResumesSectionProps) {
   // Optimistic state for deletions
   const [optimisticResumes, removeOptimisticResume] = useOptimistic(
-    resumes,
+    resumes as OptimisticResume[],
     (state, deletedResumeId: string) => 
       state.filter(resume => resume.id !== deletedResumeId)
   );
 
+  // Optimistic state for copying
+  const [optimisticCopiedResumes, addOptimisticCopy] = useOptimistic(
+    optimisticResumes,
+    (state, newResume: OptimisticResume) => {
+      // Insert the new resume after the original
+      const originalIndex = state.findIndex(r => r.id === newResume.originalId);
+      if (originalIndex >= 0) {
+        const newState = [...state];
+        newState.splice(originalIndex + 1, 0, newResume);
+        return newState;
+      }
+      // If original not found, append to beginning
+      return [newResume, ...state];
+    }
+  );
+
   const [, startTransition] = useTransition();
   const [deletingResumes, setDeletingResumes] = useState<Set<string>>(new Set());
+  const [copyingResumes, setCopyingResumes] = useState<Set<string>>(new Set());
 
   const config = {
     base: {
@@ -114,9 +137,51 @@ export function ResumesSection({
     }
   };
 
+  // Handle optimistic copying
+  const handleCopyResume = async (sourceResume: OptimisticResume) => {
+    // Add to copying set for visual feedback
+    setCopyingResumes(prev => new Set(prev).add(sourceResume.id));
+    
+    // Create optimistic copy
+    const optimisticCopy: OptimisticResume = {
+      ...sourceResume,
+      id: `temp-${Date.now()}-${Math.random()}`, // Temporary unique ID
+      name: `${sourceResume.name} (Copy)`,
+      isOptimistic: true,
+      originalId: sourceResume.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    
+    // Optimistically add to UI immediately
+    addOptimisticCopy(optimisticCopy);
+    
+    // Show immediate feedback
+    toast.loading(`Copying "${sourceResume.name}"...`, { id: `copy-${sourceResume.id}` });
+    
+    try {
+      // Call server action in background
+      await copyResume(sourceResume.id);
+      
+      // Success feedback - the real resume will appear via revalidation
+      toast.success(`"${sourceResume.name}" copied successfully`, { id: `copy-${sourceResume.id}` });
+    } catch (error) {
+      // On error, the optimistic update will automatically rollback
+      console.error('Failed to copy resume:', error);
+      toast.error(`Failed to copy "${sourceResume.name}". Please try again.`, { id: `copy-${sourceResume.id}` });
+    } finally {
+      // Remove from copying set
+      setCopyingResumes(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(sourceResume.id);
+        return newSet;
+      });
+    }
+  };
+
   const startIndex = (pagination.currentPage - 1) * pagination.itemsPerPage;
   const endIndex = startIndex + pagination.itemsPerPage;
-  const paginatedResumes = optimisticResumes.slice(startIndex, endIndex);
+  const paginatedResumes = optimisticCopiedResumes.slice(startIndex, endIndex);
 
   function handlePageChange(page: number) {
     setPagination(prev => ({
@@ -266,6 +331,136 @@ export function ResumesSection({
     </Link>
   );
 
+  // Resume Card Component with optimistic states
+  const ResumeCard = ({ resume }: { resume: OptimisticResume }) => {
+    const isDeleting = deletingResumes.has(resume.id);
+    const isCopying = copyingResumes.has(resume.originalId || resume.id);
+
+    return (
+      <div className={cn(
+        "group relative transition-all duration-300",
+        isDeleting && "opacity-50 pointer-events-none",
+        resume.isOptimistic && "animate-in slide-in-from-top-1 duration-300"
+      )}>
+        <AlertDialog>
+          <div className="relative">
+            {/* Resume Preview - Conditional Link */}
+            {resume.isOptimistic ? (
+              // Not clickable during processing
+              <div className={cn(
+                "cursor-wait",
+                "relative"
+              )}>
+                <MiniResumePreview
+                  name={resume.name}
+                  type={type}
+                  target_role={resume.target_role}
+                  createdAt={resume.created_at}
+                  className={cn(
+                    "transition-all duration-300 opacity-60",
+                    "pointer-events-none"
+                  )}
+                />
+                {/* Loading Overlay */}
+                <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                  <div className="flex flex-col items-center gap-2">
+                    <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+                    <span className="text-xs font-medium text-blue-600">Updating...</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              // Normal clickable resume
+              <Link href={`/resumes/${resume.id}`}>
+                <MiniResumePreview
+                  name={resume.name}
+                  type={type}
+                  target_role={resume.target_role}
+                  createdAt={resume.created_at}
+                  className="hover:-translate-y-1 transition-transform duration-300"
+                />
+              </Link>
+            )}
+
+            {/* Action Buttons */}
+            {!resume.isOptimistic && (
+              <div className="absolute bottom-2 left-2 flex gap-2">
+                <AlertDialogTrigger asChild>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    disabled={isDeleting}
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      "bg-rose-50/80 hover:bg-rose-100/80",
+                      "text-rose-600 hover:text-rose-700",
+                      "border border-rose-200/60",
+                      "shadow-sm",
+                      "transition-all duration-300",
+                      "hover:scale-105 hover:shadow-md",
+                      "hover:-translate-y-0.5",
+                      isDeleting && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </AlertDialogTrigger>
+                <Button
+                  size="icon"
+                  variant="ghost"
+                  onClick={() => {
+                    startTransition(() => {
+                      handleCopyResume(resume);
+                    });
+                  }}
+                  disabled={isDeleting || isCopying}
+                  className={cn(
+                    "h-8 w-8 rounded-lg",
+                    "bg-teal-50/80 hover:bg-teal-100/80",
+                    "text-teal-600 hover:text-teal-700",
+                    "border border-teal-200/60",
+                    "shadow-sm",
+                    "transition-all duration-300",
+                    "hover:scale-105 hover:shadow-md",
+                    "hover:-translate-y-0.5",
+                    (isDeleting || isCopying) && "opacity-50 cursor-not-allowed"
+                  )}
+                >
+                  {isCopying ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+              </div>
+            )}
+          </div>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Resume</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => {
+                  startTransition(() => {
+                    handleDeleteResume(resume.id, resume.name);
+                  });
+                }}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
+    );
+  };
+
   return (
     <div className="relative ">
       <div className="flex flex-col gap-4 w-full">
@@ -284,7 +479,7 @@ export function ResumesSection({
         </div>
 
         {/* Desktop Pagination (hidden on mobile) */}
-        {optimisticResumes.length > pagination.itemsPerPage && (
+        {optimisticCopiedResumes.length > pagination.itemsPerPage && (
           <div className="hidden md:flex w-full items-start justify-start -mt-4">
             <Pagination className="flex justify-end">
               <PaginationContent className="gap-1">
@@ -300,9 +495,9 @@ export function ResumesSection({
                   </Button>
                 </PaginationItem>
                 
-                {Array.from({ length: Math.ceil(optimisticResumes.length / pagination.itemsPerPage) }).map((_, index) => {
+                {Array.from({ length: Math.ceil(optimisticCopiedResumes.length / pagination.itemsPerPage) }).map((_, index) => {
                   const pageNumber = index + 1;
-                  const totalPages = Math.ceil(optimisticResumes.length / pagination.itemsPerPage);
+                  const totalPages = Math.ceil(optimisticCopiedResumes.length / pagination.itemsPerPage);
                   
                   if (
                     pageNumber === 1 || 
@@ -346,7 +541,7 @@ export function ResumesSection({
                     variant="ghost"
                     size="sm"
                     onClick={() => handlePageChange(pagination.currentPage + 1)}
-                    disabled={pagination.currentPage === Math.ceil(optimisticResumes.length / pagination.itemsPerPage)}
+                    disabled={pagination.currentPage === Math.ceil(optimisticCopiedResumes.length / pagination.itemsPerPage)}
                     className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground"
                   >
                     <ChevronRight className="h-4 w-4" />
@@ -377,97 +572,11 @@ export function ResumesSection({
             <div className="w-full">
               <Carousel className="w-full">
                 <CarouselContent>
-                  {paginatedResumes.map((resume) => {
-                    const isDeleting = deletingResumes.has(resume.id);
-                    return (
-                      <CarouselItem key={resume.id} className="basis-[85%] pl-4">
-                        <div className={cn(
-                          "group relative transition-all duration-300",
-                          isDeleting && "opacity-50 pointer-events-none"
-                        )}>
-                          <AlertDialog>
-                            <div className="relative">
-                              <Link href={`/resumes/${resume.id}`}>
-                                <MiniResumePreview
-                                  name={resume.name}
-                                  type={type}
-                                  target_role={resume.target_role}
-                                  createdAt={resume.created_at}
-                                  className="hover:-translate-y-1 transition-transform duration-300"
-                                />
-                              </Link>
-                              <div className="absolute bottom-2 left-2 flex gap-2">
-                                <AlertDialogTrigger asChild>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    disabled={isDeleting}
-                                    className={cn(
-                                      "h-8 w-8 rounded-lg",
-                                      "bg-rose-50/80 hover:bg-rose-100/80",
-                                      "text-rose-600 hover:text-rose-700",
-                                      "border border-rose-200/60",
-                                      "shadow-sm",
-                                      "transition-all duration-300",
-                                      "hover:scale-105 hover:shadow-md",
-                                      "hover:-translate-y-0.5",
-                                      isDeleting && "opacity-50 cursor-not-allowed"
-                                    )}
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </Button>
-                                </AlertDialogTrigger>
-                                <form action={async () => {
-                                  await copyResume(resume.id);
-                                }}>
-                                  <Button
-                                    size="icon"
-                                    variant="ghost"
-                                    type="submit"
-                                    disabled={isDeleting}
-                                    className={cn(
-                                      "h-8 w-8 rounded-lg",
-                                      "bg-teal-50/80 hover:bg-teal-100/80",
-                                      "text-teal-600 hover:text-teal-700",
-                                      "border border-teal-200/60",
-                                      "shadow-sm",
-                                      "transition-all duration-300",
-                                      "hover:scale-105 hover:shadow-md",
-                                      "hover:-translate-y-0.5",
-                                      isDeleting && "opacity-50 cursor-not-allowed"
-                                    )}
-                                  >
-                                    <Copy className="h-4 w-4" />
-                                  </Button>
-                                </form>
-                              </div>
-                            </div>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Resume</AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => {
-                                    startTransition(() => {
-                                      handleDeleteResume(resume.id, resume.name);
-                                    });
-                                  }}
-                                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                                >
-                                  Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
-                        </div>
-                      </CarouselItem>
-                    );
-                  })}
+                  {paginatedResumes.map((resume) => (
+                    <CarouselItem key={resume.id} className="basis-[85%] pl-4">
+                      <ResumeCard resume={resume} />
+                    </CarouselItem>
+                  ))}
                 </CarouselContent>
                 <div className="hidden sm:block">
                   <CarouselPrevious className="absolute -left-12 top-1/2" />
@@ -486,96 +595,10 @@ export function ResumesSection({
             <LimitReachedCard />
           )}
 
-          {paginatedResumes.map((resume) => {
-            const isDeleting = deletingResumes.has(resume.id);
-            return (
-              <div key={resume.id} className={cn(
-                "group relative transition-all duration-300",
-                isDeleting && "opacity-50 pointer-events-none"
-              )}>
-                <AlertDialog>
-                  <div className="relative">
-                    <Link href={`/resumes/${resume.id}`}>
-                      <MiniResumePreview
-                        name={resume.name}
-                        type={type}
-                        target_role={resume.target_role}
-                        createdAt={resume.created_at}
-                        className="hover:-translate-y-1 transition-transform duration-300"
-                      />
-                    </Link>
-                    <div className="absolute bottom-2 left-2 flex gap-2">
-                      <AlertDialogTrigger asChild>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          disabled={isDeleting}
-                          className={cn(
-                            "h-8 w-8 rounded-lg",
-                            "bg-rose-50/80 hover:bg-rose-100/80",
-                            "text-rose-600 hover:text-rose-700",
-                            "border border-rose-200/60",
-                            "shadow-sm",
-                            "transition-all duration-300",
-                            "hover:scale-105 hover:shadow-md",
-                            "hover:-translate-y-0.5",
-                            isDeleting && "opacity-50 cursor-not-allowed"
-                          )}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <form action={async () => {
-                        await copyResume(resume.id);
-                      }}>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          type="submit"
-                          disabled={isDeleting}
-                          className={cn(
-                            "h-8 w-8 rounded-lg",
-                            "bg-teal-50/80 hover:bg-teal-100/80",
-                            "text-teal-600 hover:text-teal-700",
-                            "border border-teal-200/60",
-                            "shadow-sm",
-                            "transition-all duration-300",
-                            "hover:scale-105 hover:shadow-md",
-                            "hover:-translate-y-0.5",
-                            isDeleting && "opacity-50 cursor-not-allowed"
-                          )}
-                        >
-                          <Copy className="h-4 w-4" />
-                        </Button>
-                      </form>
-                    </div>
-                  </div>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Delete Resume</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Are you sure you want to delete &quot;{resume.name}&quot;? This action cannot be undone.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => {
-                          startTransition(() => {
-                            handleDeleteResume(resume.id, resume.name);
-                          });
-                        }}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Delete
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              </div>
-            );
-          })}
-          {optimisticResumes.length === 0 && optimisticResumes.length + 1 < 4 && (
+          {paginatedResumes.map((resume) => (
+            <ResumeCard key={resume.id} resume={resume} />
+          ))}
+          {optimisticCopiedResumes.length === 0 && optimisticCopiedResumes.length + 1 < 4 && (
             <div className="col-span-2 md:col-span-1" />
           )}
         </div>
