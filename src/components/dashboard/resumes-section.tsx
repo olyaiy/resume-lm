@@ -60,14 +60,7 @@ export function ResumesSection({
   const [optimisticCopiedResumes, addOptimisticCopy] = useOptimistic(
     optimisticResumes,
     (state, newResume: OptimisticResume) => {
-      // Insert the new resume after the original
-      const originalIndex = state.findIndex(r => r.id === newResume.originalId);
-      if (originalIndex >= 0) {
-        const newState = [...state];
-        newState.splice(originalIndex + 1, 0, newResume);
-        return newState;
-      }
-      // If original not found, append to beginning
+      // Always add new resume at the beginning (leftmost position)
       return [newResume, ...state];
     }
   );
@@ -365,7 +358,7 @@ export function ResumesSection({
                 <div className="absolute inset-0 bg-white/90 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
                   <div className="flex flex-col items-center gap-2">
                     <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
-                    <span className="text-xs font-medium text-blue-600">Updating...</span>
+                    <span className="text-xs font-medium text-blue-600">Copying...</span>
                   </div>
                 </div>
               </div>
