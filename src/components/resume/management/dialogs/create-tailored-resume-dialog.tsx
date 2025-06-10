@@ -4,11 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Sparkles,ArrowRight, Plus } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { createTailoredResume } from "@/utils/actions/resumes/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/actions/jobs/ai";
@@ -20,6 +18,7 @@ import { BaseResumeSelector } from "../base-resume-selector";
 import { ImportMethodRadioGroup } from "../import-method-radio-group";
 import { JobDescriptionInput } from "../job-description-input";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
+import { cn } from "@/lib/utils";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -33,6 +32,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const [jobDescription, setJobDescription] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [currentStep, setCurrentStep] = useState<CreationStep>('analyzing');
+  const [dialogStep, setDialogStep] = useState<1 | 2>(1);
   const [importOption, setImportOption] = useState<'import-profile' | 'ai'>('ai');
   const [isBaseResumeInvalid, setIsBaseResumeInvalid] = useState(false);
   const [isJobDescriptionInvalid, setIsJobDescriptionInvalid] = useState(false);
@@ -40,6 +40,23 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const [errorMessage, setErrorMessage] = useState({ title: '', description: '' });
   const router = useRouter();
   
+
+  const handleNext = () => {
+    if (!selectedBaseResume) {
+      setIsBaseResumeInvalid(true);
+      toast({
+        title: "Required Field Missing",
+        description: "Please select a base resume to continue.",
+        variant: "destructive",
+      });
+      return;
+    }
+    setDialogStep(2);
+  };
+
+  const handleBack = () => {
+    setDialogStep(1);
+  };
 
   const handleCreate = async () => {
     // Validate required fields
@@ -278,6 +295,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
     setOpen(newOpen);
     if (newOpen) {
       setJobDescription('');
+      setDialogStep(1);
       setImportOption('ai');
       setSelectedBaseResume(baseResumes?.[0]?.id || '');
     }
@@ -289,31 +307,20 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className={cn(
-          "sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto",
-          "bg-gradient-to-b backdrop-blur-2xl border-white/40 shadow-2xl",
-          "from-pink-50/95 to-rose-50/90 border-pink-200/40",
-          "rounded-xl"
-        )}>
+        <DialogContent className="sm:max-w-[500px] bg-white border border-gray-200 shadow-lg rounded-lg">
           <div className="flex flex-col items-center justify-center p-8 space-y-4">
-            <div className="p-4 rounded-2xl bg-pink-50/50 border border-pink-100">
-              <Sparkles className="w-8 h-8 text-pink-600" />
+            <div className="p-3 rounded-lg bg-pink-50 border border-pink-100">
+              <Sparkles className="w-6 h-6 text-pink-600" />
             </div>
             <div className="text-center space-y-2 max-w-sm">
-              <h3 className="font-semibold text-base text-pink-950">No Base Resumes Found</h3>
-              <p className="text-xs text-muted-foreground">
+              <h3 className="font-semibold text-lg text-gray-900">No Base Resumes Found</h3>
+              <p className="text-sm text-gray-600">
                 You need to create a base resume first before you can create a tailored version.
               </p>
             </div>
             {profile ? (
               <CreateBaseResumeDialog profile={profile}>
-                <Button
-                  className={cn(
-                    "mt-2 text-white shadow-lg hover:shadow-xl transition-all duration-500",
-                    "bg-gradient-to-r from-purple-600 to-indigo-600",
-                    "hover:from-purple-700 hover:to-indigo-700"
-                  )}
-                >
+                <Button className="mt-2 bg-purple-600 hover:bg-purple-700 text-white">
                   <Plus className="w-4 h-4 mr-2" />
                   Create Base Resume
                 </Button>
@@ -335,12 +342,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         <DialogTrigger asChild>
           {children}
         </DialogTrigger>
-        <DialogContent className={cn(
-          "sm:max-w-[800px] p-0 max-h-[90vh] overflow-y-auto",
-          "bg-gradient-to-b backdrop-blur-2xl border-white/40 shadow-2xl",
-          "from-pink-50/95 to-rose-50/90 border-pink-200/40",
-          "rounded-xl"
-        )}>
+        <DialogContent className="sm:max-w-[700px] p-0 max-h-[85vh] overflow-y-auto bg-white border border-gray-200 shadow-lg rounded-lg">
           <style jsx global>{`
             @keyframes shake {
               0%, 100% { transform: translateX(0); }
@@ -351,131 +353,177 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
               animation: shake 0.8s cubic-bezier(.36,.07,.19,.97) both;
             }
           `}</style>
-          {/* Header Section with Icon */}
-          <div className={cn(
-            "relative px-8 pt-6 pb-4 border-b top-0 z-10 bg-white/50 backdrop-blur-xl",
-            "border-pink-200/20"
-          )}>
-            <div className="flex items-center gap-4">
-              <div className={cn(
-                "p-3 rounded-xl transition-all duration-300",
-                "bg-gradient-to-br from-pink-100/80 to-rose-100/80 border border-pink-200/60"
-              )}>
-                <Sparkles className="w-6 h-6 text-pink-600" />
+          
+          {/* Header */}
+          <div className="px-6 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-pink-50 border border-pink-100">
+                <Sparkles className="w-5 h-5 text-pink-600" />
               </div>
-              <div>
-                <DialogTitle className="text-xl font-semibold text-pink-950">
+              <div className="flex-1">
+                <DialogTitle className="text-lg font-semibold text-gray-900">
                   Create Tailored Resume
                 </DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-muted-foreground">
-                  Create a tailored resume based on an existing base resume
+                <DialogDescription className="text-sm text-gray-600">
+                  {dialogStep === 1 
+                    ? "Choose a base resume to start with"
+                    : "Configure job details and tailoring method"
+                  }
                 </DialogDescription>
               </div>
+              {/* Step indicator */}
+              <div className="flex items-center gap-2">
+                <div className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                  dialogStep >= 1 ? "bg-pink-600 text-white" : "bg-gray-200 text-gray-600"
+                )}>
+                  1
+                </div>
+                <div className={cn(
+                  "w-4 h-0.5",
+                  dialogStep >= 2 ? "bg-pink-600" : "bg-gray-200"
+                )} />
+                <div className={cn(
+                  "w-6 h-6 rounded-full flex items-center justify-center text-xs font-medium",
+                  dialogStep >= 2 ? "bg-pink-600 text-white" : "bg-gray-200 text-gray-600"
+                )}>
+                  2
+                </div>
+              </div>
             </div>
           </div>
 
-          {/* Content Section */}
-          <div className="px-8 py-6 space-y-6 bg-gradient-to-b from-pink-50/30 to-rose-50/30 relative">
+          {/* Content */}
+          <div className="px-6 py-6 min-h-[300px] relative">
             {isCreating && <LoadingOverlay currentStep={currentStep} />}
-            <div className="space-y-6">
-              <div className="space-y-2">
-                <Label 
-                  htmlFor="base-resume"
-                  className="text-base font-medium text-pink-950"
-                >
-                  Select Base Resume <span className="text-red-500">*</span>
-                </Label>
+            
+            {dialogStep === 1 && (
+              <div className="space-y-6">
+                                 <div className="text-center space-y-2">
+                   <h3 className="text-xl font-semibold text-gray-900">Select Your Base Resume</h3>
+                   <p className="text-gray-600">Choose which resume you&apos;d like to tailor for this job</p>
+                 </div>
+                
+                <div className="space-y-4">
+                  <BaseResumeSelector
+                    baseResumes={baseResumes}
+                    selectedResumeId={selectedBaseResume}
+                    onResumeSelect={setSelectedBaseResume}
+                    isInvalid={isBaseResumeInvalid}
+                  />
+                </div>
+                
+                                 {/* Resume Flow Visualization */}
+                 <div className="flex items-center justify-center gap-4 py-6">
+                   {selectedBaseResume ? (
+                     <>
+                       <MiniResumePreview
+                         name={baseResumes.find(r => r.id === selectedBaseResume)?.name || ''}
+                         type="base"
+                         className="w-20 hover:-translate-y-1 transition-transform duration-300"
+                       />
+                       <div className="flex flex-col items-center gap-1">
+                         <ArrowRight className="w-5 h-5 text-pink-600 animate-pulse" />
+                         <span className="text-xs font-medium text-gray-500">Will Become</span>
+                       </div>
+                       <MiniResumePreview
+                         name="Tailored Resume"
+                         type="tailored"
+                         className="w-20 hover:-translate-y-1 transition-transform duration-300"
+                       />
+                     </>
+                   ) : (
+                     <div className="flex flex-col items-center justify-center p-6 rounded-lg border-2 border-dashed border-gray-200">
+                       <div className="text-sm font-medium text-gray-500">
+                         Select a base resume to see preview
+                       </div>
+                     </div>
+                   )}
+                 </div>
 
-                {/* Base Resume Selector */}
-                <BaseResumeSelector
-                  baseResumes={baseResumes}
-                  selectedResumeId={selectedBaseResume}
-                  onResumeSelect={setSelectedBaseResume}
-                  isInvalid={isBaseResumeInvalid}
+                 {selectedBaseResume && (
+                   <div className="p-4 bg-pink-50 border border-pink-200 rounded-lg">
+                     <div className="text-sm text-pink-800">
+                       <span className="font-medium">Selected:</span> {baseResumes.find(r => r.id === selectedBaseResume)?.name}
+                     </div>
+                     <div className="text-xs text-pink-600 mt-1">
+                       This resume will be used as the foundation for your tailored version
+                     </div>
+                   </div>
+                 )}
+              </div>
+            )}
+
+            {dialogStep === 2 && (
+              <div className="space-y-5">
+                {/* Show selected base resume */}
+                <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
+                  <div className="text-sm text-pink-800">
+                    <span className="font-medium">Base Resume:</span> {baseResumes.find(r => r.id === selectedBaseResume)?.name}
+                  </div>
+                </div>
+
+                
+
+                {/* Job Description Input */}
+                <JobDescriptionInput
+                  value={jobDescription}
+                  onChange={setJobDescription}
+                  isInvalid={isJobDescriptionInvalid}
+                />
+
+                {/* Import Method Selection */}
+                <ImportMethodRadioGroup
+                  value={importOption}
+                  onChange={setImportOption}
                 />
               </div>
-
-              {/* Resume Selection Visualization */}
-              <div className="flex items-center justify-center gap-4">
-                {selectedBaseResume && baseResumes ? (
-                  <>
-                    <MiniResumePreview
-                      name={baseResumes.find(r => r.id === selectedBaseResume)?.name || ''}
-                      type="base"
-                      className="w-24 hover:-translate-y-1 transition-transform duration-300"
-                    />
-                    <div className="flex flex-col items-center gap-1">
-                      <ArrowRight className="w-6 h-6 text-pink-600 animate-pulse" />
-                      <span className="text-xs font-medium text-muted-foreground">Tailored For Job</span>
-                    </div>
-                    <MiniResumePreview
-                      name="Tailored Resume"
-                      type="tailored"
-                      className="w-24 hover:-translate-y-1 transition-transform duration-300"
-                    />
-                  </>
-                ) : (
-                  <div className="flex flex-col items-center justify-center p-4 rounded-lg border-2 border-dashed border-pink-100">
-                    <div className="text-sm font-medium text-muted-foreground">
-                      Select a base resume to see preview
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <JobDescriptionInput
-                value={jobDescription}
-                onChange={setJobDescription}
-                isInvalid={isJobDescriptionInvalid}
-              />
-
-              <ImportMethodRadioGroup
-                value={importOption}
-                onChange={setImportOption}
-              />
-            </div>
+            )}
           </div>
 
-          {/* Footer Section */}
-          <div className={cn(
-            "px-8 py-4 border-t sticky bottom-0 z-10 bg-white/50 backdrop-blur-xl",
-            "border-pink-200/20 bg-white/40"
-          )}>
-            <div className="flex justify-end gap-3">
-              <Button 
-                variant="outline" 
-                onClick={() => setOpen(false)}
-                className={cn(
-                  "border-gray-200 text-gray-600",
-                  "hover:bg-white/60",
-                  "hover:border-pink-200"
+          {/* Footer */}
+          <div className="px-6 py-4 border-t border-gray-100 bg-gray-50/50">
+            <div className="flex justify-between">
+              <div>
+                {dialogStep === 2 && (
+                  <Button variant="outline" onClick={handleBack} size="sm">
+                    Back
+                  </Button>
                 )}
-              >
-                Cancel
-              </Button>
-              <Button 
-                onClick={handleCreate} 
-                disabled={isCreating}
-                className={cn(
-                  "text-white shadow-lg hover:shadow-xl transition-all duration-500",
-                  "bg-gradient-to-r from-pink-600 to-rose-600 hover:from-pink-700 hover:to-rose-700"
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setOpen(false)} size="sm">
+                  Cancel
+                </Button>
+                {dialogStep === 1 && (
+                  <Button onClick={handleNext} size="sm" className="bg-pink-600 hover:bg-pink-700">
+                    Next
+                  </Button>
                 )}
-              >
-                {isCreating ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creating...
-                  </>
-                ) : (
-                  'Create Resume'
+                {dialogStep === 2 && (
+                  <Button 
+                    onClick={handleCreate} 
+                    disabled={isCreating}
+                    size="sm"
+                    className="bg-pink-600 hover:bg-pink-700 text-white"
+                  >
+                    {isCreating ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating...
+                      </>
+                    ) : (
+                      'Create Resume'
+                    )}
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
           </div>
         </DialogContent>
       </Dialog>
 
-      {/* Error Alert Dialog */}
+      {/* Error Dialog */}
       <ApiErrorDialog
         open={showErrorDialog}
         onOpenChange={setShowErrorDialog}
@@ -489,7 +537,6 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
           window.location.href = '/settings';
         }}
       />
-
     </>
   );
 } 
