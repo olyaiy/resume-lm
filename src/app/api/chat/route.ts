@@ -21,7 +21,32 @@ interface ChatRequest {
 
 export async function POST(req: Request) {
   try {
-    const { messages, target_role, config, job }: ChatRequest = await req.json();
+    const requestBody = await req.json();
+    
+    // Console log the entire request to see what's being sent
+    console.log('=== FULL CHAT REQUEST ===');
+    console.log('Request body keys:', Object.keys(requestBody));
+    console.log('Messages count:', requestBody.messages?.length || 0);
+    console.log('Target role:', requestBody.target_role);
+    console.log('Config:', JSON.stringify(requestBody.config, null, 2));
+    console.log('Job:', requestBody.job ? 'Job object present' : 'No job');
+    console.log('Resume present:', !!requestBody.resume);
+    
+    if (requestBody.resume) {
+      console.log('Resume keys:', Object.keys(requestBody.resume));
+      console.log('Resume first_name:', requestBody.resume.first_name);
+      console.log('Resume last_name:', requestBody.resume.last_name);
+      console.log('Resume target_role:', requestBody.resume.target_role);
+      console.log('Work experience count:', requestBody.resume.work_experience?.length || 0);
+      console.log('Education count:', requestBody.resume.education?.length || 0);
+      console.log('Skills count:', requestBody.resume.skills?.length || 0);
+      console.log('Projects count:', requestBody.resume.projects?.length || 0);
+    }
+    
+    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
+    console.log('=== END CHAT REQUEST ===');
+
+    const { messages, target_role, config, job, resume }: ChatRequest = requestBody;
 
     // Get subscription plan and user ID
     const { plan, id } = await getSubscriptionPlan(true);
@@ -91,7 +116,8 @@ export async function POST(req: Request) {
          - Use 'modifyWholeResume' when changing multiple sections at once
 
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
-      The target role is ${target_role}. The job is ${job}.
+      The target role is ${target_role}. The job is ${job ? JSON.stringify(job) : 'No job specified'}.
+      Current resume summary: ${resume ? `${resume.first_name} ${resume.last_name} - ${resume.target_role}` : 'No resume data'}.
       `,
       messages,
       maxSteps: 5,
