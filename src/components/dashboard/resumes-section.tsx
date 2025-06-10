@@ -398,33 +398,75 @@ export function ResumesSection({
                     <Trash2 className="h-4 w-4" />
                   </Button>
                 </AlertDialogTrigger>
-                <Button
-                  size="icon"
-                  variant="ghost"
-                  onClick={() => {
-                    startTransition(() => {
-                      handleCopyResume(resume);
-                    });
-                  }}
-                  disabled={isDeleting || isCopying}
-                  className={cn(
-                    "h-8 w-8 rounded-lg",
-                    "bg-teal-50/80 hover:bg-teal-100/80",
-                    "text-teal-600 hover:text-teal-700",
-                    "border border-teal-200/60",
-                    "shadow-sm",
-                    "transition-all duration-300",
-                    "hover:scale-105 hover:shadow-md",
-                    "hover:-translate-y-0.5",
-                    (isDeleting || isCopying) && "opacity-50 cursor-not-allowed"
-                  )}
-                >
-                  {isCopying ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
-                  )}
-                </Button>
+                
+                {/* Copy Button - Check if can create more */}
+                {canCreateMore ? (
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={() => {
+                      startTransition(() => {
+                        handleCopyResume(resume);
+                      });
+                    }}
+                    disabled={isDeleting || isCopying}
+                    className={cn(
+                      "h-8 w-8 rounded-lg",
+                      "bg-teal-50/80 hover:bg-teal-100/80",
+                      "text-teal-600 hover:text-teal-700",
+                      "border border-teal-200/60",
+                      "shadow-sm",
+                      "transition-all duration-300",
+                      "hover:scale-105 hover:shadow-md",
+                      "hover:-translate-y-0.5",
+                      (isDeleting || isCopying) && "opacity-50 cursor-not-allowed"
+                    )}
+                  >
+                    {isCopying ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                ) : (
+                  <AlertDialog>
+                    <AlertDialogTrigger asChild>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className={cn(
+                          "h-8 w-8 rounded-lg",
+                          "bg-amber-50/80 hover:bg-amber-100/80",
+                          "text-amber-600 hover:text-amber-700",
+                          "border border-amber-200/60",
+                          "shadow-sm",
+                          "transition-all duration-300",
+                          "hover:scale-105 hover:shadow-md",
+                          "hover:-translate-y-0.5"
+                        )}
+                      >
+                        <Copy className="h-4 w-4" />
+                      </Button>
+                    </AlertDialogTrigger>
+                    <AlertDialogContent>
+                      <AlertDialogHeader>
+                        <AlertDialogTitle>Upgrade Required</AlertDialogTitle>
+                        <AlertDialogDescription>
+                          You&apos;ve reached the maximum number of {type} resumes allowed on the free plan. 
+                          Upgrade to Pro to create unlimited resumes and unlock additional features.
+                        </AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction asChild>
+                          <Link href="/subscription" className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700">
+                            Upgrade to Pro
+                          </Link>
+                        </AlertDialogAction>
+                      </AlertDialogFooter>
+                    </AlertDialogContent>
+                  </AlertDialog>
+                )}
               </div>
             )}
           </div>
