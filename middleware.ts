@@ -14,8 +14,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - api/webhooks (webhook endpoints)
      * - $ (base URL / landing page)
+     * - blog (blog section)
      * Run on all other routes to protect them
      g*/
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|$|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|$|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }

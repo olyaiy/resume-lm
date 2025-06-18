@@ -97,7 +97,6 @@
     "rehype-prism-plus": "^2.0.0",
     "rehype-raw": "^7.0.0",
     "remark-breaks": "^4.0.0",
-    "remark-gfm": "^4.0.0",
     "remark-math": "^6.0.0",
     "remark-toc": "^9.0.0",
     "replace-special-characters": "^1.2.7",
@@ -112,6 +111,7 @@
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
+    "@next/mdx": "^15.3.3",
     "@shadcn/ui": "^0.0.4",
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/typography": "^0.5.15",
@@ -122,7 +122,10 @@
     "autoprefixer": "^10.4.20",
     "eslint": "^9.17.0",
     "eslint-config-next": "15.1.2",
+    "gray-matter": "^4.0.3",
+    "next-mdx-remote": "^5.0.0",
     "postcss": "^8.4.49",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.7.2"
   },
