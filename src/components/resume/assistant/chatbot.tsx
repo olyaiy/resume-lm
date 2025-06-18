@@ -230,6 +230,17 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
     // },
   });
 
+  // Ensure messages are displayed in chronological order and using stable keys
+  const orderedMessages = React.useMemo(() => {
+    return [...messages].sort((a: Message, b: Message) => {
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return aTime - bTime;
+    });
+  }, [messages]);
+
+  const lastMessageId = orderedMessages.length > 0 ? orderedMessages[orderedMessages.length - 1].id : null;
+
   // Memoize the submit handler
   const handleSubmit = useCallback((message: string) => {
   
@@ -397,8 +408,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
                 ) : (
                   <>
                     {/* Messages */}
-                    {messages.map((m: Message, index) => (
-                      <React.Fragment key={index}>
+                    {orderedMessages.map((m: Message) => (
+                      <React.Fragment key={m.id}>
 
                         {/* Regular Message Content */}
                         {m.content && (
@@ -612,8 +623,8 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
 
 
                         {/* Loading Dots Message - Modified condition */}
-                        {((isInitialLoading && index === messages.length - 1 && m.role === 'user') ||
-                          (isLoading && index === messages.length - 1 && m.role === 'assistant')) && (
+                        {lastMessageId === m.id && ((isInitialLoading && m.role === 'user') ||
+                          (isLoading && m.role === 'assistant')) && (
                           <div className="mt-2">
                             <div className="flex justify-start">
                               <div className={cn(
