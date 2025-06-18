@@ -7,7 +7,7 @@ import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Github, Loader2 } from "lucide-react";
-gimport { AuthProvider } from "./auth-context";
+import { AuthProvider } from "./auth-context";
 import { signInWithGithub } from "@/app/auth/login/actions";
 import { Separator } from "@/components/ui/separator";
 
