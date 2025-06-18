@@ -5,7 +5,6 @@ import type { NextConfig } from 'next'
 import remarkGfm from 'remark-gfm'
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-// @ts-expect-error – @next/mdx lacks type declarations
 import mdx from '@next/mdx'
 
 const withMDX = mdx({
