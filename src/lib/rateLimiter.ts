@@ -14,6 +14,11 @@ export async function checkRateLimit(
   capacity: number = 80,
   duration: number = 5 * 60 * 60 // 5 hours in seconds
 ): Promise<void> {
+  // Skip rate limiting in development environment
+  if (process.env.NODE_ENV === 'development') {
+    return;
+  }
+
   const LEAK_RATE = capacity / duration; // tokens leaked per second
   const redisKey = `rate-limit:pro:${userId}`;
   const now = Date.now() / 1000; // current time in seconds

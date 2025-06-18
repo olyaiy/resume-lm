@@ -122,7 +122,11 @@ export async function POST(req: Request) {
       messages,
       maxSteps: 5,
       tools,
-      experimental_transform: smoothStream(),
+      experimental_transform: smoothStream({
+        delayInMs: 20, // optional: defaults to 10ms
+        chunking: 'word', // optional: defaults to 'word'
+      }),
+    
     });
 
     return result.toDataStreamResponse({
