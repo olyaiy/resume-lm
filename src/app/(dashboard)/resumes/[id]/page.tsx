@@ -96,7 +96,6 @@ export default async function Page({
     
     return component;
   } catch (error) {
-    console.timeEnd('🔍 [Page] Total Load Time');
     console.error('❌ [Error]:', error);
     if (error instanceof Error && error.message === 'User not authenticated') {
       redirect("/");
