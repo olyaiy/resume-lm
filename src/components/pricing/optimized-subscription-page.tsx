@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { 
   Check, 
   Clock, 
@@ -14,9 +13,7 @@ import {
   Crown,
   Star,
   Zap,
-  ArrowRight,
-  Sparkles,
-  X
+  ArrowRight
 } from 'lucide-react';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { motion } from 'framer-motion';
@@ -107,12 +104,12 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
         <div className="absolute -bottom-24 -left-24 w-96 h-96 bg-gradient-to-br from-purple-400/10 to-pink-600/10 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl">
+      <div className="relative z-10 container mx-auto px-4 py-8 max-w-6xl pb-24">
         {/* Header Section - State Aware */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
+          className="text-center mb-4"
         >
           {isCanceling ? (
             <>
@@ -167,7 +164,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex items-center justify-center mb-12 text-sm text-gray-600"
+          className="flex items-center justify-center mb-8 text-sm text-gray-600"
         >
           <Users className="h-4 w-4 mr-2" />
           <span>Trusted by 12,000+ professionals</span>
@@ -212,11 +209,6 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                     icon: Crown,
                     title: "Unlimited everything",
                     description: "No limits on resumes, tailoring, or AI assistance"
-                  },
-                  {
-                    icon: Sparkles,
-                    title: "Premium templates",
-                    description: "ATS-optimized designs that get noticed"
                   }
                 ].map((benefit, index) => (
                   <div 
@@ -380,86 +372,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
               </div>
             )}
 
-            {/* Comparison for free users */}
-            {!isPro && (
-              <div className="bg-gray-50 rounded-xl p-6">
-                <h4 className="font-semibold text-gray-900 mb-4">Free vs Pro</h4>
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-gray-200">
-                      <TableHead className="text-gray-600 font-medium text-xs">Feature</TableHead>
-                      <TableHead className="text-center text-gray-600 font-medium text-xs">Free</TableHead>
-                      <TableHead className="text-center text-green-600 font-medium text-xs">Pro</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    <TableRow className="border-gray-200">
-                      <TableCell className="text-sm text-gray-700 py-3">Base resumes</TableCell>
-                      <TableCell className="text-center py-3">
-                        <span className="text-gray-500 text-sm">1</span>
-                      </TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <Check className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium text-sm">Unlimited</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-gray-200">
-                      <TableCell className="text-sm text-gray-700 py-3">Tailored resumes</TableCell>
-                      <TableCell className="text-center py-3">
-                        <span className="text-gray-500 text-sm">3</span>
-                      </TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <Check className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium text-sm">Unlimited</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-gray-200">
-                      <TableCell className="text-sm text-gray-700 py-3">AI assistance</TableCell>
-                      <TableCell className="text-center py-3">
-                        <span className="text-gray-500 text-sm">Basic</span>
-                      </TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <Check className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium text-sm">Advanced</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-gray-200">
-                      <TableCell className="text-sm text-gray-700 py-3">Templates</TableCell>
-                      <TableCell className="text-center py-3">
-                        <span className="text-gray-500 text-sm">Standard</span>
-                      </TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <Check className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium text-sm">Premium</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                    <TableRow className="border-gray-200">
-                      <TableCell className="text-sm text-gray-700 py-3">Customer support</TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <X className="h-4 w-4 text-gray-400 mr-1" />
-                          <span className="text-gray-500 text-sm">Email only</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-center py-3">
-                        <div className="flex items-center justify-center">
-                          <Check className="h-4 w-4 text-green-600 mr-1" />
-                          <span className="text-green-600 font-medium text-sm">Priority</span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
-              </div>
-            )}
+
           </motion.div>
         </div>
       </div>
