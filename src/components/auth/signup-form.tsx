@@ -53,12 +53,14 @@ export function SignupForm() {
     setFormState({});
 
     // Mark all fields as touched on submit
-    const fields = ['email', 'password', 'name', 'confirmPassword'] as const;
+    const fields = ['email', 'password', 'name'] as const;
     fields.forEach(field => setFieldTouched(field));
 
     // Validate all fields
     Object.entries(formData).forEach(([field, value]) => {
-      validateField(field as keyof typeof formData, value);
+      if (field !== 'confirmPassword') {
+        validateField(field as keyof typeof formData, value);
+      }
     });
 
     // Check if all required fields are valid
@@ -111,7 +113,7 @@ export function SignupForm() {
           </AlertDescription>
         </Alert>
       ) : (
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {formState.error && (
             <Alert variant="destructive" className="bg-red-50/50 text-red-900 border-red-200/50">
               <AlertDescription>{formState.error}</AlertDescription>
@@ -182,30 +184,6 @@ export function SignupForm() {
                 // className="pl-10"
                 validation={validations.password}
                 isTouched={touchedFields.password}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-sm font-medium">Confirm Password</Label>
-            <div className="relative">
-              {/* <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground/50" /> */}
-              <Input
-                autoFocus
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                autoComplete="new-password"
-                value={formData.confirmPassword}
-                onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
-                onBlur={() => setFieldTouched('confirmPassword')}
-                placeholder="••••••••"
-                required
-                minLength={6}
-                maxLength={100}
-                // className="pl-10"
-                validation={validations.confirmPassword}
-                isTouched={touchedFields.confirmPassword}
               />
             </div>
           </div>

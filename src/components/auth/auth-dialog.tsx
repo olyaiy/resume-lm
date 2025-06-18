@@ -6,9 +6,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Github, Sparkles, Loader2 } from "lucide-react";
-import { Logo } from "@/components/ui/logo";
-import { AuthProvider } from "./auth-context";
+import { ArrowRight, Github, Loader2 } from "lucide-react";
+gimport { AuthProvider } from "./auth-context";
 import { signInWithGithub } from "@/app/auth/login/actions";
 import { Separator } from "@/components/ui/separator";
 
@@ -33,18 +32,16 @@ function TabButton({ value, children }: TabButtonProps) {
     <TabsTrigger 
       value={value}
       className="
-        relative flex-1 h-12 px-6 text-sm font-medium rounded-xl
-        transition-all duration-300 ease-out
+        relative flex-1 h-8 px-3 text-sm font-medium rounded-md
+        transition-all duration-200 ease-out
         data-[state=inactive]:text-slate-600 data-[state=inactive]:bg-transparent
-        data-[state=active]:text-white data-[state=active]:bg-gradient-to-r 
-        data-[state=active]:from-violet-600 data-[state=active]:to-blue-600
-        data-[state=inactive]:hover:text-slate-900 data-[state=inactive]:hover:bg-slate-100/60
+        data-[state=active]:text-violet-700 data-[state=active]:bg-violet-50 data-[state=active]:shadow-sm
+        data-[state=inactive]:hover:text-violet-600 data-[state=inactive]:hover:bg-violet-50/50
         border-0 shadow-none
-        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2
-        data-[state=active]:shadow-lg data-[state=active]:shadow-violet-500/25
+        focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-violet-400 focus-visible:ring-offset-0
       "
     >
-      <span className="relative z-10 font-semibold">{children}</span>
+      {children}
     </TabsTrigger>
   );
 }
@@ -70,36 +67,36 @@ function SocialAuth() {
   };
 
   return (
-    <div className="space-y-4 mt-6">
+    <div className="space-y-3 mt-4">
       <div className="relative">
         <div className="absolute inset-0 flex items-center">
           <Separator className="bg-slate-200" />
         </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-white px-4 text-slate-500 font-medium">
-            Or continue with
+        <div className="relative flex justify-center text-xs">
+          <span className="bg-white px-3 text-slate-500">
+            or
           </span>
         </div>
       </div>
       <Button
         variant="outline"
         className="
-          w-full h-12 bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300
+          w-full h-10 bg-white border-slate-200 hover:bg-slate-50 hover:border-slate-300
           text-slate-700 font-medium transition-all duration-200
-          focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
-          rounded-xl
+          focus:ring-2 focus:ring-slate-500 focus:ring-offset-1
+          rounded-lg
         "
         onClick={handleGithubSignIn}
         disabled={isLoading}
       >
         {isLoading ? (
           <>
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Connecting...
           </>
         ) : (
           <>
-            <Github className="mr-2 h-5 w-5" />
+            <Github className="mr-2 h-4 w-4" />
             Continue with GitHub
           </>
         )}
@@ -139,41 +136,26 @@ export function AuthDialog({ children }: AuthDialogProps) {
 
       <DialogContent 
         className="
-          sm:max-w-[580px] w-full max-h-[80vh] p-0 bg-white border border-slate-200/80 shadow-2xl 
+          sm:max-w-[420px] w-full max-h-[85vh] p-0 bg-white border border-slate-200 shadow-xl 
           animate-in fade-in-0 zoom-in-95 duration-200
-          rounded-2xl overflow-hidden overflow-y-auto
+          rounded-xl overflow-hidden overflow-y-auto
         "
       >
         <AuthProvider>
-          {/* Header Section */}
-          <div className="px-8 py-4 border-b border-slate-100/80 bg-gradient-to-br from-slate-50/50 to-white">
-            <DialogTitle className="sr-only">Authentication</DialogTitle>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500/10 to-blue-500/10 border border-violet-100">
-                  <Sparkles className="w-4 h-4 text-violet-600" aria-hidden="true" />
-                </div>
-                <div className="flex flex-col">
-                  <Logo className="text-lg text-slate-900" asLink={false} />
-                  <span className="text-xs font-medium text-slate-500">AI Resume Builder</span>
-                </div>
-              </div>
-              <DialogDescription className="text-sm text-slate-600 leading-snug">
-                Create professional resumes with AI
-              </DialogDescription>
-            </div>
-          </div>
+          {/* Hidden accessibility elements */}
+          <DialogTitle className="sr-only">Authentication</DialogTitle>
+          <DialogDescription className="sr-only">Sign in or create an account</DialogDescription>
 
-          {/* Tabs Section */}
-          <div className="px-8 pt-6">
+          {/* Content starts immediately with tabs */}
+          <div className="px-6 pt-6">
             <Tabs 
               value={activeTab} 
               onValueChange={(value) => setActiveTab(value as "login" | "signup")} 
               className="w-full"
             >
               <TabsList className="
-                w-full h-14 bg-slate-100/80 border-0 p-2
-                flex gap-2 rounded-2xl backdrop-blur-sm
+                w-full h-10 bg-violet-50/30 border border-violet-100/50 p-1
+                flex gap-0.5 rounded-lg
               ">
                 <TabButton value="login">
                   Sign In
@@ -184,22 +166,22 @@ export function AuthDialog({ children }: AuthDialogProps) {
               </TabsList>
 
               {/* Forms Content */}
-              <div className="mt-6 pb-8">
-                <TabsContent value="login" className="mt-0 space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Welcome back</h3>
-                    <p className="text-sm text-slate-600 mb-6">Sign in to your account to continue</p>
-                    <LoginForm />
+              <div className="mt-5 pb-6">
+                <TabsContent value="login" className="mt-0 space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Welcome back</h3>
+                    <p className="text-sm text-slate-600 mt-1">Sign in to continue</p>
                   </div>
+                  <LoginForm />
                   <SocialAuth />
                 </TabsContent>
                 
-                <TabsContent value="signup" className="mt-0 space-y-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-slate-900 mb-2">Get started for free</h3>
-                    <p className="text-sm text-slate-600 mb-6">Create your account and build your first resume</p>
-                    <SignupForm />
+                <TabsContent value="signup" className="mt-0 space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-lg font-semibold text-slate-900">Get started</h3>
+                    <p className="text-sm text-slate-600 mt-1">Create your free account</p>
                   </div>
+                  <SignupForm />
                   <SocialAuth />
                 </TabsContent>
               </div>

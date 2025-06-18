@@ -9,14 +9,12 @@ interface FieldValidations {
   email: ValidationState;
   password: ValidationState;
   name?: ValidationState;
-  confirmPassword?: ValidationState;
 }
 
 interface FormData {
   email: string;
   password: string;
   name?: string;
-  confirmPassword?: string;
 }
 
 interface TouchedFields {
@@ -75,7 +73,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: '',
     password: '',
     name: '',
-    confirmPassword: '',
   });
 
   const [isLoading, setIsLoading] = useState<{ [key: string]: boolean }>({});
@@ -83,7 +80,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     email: { isValid: false },
     password: { isValid: false },
     name: { isValid: false },
-    confirmPassword: { isValid: false },
   });
   const [touchedFields, setTouchedFields] = useState<TouchedFields>({});
 
@@ -104,11 +100,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       case 'name':
         validation = validateName(value);
         break;
-      case 'confirmPassword':
-        validation = value === formData.password 
-          ? { isValid: true }
-          : { isValid: false, message: 'Passwords do not match' };
-        break;
       default:
         validation = { isValid: false };
     }
@@ -128,10 +119,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Mark field as touched when value changes
         setFieldTouched(field);
       });
-      // If password changed, revalidate confirmPassword
-      if (data.password && prev.confirmPassword) {
-        validateField('confirmPassword', prev.confirmPassword);
-      }
       return newData;
     });
   };
@@ -145,14 +132,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       email: '',
       password: '',
       name: '',
-      confirmPassword: '',
     });
     setIsLoading({});
     setValidations({
       email: { isValid: false },
       password: { isValid: false },
       name: { isValid: false },
-      confirmPassword: { isValid: false },
     });
     setTouchedFields({});
   };
