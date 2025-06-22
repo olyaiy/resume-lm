@@ -39,6 +39,7 @@ export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
                 },
             ],
             mode: "subscription",
+            allow_promotion_codes: true,
             return_url: returnUrl,
         });
 
