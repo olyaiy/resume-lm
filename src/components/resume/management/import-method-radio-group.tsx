@@ -29,7 +29,7 @@ function ImportMethodRadioItem({
       <div
         tabIndex={0}
         className={cn(
-          "flex flex-col items-center justify-center rounded-xl p-4",
+          "flex flex-col items-center justify-center rounded-lg p-3",
           "bg-white/80 border-2 shadow-sm h-full",
           "hover:border-pink-200 hover:bg-pink-50/50",
           "transition-all duration-300",
@@ -39,11 +39,13 @@ function ImportMethodRadioItem({
         )}
       >
         <div className="flex flex-col items-center text-center">
-          <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-3">
-            {icon}
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-pink-50 to-rose-50 border border-pink-100 flex items-center justify-center mb-2">
+            <div className="scale-75">
+              {icon}
+            </div>
           </div>
-          <div className="font-semibold text-sm text-pink-950 mb-1.5">{title}</div>
-          <span className="text-xs leading-relaxed text-gray-600">{description}</span>
+          <div className="font-semibold text-xs text-pink-950 mb-1">{title}</div>
+          <span className="text-xs leading-tight text-gray-600">{description}</span>
         </div>
       </div>
     </label>

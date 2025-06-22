@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } 
 import { Button } from "@/components/ui/button";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, Plus, FileText, Brain, Copy } from "lucide-react";
+import { Loader2, Sparkles, Plus, Brain, Copy } from "lucide-react";
 import { createTailoredResume } from "@/utils/actions/resumes/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/actions/jobs/ai";
@@ -394,7 +394,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
           </div>
 
           {/* Content */}
-          <div className="px-6 py-8 min-h-[400px] relative">
+          <div className="px-6 py-2 min-h-[400px] relative">
             {isCreating && <LoadingOverlay currentStep={currentStep} />}
             
             {dialogStep === 1 && (
@@ -425,16 +425,6 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
             {dialogStep === 2 && (
               <div className="space-y-6">
-                {/* Header Section */}
-                <div className="text-center space-y-2">
-                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 mb-1">
-                    <FileText className="w-5 h-5 text-white" />
-                  </div>
-                  <h3 className="text-xl font-bold text-gray-900">Configure Your Tailored Resume</h3>
-                  <p className="text-gray-600 max-w-md mx-auto text-sm">
-                    Add job details and choose your customization method.
-                  </p>
-                </div>
 
                 {/* Selected Resume Summary */}
                 <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
