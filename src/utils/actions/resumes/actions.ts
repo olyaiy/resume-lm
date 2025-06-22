@@ -4,7 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { simplifiedResumeSchema } from "@/lib/zod-schemas";
+import { simplifiedResumeSchema, Job } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
 import { generateObject } from "ai";
 import { initializeAIClient } from "@/utils/ai-tools";
@@ -391,6 +391,7 @@ export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<n
 
 export async function generateResumeScore(
   resume: Resume, 
+  job?: Job | null,
   config?: AIConfig
 ) {
   
@@ -399,28 +400,74 @@ export async function generateResumeScore(
   const isPro = subscriptionPlan === 'pro';
   const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
 
+  const isTailoredResume = job && !resume.is_base_resume;
 
   console.log("RESUME IS", resume);
+  console.log("JOB IS", job);
+  console.log("IS TAILORED RESUME", isTailoredResume);
 
   try {
+    let prompt = `
+    Generate a comprehensive score for this resume: ${JSON.stringify(resume)}
+    
+    MUST include a 'miscellaneous' field with 2-3 metrics following this format:
+    {
+      "metricName": {
+        "score": number,
+        "reason": "string explanation"
+      }
+    }
+    Example: 
+    "keywordOptimization": {
+      "score": 85,
+      "reason": "Good use of industry keywords but could add more variation"
+    }
+    `;
+
+    // Enhanced prompt for tailored resumes with job context
+    if (isTailoredResume) {
+      prompt += `
+      
+      THIS IS A TAILORED RESUME FOR A SPECIFIC JOB. Job details: ${JSON.stringify(job)}
+      
+      IMPORTANT: Since this is a tailored resume, you MUST include the 'jobAlignment' field with detailed analysis:
+      
+      1. KEYWORD MATCH ANALYSIS:
+         - Compare resume content with job description keywords
+         - Identify matched keywords and missing critical keywords
+         - Score based on keyword density and relevance
+      
+      2. REQUIREMENTS MATCH ANALYSIS:
+         - Analyze how well the resume addresses job requirements
+         - Identify which requirements are clearly addressed
+         - Highlight gaps where requirements aren't demonstrated
+      
+      3. COMPANY FIT ANALYSIS:
+         - Assess alignment with company culture/values (if mentioned in job description)
+         - Evaluate positioning for this specific role
+         - Suggest improvements for better company alignment
+      
+      ALSO INCLUDE:
+      - Set 'isTailoredResume' to true
+      - Provide 'jobSpecificImprovements' with 3-5 specific suggestions for this job
+      - Weight the overall score more heavily on job alignment factors
+      
+      Focus on actionable insights that help the candidate better align their resume with this specific opportunity.
+      `;
+    } else {
+      prompt += `
+      
+      This is a base resume (not tailored to a specific job).
+      - Set 'isTailoredResume' to false
+      - Do NOT include the 'jobAlignment' field
+      - Focus on general resume best practices and improvements
+      `;
+    }
+
     const { object } = await generateObject({
       model: aiClient,
       schema: resumeScoreSchema,
-      prompt: `
-      Generate a score for this resume: ${JSON.stringify(resume)}
-      MUST include a 'miscellaneous' field with 2-3 metrics following this format:
-      {
-        "metricName": {
-          "score": number,
-          "reason": "string explanation"
-        }
-      }
-      Example: 
-      "keywordOptimization": {
-        "score": 85,
-        "reason": "Good use of industry keywords but could add more variation"
-      }
-      `
+      prompt
     });
 
     // console.log("THE OUTPUTTED object", object);

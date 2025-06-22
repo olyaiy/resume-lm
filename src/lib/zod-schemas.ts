@@ -301,13 +301,36 @@ export const resumeScoreSchema = z.object({
       reason: z.string()
     })
   }),
+  // Job-specific scoring for tailored resumes
+  jobAlignment: z.object({
+    keywordMatch: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string(),
+      matchedKeywords: z.array(z.string()).optional(),
+      missingKeywords: z.array(z.string()).optional()
+    }),
+    requirementsMatch: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string(),
+      matchedRequirements: z.array(z.string()).optional(),
+      gapAnalysis: z.array(z.string()).optional()
+    }),
+    companyFit: z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string(),
+      suggestions: z.array(z.string()).optional()
+    })
+  }).optional(),
   miscellaneous: z.record(
     z.union([z.number(), z.object({
       score: z.number().min(0).max(100).optional(),
       reason: z.string().optional()
     })]).optional()
   ).optional(),
-  overallImprovements: z.array(z.string())
+  overallImprovements: z.array(z.string()),
+  // Job-specific improvements for tailored resumes
+  jobSpecificImprovements: z.array(z.string()).optional(),
+  isTailoredResume: z.boolean().optional()
 });
 
 export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>; 

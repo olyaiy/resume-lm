@@ -175,7 +175,7 @@ export function EditorPanel({
               <TabsContent value="resume-score">
                 <ResumeScorePanel
                   resume={resume}
-                  // job={job}
+                  job={job}
                 />
               </TabsContent>
             </Tabs>
