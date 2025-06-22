@@ -73,6 +73,15 @@ interface ResumeScorePanelProps {
 const LOCAL_STORAGE_KEY = 'resumelm-resume-scores';
 const MAX_SCORES = 10;
 
+// Helper function to convert camelCase to readable labels
+function camelCaseToReadable(text: string): string {
+  return text
+    // Insert space before uppercase letters
+    .replace(/([a-z])([A-Z])/g, '$1 $2')
+    // Capitalize first letter
+    .replace(/^./, str => str.toUpperCase());
+}
+
 function getStoredScores(resumeId: string): ResumeScoreMetrics | null {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
@@ -296,7 +305,7 @@ function ScoreItem({ label, score, reason }: { label: string; score: number; rea
       className="space-y-2"
     >
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium">{label}</span>
+        <span className="text-sm font-medium">{camelCaseToReadable(label)}</span>
         <span className={cn(
           "text-xs px-2 py-1 rounded-full font-medium",
           score >= 70 ? "bg-green-100 text-green-700" : 
