@@ -90,7 +90,6 @@ No credit card required • No signup fees • Open source
 - **PostgreSQL** - Robust relational database
 - **Supabase** - Backend-as-a-Service with auth
 - **Row Level Security** - Enterprise-grade security
-- **Prisma ORM** - Type-safe database access
 
 ### Additional Features
 - **React PDF** - Professional PDF generation
@@ -306,12 +305,6 @@ We welcome contributions from developers of all skill levels! Here's how you can
 ### Commercial Licensing
 For businesses requiring proprietary licenses or commercial support, please contact us for custom licensing arrangements.
 
-## 🏅 Recognition & Awards
-
-- **Product Hunt** - Featured product of the day
-- **GitHub** - Trending repository in JavaScript
-- **Developer Community** - Top open-source resume tool
-- **User Reviews** - Consistently rated 4.9/5 stars
 
 ---
 
