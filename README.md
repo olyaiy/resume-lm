@@ -315,6 +315,6 @@ For businesses requiring proprietary licenses or commercial support, please cont
 [![Get Started Free](https://img.shields.io/badge/🚀_Get_Started_Free-resumelm.com-blue?style=for-the-badge&color=6366f1)](https://resumelm.com)
 [![View Source Code](https://img.shields.io/badge/📚_View_Source-GitHub-black?style=for-the-badge&logo=github)](https://github.com/olyaiy/resume-lm)
 
-**Built with ❤️ using Next.js | Join 50,000+ professionals getting more interviews**
+**Built with ❤️ using Next.js**
 
 </div>
