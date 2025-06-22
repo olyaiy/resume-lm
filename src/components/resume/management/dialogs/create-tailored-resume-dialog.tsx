@@ -458,18 +458,18 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 </div>
 
                 {/* Job Description Section */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
                       <span className="text-pink-600 font-bold text-sm">1</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Job Information</h4>
-                      <p className="text-sm text-gray-600">Paste the job posting to help us understand the requirements</p>
+                      <p className="text-xs text-gray-600">Paste the job posting details</p>
                     </div>
                   </div>
                   
-                  <div className="ml-11">
+                  <div className="ml-10">
                     <JobDescriptionInput
                       value={jobDescription}
                       onChange={setJobDescription}
@@ -479,18 +479,18 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 </div>
 
                 {/* Tailoring Method Section */}
-                <div className="space-y-4">
+                <div className="space-y-3">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-full bg-pink-100 flex items-center justify-center">
                       <span className="text-pink-600 font-bold text-sm">2</span>
                     </div>
                     <div>
                       <h4 className="font-semibold text-gray-900">Tailoring Method</h4>
-                      <p className="text-sm text-gray-600">Choose how you&apos;d like to customize your resume</p>
+                      <p className="text-xs text-gray-600">Choose your customization approach</p>
                     </div>
                   </div>
                   
-                  <div className="ml-11">
+                  <div className="ml-10">
                     <ImportMethodRadioGroup
                       value={importOption}
                       onChange={setImportOption}
@@ -500,24 +500,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
                 {/* Method Description */}
                 {importOption === 'ai' && (
-                  <div className="ml-11 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="ml-10 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Brain className="w-3 h-3 text-blue-600" />
                       </div>
-                      <div className="space-y-2">
-                        <h5 className="font-medium text-blue-900">AI Tailoring Process</h5>
-                        <ul className="text-sm text-blue-800 space-y-1">
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-blue-900 text-sm">AI Tailoring Process</h5>
+                        <ul className="text-xs text-blue-800 space-y-0.5">
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
                             Analyzes job requirements and keywords
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
                             Optimizes your experience descriptions
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-blue-400"></div>
                             Highlights relevant skills and achievements
                           </li>
                         </ul>
@@ -527,24 +527,24 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                 )}
 
                 {importOption === 'import-profile' && (
-                  <div className="ml-11 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
-                    <div className="flex items-start gap-3">
-                      <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <div className="ml-10 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-lg p-3">
+                    <div className="flex items-start gap-2">
+                      <div className="w-5 h-5 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                         <Copy className="w-3 h-3 text-amber-600" />
                       </div>
-                      <div className="space-y-2">
-                        <h5 className="font-medium text-amber-900">Direct Copy Process</h5>
-                        <ul className="text-sm text-amber-800 space-y-1">
+                      <div className="space-y-1">
+                        <h5 className="font-medium text-amber-900 text-sm">Direct Copy Process</h5>
+                        <ul className="text-xs text-amber-800 space-y-0.5">
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
                             Creates an exact copy of your base resume
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
                             Links it to the job posting for organization
                           </li>
                           <li className="flex items-center gap-2">
-                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            <div className="w-1 h-1 rounded-full bg-amber-400"></div>
                             You can manually edit it afterwards
                           </li>
                         </ul>
