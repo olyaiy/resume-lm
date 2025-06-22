@@ -27,16 +27,6 @@
 
 **ResumeLM** is a free, open-source AI resume builder that helps job seekers create professional, ATS-optimized resumes that increase interview chances by up to **3x**. Our intelligent platform combines cutting-edge AI technology with proven resume best practices to help you land your dream job.
 
-### 🏆 Trusted by Professionals From Top Companies
-
-<div align="center">
-
-![Google](public/logos/google.png) ![Microsoft](public/logos/microsoft.webp) ![Amazon](public/logos/amazon.png) ![Meta](public/logos/meta.png) ![Netflix](public/logos/netflix.png)
-
-*Join 50,000+ professionals who are getting more interviews with ResumeLM*
-
-</div>
-
 ## ✨ Key Features & Screenshots
 
 ### 🤖 AI-Powered Resume Assistant
@@ -53,8 +43,6 @@
 
 **Organize Your Entire Job Search**
 - Centralized resume management system
-- Version control for all your resumes
-- Track application status and progress
 - Create base resumes and tailored versions
 
 ### 📈 Resume Performance Scoring
