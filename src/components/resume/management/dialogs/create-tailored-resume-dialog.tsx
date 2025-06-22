@@ -6,7 +6,7 @@ import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } 
 import { Button } from "@/components/ui/button";
 import { Resume, Profile } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
-import { Loader2, Sparkles, ArrowRight, Plus, FileText } from "lucide-react";
+import { Loader2, Sparkles, Plus, FileText, Brain, Copy } from "lucide-react";
 import { createTailoredResume } from "@/utils/actions/resumes/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/actions/jobs/ai";
@@ -398,15 +398,15 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
             {isCreating && <LoadingOverlay currentStep={currentStep} />}
             
             {dialogStep === 1 && (
-              <div className="space-y-8">
+              <div className="space-y-6">
                 {/* Header Section */}
-                <div className="text-center space-y-3">
-                  <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 mb-2">
-                    <Sparkles className="w-6 h-6 text-white" />
+                <div className="text-center space-y-2">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-pink-500 to-purple-600 mb-1">
+                    <Sparkles className="w-5 h-5 text-white" />
                   </div>
-                  <h3 className="text-2xl font-bold text-gray-900">Choose Your Foundation</h3>
-                  <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
-                    Select the base resume that best represents your experience. We&apos;ll transform it into a perfectly tailored version for your target job.
+                  <h3 className="text-xl font-bold text-gray-900">Choose Your Foundation</h3>
+                  <p className="text-gray-600 max-w-sm mx-auto text-sm">
+                    Select a base resume to tailor for this job opportunity.
                   </p>
                 </div>
                 
@@ -419,125 +419,139 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                     isInvalid={isBaseResumeInvalid}
                   />
                 </div>
-                
-                {/* Enhanced Flow Visualization */}
-                {selectedBaseResume ? (
-                  <div className="bg-gradient-to-r from-pink-50 via-purple-50 to-pink-50 rounded-2xl p-6 border border-pink-100">
-                    <div className="text-center mb-4">
-                      <h4 className="font-semibold text-gray-900 mb-1">Transformation Preview</h4>
-                      <p className="text-sm text-gray-600">Here&apos;s how your resume will evolve</p>
-                    </div>
-                    
-                    <div className="flex items-center justify-center gap-6">
-                      {/* Before */}
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="relative">
-                          <MiniResumePreview
-                            name={baseResumes.find(r => r.id === selectedBaseResume)?.name || ''}
-                            type="base"
-                            className="w-24 hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                            <div className="bg-purple-100 text-purple-700 px-2 py-1 rounded-full text-xs font-medium">
-                              Original
-                            </div>
-                          </div>
-                        </div>
-                      </div>
 
-                      {/* Arrow with animation */}
-                      <div className="flex flex-col items-center gap-2">
-                        <div className="relative">
-                          <ArrowRight className="w-8 h-8 text-pink-500" />
-                          <div className="absolute inset-0 w-8 h-8 text-pink-300 animate-ping">
-                            <ArrowRight className="w-8 h-8" />
-                          </div>
-                        </div>
-                        <div className="bg-white px-3 py-1 rounded-full shadow-sm border border-pink-200">
-                          <span className="text-xs font-medium text-pink-700">AI Tailoring</span>
-                        </div>
-                      </div>
-
-                      {/* After */}
-                      <div className="flex flex-col items-center space-y-3">
-                        <div className="relative">
-                          <MiniResumePreview
-                            name="Tailored Resume"
-                            type="tailored"
-                            className="w-24 hover:scale-105 transition-transform duration-300"
-                          />
-                          <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2">
-                            <div className="bg-pink-100 text-pink-700 px-2 py-1 rounded-full text-xs font-medium">
-                              Optimized
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Benefits */}
-                    <div className="mt-6 grid grid-cols-3 gap-4 text-center">
-                      <div className="space-y-1">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mx-auto">
-                          <span className="text-pink-600 font-bold text-sm">✓</span>
-                        </div>
-                        <p className="text-xs text-gray-600">Keywords Optimized</p>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mx-auto">
-                          <span className="text-purple-600 font-bold text-sm">✓</span>
-                        </div>
-                        <p className="text-xs text-gray-600">Skills Highlighted</p>
-                      </div>
-                      <div className="space-y-1">
-                        <div className="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center mx-auto">
-                          <span className="text-pink-600 font-bold text-sm">✓</span>
-                        </div>
-                        <p className="text-xs text-gray-600">Experience Focused</p>
-                      </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="bg-gray-50 rounded-2xl p-8 border-2 border-dashed border-gray-200">
-                    <div className="text-center space-y-3">
-                      <div className="w-16 h-16 bg-gray-200 rounded-full flex items-center justify-center mx-auto">
-                        <FileText className="w-8 h-8 text-gray-400" />
-                      </div>
-                      <div>
-                        <h4 className="font-medium text-gray-900 mb-1">Ready to Transform</h4>
-                        <p className="text-sm text-gray-600">
-                          Select a base resume above to see the transformation preview
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
             {dialogStep === 2 && (
-              <div className="space-y-5">
-                {/* Show selected base resume */}
-                <div className="bg-pink-50 border border-pink-200 rounded-lg p-3">
-                  <div className="text-sm text-pink-800">
-                    <span className="font-medium">Base Resume:</span> {baseResumes.find(r => r.id === selectedBaseResume)?.name}
+              <div className="space-y-6">
+                {/* Header Section */}
+                <div className="text-center space-y-2">
+                  <div className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-600 mb-1">
+                    <FileText className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-xl font-bold text-gray-900">Configure Your Tailored Resume</h3>
+                  <p className="text-gray-600 max-w-md mx-auto text-sm">
+                    Add job details and choose your customization method.
+                  </p>
+                </div>
+
+                {/* Selected Resume Summary */}
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-lg p-3">
+                  <div className="flex items-center gap-3">
+                    <div className="flex-shrink-0">
+                      <MiniResumePreview
+                        name={baseResumes.find(r => r.id === selectedBaseResume)?.name || ''}
+                        type="base"
+                        className="w-10 h-10"
+                      />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-purple-900">Foundation:</span>
+                        <span className="text-sm text-purple-700 font-semibold truncate">
+                          {baseResumes.find(r => r.id === selectedBaseResume)?.name}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                
+                {/* Job Description Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                      <span className="text-pink-600 font-bold text-sm">1</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Job Information</h4>
+                      <p className="text-sm text-gray-600">Paste the job posting to help us understand the requirements</p>
+                    </div>
+                  </div>
+                  
+                  <div className="ml-11">
+                    <JobDescriptionInput
+                      value={jobDescription}
+                      onChange={setJobDescription}
+                      isInvalid={isJobDescriptionInvalid}
+                    />
+                  </div>
+                </div>
 
-                {/* Job Description Input */}
-                <JobDescriptionInput
-                  value={jobDescription}
-                  onChange={setJobDescription}
-                  isInvalid={isJobDescriptionInvalid}
-                />
+                {/* Tailoring Method Section */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-pink-100 flex items-center justify-center">
+                      <span className="text-pink-600 font-bold text-sm">2</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">Tailoring Method</h4>
+                      <p className="text-sm text-gray-600">Choose how you&apos;d like to customize your resume</p>
+                    </div>
+                  </div>
+                  
+                  <div className="ml-11">
+                    <ImportMethodRadioGroup
+                      value={importOption}
+                      onChange={setImportOption}
+                    />
+                  </div>
+                </div>
 
-                {/* Import Method Selection */}
-                <ImportMethodRadioGroup
-                  value={importOption}
-                  onChange={setImportOption}
-                />
+                {/* Method Description */}
+                {importOption === 'ai' && (
+                  <div className="ml-11 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Brain className="w-3 h-3 text-blue-600" />
+                      </div>
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-blue-900">AI Tailoring Process</h5>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            Analyzes job requirements and keywords
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            Optimizes your experience descriptions
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-blue-400"></div>
+                            Highlights relevant skills and achievements
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {importOption === 'import-profile' && (
+                  <div className="ml-11 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="w-6 h-6 rounded-full bg-amber-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                        <Copy className="w-3 h-3 text-amber-600" />
+                      </div>
+                      <div className="space-y-2">
+                        <h5 className="font-medium text-amber-900">Direct Copy Process</h5>
+                        <ul className="text-sm text-amber-800 space-y-1">
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            Creates an exact copy of your base resume
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            Links it to the job posting for organization
+                          </li>
+                          <li className="flex items-center gap-2">
+                            <div className="w-1.5 h-1.5 rounded-full bg-amber-400"></div>
+                            You can manually edit it afterwards
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
