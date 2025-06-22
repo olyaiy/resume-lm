@@ -395,14 +395,12 @@ export async function generateResumeScore(
 ) {
   
 
-
   const subscriptionPlan = await getSubscriptionPlan();
   const isPro = subscriptionPlan === 'pro';
   const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
 
 
   console.log("RESUME IS", resume);
-  // console.log("AICLIENT IS", aiClient);
 
   try {
     const { object } = await generateObject({

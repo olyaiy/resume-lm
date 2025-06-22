@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import { CircularProgressbar, buildStyles } from "react-circular-progressbar";
 import "react-circular-progressbar/dist/styles.css";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, TrendingUp, Target, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { generateResumeScore } from "@/utils/actions/resumes/actions";
@@ -152,31 +152,32 @@ export default function ResumeScorePanel({ resume }: ResumeScorePanelProps) {
   // If no score data is available, show the empty state
   if (!scoreData) {
     return (
-      <div className="max-w-3xl mx-auto space-y-4 p-6">
-        <Card className="relative overflow-hidden bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-white/40">
-          <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10" />
-          <div className="relative p-8 flex flex-col items-center gap-6 text-center">
-            <h1 className="text-3xl font-semibold mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Resume Score Analysis
-            </h1>
-            <p className="text-muted-foreground text-lg">
-              No score analysis available yet. Generate one to see how your resume measures up!
-            </p>
-            <Button
-              onClick={handleRecalculate}
-              disabled={isCalculating}
-              size="lg"
-              className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:opacity-90"
-            >
-              <RefreshCw 
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  isCalculating && "animate-spin"
-                )} 
-              />
-              {isCalculating ? "Analyzing Resume..." : "Generate Score Analysis"}
-            </Button>
-          </div>
+      <div className="space-y-4">
+        <Card>
+          <CardContent className="flex flex-col items-center gap-4 py-8 text-center">
+            <div className="p-3 bg-muted rounded-full">
+              <TrendingUp className="h-6 w-6 text-muted-foreground" />
+            </div>
+            <div>
+              <h3 className="font-semibold mb-2">Resume Score Analysis</h3>
+                             <p className="text-sm text-muted-foreground mb-4">
+                 Generate a comprehensive analysis of your resume&apos;s effectiveness
+               </p>
+              <Button
+                onClick={handleRecalculate}
+                disabled={isCalculating}
+                className="w-full sm:w-auto"
+              >
+                <RefreshCw 
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    isCalculating && "animate-spin"
+                  )} 
+                />
+                {isCalculating ? "Analyzing..." : "Generate Score"}
+              </Button>
+            </div>
+          </CardContent>
         </Card>
       </div>
     );
@@ -184,125 +185,136 @@ export default function ResumeScorePanel({ resume }: ResumeScorePanelProps) {
 
   // When we have score data, show the full analysis
   return (
-    <div className="max-w-3xl mx-auto space-y-4 p-6">
-      <div className="flex justify-end">
+    <div className="space-y-4">
+      {/* Header with recalculate button */}
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Resume Score Analysis</h3>
         <Button
           onClick={handleRecalculate}
           disabled={isCalculating}
           variant="outline"
-          className="bg-white/50 hover:bg-white/60 border-white/40"
+          size="sm"
         >
           <RefreshCw 
             className={cn(
-              "mr-2 h-4 w-4",
+              "mr-2 h-3 w-3",
               isCalculating && "animate-spin"
             )} 
           />
-          Recalculate Score
+          Recalculate
         </Button>
       </div>
 
-      {/* Main Score Card */}
-      <Card className="relative overflow-hidden bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-white/40">
-        <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-transparent to-cyan-500/10" />
-        <div className="relative p-8 flex flex-col sm:flex-row items-center gap-8">
-          <div className="w-40 h-40 sm:w-32 sm:h-32">
-            <CircularProgressbar
-              value={scoreData.overallScore.score}
-              text={`${scoreData.overallScore.score}%`}
-              styles={buildStyles({
-                pathColor: `rgba(20, 184, 166, ${scoreData.overallScore.score / 100})`,
-                textColor: '#0F766E',
-                trailColor: '#E2E8F0',
-                pathTransitionDuration: 1
-              })}
-            />
+      {/* Overall Score Card */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="flex items-center gap-4">
+            <div className="w-16 h-16 flex-shrink-0">
+              <CircularProgressbar
+                value={scoreData.overallScore.score}
+                text={`${scoreData.overallScore.score}%`}
+                styles={buildStyles({
+                  pathColor: scoreData.overallScore.score >= 70 ? '#10b981' : scoreData.overallScore.score >= 50 ? '#f59e0b' : '#ef4444',
+                  textColor: '#374151',
+                  trailColor: '#e5e7eb',
+                  pathTransitionDuration: 1,
+                  textSize: '24px'
+                })}
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h4 className="font-medium mb-1">Overall Score</h4>
+              <p className="text-sm text-muted-foreground">{scoreData.overallScore.reason}</p>
+            </div>
           </div>
-          <div className="flex-1 text-center sm:text-left">
-            <h1 className="text-3xl font-semibold mb-2 bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-              Resume Score Analysis
-            </h1>
-            <p className="text-muted-foreground text-lg">{scoreData.overallScore.reason}</p>
-          </div>
-        </div>
+        </CardContent>
       </Card>
 
-      {/* Key Improvements Card */}
-      <Card className="bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-white/40 p-6">
-        <h2 className="text-xl font-semibold mb-4 text-teal-700">Key Improvements</h2>
-        <div className="space-y-3">
-          {scoreData.overallImprovements.map((improvement, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="flex items-start gap-3"
-            >
-              <div className="mt-1.5 h-2 w-2 rounded-full bg-teal-500" />
-              <p className="text-muted-foreground">{improvement}</p>
-            </motion.div>
-          ))}
-        </div>
+      {/* Key Improvements */}
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base flex items-center gap-2">
+            <Target className="h-4 w-4" />
+            Key Improvements
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="pt-0">
+          <div className="space-y-2">
+            {scoreData.overallImprovements.slice(0, 5).map((improvement, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.05 }}
+                className="flex items-start gap-2 text-sm"
+              >
+                <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-primary flex-shrink-0" />
+                <p className="text-muted-foreground">{improvement}</p>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
       </Card>
 
-      {/* Metrics Cards */}
+      {/* Detailed Metrics */}
       {Object.entries({
-        Completeness: scoreData.completeness,
-        "Impact Score": scoreData.impactScore,
-        "Role Match": scoreData.roleMatch
-      }).map(([title, metrics]) => (
-        <MetricsCard key={title} title={title} metrics={metrics} />
+        Completeness: { icon: Award, metrics: scoreData.completeness },
+        "Impact Score": { icon: TrendingUp, metrics: scoreData.impactScore },
+        "Role Match": { icon: Target, metrics: scoreData.roleMatch }
+      }).map(([title, { icon: Icon, metrics }]) => (
+        <Card key={title}>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Icon className="h-4 w-4" />
+              {title}
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="space-y-4">
+              {Object.entries(metrics).map(([label, data]) => (
+                <ScoreItem key={label} label={label} {...data} />
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
 }
 
-function MetricsCard({ title, metrics }: { title: string; metrics: Record<string, { score: number; reason: string }> }) {
-  return (
-    <Card className="bg-gradient-to-br from-white/50 to-white/30 backdrop-blur-xl border-white/40 p-6">
-      <h2 className="text-xl font-semibold mb-6 text-teal-700">{title}</h2>
-      <div className="grid gap-8">
-        {Object.entries(metrics).map(([label, data]) => (
-          <ScoreItem key={label} label={label} {...data} />
-        ))}
-      </div>
-    </Card>
-  );
-}
-
 function ScoreItem({ label, score, reason }: { label: string; score: number; reason: string }) {
   const getScoreColor = (score: number) => {
-    if (score >= 90) return "bg-emerald-500";
-    if (score >= 70) return "bg-teal-500";
+    if (score >= 70) return "bg-green-500";
     if (score >= 50) return "bg-yellow-500";
     return "bg-red-500";
   };
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       className="space-y-2"
     >
       <div className="flex justify-between items-center">
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <span className="text-sm font-medium">{label}</span>
         <span className={cn(
-          "text-sm font-semibold px-2 py-1 rounded-full",
-          score >= 70 ? "bg-teal-100 text-teal-700" : "bg-yellow-100 text-yellow-700"
+          "text-xs px-2 py-1 rounded-full font-medium",
+          score >= 70 ? "bg-green-100 text-green-700" : 
+          score >= 50 ? "bg-yellow-100 text-yellow-700" : 
+          "bg-red-100 text-red-700"
         )}>
           {score}/100
         </span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-muted rounded-full overflow-hidden">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${score}%` }}
-          transition={{ duration: 1, ease: "easeOut" }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
           className={cn("h-full rounded-full", getScoreColor(score))}
         />
       </div>
-      <p className="text-sm text-muted-foreground">{reason}</p>
+      <p className="text-xs text-muted-foreground">{reason}</p>
     </motion.div>
   );
 }
