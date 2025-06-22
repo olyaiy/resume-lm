@@ -9,11 +9,15 @@ interface NavLinkProps {
 
 function NavLink({ href, children, className }: NavLinkProps) {
   const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const target = document.querySelector(href);
-    if (target) {
-      target.scrollIntoView({ behavior: 'smooth' });
+    // Only prevent default and use smooth scrolling for anchor links (starting with #)
+    if (href.startsWith('#')) {
+      e.preventDefault();
+      const target = document.querySelector(href);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
     }
+    // For regular page routes (like /blog), let the browser handle navigation normally
   };
 
   return (
