@@ -7,6 +7,24 @@ export function Hero() {
     <section className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 py-12 md:py-16 lg:py-20">
       {/* Left Content */}
       <div className="w-full lg:w-1/2 space-y-8">
+        {/* Product Hunt Badge */}
+        <div className="flex justify-start">
+          <a 
+            href="https://www.producthunt.com/products/resumelm?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-resumelm" 
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-block transition-transform duration-300 hover:-translate-y-1"
+          >
+            <img 
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982199&theme=light&t=1750633039421" 
+              alt="ResumeLM - Open Source AI Resume Builder for Tech Jobs | Product Hunt" 
+              style={{ width: '250px', height: '54px' }}
+              width={250} 
+              height={54} 
+            />
+          </a>
+        </div>
+        
         {/* Tagline with simplified gradient text */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
           <span className="block">Open source</span>
