@@ -1,5 +1,4 @@
 import { cn } from "@/lib/utils";
-import { Label } from "@/components/ui/label";
 
 interface JobDescriptionInputProps {
   value: string;
@@ -10,12 +9,6 @@ interface JobDescriptionInputProps {
 export function JobDescriptionInput({ value, onChange, isInvalid }: JobDescriptionInputProps) {
   return (
     <div className="space-y-3">
-      <Label 
-        htmlFor="job-description"
-        className="text-base font-medium text-pink-950"
-      >
-        Job Description <span className="text-red-500">*</span>
-      </Label>
       <textarea
         id="job-description"
         placeholder="Paste the job description here..."

@@ -454,7 +454,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
                       <span className="text-pink-600 font-bold text-sm">1</span>
                     </div>
                     <div>
-                      <h4 className="font-semibold text-gray-900">Job Information</h4>
+                      <h4 className="font-semibold text-gray-900">Job Information <span className="text-red-500">*</span></h4>
                       <p className="text-xs text-gray-600">Paste the job posting details</p>
                     </div>
                   </div>
