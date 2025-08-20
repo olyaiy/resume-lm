@@ -9,7 +9,8 @@ import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
-import { ModelSelector, type ApiKey, AI_MODELS, PROVIDERS } from "@/components/shared/model-selector"
+import { ModelSelector } from "@/components/shared/model-selector"
+import { AI_MODELS, getProvidersArray, type ApiKey } from "@/lib/ai-models"
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
@@ -98,15 +99,9 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const autoSelectModel = () => {
       switch (service) {
         case 'anthropic':
-          return 'claude-4-sonnet-20250514'
+          return 'claude-4-sonnet'
         case 'openai':
-          return 'gpt-4o'
-        case 'deepseek':
-          return 'deepseek-chat'
-        case 'groq':
-          return 'llama-3.3-70b-versatile'
-        case 'google':
-          return 'gemini-2.5-pro-preview-05-06'
+          return 'gpt-5'
         default:
           return defaultModel
       }
@@ -212,7 +207,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
 
         <div className="space-y-4">
           {/* Stable Providers */}
-          {PROVIDERS.filter(p => !p.unstable).map(provider => {
+          {getProvidersArray().filter(p => !p.unstable).map(provider => {
             const existingKey = getExistingKey(provider.id)
             const isVisible = visibleKeys[provider.id]
             const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
@@ -329,7 +324,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
 
                 {providerModels.length > 0 && (
                   <div className="text-xs text-muted-foreground mt-2">
-                    Available models: {providerModels.map(m => `${m.name}${m.unstable ? ' (Unstable)' : ''}`).join(', ')}
+                    Available models: {providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
                   </div>
                 )}
               </div>
@@ -343,7 +338,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
               <p className="mt-1">The following providers are currently unstable. You may experience errors or intermittent service. We recommend using stable providers above for critical operations.</p>
             </div>
 
-            {PROVIDERS.filter(p => p.unstable).map(provider => {
+            {getProvidersArray().filter(p => p.unstable).map(provider => {
               const existingKey = getExistingKey(provider.id)
               const isVisible = visibleKeys[provider.id]
               const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
@@ -465,7 +460,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
 
                   {providerModels.length > 0 && (
                     <div className="text-xs text-muted-foreground mt-2">
-                      Available models: {providerModels.map(m => `${m.name}${m.unstable ? ' (Unstable)' : ''}`).join(', ')}
+                      Available models: {providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
                     </div>
                   )}
                 </div>

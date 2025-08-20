@@ -174,14 +174,15 @@ export const AI_PROVIDERS = {
   DEEPSEEK: 'deepseek',
 } as const;
 
-export type AIProvider = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
+export type AIProviderOld = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 
+// ServiceName is used across the app for API key management
 export type ServiceName = 
   | 'openai'
   // | 'azure'
-  | 'anthropic'
+  | 'anthropic';
   // | 'bedrock'
-  | 'google'
+  // | 'google'
   // | 'vertex'
   // | 'mistral'
   // | 'xai'
@@ -189,8 +190,11 @@ export type ServiceName =
   // | 'cohere'
   // | 'fireworks'
   // | 'deepinfra'
-  | 'groq'
-  | 'deepseek';
+  // | 'groq'
+  // | 'deepseek';
+
+// Re-export AI model types from centralized location (except AIProvider to avoid conflict)
+export type { AIModel, ApiKey, AIConfig } from './ai-models';
 
 export type SortDirection = 'ascending' | 'descending';
 

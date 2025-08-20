@@ -14,7 +14,6 @@ import { Suggestion } from './suggestions';
 import { SuggestionSkeleton } from './suggestion-skeleton';
 import ChatInput from './chat-input';
 import { LoadingDots } from '@/components/ui/loading-dots';
-import { ApiKey } from '@/utils/ai-tools';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -35,6 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ApiKeyErrorAlert } from '@/components/ui/api-key-error-alert';
 import { Textarea } from '@/components/ui/textarea';
+import { getDefaultModel, type ApiKey } from '@/lib/ai-models';
 
 
 
@@ -74,7 +74,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
   const [accordionValue, setAccordionValue] = React.useState<string>("");
   const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
-  const [defaultModel, setDefaultModel] = React.useState<string>('gpt-4.1-nano');
+  const [defaultModel, setDefaultModel] = React.useState<string>(getDefaultModel(false));
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);

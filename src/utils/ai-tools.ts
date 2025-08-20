@@ -1,67 +1,52 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
-import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import { createDeepSeek } from '@ai-sdk/deepseek';
-import { createGroq } from '@ai-sdk/groq';
 import { LanguageModelV1 } from 'ai';
-// import { createDeepSeek } from '@ai-sdk/deepseek';
+import { 
+  getModelById, 
+  getModelProvider,
+  type AIConfig
+} from '@/lib/ai-models';
 
-export type ApiKey = {
-  service: string;
-  key: string;
-  addedAt: string;
-};
-
-export type AIConfig = {
-  model: string;
-  apiKeys: Array<ApiKey>;
-};
+// Re-export types for backward compatibility
+export type { ApiKey, AIConfig } from '@/lib/ai-models';
 
 /**
  * Initializes an AI client based on the provided configuration
  * Falls back to default OpenAI configuration if no config is provided
  */
 export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {
-
+  void useThinking; // Keep for future use
 
   // Handle Pro subscription with environment variables
   if (isPro && config) {
-
     const { model } = config;
+    const modelData = getModelById(model);
+    const provider = modelData ? getModelProvider(model) : undefined;
     
-    if (model.startsWith('claude')) {
-      if (!process.env.ANTHROPIC_API_KEY) throw new Error('Anthropic API key not found');
-      return createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY,  })(model) as LanguageModelV1;
+    if (!modelData || !provider) {
+      throw new Error(`Unknown model: ${model}`);
     }
 
-    if (model.startsWith('gemini')) {
-      if (!process.env.GEMINI_API_KEY) throw new Error('Google API key not found');
-      return createGoogleGenerativeAI ({ apiKey: process.env.GEMINI_API_KEY })(model) as LanguageModelV1;
+    // Get the environment key and check if it exists
+    const envKey = process.env[provider.envKey];
+    if (!envKey) {
+      throw new Error(`${provider.name} API key not found (${provider.envKey})`);
     }
 
-    if (model.startsWith('deepseek')) {
-      if (!process.env.DEEPSEEK_API_KEY) throw new Error('DeepSeek API key not found');
-      return createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })(model) as LanguageModelV1;
+    // Create the appropriate SDK client based on provider
+    switch (provider.id) {
+      case 'anthropic':
+        return createAnthropic({ apiKey: envKey })(model) as LanguageModelV1;
+      
+      case 'openai':
+        return createOpenAI({ 
+          apiKey: envKey,
+          compatibility: 'strict'
+        })(model) as LanguageModelV1;
+      
+      default:
+        throw new Error(`Unsupported provider: ${provider.id}`);
     }
-
-    if (model.startsWith('gemma')) {
-      if (!process.env.GROQ_API_KEY) throw new Error('Groq API key not found');
-      return createGroq({ apiKey: process.env.GROQ_API_KEY })(model) as LanguageModelV1;
-    }
-
-    void useThinking;
-    // if (model.startsWith('deepseek')) {
-    //   if (!process.env.DEEPSEEK_API_KEY) throw new Error('DeepSeek API key not found');
-    //   return createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })(model);
-    // }
-
-    // Default to OpenAI for Pro
-    if (!process.env.OPENAI_API_KEY) throw new Error('OpenAI API key not found');
-    return createOpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY,
-      compatibility: 'strict',
-    
-    })('gpt-4.1-nano');
   }
 
   // Existing logic for free users
@@ -70,41 +55,44 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   }
 
   const { model, apiKeys } = config;
+  const modelData = getModelById(model);
+  const provider = modelData ? getModelProvider(model) : undefined;
+  
+  if (!modelData || !provider) {
+    throw new Error(`Unknown model: ${model}`);
+  }
   
   // Special case: GPT 4.1 Nano is free for all users
-  if (model === 'gpt-4.1-nano') {
-    if (!process.env.OPENAI_API_KEY) throw new Error('OpenAI API key not found');
-    return createOpenAI({ 
-      apiKey: process.env.OPENAI_API_KEY,
-      compatibility: 'strict',
-    })(model) as LanguageModelV1;
+  if (modelData.features.isFree) {
+    const envKey = process.env[provider.envKey];
+    if (!envKey) throw new Error(`${provider.name} API key not found`);
+    
+    if (provider.id === 'openai') {
+      return createOpenAI({ 
+        apiKey: envKey,
+        compatibility: 'strict',
+      })(model) as LanguageModelV1;
+    }
   }
   
-  if (model.startsWith('claude')) {
-    const anthropicKey = apiKeys.find(k => k.service === 'anthropic')?.key;
-    if (!anthropicKey) throw new Error('Anthropic API key not found');
-    return createAnthropic({ apiKey: anthropicKey })(model) as LanguageModelV1;
+  // For non-free models, user must provide their own API key
+  const userApiKey = apiKeys.find(k => k.service === provider.id)?.key;
+  if (!userApiKey) {
+    throw new Error(`${provider.name} API key not found in user configuration`);
   }
 
-  if (model.startsWith('gemini')) {
-    const googleKey = apiKeys.find(k => k.service === 'google')?.key;
-    if (!googleKey) throw new Error('Google API key not found');
-    return createGoogleGenerativeAI({ apiKey: googleKey })(model) as LanguageModelV1;
+  // Create the appropriate SDK client based on provider
+  switch (provider.id) {
+    case 'anthropic':
+      return createAnthropic({ apiKey: userApiKey })(model) as LanguageModelV1;
+    
+    case 'openai':
+      return createOpenAI({ 
+        apiKey: userApiKey,
+        compatibility: 'strict'
+      })(model) as LanguageModelV1;
+    
+    default:
+      throw new Error(`Unsupported provider: ${provider.id}`);
   }
-  
-  if (model.startsWith('deepseek')) {
-    const deepseekKey = apiKeys.find(k => k.service === 'deepseek')?.key;
-    if (!deepseekKey) throw new Error('DeepSeek API key not found');
-    return createDeepSeek({ apiKey: deepseekKey })(model) as LanguageModelV1;
-  }
-  
-  if (model.startsWith('gemma')) {
-    const groqKey = apiKeys.find(k => k.service === 'groq')?.key;
-    if (!groqKey) throw new Error('Groq API key not found');
-    return createGroq({ apiKey: groqKey })(model) as LanguageModelV1;
-  }
-  
-  const openaiKey = apiKeys.find(k => k.service === 'openai')?.key;
-  if (!openaiKey) throw new Error('OpenAI API key not found');
-  return createOpenAI({ apiKey: openaiKey })(model) as LanguageModelV1;
 }

@@ -11,7 +11,8 @@ import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useState, useEffect } from "react";
-import { ModelSelector, type ApiKey } from "@/components/shared/model-selector";
+import { ModelSelector } from "@/components/shared/model-selector";
+import { getDefaultModel, type ApiKey } from "@/lib/ai-models";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
@@ -40,14 +41,11 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
     const storedModel = localStorage.getItem('resumelm-default-model');
     if (storedModel) {
       setDefaultModel(storedModel);
-    } else if (isProPlan) {
-      // Set the best default model for Pro users
-      setDefaultModel('claude-4-sonnet-20250514');
-      localStorage.setItem('resumelm-default-model', 'claude-4-sonnet-20250514');
     } else {
-      // Set free model for non-Pro users
-      setDefaultModel('gpt-4.1-nano');
-      localStorage.setItem('resumelm-default-model', 'gpt-4.1-nano');
+      // Use centralized default model logic
+      const defaultModelId = getDefaultModel(isProPlan);
+      setDefaultModel(defaultModelId);
+      localStorage.setItem('resumelm-default-model', defaultModelId);
     }
   }, [isProPlan]);
 
