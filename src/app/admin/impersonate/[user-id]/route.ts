@@ -45,7 +45,7 @@ export async function GET(
   // 3. Generate a magic-link that signs the admin in **as the target user**.
   const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
     type: 'magiclink',
-    email: authUser.email!, // email can be safely asserted – Supabase guarantees it on users
+    email: authUser.user.email!, // email can be safely asserted – Supabase guarantees it on users
     options: {
       redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
     },
