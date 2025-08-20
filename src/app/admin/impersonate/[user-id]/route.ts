@@ -14,8 +14,9 @@ import { ensureAdmin } from '../../actions' // relative to this file
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { 'user-id': string } }
+  context: { params: Promise<{ 'user-id': string }> }
 ) {
+  const params = await context.params
   const targetUserId = params['user-id']
 
   if (!targetUserId) {
