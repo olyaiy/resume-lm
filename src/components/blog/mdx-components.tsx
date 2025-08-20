@@ -2,7 +2,7 @@ import Image, { ImageProps } from "next/image";
 import type { ComponentProps } from "react";
 
 function RoundedImage(props: ImageProps) {
-  return <Image {...props} className="rounded-md border shadow-sm my-4" />;
+  return <Image {...props} alt={props.alt || ""} className="rounded-md border shadow-sm my-4" />;
 }
 
 function InlineCode(props: ComponentProps<"code">) {

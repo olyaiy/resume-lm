@@ -1,5 +1,6 @@
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
+import Image from "next/image";
 import { AuthDialog } from "@/components/auth/auth-dialog";
 
 export function Hero() {
