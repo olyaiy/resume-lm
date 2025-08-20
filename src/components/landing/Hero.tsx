@@ -16,10 +16,9 @@ export function Hero() {
             rel="noopener noreferrer"
             className="inline-block transition-transform duration-300 hover:-translate-y-1"
           >
-            <img 
+            <Image 
               src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982199&theme=light&t=1750633039421" 
               alt="ResumeLM - Open Source AI Resume Builder for Tech Jobs | Product Hunt" 
-              style={{ width: '250px', height: '54px' }}
               width={250} 
               height={54} 
             />
