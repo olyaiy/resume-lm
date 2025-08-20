@@ -175,45 +175,53 @@ export async function getUsersWithProfilesAndSubscriptions(): Promise<UserWithDe
 
   console.log(`Fetching profiles, subscriptions, and resume counts for ${userIds.length} users via RPC.`);
 
-  // 1. Fetch profiles using RPC
-  const { data: profiles, error: profilesError } = await supabase
-    .rpc('get_profiles_for_users', { user_ids_array: userIds });
-
-  if (profilesError) {
-    console.error('Error fetching profiles via RPC:', profilesError);
-    throw new Error('Failed to fetch profiles');
+  const BATCH_SIZE = 1000;
+  // Utility to split array into chunks
+  function chunkArray<T>(arr: T[], size: number): T[][] {
+    const chunks: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) {
+      chunks.push(arr.slice(i, i + size));
+    }
+    return chunks;
   }
-  const profilesMap = new Map((profiles as Profile[] | null)?.map(p => [p.user_id, p]));
 
-  // 2. Fetch subscriptions using RPC
-  const { data: subscriptions, error: subscriptionsError } = await supabase
-    .rpc('get_subscriptions_for_users', { user_ids_array: userIds });
-
-  if (subscriptionsError) {
-    console.error('Error fetching subscriptions via RPC:', subscriptionsError);
-    throw new Error('Failed to fetch subscriptions');
+  // Helper to fetch RPC in batches and concatenate results
+  async function fetchRpcInBatches<T>(rpcName: string, paramsKey: string, ids: string[]): Promise<T[]> {
+    const chunks = chunkArray(ids, BATCH_SIZE);
+    const results: T[] = [];
+    for (const chunk of chunks) {
+      const { data, error } = await supabase.rpc(rpcName, { [paramsKey]: chunk });
+      if (error) {
+        throw new Error(`${rpcName} failed: ${error.message}`);
+      }
+      results.push(...(data as T[]));
+    }
+    return results;
   }
-  const subscriptionsMap = new Map((subscriptions as Subscription[] | null)?.map(s => [s.user_id, s]));
 
-  // 3. Fetch resume counts using RPC
-  const { data: resumeCountsData, error: resumeCountsError } = await supabase
-    .rpc('get_resume_counts_for_users', { user_ids_array: userIds });
+  // 1. Fetch profiles using RPC (batched)
+  const profilesData = await fetchRpcInBatches<Profile>('get_profiles_for_users', 'user_ids_array', userIds);
+  const profilesMap = new Map(profilesData.map(p => [p.user_id, p]));
 
-  if (resumeCountsError) {
-    console.error('Error fetching resume counts via RPC:', resumeCountsError);
-    // No fallback here, as the RPC should be reliable. If it fails, it's a deeper issue.
-    throw new Error('Failed to fetch resume counts');
-  }
-  
-  const resumeCountsMap = new Map<string, number>(
-    resumeCountsData?.map((item: { user_id: string, resume_count: number }) => [item.user_id, Number(item.resume_count) || 0]) || []
-);
+  // 2. Fetch subscriptions using RPC (batched)
+  const subscriptionsData = await fetchRpcInBatches<Subscription>('get_subscriptions_for_users', 'user_ids_array', userIds);
 
+  console.log('DEBUG | Subscriptions fetched total:', subscriptionsData.length);
 
-  // 4. Merge data (using Maps for efficiency)
+  const subscriptionsMap = new Map(subscriptionsData.map(s => [s.user_id, s]));
+
+  // 3. Fetch resume counts using RPC (batched)
+  const resumeCountsData = await fetchRpcInBatches<{ user_id: string; resume_count: number }>('get_resume_counts_for_users', 'user_ids_array', userIds);
+
+  const resumeCountsMap = new Map(resumeCountsData.map(item => [item.user_id, Number(item.resume_count) || 0]));
+
+  // Added debug log for missing subscription cases
   const mergedData = users.map(user => {
     const profile = profilesMap.get(user.id) || null;
     const subscription = subscriptionsMap.get(user.id) || null;
+    if (!subscription) {
+      console.warn(`DEBUG | No subscription found for user ${user.id} (${user.email})`);
+    }
     const resume_count = resumeCountsMap.get(user.id) || 0;
 
     return {
@@ -223,6 +231,7 @@ export async function getUsersWithProfilesAndSubscriptions(): Promise<UserWithDe
       resume_count
     } as unknown as UserWithDetails;
   });
+  //--------------------------------------------
   return mergedData;
 }
 

@@ -121,6 +121,10 @@ export default function UsersTable() {
       try {
         setLoading(true);
         const data = await getUsersWithProfilesAndSubscriptions();
+        console.log('DEBUG (browser) | users fetched from server action:', {
+          total: data?.length,
+          sample: (data as unknown as any[])?.slice?.(0, 3) // show first 3
+        });
         setUsers(data as unknown as UserData[]);
       } catch (err) {
         console.error('Error fetching users:', err);
