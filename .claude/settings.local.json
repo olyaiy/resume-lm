@@ -5,7 +5,11 @@
       "Bash(pnpm build:*)",
       "Bash(pnpm add:*)",
       "Bash(pnpm install:*)",
-      "Bash(npm search:*)"
+      "Bash(npm search:*)",
+      "Bash(git add:*)",
+      "Bash(pnpm ls:*)",
+      "Bash(rm:*)",
+      "Bash(git fetch:*)"
     ],
     "deny": [],
     "ask": []
