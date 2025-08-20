@@ -102,6 +102,8 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
           return 'claude-4-sonnet'
         case 'openai':
           return 'gpt-5'
+        case 'openrouter':
+          return 'openai/gpt-oss-120b:nitro'
         default:
           return defaultModel
       }

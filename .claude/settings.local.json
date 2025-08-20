@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(pnpm lint:*)",
-      "Bash(pnpm build:*)"
+      "Bash(pnpm build:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm install:*)",
+      "Bash(npm search:*)"
     ],
     "deny": [],
     "ask": []

@@ -15,7 +15,7 @@
     "@ai-sdk/google-vertex": "^2.0.12",
     "@ai-sdk/groq": "^1.1.9",
     "@ai-sdk/openai": "^1.0.12",
-    "@openrouter/ai-sdk-provider": "^0.0.6",
+    "@openrouter/ai-sdk-provider": "^1.1.2",
     "@radix-ui/react-accordion": "^1.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.4",
     "@radix-ui/react-avatar": "^1.1.9",

@@ -81,6 +81,8 @@ export async function POST(req: Request) {
     // Initialize the AI client using the provided config and plan.
     const aiClient = initializeAIClient(config, isPro);
 
+    console.log('THE AI Client isss:', aiClient);
+
     // Build and send the AI call.
     const result = streamText({
       model: aiClient as LanguageModelV1,

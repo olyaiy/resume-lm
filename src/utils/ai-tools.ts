@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { LanguageModelV1 } from 'ai';
 import { 
   getModelById, 
@@ -39,9 +40,37 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
         return createAnthropic({ apiKey: envKey })(model) as LanguageModelV1;
       
       case 'openai':
+        // Check if this is actually an OpenRouter model (contains forward slash)
+        if (model.includes('/')) {
+          // Use OpenRouter for models with provider prefix
+          const openRouterKey = process.env.OPENROUTER_API_KEY;
+          if (!openRouterKey) {
+            throw new Error('OpenRouter API key not found (OPENROUTER_API_KEY)');
+          }
+          return createOpenRouter({
+            apiKey: openRouterKey,
+            baseURL: 'https://openrouter.ai/api/v1',
+            headers: {
+              'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+              'X-Title': 'ResumeLM'
+            },
+            
+          })(model) as LanguageModelV1;
+        }
+        // Regular OpenAI models
         return createOpenAI({ 
           apiKey: envKey,
           compatibility: 'strict'
+        })(model) as LanguageModelV1;
+      
+      case 'openrouter':
+        return createOpenRouter({
+          apiKey: envKey,
+          baseURL: 'https://openrouter.ai/api/v1',
+          headers: {
+            'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+            'X-Title': 'ResumeLM'
+          }
         })(model) as LanguageModelV1;
       
       default:
@@ -63,7 +92,24 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   }
   
   // Special case: GPT 4.1 Nano is free for all users
-  if (modelData.features.isFree) {
+  // Also allow GPT OSS models to use server-side OpenRouter key
+  if (modelData.features.isFree || model.includes('/')) {
+    // For OpenRouter models (with slash), use OpenRouter key
+    if (model.includes('/')) {
+      const openRouterKey = process.env.OPENROUTER_API_KEY;
+      if (!openRouterKey) throw new Error('OpenRouter API key not found');
+      
+      return createOpenRouter({
+        apiKey: openRouterKey,
+        baseURL: 'https://openrouter.ai/api/v1',
+        headers: {
+          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+          'X-Title': 'ResumeLM'
+        }
+      })(model) as LanguageModelV1;
+    }
+    
+    // For regular free models like GPT 4.1 Nano
     const envKey = process.env[provider.envKey];
     if (!envKey) throw new Error(`${provider.name} API key not found`);
     
@@ -87,9 +133,36 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
       return createAnthropic({ apiKey: userApiKey })(model) as LanguageModelV1;
     
     case 'openai':
+      // Check if this is actually an OpenRouter model (contains forward slash)
+      if (model.includes('/')) {
+        // Use OpenRouter for models with provider prefix
+        const openRouterKey = apiKeys.find(k => k.service === 'openrouter')?.key;
+        if (!openRouterKey) {
+          throw new Error('OpenRouter API key not found in user configuration');
+        }
+        return createOpenRouter({
+          apiKey: openRouterKey,
+          baseURL: 'https://openrouter.ai/api/v1',
+          headers: {
+            'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+            'X-Title': 'ResumeLM'
+          }
+        })(model) as LanguageModelV1;
+      }
+      // Regular OpenAI models
       return createOpenAI({ 
         apiKey: userApiKey,
         compatibility: 'strict'
+      })(model) as LanguageModelV1;
+    
+    case 'openrouter':
+      return createOpenRouter({
+        apiKey: userApiKey,
+        baseURL: 'https://openrouter.ai/api/v1',
+        headers: {
+          'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+          'X-Title': 'ResumeLM'
+        }
       })(model) as LanguageModelV1;
     
     default:

@@ -78,6 +78,16 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
     sdkInitializer: 'openai',
     unstable: false
   },
+  openrouter: {
+    id: 'openrouter',
+    name: 'OpenRouter',
+    apiLink: 'https://openrouter.ai/account/api-keys',
+    logo: '/logos/openrouter.png',
+    envKey: 'OPENROUTER_API_KEY',
+    sdkInitializer: 'openrouter',
+    unstable: false
+    
+  },
 }
 
 // ========================
@@ -148,6 +158,38 @@ export const AI_MODELS: AIModel[] = [
       requiresApiKey: true,
       requiresPro: false
     }
+  },
+  {
+    id: 'openai/gpt-oss-120b:nitro',
+    name: 'GPT OSS 120B',
+    provider: 'openai', // Show under OpenAI section
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 128000,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true, // Requires OpenRouter API key
+      requiresPro: false
+    },
+  },
+  {
+    id: 'openai/gpt-oss-20b:nitro',
+    name: 'GPT OSS 20B',
+    provider: 'openai', // Show under OpenAI section
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 128000,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true, // Requires OpenRouter API key
+      requiresPro: false
+    },
   },
 
   // Anthropic Models
@@ -244,6 +286,11 @@ export function isModelAvailable(
 
   // Free model (gpt-4.1-nano)
   if (model.features.isFree) return true
+
+  // Check if this is an OpenRouter model (contains forward slash)
+  if (modelId.includes('/')) {
+    return apiKeys.some(key => key.service === 'openrouter')
+  }
 
   // Check if user has the required API key
   return apiKeys.some(key => key.service === model.provider)

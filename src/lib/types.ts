@@ -180,7 +180,8 @@ export type AIProviderOld = typeof AI_PROVIDERS[keyof typeof AI_PROVIDERS];
 export type ServiceName = 
   | 'openai'
   // | 'azure'
-  | 'anthropic';
+  | 'anthropic'
+  | 'openrouter';
   // | 'bedrock'
   // | 'google'
   // | 'vertex'
