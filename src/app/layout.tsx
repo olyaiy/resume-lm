@@ -7,6 +7,8 @@ import { createClient } from "@/utils/supabase/server";
 import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react"
+import Link from "next/link";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -77,6 +79,11 @@ export default async function RootLayout({
 }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
+
+  // Detect impersonation via cookie set during /admin/impersonate flow
+  const cookieStore = await cookies();
+  const isImpersonating = cookieStore.get('is_impersonating')?.value === 'true';
+
   
   let showUpgradeButton = false;
   let isProPlan = false;
@@ -98,6 +105,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        {isImpersonating && user && (
+          <div className="bg-amber-500 text-white text-center text-sm py-2">
+            Impersonating&nbsp;<span className="font-semibold">{user.email ?? user.id}</span>.&nbsp;
+            <Link href="/stop-impersonation" className="underline font-medium">
+              Stop impersonating
+            </Link>
+          </div>
+        )}
         <div className="relative min-h-screen h-screen flex flex-col">
           {user && <AppHeader showUpgradeButton={showUpgradeButton} isProPlan={isProPlan} />}
           {/* Padding for header and footer */}

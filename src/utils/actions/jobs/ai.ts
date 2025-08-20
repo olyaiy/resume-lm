@@ -20,13 +20,19 @@ export async function tailorResumeToJob(
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
+  // Hardcode to use gpt-5 for now
+  const hardcodedConfig: AIConfig = {
+    model: 'gpt-5',
+    apiKeys: config?.apiKeys || []
+  };
+  const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
 // Check rate limit
   await checkRateLimit(id);
 
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1, 
+      temperature: 1, // GPT-5 requires temperature to be 1
       schema: z.object({
       content: simplifiedResumeSchema,
     }),
@@ -86,13 +92,19 @@ prompt: `
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro, true) : initializeAIClient(config);
+  // Hardcode to use gpt-5 for now
+  const hardcodedConfig: AIConfig = {
+    model: 'gpt-5',
+    apiKeys: config?.apiKeys || []
+  };
+  const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
 // Check rate limit
   await checkRateLimit(id);
 
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1,
+      temperature: 1, // GPT-5 requires temperature to be 1
       schema: z.object({
         content: simplifiedJobSchema
       }),

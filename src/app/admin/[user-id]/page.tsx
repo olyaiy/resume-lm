@@ -79,6 +79,10 @@ export default async function AdminUserDetailPage({ params }: AdminUserDetailPag
              <span className="sr-only">Back to Admin Dashboard</span>
            </Link>
          </Button>
+        {/* Impersonate User Button */}
+        <Button variant="destructive" size="sm" asChild>
+          <Link href={`/admin/impersonate/${targetUserId}`}>Impersonate User</Link>
+        </Button>
         <h1 className="text-2xl font-bold">User Details</h1>
       </div>
 
