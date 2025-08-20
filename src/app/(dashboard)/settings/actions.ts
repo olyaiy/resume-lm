@@ -115,7 +115,7 @@ interface ApiTestResult {
         messages: [{ role: 'user', content: 'Say this is a test!' }],
         response_format: { type: "text" },
         temperature: 1,
-        max_tokens: 2048,
+        max_tokens: 8000,
         top_p: 1,
         frequency_penalty: 0,
         presence_penalty: 0

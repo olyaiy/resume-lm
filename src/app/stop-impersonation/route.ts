@@ -12,8 +12,8 @@ export async function GET(request: NextRequest) {
   await supabase.auth.signOut()
 
   const response = NextResponse.redirect(new URL('/auth/login', request.url))
-  response.cookies.delete('is_impersonating', { path: '/' })
-  response.cookies.delete('impersonated_user_id', { path: '/' })
+  response.cookies.delete('is_impersonating')
+  response.cookies.delete('impersonated_user_id')
 
   return response
 }
