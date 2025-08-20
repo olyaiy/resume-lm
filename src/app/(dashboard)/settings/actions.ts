@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import OpenAI from "openai";
+import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 
 interface SecurityResult {
   success: boolean;
@@ -110,7 +111,7 @@ interface ApiTestResult {
       });
   
       const response = await openai.chat.completions.create({
-        model: "gpt-4.1-nano",
+        model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
         messages: [{ role: 'user', content: 'Say this is a test!' }],
         response_format: { type: "text" },
         temperature: 1,

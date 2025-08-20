@@ -239,6 +239,41 @@ export const DEFAULT_MODELS = {
 } as const
 
 // ========================
+// Model Designations for Different Use Cases
+// ========================
+
+/**
+ * Designated models for specific use cases throughout the application.
+ * Change these to update which models are used globally.
+ */
+export const MODEL_DESIGNATIONS = {
+  // Fast & cheap model for parsing, simple tasks, quick analysis
+  FAST_CHEAP: 'openai/gpt-oss-20b:nitro',
+  
+  // Alternative fast & cheap option (free for all users)
+  FAST_CHEAP_FREE: 'gpt-4.1-nano',
+  
+  // Frontier model for complex tasks, deep analysis, best quality
+  FRONTIER: 'claude-4-sonnet',
+  
+  // Alternative frontier model
+  FRONTIER_ALT: 'gpt-5',
+  
+  // Balanced model - good quality but faster/cheaper than frontier
+  BALANCED: 'openai/gpt-oss-120b:nitro',
+  
+  // Vision-capable model for image analysis
+  VISION: 'gpt-4o',
+  
+  // Default models by user type
+  DEFAULT_PRO: 'claude-4-sonnet',
+  DEFAULT_FREE: 'gpt-4.1-nano'
+} as const
+
+// Type for model designations
+export type ModelDesignation = keyof typeof MODEL_DESIGNATIONS
+
+// ========================
 // Utility Functions
 // ========================
 

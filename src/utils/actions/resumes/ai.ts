@@ -7,6 +7,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
+import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import { PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { WorkExperience } from "@/lib/types";
@@ -19,8 +20,8 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const _unusedConfig = config; // Keep parameter for future use
   
-  // Hardcode to use gpt-4.1-nano for now
-  const hardcodedConfig = { model: 'gpt-4.1-nano', apiKeys: [] };
+  // Use fast and cheap free model for text parsing
+  const hardcodedConfig = { model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE, apiKeys: [] };
   const aiClient = initializeAIClient(hardcodedConfig);
 
   

@@ -10,7 +10,7 @@ import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
 import { ModelSelector } from "@/components/shared/model-selector"
-import { AI_MODELS, getProvidersArray, type ApiKey } from "@/lib/ai-models"
+import { AI_MODELS, MODEL_DESIGNATIONS, getProvidersArray, type ApiKey } from "@/lib/ai-models"
 
 const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
 const MODEL_STORAGE_KEY = 'resumelm-default-model'
@@ -42,12 +42,12 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
       setDefaultModel(storedModel)
     } else if (isProPlan) {
       // Set the best default model for Pro users
-      setDefaultModel('claude-4-sonnet-20250514')
-      localStorage.setItem(MODEL_STORAGE_KEY, 'claude-4-sonnet-20250514')
+      setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_PRO)
+      localStorage.setItem(MODEL_STORAGE_KEY, MODEL_DESIGNATIONS.DEFAULT_PRO)
     } else {
       // Set free model for non-Pro users
-      setDefaultModel('gpt-4.1-nano')
-      localStorage.setItem(MODEL_STORAGE_KEY, 'gpt-4.1-nano')
+      setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_FREE)
+      localStorage.setItem(MODEL_STORAGE_KEY, MODEL_DESIGNATIONS.DEFAULT_FREE)
     }
 
     // Mark initial load as complete
@@ -99,11 +99,11 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const autoSelectModel = () => {
       switch (service) {
         case 'anthropic':
-          return 'claude-4-sonnet'
+          return MODEL_DESIGNATIONS.FRONTIER
         case 'openai':
-          return 'gpt-5'
+          return MODEL_DESIGNATIONS.FRONTIER_ALT
         case 'openrouter':
-          return 'openai/gpt-oss-120b:nitro'
+          return MODEL_DESIGNATIONS.BALANCED
         default:
           return defaultModel
       }
