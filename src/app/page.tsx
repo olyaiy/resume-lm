@@ -85,11 +85,6 @@ export default async function Page() {
           <Hero />
         </div>
         
-        {/* Video Showcase Section */}
-        <section id="product-demo">
-          <VideoShowcase />
-        </section>
-        
         {/* Feature Highlights Section */}
         <section id="features" aria-labelledby="features-heading">
           <FeatureHighlights />
