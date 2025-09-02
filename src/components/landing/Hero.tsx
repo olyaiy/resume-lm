@@ -9,9 +9,8 @@ export function Hero() {
         
         {/* Tagline with simplified gradient text */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
-          <span className="block">Open source</span>
           <span className="block text-indigo-600">AI Resume Builder</span>
-          <span className="block">that lands you tech jobs</span>
+          <span className="block">that lands you jobs</span>
         </h1>
         
         {/* Description with quantifiable benefits */}
