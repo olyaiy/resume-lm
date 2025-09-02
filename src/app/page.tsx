@@ -2,7 +2,6 @@ import { Background } from "@/components/landing/Background";
 import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
-import { CreatorStory } from "@/components/landing/creator-story";
 import { FAQ } from "@/components/landing/FAQ";
 import { Footer } from "@/components/layout/footer";
 import { NavLinks } from "@/components/layout/nav-links";
@@ -88,11 +87,6 @@ export default async function Page() {
         {/* Feature Highlights Section */}
         <section id="features" aria-labelledby="features-heading">
           <FeatureHighlights />
-        </section>
-        
-        {/* Creator Story Section */}
-        <section id="about" aria-labelledby="about-heading">
-          <CreatorStory />
         </section>
         
         {/* Pricing Plans Section */}
