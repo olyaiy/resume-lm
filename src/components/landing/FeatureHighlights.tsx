@@ -3,7 +3,7 @@ import React from 'react';
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
-import Link from "next/link";
+// NOTE: Link removed since we’re deleting the GitHub button
 import { SplitContent } from '../ui/split-content';
 import { AuthDialog } from "@/components/auth/auth-dialog";
 
@@ -24,14 +24,13 @@ const FeatureHighlights = () => {
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-gradient-to-tr from-teal-200/30 to-cyan-200/30 blur-3xl"></div>
       <div className="absolute top-1/3 left-1/4 w-64 h-64 rounded-full bg-gradient-to-r from-pink-200/20 to-rose-200/20 blur-3xl"></div>
  
-      {/* Redesigned heading section with enhanced visual appeal */}
+      {/* Heading area */}
       <div className="relative z-10 max-w-5xl mx-auto">
-        {/* Decorative elements specific to the heading */}
         <div className="absolute -top-28 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-gradient-to-br from-violet-200/15 to-indigo-200/15 blur-3xl -z-10"></div>
         <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full bg-gradient-to-br from-cyan-200/20 to-teal-200/20 blur-3xl -z-10"></div>
         <div className="absolute -bottom-10 -left-20 w-72 h-72 rounded-full bg-gradient-to-tr from-rose-200/20 to-pink-200/20 blur-3xl -z-10"></div>
         
-        {/* Leading badges */}
+        {/* Badges */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -49,7 +48,7 @@ const FeatureHighlights = () => {
           </span>
         </motion.div>
         
-        {/* Heading with typography */}
+        {/* Heading + subcopy */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -89,7 +88,7 @@ const FeatureHighlights = () => {
         </div>
       </div>
       
-      {/* Enhanced Features Section */}
+      {/* Features */}
       <div className="flex flex-col gap-24 py-24 relative" id="features">
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-violet-50/30 to-transparent"></div>
         
@@ -152,7 +151,7 @@ const FeatureHighlights = () => {
         />
       </div>
       
-      {/* Social proof section */}
+      {/* Social proof */}
       <motion.div 
         className="mt-24 text-center"
         initial={{ opacity: 0, y: 20 }}
@@ -176,7 +175,7 @@ const FeatureHighlights = () => {
         </div>
       </motion.div>
       
-      {/* CTA section */}
+      {/* CTA (GitHub button removed, primary button centered) */}
       <motion.div 
         className="mt-28 text-center"
         initial={{ opacity: 0, scale: 0.95 }}
@@ -194,7 +193,8 @@ const FeatureHighlights = () => {
             Join 50,000+ professionals who are getting more interviews with ResumeLM
           </p>
           
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          {/* Single, centered button */}
+          <div className="flex justify-center">
             <AuthDialog>
               <button 
                 className="px-8 py-4 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-lg font-medium shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl"
@@ -202,16 +202,6 @@ const FeatureHighlights = () => {
                 Create Your Free Resume
               </button>
             </AuthDialog>
-            <Link 
-              href="https://github.com/olyaiy/resume-lm" 
-              target="_blank"
-              rel="noopener noreferrer"
-              className="px-8 py-4 rounded-lg bg-white/80 border border-purple-200/40 text-lg font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
-            >
-              <span className="bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                Open Source on Github
-              </span>
-            </Link>
           </div>
           
           <p className="text-sm text-muted-foreground mt-6 flex items-center justify-center gap-2">
