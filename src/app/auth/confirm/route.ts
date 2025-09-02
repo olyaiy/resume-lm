@@ -1,28 +1,30 @@
 import { type EmailOtpType } from '@supabase/supabase-js'
 import { type NextRequest } from 'next/server'
-
-import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 
+import { createClient } from '@/utils/supabase/server'
+
 export async function GET(request: NextRequest) {
-  const { searchParams } = new URL(request.url)
-  const token_hash = searchParams.get('token_hash')
-  const type = searchParams.get('type') as EmailOtpType | null
-  const next = searchParams.get('next') ?? '/'
+  const url = new URL(request.url)
+
+  // Supabase may send token as `token_hash` (new) or `code` (older).
+  const token_hash = url.searchParams.get('token_hash') ?? url.searchParams.get('code')
+
+  // For email confirmation this is usually "signup". Keep what's sent, but default to signup.
+  const type = (url.searchParams.get('type') as EmailOtpType | null) ?? 'signup'
+
+  // Only allow internal redirects like "/home". Anything else falls back to "/".
+  const nextParam = url.searchParams.get('next')
+  const next = nextParam && nextParam.startsWith('/') ? nextParam : '/'
 
   if (token_hash && type) {
     const supabase = await createClient()
-
-    const { error } = await supabase.auth.verifyOtp({
-      type,
-      token_hash,
-    })
+    const { error } = await supabase.auth.verifyOtp({ type, token_hash })
     if (!error) {
-      // redirect user to specified redirect URL or root of app
-      redirect(next)
+      return redirect(next)
     }
   }
 
-  // redirect to login page with error parameter
-  redirect('//?error=email_confirmation')
+  // On failure, send the user to your login page with an error flag
+  return redirect('/auth/login?error=email_confirmation')
 }
