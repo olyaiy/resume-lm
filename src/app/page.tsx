@@ -2,7 +2,6 @@ import { Background } from "@/components/landing/Background";
 import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
 import { PricingPlans } from "@/components/landing/PricingPlans";
-import { VideoShowcase } from "@/components/landing/VideoShowcase";
 import { CreatorStory } from "@/components/landing/creator-story";
 import { FAQ } from "@/components/landing/FAQ";
 import { Footer } from "@/components/layout/footer";
