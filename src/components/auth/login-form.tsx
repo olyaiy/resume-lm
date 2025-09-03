@@ -76,12 +76,16 @@ export function LoginForm() {
       if (!result.success) {
         setError("Invalid credentials. If you just signed up, please check your email for a verification link.");
       }
-    } catch (error: unknown) {
-      setError("An error occurred during login");
-      console.error("Login error:", error);
-    } finally {
-      setFieldLoading('submit', false);
-    }
+   } catch (error: unknown) {
+  // Ignore Next.js redirect "error" thrown by redirect('/')
+  if ((error as { digest?: string })?.digest === 'NEXT_REDIRECT') {
+    return; // successful login + redirect
+  }
+  setError("An error occurred during login");
+  console.error("Login error:", error);
+} finally {
+  setFieldLoading('submit', false);
+}
   }
 
   const handleInputChange = (field: 'email' | 'password', value: string) => {
