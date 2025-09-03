@@ -18,24 +18,24 @@ export function FAQ() {
   // FAQ data - focused on ResumeLM specific questions
   const faqItems: FAQItem[] = [
     {
-      question: "How does ResumeLM's AI tailor my resume for specific jobs?",
+      question: "How does Wooed.AI tailor my resume for specific jobs?",
       answer: "Our AI analyzes job descriptions and automatically adjusts your resume content, keywords, and formatting to match what recruiters and ATS systems are looking for. It optimizes your bullet points, highlights relevant skills, and ensures your experience aligns with the job requirements."
     },
     {
-      question: "Is ResumeLM really free to use?",
-      answer: "Yes! Our free plan includes 2 base resumes and 5 tailored resumes using your own API keys. You can also self-host the entire platform. Our Pro plan ($20/month) provides unlimited resumes and access to premium AI models without needing your own API keys."
+      question: "Is Wooed.AI really free to use?",
+      answer: "Yes! Our free plan includes 2 base resumes and 5 tailored resumes using your own API keys. Our Pro plan ($30/month) provides unlimited resumes and access to premium AI models without needing your own API keys."
     },
     {
-      question: "What makes ResumeLM different from other resume builders?",
-      answer: "ResumeLM is specifically designed for tech professionals with AI-powered optimization, ATS compatibility, and the ability to create multiple tailored versions from one base resume. Plus, it's open-source and can be self-hosted for complete control over your data."
+      question: "What makes Wooed.AI different from other resume builders?",
+      answer: "Wooed.ai is specifically designed with AI-powered optimization, ATS compatibility, and the ability to create multiple tailored versions from one base resume."
     },
     {
-      question: "How long does it take to create a resume with ResumeLM?",
+      question: "How long does it take to create a resume with Wooed.AI?",
       answer: "Most users create their first resume in under 15 minutes. Once you have a base resume, generating tailored versions for specific jobs takes just 2-3 minutes with our AI assistant."
     },
     {
       question: "Will my resume pass ATS (Applicant Tracking Systems)?",
-      answer: "Absolutely! ResumeLM is specifically designed to create ATS-optimized resumes. Our templates use proper formatting, keyword optimization, and structure that ATS systems can easily parse and rank highly."
+      answer: "Absolutely! Wooed.AI is specifically designed to create ATS-optimized resumes. Our templates use proper formatting, keyword optimization, and structure that ATS systems can easily parse and rank highly."
     },
     {
       question: "Can I use my own AI API keys?",
@@ -43,11 +43,11 @@ export function FAQ() {
     },
     {
       question: "Is my data secure and private?",
-      answer: "Your privacy is our priority. All data is encrypted, and you can even self-host ResumeLM for complete control. We never share your personal information or resume data with third parties."
+      answer: "Your privacy is our priority. All data is encrypted. We never share your personal information or resume data with third parties."
     },
     {
       question: "Do you offer support for students or career changers?",
-      answer: "Absolutely! ResumeLM is perfect for students, career changers, and professionals at any level. Our AI helps highlight transferable skills and optimize your resume regardless of your experience level."
+      answer: "Absolutely! Wooed.AI is perfect for students, career changers, and professionals at any level. Our AI helps highlight transferable skills and optimize your resume regardless of your experience level."
     }
   ];
 
