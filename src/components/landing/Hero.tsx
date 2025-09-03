@@ -3,8 +3,8 @@ import { AuthDialog } from "@/components/auth/auth-dialog";
 
 export function Hero() {
   return (
-    <section className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 py-12 md:py-16 lg:py-20">
-      {/* Left Content */}
+<section className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 py-6 md:py-8 lg:py-10">
+  {/* Left Content */}
       <div className="w-full lg:w-1/2 space-y-8">
         
         {/* Tagline with simplified gradient text */}
