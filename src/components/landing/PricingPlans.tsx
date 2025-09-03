@@ -46,7 +46,7 @@ export function PricingPlans() {
     },
     {
       name: "Pro",
-      price: "$20",
+      price: "$30",
       period: "/month",
       description: "Enhanced features for serious job seekers",
       badge: "Most Popular",
