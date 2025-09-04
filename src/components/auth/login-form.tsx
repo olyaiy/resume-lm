@@ -79,6 +79,7 @@ try {
 } finally {
   setFieldLoading('submit', false);
 }
+  }
 
   const handleInputChange = (field: 'email' | 'password', value: string) => {
     setFormData({ [field]: value });
