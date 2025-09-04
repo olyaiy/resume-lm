@@ -76,6 +76,7 @@ export function LoginForm() {
       if (!result.success) {
         setError("Invalid credentials. If you just signed up, please check your email for a verification link.");
       }
+    }  
   }
 
   const handleInputChange = (field: 'email' | 'password', value: string) => {
