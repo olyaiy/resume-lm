@@ -62,22 +62,23 @@ export function LoginForm() {
     const isValid = fields.every(field => validations[field]?.isValid);
 
     if (!isValid) {
-      setError("Please fix the validation errors before submitting");
-      return;
-    }
+  setError("Please fix the validation errors before submitting");
+  return;
+}
 
-    try {
-      setFieldLoading('submit', true);
-      const formDataToSend = new FormData();
-      formDataToSend.append('email', formData.email);
-      formDataToSend.append('password', formData.password);
-      
-      const result = await login(formDataToSend);
-      if (!result.success) {
-        setError("Invalid credentials. If you just signed up, please check your email for a verification link.");
-      }
-    }  
+try {
+  setFieldLoading('submit', true);
+  const formDataToSend = new FormData();
+  formDataToSend.append('email', formData.email);
+  formDataToSend.append('password', formData.password);
+  
+  const result = await login(formDataToSend);
+  if (!result.success) {
+    setError("Invalid credentials. If you just signed up, please check your email for a verification link.");
   }
+} finally {
+  setFieldLoading('submit', false);
+}
 
   const handleInputChange = (field: 'email' | 'password', value: string) => {
     setFormData({ [field]: value });
