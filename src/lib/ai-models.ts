@@ -194,26 +194,11 @@ export const AI_MODELS: AIModel[] = [
 
   // Anthropic Models
   {
-    id: 'claude-4-sonnet',
+    id: 'claude-sonnet-4-20250514',
     name: 'Claude Sonnet 4',
     provider: 'anthropic',
     features: {
       isRecommended: true,
-      isUnstable: false,
-      maxTokens: 200000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'claude-4-sonnet-20250514',
-    name: 'Claude 4 Sonnet (Legacy)',
-    provider: 'anthropic',
-    features: {
       isUnstable: false,
       maxTokens: 200000,
       supportsVision: true,
@@ -230,11 +215,23 @@ export const AI_MODELS: AIModel[] = [
 ]
 
 // ========================
+// Legacy ID Aliases
+// ========================
+
+// Map legacy or shorthand model IDs to current canonical IDs
+const MODEL_ALIASES: Record<string, string> = {
+  // Old shorthand → Current Anthropic Sonnet 4 (dated ID)
+  'claude-4-sonnet': 'claude-sonnet-4-20250514',
+  // Older legacy model not present anymore → best current equivalent
+  'claude-3-sonnet-20240229': 'claude-sonnet-4-20250514',
+}
+
+// ========================
 // Default Model Configuration
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: 'claude-4-sonnet',
+  PRO_USER: 'claude-sonnet-4-20250514',
   FREE_USER: 'gpt-4.1-nano'
 } as const
 
@@ -254,7 +251,7 @@ export const MODEL_DESIGNATIONS = {
   FAST_CHEAP_FREE: 'gpt-4.1-nano',
   
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: 'claude-4-sonnet',
+  FRONTIER: 'claude-sonnet-4-20250514',
   
   // Alternative frontier model
   FRONTIER_ALT: 'gpt-5',
@@ -266,7 +263,7 @@ export const MODEL_DESIGNATIONS = {
   VISION: 'gpt-4o',
   
   // Default models by user type
-  DEFAULT_PRO: 'claude-4-sonnet',
+  DEFAULT_PRO: 'claude-sonnet-4-20250514',
   DEFAULT_FREE: 'gpt-4.1-nano'
 } as const
 
@@ -288,7 +285,8 @@ export function getProvidersArray(): AIProvider[] {
  * Get a model by its ID
  */
 export function getModelById(id: string): AIModel | undefined {
-  return AI_MODELS.find(model => model.id === id)
+  const resolvedId = MODEL_ALIASES[id] || id
+  return AI_MODELS.find(model => model.id === resolvedId)
 }
 
 /**
@@ -313,6 +311,7 @@ export function isModelAvailable(
   isPro: boolean,
   apiKeys: ApiKey[]
 ): boolean {
+  modelId = MODEL_ALIASES[modelId] || modelId
   // Pro users have access to all models
   if (isPro) return true
 

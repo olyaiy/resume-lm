@@ -98,7 +98,7 @@ export function ApiKeyErrorAlert({ error, router }: ApiKeyErrorAlertProps) {
                                         });
                                       }
                                     })()}. Upgrade to Pro for higher limits.`
-                                  : "An error occurred. Please try again or check your settings."}
+                                  : `An error occurred. Please try again or check your settings. ${error}`}
           </div>
         </div>
 
