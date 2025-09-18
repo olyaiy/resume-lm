@@ -22,7 +22,8 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   if (isPro && config) {
     const { model } = config;
     const modelData = getModelById(model);
-    const provider = modelData ? getModelProvider(model) : undefined;
+    const resolvedModelId = modelData?.id ?? model;
+    const provider = modelData ? getModelProvider(resolvedModelId) : undefined;
     
     if (!modelData || !provider) {
       throw new Error(`Unknown model: ${model}`);
@@ -37,11 +38,11 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
     // Create the appropriate SDK client based on provider
     switch (provider.id) {
       case 'anthropic':
-        return createAnthropic({ apiKey: envKey })(model) as LanguageModelV1;
+        return createAnthropic({ apiKey: envKey })(resolvedModelId) as LanguageModelV1;
       
       case 'openai':
         // Check if this is actually an OpenRouter model (contains forward slash)
-        if (model.includes('/')) {
+        if (resolvedModelId.includes('/')) {
           // Use OpenRouter for models with provider prefix
           const openRouterKey = process.env.OPENROUTER_API_KEY;
           if (!openRouterKey) {
@@ -55,13 +56,13 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
               'X-Title': 'ResumeLM'
             },
             
-          })(model) as LanguageModelV1;
+          })(resolvedModelId) as LanguageModelV1;
         }
         // Regular OpenAI models
         return createOpenAI({ 
           apiKey: envKey,
           compatibility: 'strict'
-        })(model) as LanguageModelV1;
+        })(resolvedModelId) as LanguageModelV1;
       
       case 'openrouter':
         return createOpenRouter({
@@ -71,7 +72,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
             'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
             'X-Title': 'ResumeLM'
           }
-        })(model) as LanguageModelV1;
+        })(resolvedModelId) as LanguageModelV1;
       
       default:
         throw new Error(`Unsupported provider: ${provider.id}`);
@@ -85,7 +86,8 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
 
   const { model, apiKeys } = config;
   const modelData = getModelById(model);
-  const provider = modelData ? getModelProvider(model) : undefined;
+  const resolvedModelId = modelData?.id ?? model;
+  const provider = modelData ? getModelProvider(resolvedModelId) : undefined;
   
   if (!modelData || !provider) {
     throw new Error(`Unknown model: ${model}`);
@@ -93,9 +95,9 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   
   // Special case: GPT 4.1 Nano is free for all users
   // Also allow GPT OSS models to use server-side OpenRouter key
-  if (modelData.features.isFree || model.includes('/')) {
+  if (modelData.features.isFree || resolvedModelId.includes('/')) {
     // For OpenRouter models (with slash), use OpenRouter key
-    if (model.includes('/')) {
+    if (resolvedModelId.includes('/')) {
       const openRouterKey = process.env.OPENROUTER_API_KEY;
       if (!openRouterKey) throw new Error('OpenRouter API key not found');
       
@@ -106,7 +108,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
           'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
           'X-Title': 'ResumeLM'
         }
-      })(model) as LanguageModelV1;
+      })(resolvedModelId) as LanguageModelV1;
     }
     
     // For regular free models like GPT 4.1 Nano
@@ -117,7 +119,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
       return createOpenAI({ 
         apiKey: envKey,
         compatibility: 'strict',
-      })(model) as LanguageModelV1;
+      })(resolvedModelId) as LanguageModelV1;
     }
   }
   
@@ -130,11 +132,11 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
   // Create the appropriate SDK client based on provider
   switch (provider.id) {
     case 'anthropic':
-      return createAnthropic({ apiKey: userApiKey })(model) as LanguageModelV1;
+      return createAnthropic({ apiKey: userApiKey })(resolvedModelId) as LanguageModelV1;
     
     case 'openai':
       // Check if this is actually an OpenRouter model (contains forward slash)
-      if (model.includes('/')) {
+      if (resolvedModelId.includes('/')) {
         // Use OpenRouter for models with provider prefix
         const openRouterKey = apiKeys.find(k => k.service === 'openrouter')?.key;
         if (!openRouterKey) {
@@ -147,13 +149,13 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
             'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
             'X-Title': 'ResumeLM'
           }
-        })(model) as LanguageModelV1;
+        })(resolvedModelId) as LanguageModelV1;
       }
       // Regular OpenAI models
       return createOpenAI({ 
         apiKey: userApiKey,
         compatibility: 'strict'
-      })(model) as LanguageModelV1;
+      })(resolvedModelId) as LanguageModelV1;
     
     case 'openrouter':
       return createOpenRouter({
@@ -163,7 +165,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
           'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
           'X-Title': 'ResumeLM'
         }
-      })(model) as LanguageModelV1;
+      })(resolvedModelId) as LanguageModelV1;
     
     default:
       throw new Error(`Unsupported provider: ${provider.id}`);
