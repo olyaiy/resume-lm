@@ -209,6 +209,22 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     }
   },
+  {
+    id: 'claude-sonnet-4-5-20250929',
+    name: 'Claude Sonnet 4.5',
+    provider: 'anthropic',
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 200000,
+      supportsVision: true,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
 
 
 
@@ -224,6 +240,8 @@ const MODEL_ALIASES: Record<string, string> = {
   'claude-4-sonnet': 'claude-sonnet-4-20250514',
   // Older legacy model not present anymore → best current equivalent
   'claude-3-sonnet-20240229': 'claude-sonnet-4-20250514',
+  // Shorthand for Claude Sonnet 4.5
+  'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
 }
 
 // ========================
