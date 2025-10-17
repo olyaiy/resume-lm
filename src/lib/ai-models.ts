@@ -198,7 +198,7 @@ export const AI_MODELS: AIModel[] = [
     name: 'Claude Sonnet 4',
     provider: 'anthropic',
     features: {
-      isRecommended: true,
+      isRecommended: false,
       isUnstable: false,
       maxTokens: 200000,
       supportsVision: true,
@@ -214,6 +214,22 @@ export const AI_MODELS: AIModel[] = [
     name: 'Claude Sonnet 4.5',
     provider: 'anthropic',
     features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 200000,
+      supportsVision: true,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'claude-haiku-4-5-20251001',
+    name: 'Claude Haiku 4.5',
+    provider: 'anthropic',
+    features: {
       isRecommended: true,
       isUnstable: false,
       maxTokens: 200000,
@@ -225,7 +241,6 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     }
   },
-
 
 
 ]
