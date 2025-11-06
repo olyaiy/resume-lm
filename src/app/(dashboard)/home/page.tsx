@@ -12,7 +12,6 @@
  */
 
 import { redirect } from "next/navigation";
-import { countResumes } from "@/utils/actions/resumes/actions";
 import {User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -23,7 +22,6 @@ import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { Resume } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
-import { createClient } from "@/utils/supabase/server";
 import { getDashboardData } from "@/utils/actions";
 import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
 
@@ -40,28 +38,24 @@ export default async function Home({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-
-  const supabase = await createClient();
-  
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-
-
-  const userId = user?.id;
-  void userId;
-  
-  
   // Check if user is coming from confirmation
   const params = await searchParams;
   const isNewSignup = params?.type === 'signup' && params?.token_hash;
 
   // Fetch dashboard data and handle authentication
+  const fallbackSubscription = {
+    plan: '',
+    status: '',
+    currentPeriodEnd: ''
+  };
+
   let data;
+  let subscription: Awaited<ReturnType<typeof checkSubscriptionPlan>> = fallbackSubscription;
   try {
-    data = await getDashboardData();
+    [data, subscription] = await Promise.all([
+      getDashboardData(),
+      checkSubscriptionPlan().catch(() => fallbackSubscription)
+    ]);
     if (!data.profile) {
       redirect("/");
     }
@@ -71,6 +65,8 @@ export default async function Home({
   }
 
   const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;
+  const baseResumesCount = unsortedBaseResumes.length;
+  const tailoredResumesCount = unsortedTailoredResumes.length;
 
   // Get sort parameters for both sections
   const baseSort = (params.baseSort as SortOption) || 'createdAt';
@@ -101,18 +97,10 @@ export default async function Home({
   const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
   
   // Check if user is on Pro plan
-  const subscription = await checkSubscriptionPlan();
   const isProPlan = subscription.plan === 'pro';
 
   // console.log(subscription);
   
-  // Count resumes for base and tailored sections
-  const baseResumesCount = await countResumes('base');
-  const tailoredResumesCount = await countResumes('tailored');
-  // console.log(baseResumesCount, tailoredResumesCount);
-  // console.log(isProPlan);
-  
-
   // Free plan limits
   const canCreateBase = isProPlan || baseResumesCount < 2;
   const canCreateTailored = isProPlan || tailoredResumesCount < 4;

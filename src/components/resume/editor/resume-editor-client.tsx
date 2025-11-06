@@ -15,11 +15,13 @@ import { UnsavedChangesDialog } from './dialogs/unsaved-changes-dialog';
 interface ResumeEditorClientProps {
   initialResume: Resume;
   profile: Profile;
+  initialJob?: Job | null;
 }
 
 export function ResumeEditorClient({
   initialResume,
   profile,
+  initialJob,
 }: ResumeEditorClientProps) {
   const router = useRouter();
   const [state, dispatch] = useReducer(resumeReducer, {
@@ -32,17 +34,24 @@ export function ResumeEditorClient({
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const debouncedResume = useDebouncedValue(state.resume, 100);
-  const [job, setJob] = useState<Job | null>(null);
+  const [job, setJob] = useState<Job | null>(initialJob ?? null);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
 
   // Single job fetching effect
   useEffect(() => {
-    async function fetchJob() {
-      if (!state.resume.job_id) {
-        setJob(null);
-        return;
-      }
+    if (!state.resume.job_id) {
+      setJob(null);
+      setIsLoadingJob(false);
+      return;
+    }
 
+    if (job?.id === state.resume.job_id) {
+      return;
+    }
+
+    let isCancelled = false;
+
+    async function fetchJob() {
       try {
         setIsLoadingJob(true);
         const supabase = createClient();
@@ -52,21 +61,34 @@ export function ResumeEditorClient({
           .eq('id', state.resume.job_id)
           .single();
 
+        if (isCancelled) {
+          return;
+        }
+
         if (error) {
-          void error
+          void error;
           setJob(null);
           return;
         }
 
         setJob(jobData);
       } catch {
-        setJob(null);
+        if (!isCancelled) {
+          setJob(null);
+        }
       } finally {
-        setIsLoadingJob(false);
+        if (!isCancelled) {
+          setIsLoadingJob(false);
+        }
       }
     }
+
     fetchJob();
-  }, [state.resume.job_id]);
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [state.resume.job_id, job?.id]);
 
   const updateField = <K extends keyof Resume>(field: K, value: Resume[K]) => {
     

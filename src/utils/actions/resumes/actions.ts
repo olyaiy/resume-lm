@@ -1,10 +1,10 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume, WorkExperience, Education, Skill, Project } from "@/lib/types";
+import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
-import { simplifiedResumeSchema, Job } from "@/lib/zod-schemas";
+import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
 import { generateObject } from "ai";
 import { initializeAIClient } from "@/utils/ai-tools";
@@ -13,7 +13,7 @@ import { getSubscriptionPlan } from "../stripe/actions";
 
 
 //  SUPABASE ACTIONS
-export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile }> {
+export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile; job: Job | null }> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
   
@@ -44,9 +44,27 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
       throw new Error('Profile not found');
     }
 
+    let job: Job | null = null;
+
+    if (resumeResult.data.job_id) {
+      const { data: jobData, error: jobError } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('id', resumeResult.data.job_id)
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (jobError) {
+        console.error('Failed to fetch associated job:', jobError);
+      } else {
+        job = jobData;
+      }
+    }
+
     return { 
       resume: resumeResult.data, 
-      profile: profileResult.data 
+      profile: profileResult.data,
+      job
     };
   } catch (error) {
     throw error;
@@ -391,7 +409,7 @@ export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<n
 
 export async function generateResumeScore(
   resume: Resume, 
-  job?: Job | null,
+  job?: ZodJob | null,
   config?: AIConfig
 ) {
   

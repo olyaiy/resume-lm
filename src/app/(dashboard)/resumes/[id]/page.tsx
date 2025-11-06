@@ -1,8 +1,13 @@
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { getResumeById } from "@/utils/actions/resumes/actions";
 import { ResumeEditorClient } from "@/components/resume/editor/resume-editor-client";
 import { Metadata } from "next";
 import { Resume } from "@/lib/types";
+
+const getResumePageData = cache(async (resumeId: string) => {
+  return getResumeById(resumeId);
+});
 
 // Helper function to normalize resume data
 function normalizeResumeData(resume: Resume): Resume {
@@ -58,7 +63,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   try {
     const { id } = await params;
-    const { resume } = await getResumeById(id);
+    const { resume } = await getResumePageData(id);
     return {
       title: `${resume.name} | ResumeLM`,
       description: `Editing ${resume.name} - ${resume.target_role} resume`,
@@ -81,7 +86,7 @@ export default async function Page({
   
   try {
     const { id } = await params;
-    const { resume: rawResume, profile } = await getResumeById(id);
+    const { resume: rawResume, profile, job } = await getResumePageData(id);
     const normalizedResume = normalizeResumeData(rawResume);
     const component = (
       <div 
@@ -89,7 +94,7 @@ export default async function Page({
         data-page-title={normalizedResume.name}
         data-resume-type={normalizedResume.is_base_resume ? "Base Resume" : "Tailored Resume"}
       >
-        <ResumeEditorClient initialResume={normalizedResume} profile={profile} />
+        <ResumeEditorClient initialResume={normalizedResume} profile={profile} initialJob={job} />
       </div>
     );
   

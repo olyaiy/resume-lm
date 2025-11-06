@@ -20,9 +20,9 @@ export async function tailorResumeToJob(
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use gpt-5 for now
+  // Hardcode to use Claude Haiku 4.5 for now
   const hardcodedConfig: AIConfig = {
-    model: 'gpt-5',
+    model: 'claude-haiku-4-5-20251001',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
@@ -32,7 +32,7 @@ export async function tailorResumeToJob(
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1, 
-      temperature: 1, // GPT-5 requires temperature to be 1
+      temperature: 1, // tuned for output quality
       schema: z.object({
       content: simplifiedResumeSchema,
     }),
@@ -92,9 +92,9 @@ prompt: `
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use gpt-5 for now
+  // Hardcode to use Claude Haiku 4.5 for now
   const hardcodedConfig: AIConfig = {
-    model: 'gpt-5',
+    model: 'claude-haiku-4-5-20251001',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
@@ -104,7 +104,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1,
-      temperature: 1, // GPT-5 requires temperature to be 1
+      temperature: 1, // tuned for output quality
       schema: z.object({
         content: simplifiedJobSchema
       }),
