@@ -14,15 +14,15 @@ import { checkRateLimit } from '@/lib/rateLimiter';
 
 
 export async function tailorResumeToJob(
-  resume: Resume, 
+  resume: Resume,
   jobListing: z.infer<typeof simplifiedJobSchema>,
   config?: AIConfig
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use Claude Haiku 4.5 for now
+  // Hardcode to use GPT OSS 120B for now
   const hardcodedConfig: AIConfig = {
-    model: 'claude-haiku-4-5-20251001',
+    model: 'openai/gpt-oss-120b:nitro',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
@@ -31,11 +31,12 @@ export async function tailorResumeToJob(
 
 try {
     const { object } = await generateObject({
-      model: aiClient as LanguageModelV1, 
-      temperature: 1, // tuned for output quality
+      model: aiClient as LanguageModelV1,
+      temperature: 0.5, // further reduced for better structured output reliability
       schema: z.object({
       content: simplifiedResumeSchema,
     }),
+      maxRetries: 2, // retry on failure
     system: `
 
 You are ResumeLM, an advanced AI resume transformer that specializes in optimizing technical resumes for software engineering roles using machine-learning-driven ATS strategies. Your mission is to transform the provided resume into a highly targeted, ATS-friendly document that precisely aligns with the job description.
@@ -92,9 +93,9 @@ prompt: `
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use Claude Haiku 4.5 for now
+  // Hardcode to use GPT OSS 120B for now
   const hardcodedConfig: AIConfig = {
-    model: 'claude-haiku-4-5-20251001',
+    model: 'openai/gpt-oss-120b:nitro',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
@@ -104,7 +105,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
 try {
     const { object } = await generateObject({
       model: aiClient as LanguageModelV1,
-      temperature: 1, // tuned for output quality
+      temperature: 0.7, // reduced for better structured output compatibility
       schema: z.object({
         content: simplifiedJobSchema
       }),

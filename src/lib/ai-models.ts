@@ -191,6 +191,22 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     },
   },
+  {
+    id: 'qwen/qwen3-235b-a22b-thinking-2507:nitro',
+    name: 'Qwen3 235B Thinking',
+    provider: 'openai', // Show under OpenAI section (uses OpenRouter)
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 128000,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true, // Requires OpenRouter API key
+      requiresPro: false
+    },
+  },
 
   // Anthropic Models
   {
