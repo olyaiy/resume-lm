@@ -87,6 +87,17 @@ export interface Resume {
   cover_letter?: Record<string, unknown> | null;
 }
 
+export interface ResumeSummary {
+  id: string;
+  user_id: string;
+  job_id?: string | null;
+  name: string;
+  target_role: string;
+  is_base_resume: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface DocumentSettings {
   // Global Settings
   document_font_size: number;
@@ -203,4 +214,3 @@ export interface SortDescriptor<T> {
   column: T;
   direction: SortDirection;
 }
-

@@ -2,12 +2,12 @@
 
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { CreateTailoredResumeDialog } from "./create-tailored-resume-dialog";
-import { Resume, Profile } from "@/lib/types";
+import { ResumeSummary, Profile } from "@/lib/types";
 
 interface CreateResumeDialogProps {
   children: React.ReactNode;
   type: 'base' | 'tailored';
-  baseResumes?: Resume[];
+  baseResumes?: ResumeSummary[];
   profile: Profile;
 }
 

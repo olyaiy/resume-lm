@@ -1,10 +1,10 @@
-import { Resume } from "@/lib/types";
+import { ResumeSummary } from "@/lib/types";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
 interface ResumeListProps {
-  resumes: Resume[];
+  resumes: ResumeSummary[];
   title: string;
   type: 'base' | 'tailored';
   accentColor: {

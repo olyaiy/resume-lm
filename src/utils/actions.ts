@@ -1,12 +1,12 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
-import { Profile, Resume } from "@/lib/types";
+import { Profile, ResumeSummary } from "@/lib/types";
 
 interface DashboardData {
   profile: Profile | null;
-  baseResumes: Resume[];
-  tailoredResumes: Resume[];
+  baseResumes: ResumeSummary[];
+  tailoredResumes: ResumeSummary[];
 }
 
 export async function getDashboardData(): Promise<DashboardData> {
@@ -64,7 +64,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     // Fetch resumes data
     const { data: resumes, error: resumesError } = await supabase
       .from('resumes')
-      .select('*')
+      .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at')
       .eq('user_id', user.id);
 
     if (resumesError) {
@@ -72,23 +72,19 @@ export async function getDashboardData(): Promise<DashboardData> {
       throw new Error('Error fetching dashboard data');
     }
 
-    const baseResumes = resumes?.filter(resume => resume.is_base_resume) ?? [];
-    const tailoredResumes = resumes?.filter(resume => !resume.is_base_resume) ?? [];
+    const sanitizedResumes =
+      resumes?.map((resume) => ({
+        ...resume,
+        target_role: resume.target_role || '',
+      })) ?? [];
 
-    const baseResumesData = baseResumes.map(resume => ({
-      ...resume,
-      type: 'base' as const
-    }));
-
-    const tailoredResumesData = tailoredResumes.map(resume => ({
-      ...resume,
-      type: 'tailored' as const
-    }));
+    const baseResumes = sanitizedResumes.filter((resume) => resume.is_base_resume);
+    const tailoredResumes = sanitizedResumes.filter((resume) => !resume.is_base_resume);
 
     return {
       profile,
-      baseResumes: baseResumesData,
-      tailoredResumes: tailoredResumesData
+      baseResumes,
+      tailoredResumes,
     };
   } catch (error) {
     if (error instanceof Error && error.message === 'User not authenticated') {
@@ -101,7 +97,6 @@ export async function getDashboardData(): Promise<DashboardData> {
     throw error;
   }
 }
-
 
 
 

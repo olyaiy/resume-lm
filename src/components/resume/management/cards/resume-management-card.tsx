@@ -3,16 +3,15 @@ import { Button } from "@/components/ui/button";
 import { Plus, ChevronRight } from "lucide-react";
 
 import { ResumeList } from "./resume-list";
-import { Resume } from "@/lib/types";
+import { ResumeSummary, Profile } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { Profile } from "@/lib/types";
 import { CreateResumeDialog } from "../dialogs/create-resume-dialog";
 
 interface ResumeManagementCardProps {
   type: 'base' | 'tailored';
-  resumes: Resume[];
-  baseResumes?: Resume[];
+  resumes: ResumeSummary[];
+  baseResumes?: ResumeSummary[];
   profile: Profile;
   icon: React.ReactNode;
   title: string;

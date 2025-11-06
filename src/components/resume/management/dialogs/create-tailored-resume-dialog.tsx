@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Resume, Profile } from "@/lib/types";
+import { Profile, ResumeSummary } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, Sparkles, Plus, Brain, Copy } from "lucide-react";
-import { createTailoredResume } from "@/utils/actions/resumes/actions";
+import { createTailoredResume, getResumeById } from "@/utils/actions/resumes/actions";
 import { CreateBaseResumeDialog } from "./create-base-resume-dialog";
 import { tailorResumeToJob } from "@/utils/actions/jobs/ai";
 import { formatJobListing } from "@/utils/actions/jobs/ai";
@@ -22,7 +22,7 @@ import { cn } from "@/lib/utils";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
-  baseResumes?: Resume[];
+  baseResumes?: ResumeSummary[];
   profile?: Profile;
 }
 
@@ -90,7 +90,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
       if (importOption === 'import-profile') {
         // Direct copy logic
-        const baseResume = baseResumes?.find(r => r.id === selectedBaseResume);
+        const { resume: baseResume } = await getResumeById(selectedBaseResume);
         if (!baseResume) throw new Error("Base resume not found");
 
         let jobId: string | null = null;
@@ -224,7 +224,7 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
 
       // 3. Get the base resume object
-      const baseResume = baseResumes?.find(r => r.id === selectedBaseResume);
+      const { resume: baseResume } = await getResumeById(selectedBaseResume);
       if (!baseResume) throw new Error("Base resume not found");
 
       setCurrentStep('tailoring');

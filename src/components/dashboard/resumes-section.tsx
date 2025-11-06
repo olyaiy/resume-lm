@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import { MiniResumePreview } from '@/components/resume/shared/mini-resume-preview';
 import { CreateResumeDialog } from '@/components/resume/management/dialogs/create-resume-dialog';
 import { ResumeSortControls, type SortOption, type SortDirection } from '@/components/resume/management/resume-sort-controls';
-import type { Profile, Resume } from '@/lib/types';
+import type { Profile, ResumeSummary } from '@/lib/types';
 import { deleteResume, copyResume } from '@/utils/actions/resumes/actions';
 import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/pagination';
 import { useState, useOptimistic, useTransition } from 'react';
@@ -16,20 +16,20 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { toast } from 'sonner';
 
 // Extended Resume type for optimistic updates
-interface OptimisticResume extends Resume {
+interface OptimisticResume extends ResumeSummary {
   isOptimistic?: boolean;
   originalId?: string;
 }
 
 interface ResumesSectionProps {
   type: 'base' | 'tailored';
-  resumes: Resume[];
+  resumes: ResumeSummary[];
   profile: Profile;
   sortParam: string;
   directionParam: string;
   currentSort: SortOption;
   currentDirection: SortDirection;
-  baseResumes?: Resume[]; // Only needed for tailored type
+  baseResumes?: ResumeSummary[]; // Only needed for tailored type
   canCreateMore?: boolean;
 }
 

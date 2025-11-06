@@ -1,10 +1,10 @@
 import { cn } from "@/lib/utils";
-import { Resume } from "@/lib/types";
+import { ResumeSummary } from "@/lib/types";
 import { MiniResumePreview } from "../shared/mini-resume-preview";
 import { Check, FileText } from "lucide-react";
 
 interface BaseResumeSelectorProps {
-  baseResumes: Resume[];
+  baseResumes: ResumeSummary[];
   selectedResumeId: string;
   onResumeSelect: (value: string) => void;
   isInvalid?: boolean;

@@ -20,7 +20,7 @@ import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
 import { getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
-import type { Resume } from "@/lib/types";
+import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { getDashboardData } from "@/utils/actions";
 import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
@@ -75,7 +75,7 @@ export default async function Home({
   const tailoredDirection = (params.tailoredDirection as SortDirection) || 'asc';
 
   // Sort function
-  function sortResumes(resumes: Resume[], sort: SortOption, direction: SortDirection) {
+  function sortResumes(resumes: ResumeSummary[], sort: SortOption, direction: SortDirection) {
     return [...resumes].sort((a, b) => {
       const modifier = direction === 'asc' ? 1 : -1;
       switch (sort) {
