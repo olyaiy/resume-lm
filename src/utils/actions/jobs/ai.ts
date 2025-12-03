@@ -20,9 +20,9 @@ export async function tailorResumeToJob(
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use GPT OSS 120B for now
+  // Use OpenRouter Kimi K2 Thinking for resume tailoring
   const hardcodedConfig: AIConfig = {
-    model: 'openai/gpt-oss-120b:nitro',
+    model: 'moonshotai/kimi-k2-thinking',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
@@ -93,9 +93,9 @@ prompt: `
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Hardcode to use GPT OSS 120B for now
+  // Use OpenRouter Kimi K2 Thinking for job listing formatting
   const hardcodedConfig: AIConfig = {
-    model: 'openai/gpt-oss-120b:nitro',
+    model: 'moonshotai/kimi-k2-thinking',
     apiKeys: config?.apiKeys || []
   };
   const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);

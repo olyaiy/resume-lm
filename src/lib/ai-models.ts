@@ -82,7 +82,7 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
     id: 'openrouter',
     name: 'OpenRouter',
     apiLink: 'https://openrouter.ai/account/api-keys',
-    logo: '/logos/openrouter.png',
+    logo: '/logos/gemini-logo.webp',
     envKey: 'OPENROUTER_API_KEY',
     sdkInitializer: 'openrouter',
     unstable: false
@@ -113,10 +113,11 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'gpt-4.1',
-    name: 'GPT 4.1',
+    id: 'gpt-5.1-chat',
+    name: 'GPT-5.1',
     provider: 'openai',
     features: {
+      isRecommended: true,
       isUnstable: false,
       maxTokens: 128000,
       supportsVision: true,
@@ -128,14 +129,15 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'gpt-4.1-nano',
-    name: 'GPT 4.1 Nano',
+    id: 'gpt-5-mini-2025-08-07',
+    name: 'GPT-5 Mini',
     provider: 'openai',
     features: {
       isFree: true,
+      isRecommended: false,
       isUnstable: false,
       maxTokens: 128000,
-      supportsVision: false,
+      supportsVision: true,
       supportsTools: true
     },
     availability: {
@@ -144,14 +146,14 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'gpt-4o',
-    name: 'GPT-4o',
-    provider: 'openai',
+    id: 'gemini-3-pro-preview',
+    name: 'Gemini 3 Pro Preview',
+    provider: 'openrouter',
     features: {
       isRecommended: true,
       isUnstable: false,
-      maxTokens: 128000,
-      supportsVision: true,
+      maxTokens: 1000000,
+      supportsVision: false,
       supportsTools: true
     },
     availability: {
@@ -160,52 +162,19 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'openai/gpt-oss-120b:nitro',
-    name: 'GPT OSS 120B',
-    provider: 'openai', // Show under OpenAI section
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 128000,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true, // Requires OpenRouter API key
-      requiresPro: false
-    },
-  },
-  {
-    id: 'openai/gpt-oss-20b:nitro',
-    name: 'GPT OSS 20B',
-    provider: 'openai', // Show under OpenAI section
+    id: 'moonshotai/kimi-k2-thinking',
+    name: 'Kimi K2 Thinking',
+    provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
-      maxTokens: 128000,
       supportsVision: false,
-      supportsTools: true
+      supportsTools: false
     },
     availability: {
-      requiresApiKey: true, // Requires OpenRouter API key
+      requiresApiKey: true,
       requiresPro: false
-    },
-  },
-  {
-    id: 'qwen/qwen3-235b-a22b-thinking-2507:nitro',
-    name: 'Qwen3 235B Thinking',
-    provider: 'openai', // Show under OpenAI section (uses OpenRouter)
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 128000,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true, // Requires OpenRouter API key
-      requiresPro: false
-    },
+    }
   },
 
   // Anthropic Models
@@ -281,7 +250,7 @@ const MODEL_ALIASES: Record<string, string> = {
 
 export const DEFAULT_MODELS = {
   PRO_USER: 'claude-sonnet-4-20250514',
-  FREE_USER: 'gpt-4.1-nano'
+  FREE_USER: 'gpt-5-mini-2025-08-07'
 } as const
 
 // ========================
@@ -294,10 +263,10 @@ export const DEFAULT_MODELS = {
  */
 export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
-  FAST_CHEAP: 'openai/gpt-oss-20b:nitro',
+  FAST_CHEAP: 'gpt-5.1-chat',
   
   // Alternative fast & cheap option (free for all users)
-  FAST_CHEAP_FREE: 'gpt-4.1-nano',
+  FAST_CHEAP_FREE: 'gpt-5-mini-2025-08-07',
   
   // Frontier model for complex tasks, deep analysis, best quality
   FRONTIER: 'claude-sonnet-4-20250514',
@@ -306,14 +275,14 @@ export const MODEL_DESIGNATIONS = {
   FRONTIER_ALT: 'gpt-5',
   
   // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: 'openai/gpt-oss-120b:nitro',
+  BALANCED: 'gemini-3-pro-preview',
   
   // Vision-capable model for image analysis
-  VISION: 'gpt-4o',
+  VISION: 'gpt-5',
   
   // Default models by user type
   DEFAULT_PRO: 'claude-sonnet-4-20250514',
-  DEFAULT_FREE: 'gpt-4.1-nano'
+  DEFAULT_FREE: 'gpt-5-mini-2025-08-07'
 } as const
 
 // Type for model designations
@@ -367,7 +336,7 @@ export function isModelAvailable(
   const model = getModelById(modelId)
   if (!model) return false
 
-  // Free model (gpt-4.1-nano)
+  // Free model allowance
   if (model.features.isFree) return true
 
   // Check if this is an OpenRouter model (contains forward slash)
@@ -399,7 +368,7 @@ export function getModelProvider(modelId: string): AIProvider | undefined {
  * Group models by provider for display
  */
 export function groupModelsByProvider(): GroupedModels[] {
-  const providerOrder: ServiceName[] = ['anthropic', 'openai']
+  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'openrouter']
   const grouped = new Map<ServiceName, AIModel[]>()
 
   // Group models by provider

@@ -4,70 +4,42 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Copy, Check } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { ServiceName } from "@/lib/types"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'
 import { ModelSelector } from "@/components/shared/model-selector"
-import { AI_MODELS, MODEL_DESIGNATIONS, getProvidersArray, type ApiKey } from "@/lib/ai-models"
-
-const LOCAL_STORAGE_KEY = 'resumelm-api-keys'
-const MODEL_STORAGE_KEY = 'resumelm-default-model'
+import { AI_MODELS, MODEL_DESIGNATIONS, getProvidersArray } from "@/lib/ai-models"
+import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys"
 
 export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([])
+  // Use synchronized hooks for API keys and default model
+  const { apiKeys, setApiKeys } = useApiKeys()
+  const { defaultModel, setDefaultModel } = useDefaultModel()
+  
+  // UI-specific local state
   const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>({} as Record<ServiceName, boolean>)
   const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
-  const [defaultModel, setDefaultModel] = useState<string>('')
   const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
-  const [hasLoaded, setHasLoaded] = useState(false)
+  
+  // Track if we've initialized the default model
+  const hasInitialized = useRef(false)
 
-
-  // Load stored data on mount
+  // Initialize default model if not set (only runs once on mount)
   useEffect(() => {
-    // Load API keys
-    const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY)
-    if (storedKeys) {
-      try {
-        setApiKeys(JSON.parse(storedKeys))
-      } catch (error) {
-        console.error('Error loading API keys:', error)
+    if (hasInitialized.current) return
+    hasInitialized.current = true
+    
+    // Only set default if there's no model selected
+    if (!defaultModel) {
+      if (isProPlan) {
+        setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_PRO)
+      } else {
+        setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_FREE)
       }
     }
-
-    // Load default model
-    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY)
-    if (storedModel) {
-      setDefaultModel(storedModel)
-    } else if (isProPlan) {
-      // Set the best default model for Pro users
-      setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_PRO)
-      localStorage.setItem(MODEL_STORAGE_KEY, MODEL_DESIGNATIONS.DEFAULT_PRO)
-    } else {
-      // Set free model for non-Pro users
-      setDefaultModel(MODEL_DESIGNATIONS.DEFAULT_FREE)
-      localStorage.setItem(MODEL_STORAGE_KEY, MODEL_DESIGNATIONS.DEFAULT_FREE)
-    }
-
-    // Mark initial load as complete
-    setHasLoaded(true)
-  }, [isProPlan])
-
-  // Save API keys to local storage whenever they change
-  useEffect(() => {
-    if (hasLoaded) { // Only save after initial load
-      localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(apiKeys))
-    }
-  }, [apiKeys, hasLoaded])
-
-  // Save default model to local storage whenever it changes
-  useEffect(() => {
-    // Only save if we have a model (prevents overwriting on initial mount)
-    if (defaultModel) {
-      localStorage.setItem(MODEL_STORAGE_KEY, defaultModel)
-    }
-  }, [defaultModel])
+  }, [defaultModel, isProPlan, setDefaultModel])
 
   const handleUpdateKey = (service: ServiceName) => {
     const keyValue = newKeyValues[service]

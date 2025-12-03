@@ -1,7 +1,7 @@
 'use client';
 
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { useChat } from 'ai/react';
 import { Card } from "@/components/ui/card";
 import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
@@ -34,13 +34,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { ApiKeyErrorAlert } from '@/components/ui/api-key-error-alert';
 import { Textarea } from '@/components/ui/textarea';
-import { getDefaultModel, type ApiKey } from '@/lib/ai-models';
-
-
-
-
-const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
-const MODEL_STORAGE_KEY = 'resumelm-default-model';
+import { useApiKeys, useDefaultModel } from '@/hooks/use-api-keys';
 
 interface ChatBotProps {
   resume: Resume;
@@ -73,31 +67,16 @@ function ScrollToBottom() {
 export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const router = useRouter();
   const [accordionValue, setAccordionValue] = React.useState<string>("");
-  const [apiKeys, setApiKeys] = React.useState<ApiKey[]>([]);
-  const [defaultModel, setDefaultModel] = React.useState<string>(getDefaultModel(false));
+  
+  // Use synchronized hooks for instant updates when settings change
+  const { apiKeys } = useApiKeys();
+  const { defaultModel } = useDefaultModel();
+  
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
-
-  // Load settings from local storage
-  useEffect(() => {
-    const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const storedModel = localStorage.getItem(MODEL_STORAGE_KEY);
-    
-    if (storedKeys) {
-      try {
-        setApiKeys(JSON.parse(storedKeys));
-      } catch (error) {
-        console.error('Error loading API keys:', error);
-      }
-    }
-
-    if (storedModel) {
-      setDefaultModel(storedModel);
-    }
-  }, []);
 
   const config = {
     model: defaultModel,

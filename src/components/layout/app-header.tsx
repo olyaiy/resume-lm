@@ -10,9 +10,10 @@ import { PageTitle } from "./page-title";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ModelSelector } from "@/components/shared/model-selector";
-import { getDefaultModel, type ApiKey } from "@/lib/ai-models";
+import { getDefaultModel } from "@/lib/ai-models";
+import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
@@ -22,36 +23,27 @@ interface AppHeaderProps {
 
 export function AppHeader({ children, showUpgradeButton = true, isProPlan = false }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [defaultModel, setDefaultModel] = useState<string>('');
-  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  
+  // Use synchronized hooks for instant updates across components
+  const { apiKeys } = useApiKeys();
+  const { defaultModel, setDefaultModel } = useDefaultModel();
+  
+  // Track if we've initialized the default model
+  const hasInitialized = useRef(false);
 
-  // Load stored data on mount
+  // Initialize default model if not set (only runs once on mount)
   useEffect(() => {
-    // Load API keys
-    const storedKeys = localStorage.getItem('resumelm-api-keys');
-    if (storedKeys) {
-      try {
-        setApiKeys(JSON.parse(storedKeys));
-      } catch (error) {
-        console.error('Error loading API keys:', error);
-      }
-    }
-
-    // Load default model
-    const storedModel = localStorage.getItem('resumelm-default-model');
-    if (storedModel) {
-      setDefaultModel(storedModel);
-    } else {
-      // Use centralized default model logic
+    if (hasInitialized.current) return;
+    hasInitialized.current = true;
+    
+    if (!defaultModel) {
       const defaultModelId = getDefaultModel(isProPlan);
       setDefaultModel(defaultModelId);
-      localStorage.setItem('resumelm-default-model', defaultModelId);
     }
-  }, [isProPlan]);
+  }, [defaultModel, isProPlan, setDefaultModel]);
 
   const handleModelChange = (modelId: string) => {
     setDefaultModel(modelId);
-    localStorage.setItem('resumelm-default-model', modelId);
   };
 
   return (

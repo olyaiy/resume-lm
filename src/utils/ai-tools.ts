@@ -93,7 +93,7 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
     throw new Error(`Unknown model: ${model}`);
   }
   
-  // Special case: GPT 4.1 Nano is free for all users
+  // Special case: free-tier models (e.g., GPT-5 Mini) skip user key requirement
   // Also allow GPT OSS models to use server-side OpenRouter key
   if (modelData.features.isFree || resolvedModelId.includes('/')) {
     // For OpenRouter models (with slash), use OpenRouter key

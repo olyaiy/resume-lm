@@ -83,9 +83,27 @@ export async function POST(req: Request) {
 
     console.log('THE AI Client isss:', aiClient);
 
+    // Some models (e.g., GPT-5 / GPT-5 Mini) only support the default temperature (1)
+    const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5'].includes(config?.model ?? '');
+    // Gemini models support a thinking phase—explicitly disable it to avoid added latency/cost
+    const geminiThinkingDisabled =
+      (config?.model ?? '').toLowerCase().includes('gemini-3');
+    const providerOptions = geminiThinkingDisabled
+      ? {
+          google: {
+            thinkingConfig: {
+              thinkingBudget: 0,
+              includeThoughts: false,
+            },
+          },
+        }
+      : undefined;
+
     // Build and send the AI call.
     const result = streamText({
       model: aiClient as LanguageModelV1,
+      ...(requiresDefaultTemp ? { temperature: 1 } : {}),
+      ...(providerOptions ? { providerOptions } : {}),
       system: `
       You are ResumeLM, an expert technical resume consultant 
       specializing in computer science and software 
