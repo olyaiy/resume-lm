@@ -98,6 +98,10 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       const isPro = subscriptionPlan === 'pro';
       const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
   
+      // Use custom prompt if provided in config, otherwise fall back to default
+      const systemPrompt = config?.customPrompts?.workExperienceGenerator 
+        ?? (WORK_EXPERIENCE_GENERATOR_MESSAGE.content as string);
+
       const { object } = await generateObject({
         model: aiClient,
         schema: z.object({
@@ -108,7 +112,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       Technologies: ${technologies.join(', ')}
       Target Role: ${targetRole}
       Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
-        system: WORK_EXPERIENCE_GENERATOR_MESSAGE.content as string,
+        system: systemPrompt,
       });
 
       return object.content;
@@ -120,6 +124,10 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
           
+          // Use custom prompt if provided in config, otherwise fall back to default
+          const systemPrompt = config?.customPrompts?.workExperienceImprover 
+            ?? (WORK_EXPERIENCE_IMPROVER_MESSAGE.content as string);
+
           const { object } = await generateObject({
           model: aiClient,
           
@@ -127,7 +135,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
               content: z.string().describe("The improved work experience bullet point")
           }),
           prompt: `Please improve this work experience bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
-          system: WORK_EXPERIENCE_IMPROVER_MESSAGE.content as string,
+          system: systemPrompt,
           });
       
 
@@ -141,6 +149,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
 
+          // Use custom prompt if provided in config, otherwise fall back to default
+          const systemPrompt = config?.customPrompts?.projectImprover 
+            ?? (PROJECT_IMPROVER_MESSAGE.content as string);
   
           const { object } = await generateObject({
           model: aiClient,
@@ -148,7 +159,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
               content: z.string().describe("The improved project bullet point")
           }),
           prompt: `Please improve this project bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
-          system: PROJECT_IMPROVER_MESSAGE.content as string,
+          system: systemPrompt,
           });
       
           return object.content;
@@ -167,6 +178,10 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
           
+          // Use custom prompt if provided in config, otherwise fall back to default
+          const systemPrompt = config?.customPrompts?.projectGenerator 
+            ?? (PROJECT_GENERATOR_MESSAGE.content as string);
+
           const { object } = await generateObject({
           model: aiClient,
           schema: z.object({
@@ -176,7 +191,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       Technologies: ${technologies.join(', ')}
       Target Role: ${targetRole}
       Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
-          system: PROJECT_GENERATOR_MESSAGE.content as string,
+          system: systemPrompt,
           });
       
           return object.content;
@@ -186,13 +201,17 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       export async function processTextImport(text: string, config?: AIConfig) {
           const aiClient = initializeAIClient(config);
           
+          // Use custom prompt if provided in config, otherwise fall back to default
+          const systemPrompt = config?.customPrompts?.textAnalyzer 
+            ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
+
           const { object } = await generateObject({
           model: aiClient,
           schema: z.object({
               content: textImportSchema
           }),
           prompt: text,
-          system: TEXT_ANALYZER_SYSTEM_MESSAGE.content as string,
+          system: systemPrompt,
           });
       
           return object.content;
@@ -229,6 +248,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
   
+          // Use custom prompt if provided in config, otherwise fall back to default
+          const systemPrompt = config?.customPrompts?.textAnalyzer 
+            ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
           
           const { object } = await generateObject({
           model: aiClient,
@@ -236,7 +258,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
               content: textImportSchema
           }),
           prompt: `Extract relevant resume information from the following text, including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
-          system: TEXT_ANALYZER_SYSTEM_MESSAGE.content as string,
+          system: systemPrompt,
           });
           
           // Merge the AI-generated content with existing resume data

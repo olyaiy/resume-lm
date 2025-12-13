@@ -35,6 +35,7 @@ import {
 import { ApiKeyErrorAlert } from '@/components/ui/api-key-error-alert';
 import { Textarea } from '@/components/ui/textarea';
 import { useApiKeys, useDefaultModel } from '@/hooks/use-api-keys';
+import { useCustomPrompts } from '@/hooks/use-custom-prompts';
 
 interface ChatBotProps {
   resume: Resume;
@@ -71,6 +72,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   // Use synchronized hooks for instant updates when settings change
   const { apiKeys } = useApiKeys();
   const { defaultModel } = useDefaultModel();
+  const { customPrompts } = useCustomPrompts();
   
   const [originalResume, setOriginalResume] = React.useState<Resume | null>(null);
   const [isInitialLoading, setIsInitialLoading] = React.useState(false);
@@ -81,6 +83,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   const config = {
     model: defaultModel,
     apiKeys,
+    customPrompts: Object.keys(customPrompts).length > 0 ? customPrompts : undefined,
   };
   
   const { messages, error, append, isLoading, addToolResult, stop, setMessages } = useChat({

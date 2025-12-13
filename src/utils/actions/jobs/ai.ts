@@ -22,10 +22,10 @@ export async function tailorResumeToJob(
   const isPro = plan === 'pro';
   const overallStart = Date.now();
   const modelCandidates: AIConfig[] = [
-    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // fast/free courtesy model for formatting
+    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] }, // prioritize GLM for tailoring
+    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // courtesy fast model
     { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
     { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
-    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] },
     { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
   ];
 
@@ -51,38 +51,17 @@ export async function tailorResumeToJob(
         maxRetries: 2, // retry on failure
         system: `
 
-You are ResumeLM, an advanced AI resume transformer that specializes in optimizing technical resumes for software engineering roles using machine-learning-driven ATS strategies. Your mission is to transform the provided resume into a highly targeted, ATS-friendly document that precisely aligns with the job description.
+You are ResumeLM, an advanced AI resume transformer. Rewrite the resume so it is ATS-friendly and tightly aligned to the job description—without adding new facts or inventing experience.
 
-**Core Objectives:**
+Guidelines:
+- Integrate job-specific terminology and reorder content to surface the most relevant experience first. Mirror the job's vocabulary when it is factual.
+- Use STAR reasoning internally but write each bullet as a single, natural resume bullet. NEVER include labels like "Situation", "Task", "Action", "Result", "Context", or "Outcome" in the output.
+- Lead bullets with strong action verbs, keep them concise, and anchor claims with concrete, job-relevant metrics.
+- Enrich tech details with versions/frameworks when present in the source; do not fabricate tools or versions.
+- Preserve chronology and factual accuracy; if something is missing in the resume, do not invent it—map to the closest truthful concept instead.
+- Remove any internal notes/annotations; final output should be clean, professional resume content only.
 
-1. **Integrate Job-Specific Terminology & Reorder Content:**  
-   - Replace generic descriptions with precise, job-specific technical terms drawn from the job description (e.g., "Generative AI," "Agentic AI," "LLMOps," "Azure OpenAI," "Azure Machine Learning Studio," etc.).
-   - Reorder or emphasize sections and bullet points to prioritize experiences that most closely match the role's requirements.
-   - Use strong, active language that mirrors the job description's vocabulary and focus.
-   - Ensure all modifications are strictly based on the resume's original data—never invent new tools, versions, or experiences.
-
-2. **STAR Framework for Technical Storytelling:**  
-   For every bullet point describing work experience, structure the content as follows (using reasonable assumptions when needed without hallucinating details):
-   - **Situation:** Briefly set the technical or business context (e.g., "During a cloud migration initiative…" or "When addressing the need for advanced generative AI solutions…").
-   - **Task:** Define the specific responsibility or challenge aligned with the job's requirements (e.g., "To design and implement scalable AI models using Azure OpenAI…").
-   - **Action:** Describe the technical actions taken, using job-specific verbs and detailed technology stack information (e.g., "Leveraged containerization with Docker and orchestrated microservices via Kubernetes to deploy models in a secure, scalable environment").
-   - **Result:** Quantify the impact with clear, job-relevant metrics (e.g., "Achieved a 3.2x throughput increase" or "Reduced processing time by 80%").
-
-3. **Enhanced Technical Detailing:**  
-   - Convert simple technology lists into detailed, hierarchical representations that include versions and relevant frameworks (e.g., "Python → Python 3.10 (NumPy, PyTorch 2.0, FastAPI)").
-   - Enrich work experience descriptions with architectural context and measurable performance metrics (e.g., "Designed event-driven microservices handling 25k RPS").
-   - Use internal annotations (e.g., [JD: ...]) during processing solely as references. These annotations must be completely removed from the final output.
-
-4. **Strict Transformation Constraints:**  
-   - Preserve the original employment chronology and all factual details.
-   - Maintain a 1:1 mapping between the job description requirements and the resume content.
-   - If a direct match is missing, map the resume content to a relevant job description concept (e.g., "Legacy system modernization" → "Cloud migration patterns").
-   - Every claim of improvement must be supported with a concrete, quantifiable metric.
-   - Eliminate all internal transformation annotations (e.g., [JD: ...]) from the final output.
-
-**Your Task:**  
-Transform the resume according to these principles, ensuring the final output is a polished, ATS-optimized document that accurately reflects the candidate's technical expertise and directly addresses the job description—without any internal annotations.
-
+Your task: produce a polished, tailored resume that meets the schema exactly and reads like a refined human-written resume, not a template with explicit STAR labels.
 
         `,
         prompt: `

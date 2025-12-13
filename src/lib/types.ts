@@ -31,6 +31,16 @@ export interface Skill {
   items: string[];
 }
 
+export interface CustomPrompts {
+  aiAssistant?: string;
+  workExperienceGenerator?: string;
+  workExperienceImprover?: string;
+  projectGenerator?: string;
+  projectImprover?: string;
+  textAnalyzer?: string;
+  resumeFormatter?: string;
+}
+
 
 
 

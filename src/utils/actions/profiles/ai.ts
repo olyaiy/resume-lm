@@ -67,7 +67,9 @@ export async function formatProfileWithAI(
   
                 Resume Text:
   ${userMessages}`,
-        system: RESUME_FORMATTER_SYSTEM_MESSAGE.content as string,
+        // Use custom prompt if provided in config, otherwise fall back to default
+        system: config?.customPrompts?.resumeFormatter 
+          ?? (RESUME_FORMATTER_SYSTEM_MESSAGE.content as string),
       });
 
   

@@ -47,6 +47,7 @@ export interface ApiKey {
 export interface AIConfig {
   model: string
   apiKeys: ApiKey[]
+  customPrompts?: import('./types').CustomPrompts
 }
 
 export interface GroupedModels {

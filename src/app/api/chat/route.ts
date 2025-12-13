@@ -4,6 +4,7 @@ import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
 import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
 import { checkRateLimit } from '@/lib/rateLimiter';
+import { AI_ASSISTANT_SYSTEM_MESSAGE } from '@/lib/prompts';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -99,17 +100,12 @@ export async function POST(req: Request) {
         }
       : undefined;
 
-    // Build and send the AI call.
-    const result = streamText({
-      model: aiClient as LanguageModelV1,
-      ...(requiresDefaultTemp ? { temperature: 1 } : {}),
-      ...(providerOptions ? { providerOptions } : {}),
-      system: `
-      You are ResumeLM, an expert technical resume consultant 
-      specializing in computer science and software 
-      engineering careers. Your expertise spans resume 
-      optimization, technical writing, and industry best 
-      practices for tech job applications.
+    // Use custom prompt if provided, otherwise fall back to default
+    const baseSystemPrompt = config?.customPrompts?.aiAssistant 
+      ?? (AI_ASSISTANT_SYSTEM_MESSAGE.content as string);
+    
+    // Append context-specific information to the system prompt
+    const systemPrompt = `${baseSystemPrompt}
 
       TOOL USAGE INSTRUCTIONS:
       1. For work experience improvements:
@@ -138,7 +134,14 @@ export async function POST(req: Request) {
       Aim to use a maximum of 5 tools in one go, then confirm with the user if they would like you to continue.
       The target role is ${target_role}. The job is ${job ? JSON.stringify(job) : 'No job specified'}.
       Current resume summary: ${resume ? `${resume.first_name} ${resume.last_name} - ${resume.target_role}` : 'No resume data'}.
-      `,
+      `;
+
+    // Build and send the AI call.
+    const result = streamText({
+      model: aiClient as LanguageModelV1,
+      ...(requiresDefaultTemp ? { temperature: 1 } : {}),
+      ...(providerOptions ? { providerOptions } : {}),
+      system: systemPrompt,
       messages,
       maxSteps: 5,
       tools,

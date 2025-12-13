@@ -4,6 +4,7 @@ import { SecurityForm } from "./security-form"
 import { ApiKeysForm } from "./api-keys-form"
 import { SubscriptionSection } from "./subscription-section"
 import { DangerZone } from "./danger-zone"
+import { AiPromptsForm } from "./ai-prompts-form"
 import { User } from "@supabase/supabase-js"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -13,6 +14,7 @@ const sections = [
   { id: "security", title: "Security", description: "Manage your email and password settings", icon: "🔒" },
   { id: "subscription", title: "Subscription", description: "Manage your subscription and billing settings", icon: "💳" },
   { id: "api-keys", title: "API Keys", description: "Manage your API keys for different AI providers", icon: "🔑" },
+  { id: "ai-prompts", title: "AI Prompts", description: "Customize AI system prompts for different actions", icon: "🤖" },
   { id: "danger-zone", title: "Danger Zone", description: "Irreversible and destructive actions", icon: "⚠️" },
 ]
 
@@ -123,6 +125,17 @@ export function SettingsContent({ user, isProPlan, subscriptionStatus }: Setting
           </CardHeader>
           <CardContent>
             <ApiKeysForm isProPlan={isProPlan} />
+          </CardContent>
+        </Card>
+
+        {/* AI Prompts */}
+        <Card id="ai-prompts" className="border-white/40 shadow-xl shadow-black/5 bg-white/80 backdrop-blur-xl">
+          <CardHeader>
+            <CardTitle className="text-xl">AI Prompts</CardTitle>
+            <CardDescription>Customize AI system prompts for different actions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <AiPromptsForm />
           </CardContent>
         </Card>
 
