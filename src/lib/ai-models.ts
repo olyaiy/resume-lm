@@ -133,7 +133,6 @@ export const AI_MODELS: AIModel[] = [
     name: 'GPT-5 Mini',
     provider: 'openai',
     features: {
-      isFree: true,
       isRecommended: false,
       isUnstable: false,
       maxTokens: 128000,
@@ -141,7 +140,7 @@ export const AI_MODELS: AIModel[] = [
       supportsTools: true
     },
     availability: {
-      requiresApiKey: false,
+      requiresApiKey: true,
       requiresPro: false
     }
   },
@@ -162,17 +161,34 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'moonshotai/kimi-k2-thinking',
-    name: 'Kimi K2 Thinking',
+    id: 'z-ai/glm-4.6:exacto',
+    name: 'GLM-4.6 Exacto',
     provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
       supportsVision: false,
-      supportsTools: false
+      supportsTools: true
     },
     availability: {
       requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'deepseek/deepseek-v3.2:nitro',
+    name: 'DeepSeek V3.2',
+    provider: 'openrouter',
+    features: {
+      isFree: true,
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 163840,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: false,
       requiresPro: false
     }
   },
@@ -250,7 +266,7 @@ const MODEL_ALIASES: Record<string, string> = {
 
 export const DEFAULT_MODELS = {
   PRO_USER: 'claude-sonnet-4-20250514',
-  FREE_USER: 'gpt-5-mini-2025-08-07'
+  FREE_USER: 'deepseek/deepseek-v3.2:nitro'
 } as const
 
 // ========================
@@ -266,7 +282,7 @@ export const MODEL_DESIGNATIONS = {
   FAST_CHEAP: 'gpt-5.1-chat',
   
   // Alternative fast & cheap option (free for all users)
-  FAST_CHEAP_FREE: 'gpt-5-mini-2025-08-07',
+  FAST_CHEAP_FREE: 'deepseek/deepseek-v3.2:nitro',
   
   // Frontier model for complex tasks, deep analysis, best quality
   FRONTIER: 'claude-sonnet-4-20250514',
@@ -282,7 +298,7 @@ export const MODEL_DESIGNATIONS = {
   
   // Default models by user type
   DEFAULT_PRO: 'claude-sonnet-4-20250514',
-  DEFAULT_FREE: 'gpt-5-mini-2025-08-07'
+  DEFAULT_FREE: 'deepseek/deepseek-v3.2:nitro'
 } as const
 
 // Type for model designations

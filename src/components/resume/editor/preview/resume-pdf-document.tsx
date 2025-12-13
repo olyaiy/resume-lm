@@ -575,6 +575,8 @@ export const ResumePDFDocument = memo(function ResumePDFDocument({ resume }: Res
         
         {resume.document_settings?.show_ubc_footer && (
           <View style={styles.footer}>
+            {/* React PDF Image does not support alt text, so disable lint here */}
+            {/* eslint-disable-next-line jsx-a11y/alt-text */}
             <Image 
               src="/images/ubc-science-footer.png"
               style={styles.footerImage}

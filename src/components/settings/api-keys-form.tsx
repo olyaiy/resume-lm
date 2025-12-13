@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Copy, Check } from "lucide-react"
 import { useState, useEffect, useRef } from "react"
 import { ServiceName } from "@/lib/types"
+import type { ApiKey } from "@/lib/ai-models"
 import { toast } from "sonner"
 import { cn } from "@/lib/utils"
 import replaceSpecialCharacters from 'replace-special-characters'

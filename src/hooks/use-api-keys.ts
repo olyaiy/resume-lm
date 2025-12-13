@@ -87,13 +87,16 @@ function parseApiKeys(raw: string | null): ApiKey[] {
   }
 }
 
-function isValidApiKey(value: any): value is ApiKey {
+function isValidApiKey(value: unknown): value is ApiKey {
+  if (!value || typeof value !== 'object') {
+    return false
+  }
+
+  const candidate = value as Record<string, unknown>
   return (
-    value &&
-    typeof value === 'object' &&
-    typeof value.service === 'string' &&
-    typeof value.key === 'string' &&
-    typeof value.addedAt === 'string'
+    typeof candidate.service === 'string' &&
+    typeof candidate.key === 'string' &&
+    typeof candidate.addedAt === 'string'
   )
 }
 
@@ -242,4 +245,3 @@ export function useDefaultModel() {
 
 // Re-export storage keys for consistency
 export { API_KEYS_STORAGE_KEY, MODEL_STORAGE_KEY }
-

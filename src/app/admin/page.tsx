@@ -12,6 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, FileText, CreditCard, FileCheck, FilePlus, Star } from "lucide-react"; // Import Star, remove UsersRound
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default async function AdminPage() {
     try {
         // Ensure the current user is an admin, redirect if not
