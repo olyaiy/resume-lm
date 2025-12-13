@@ -161,6 +161,40 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
+    id: 'openai/gpt-oss-120b',
+    name: 'GPT-OSS 120B',
+    provider: 'openrouter',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      isFree: true,
+      maxTokens: 131072,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'openai/gpt-oss-20b',
+    name: 'GPT-OSS 20B',
+    provider: 'openrouter',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      isFree: true,
+      maxTokens: 131072,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
     id: 'z-ai/glm-4.6:exacto',
     name: 'GLM-4.6 Exacto',
     provider: 'openrouter',
@@ -258,6 +292,8 @@ const MODEL_ALIASES: Record<string, string> = {
   'claude-3-sonnet-20240229': 'claude-sonnet-4-20250514',
   // Shorthand for Claude Sonnet 4.5
   'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
+  // Allow DeepSeek without the nitro suffix
+  'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
 }
 
 // ========================

@@ -20,24 +20,36 @@ export async function tailorResumeToJob(
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Use OpenRouter GLM-4.6 Exacto for resume tailoring
-  const hardcodedConfig: AIConfig = {
-    model: 'z-ai/glm-4.6:exacto',
-    apiKeys: config?.apiKeys || []
-  };
-  const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
-// Check rate limit
+  const overallStart = Date.now();
+  const modelCandidates: AIConfig[] = [
+    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // fast/free courtesy model for formatting
+    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
+    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] },
+    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
+  ];
+
+  // Check rate limit once per tailoring request
   await checkRateLimit(id);
 
-try {
-    const { object } = await generateObject({
-      model: aiClient as LanguageModelV1,
-      temperature: 0.5, // further reduced for better structured output reliability
-      schema: z.object({
-      content: simplifiedResumeSchema,
-    }),
-      maxRetries: 2, // retry on failure
-    system: `
+  let lastError: unknown;
+
+  for (const candidate of modelCandidates) {
+    let start = Date.now();
+    try {
+      start = Date.now();
+      console.log(
+        `[TAILOR][TRY] ${candidate.model} | STEP: Tailoring resume content | Subscription: ${isPro ? 'PRO' : 'FREE'}`
+      );
+      const aiClient = isPro ? initializeAIClient(candidate, isPro, true) : initializeAIClient(candidate);
+      const { object } = await generateObject({
+        model: aiClient as LanguageModelV1,
+        temperature: 0.5, // reduced for structured output reliability
+        schema: z.object({
+          content: simplifiedResumeSchema,
+        }),
+        maxRetries: 2, // retry on failure
+        system: `
 
 You are ResumeLM, an advanced AI resume transformer that specializes in optimizing technical resumes for software engineering roles using machine-learning-driven ATS strategies. Your mission is to transform the provided resume into a highly targeted, ATS-friendly document that precisely aligns with the job description.
 
@@ -72,91 +84,131 @@ You are ResumeLM, an advanced AI resume transformer that specializes in optimizi
 Transform the resume according to these principles, ensuring the final output is a polished, ATS-optimized document that accurately reflects the candidate's technical expertise and directly addresses the job description—without any internal annotations.
 
 
-    `,
-prompt: `
+        `,
+        prompt: `
     This is the Resume:
     ${JSON.stringify(resume, null, 2)}
     
     This is the Job Description:
     ${JSON.stringify(jobListing, null, 2)}
     `,
-  });
+      });
 
-
-    return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
-  } catch (error) {
-    console.error('Error tailoring resume:', error);
-    throw error;
+      console.log(
+        `[TAILOR][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Tailoring resume content`
+      );
+      return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `[TAILOR][FAILED ❌] ${candidate.model} | STEP: Tailoring resume content | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
+        error
+      );
+    }
   }
+
+  console.error(
+    `[TAILOR][ABORT 🚨] All models failed | Tried: ${modelCandidates.map(m => m.model).join(', ')} | Total Duration: ${
+      Date.now() - overallStart
+    }ms`
+  );
+  throw lastError ?? new Error('Failed to tailor resume');
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  // Use OpenRouter GLM-4.6 Exacto for job listing formatting
-  const hardcodedConfig: AIConfig = {
-    model: 'z-ai/glm-4.6:exacto',
-    apiKeys: config?.apiKeys || []
-  };
-  const aiClient = isPro ? initializeAIClient(hardcodedConfig, isPro, true) : initializeAIClient(hardcodedConfig);
-// Check rate limit
+  const overallStart = Date.now();
+  const modelCandidates: AIConfig[] = [
+    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] }, // prioritize GLM for parsing
+    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // fast/free courtesy model for formatting
+    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
+    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
+  ];
+
+  // Check rate limit once per formatting request
   await checkRateLimit(id);
 
-try {
-    const { object } = await generateObject({
-      model: aiClient as LanguageModelV1,
-      temperature: 0.7, // reduced for better structured output compatibility
-      schema: z.object({
-        content: simplifiedJobSchema
-      }),
-      system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
-              and must adhere to it strictly. When processing the given job listing, follow these steps:
-              IMPORTANT: For any missing or uncertain information, you must return an empty string ("") - never return "<UNKNOWN>" or similar placeholders.
+  let lastError: unknown;
 
-            Read the entire job listing thoroughly to understand context, responsibilities, requirements, and any other relevant details.
-            Perform the analysis as described in each TASK below.
-            Return your final output in a structured format (e.g., JSON or the prescribed schema), using the exact field names you have been given.
-            Do not guess or fabricate information that is not present in the listing; instead, return an empty string for missing fields.
-            Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.
-            
-            For the description field:
-            1. Start with 3-5 bullet points highlighting the most important responsibilities of the role.
-               - Format these bullet points using markdown, with each point on a new line starting with "• "
-               - These should be the most critical duties mentioned in the job listing
-            2. After the bullet points, include the full job description stripped of:
-               - Any non-job-related content
-            3. Format the full description as a clean paragraph, maintaining proper grammar and flow.`,
-      prompt: `Analyze this job listing carefully and extract structured information.
+  for (const candidate of modelCandidates) {
+    let start = Date.now();
+    try {
+      start = Date.now();
+      console.log(
+        `[FORMAT][TRY] ${candidate.model} | STEP: Analyzing job description → Formatting requirements | Subscription: ${
+          isPro ? 'PRO' : 'FREE'
+        }`
+      );
+      const aiClient = isPro ? initializeAIClient(candidate, isPro, true) : initializeAIClient(candidate);
+      const { object } = await generateObject({
+        model: aiClient as LanguageModelV1,
+        temperature: 0.7, // reduced for better structured output compatibility
+        schema: z.object({
+          content: simplifiedJobSchema
+        }),
+        system: `You are an AI assistant specializing in structured data extraction from job listings. You have been provided with a schema
+                and must adhere to it strictly. When processing the given job listing, follow these steps:
+                IMPORTANT: For any missing or uncertain information, you must return an empty string ("") - never return "<UNKNOWN>" or similar placeholders.
 
-              TASK 1 - ESSENTIAL INFORMATION:
-              Extract the basic details (company, position, URL, location, salary).
-              For the description, include 3-5 key responsibilities as bullet points.
+              Read the entire job listing thoroughly to understand context, responsibilities, requirements, and any other relevant details.
+              Perform the analysis as described in each TASK below.
+              Return your final output in a structured format (e.g., JSON or the prescribed schema), using the exact field names you have been given.
+              Do not guess or fabricate information that is not present in the listing; instead, return an empty string for missing fields.
+              Do not include chain-of-thought or intermediate reasoning in the final output; provide only the structured results.
+              
+              For the description field:
+              1. Start with 3-5 bullet points highlighting the most important responsibilities of the role.
+                 - Format these bullet points using markdown, with each point on a new line starting with "• "
+                 - These should be the most critical duties mentioned in the job listing
+              2. After the bullet points, include the full job description stripped of:
+                 - Any non-job-related content
+              3. Format the full description as a clean paragraph, maintaining proper grammar and flow.`,
+        prompt: `Analyze this job listing carefully and extract structured information.
 
-              TASK 2 - KEYWORD ANALYSIS:
-              1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
-              2. Soft Skills: Extract interpersonal and professional competencies
-              3. Industry Knowledge: Capture domain-specific knowledge requirements
-              4. Required Qualifications: List education, and experience levels
-              5. Responsibilities: Key job functions and deliverables
+                TASK 1 - ESSENTIAL INFORMATION:
+                Extract the basic details (company, position, URL, location, salary).
+                For the description, include 3-5 key responsibilities as bullet points.
 
-              Format the output according to the schema, ensuring:
-              - Keywords as they are (e.g., "React.js" → "React.js")
-              - Skills are deduplicated and categorized
-              - Seniority level is inferred from context
-              - Description contains 3-5 bullet points of key responsibilities
-              Usage Notes:
+                TASK 2 - KEYWORD ANALYSIS:
+                1. Technical Skills: Identify all technical skills, programming languages, frameworks, and tools
+                2. Soft Skills: Extract interpersonal and professional competencies
+                3. Industry Knowledge: Capture domain-specific knowledge requirements
+                4. Required Qualifications: List education, and experience levels
+                5. Responsibilities: Key job functions and deliverables
 
-              - If certain details (like salary or location) are missing, return "" (an empty string).
-              - Adhere to the schema you have been provided, and format your response accordingly (e.g., JSON fields must match exactly).
-              - Avoid exposing your internal reasoning.
-              - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
-              - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,
-    });
+                Format the output according to the schema, ensuring:
+                - Keywords as they are (e.g., "React.js" → "React.js")
+                - Skills are deduplicated and categorized
+                - Seniority level is inferred from context
+                - Description contains 3-5 bullet points of key responsibilities
+                Usage Notes:
 
+                - If certain details (like salary or location) are missing, return "" (an empty string).
+                - Adhere to the schema you have been provided, and format your response accordingly (e.g., JSON fields must match exactly).
+                - Avoid exposing your internal reasoning.
+                - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
+                - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,
+      });
 
-    return object.content satisfies Partial<Job>;
-  } catch (error) {
-    console.error('Error formatting job listing:', error);
-    throw error;
+      console.log(
+        `[FORMAT][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Analyzing job description → Formatting requirements`
+      );
+      return object.content satisfies Partial<Job>;
+    } catch (error) {
+      lastError = error;
+      console.error(
+        `[FORMAT][FAILED ❌] ${candidate.model} | STEP: Analyzing job description → Formatting requirements | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
+        error
+      );
+    }
   }
+
+  console.error(
+    `[FORMAT][ABORT 🚨] All models failed | Tried: ${modelCandidates.map(m => m.model).join(', ')} | Total Duration: ${
+      Date.now() - overallStart
+    }ms`
+  );
+  throw lastError ?? new Error('Failed to format job listing');
 }

@@ -41,6 +41,30 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
   const router = useRouter();
   
 
+  function redactSecrets(text: string) {
+    return text
+      .replace(/Bearer\s+[^,\s]+/gi, 'Bearer ***')
+      .replace(/sk-[a-zA-Z0-9]{8,}/g, 'sk-***')
+      .replace(/AIza[0-9A-Za-z\-_]{20,}/g, 'AIza***');
+  }
+
+  function getErrorDetails(error: unknown) {
+    if (error instanceof Error) return redactSecrets(error.message);
+    if (typeof error === 'string') return redactSecrets(error);
+    if (!error) return '';
+    try {
+      return redactSecrets(JSON.stringify(error));
+    } catch {
+      return '';
+    }
+  }
+
+  function buildErrorDescription(summary: string, error: unknown) {
+    const details = getErrorDetails(error);
+    const detailsText = details ? ` Details: ${details}` : '';
+    return `${summary}${detailsText}. Contact the developer at hi@alexo.ca for help.`;
+  }
+
   const handleNext = () => {
     if (!selectedBaseResume) {
       setIsBaseResumeInvalid(true);
@@ -134,12 +158,15 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
             ) {
               setErrorMessage({
                 title: "API Key Error",
-                description: "There was an issue with your API key. Please check your settings and try again."
+                description: buildErrorDescription(
+                  "There was an issue with your API key. Please check your settings and try again",
+                  error
+                )
               });
             } else {
               setErrorMessage({
                 title: "Error",
-                description: "Failed to process job description. Please try again."
+                description: buildErrorDescription("Failed to process job description. Please try again", error)
               });
             }
             setShowErrorDialog(true);
@@ -203,12 +230,15 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         ) {
           setErrorMessage({
             title: "API Key Error",
-            description: "There was an issue with your API key. Please check your settings and try again."
+            description: buildErrorDescription(
+              "There was an issue with your API key. Please check your settings and try again",
+              error
+            )
           });
         } else {
           setErrorMessage({
             title: "Error",
-            description: "Failed to analyze job description. Please try again."
+            description: buildErrorDescription("Failed to analyze job description. Please try again", error)
           });
         }
         setShowErrorDialog(true);
@@ -245,12 +275,15 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         ) {
           setErrorMessage({
             title: "API Key Error",
-            description: "There was an issue with your API key. Please check your settings and try again."
+            description: buildErrorDescription(
+              "There was an issue with your API key. Please check your settings and try again",
+              error
+            )
           });
         } else {
           setErrorMessage({
             title: "Error",
-            description: "Failed to tailor resume. Please try again."
+            description: buildErrorDescription("Failed to tailor resume. Please try again", error)
           });
         }
         setShowErrorDialog(true);
