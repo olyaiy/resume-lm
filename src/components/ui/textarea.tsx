@@ -5,7 +5,36 @@ import { cn } from "@/lib/utils"
 const Textarea = React.forwardRef<
   HTMLTextAreaElement,
   React.ComponentProps<"textarea">
->(({ className, ...props }, ref) => {
+>(({ className, onKeyDown, ...props }, ref) => {
+  const internalRef = React.useRef<HTMLTextAreaElement>(null)
+  
+  // Combine refs: use the forwarded ref if provided, otherwise use internal ref
+  const textareaRef = React.useCallback(
+    (node: HTMLTextAreaElement | null) => {
+      internalRef.current = node
+      if (typeof ref === 'function') {
+        ref(node)
+      } else if (ref) {
+        ref.current = node
+      }
+    },
+    [ref]
+  )
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Handle Cmd+A (Mac) or Ctrl+A (Windows/Linux) to select all text
+    if ((e.metaKey || e.ctrlKey) && e.key === 'a') {
+      e.preventDefault()
+      const textarea = internalRef.current
+      if (textarea) {
+        textarea.select()
+      }
+    }
+
+    // Call original onKeyDown if provided
+    onKeyDown?.(e)
+  }
+
   return (
     <textarea
       className={cn(
@@ -24,7 +53,8 @@ const Textarea = React.forwardRef<
         "custom-scrollbar",
         className
       )}
-      ref={ref}
+      ref={textareaRef}
+      onKeyDown={handleKeyDown}
       {...props}
     />
   )
