@@ -359,18 +359,19 @@ export async function getSubscriptionPlan(returnId?: boolean) {
 }
 
 export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {
-  
-  const supabase = await createServiceClient();
-  
+  const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
 
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
 
   try {
-
-    // Upsert the new plan
+    // Upsert the new plan for the authenticated user
     const { error: upsertError } = await supabase
       .from('subscriptions')
       .upsert({
-        user_id: "db2686c0-2003-4c90-87b0-cbc20e9d6b3c",
+        user_id: user.id,
         subscription_plan: newPlan,
         subscription_status: 'active',
         updated_at: new Date().toISOString()

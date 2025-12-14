@@ -67,7 +67,25 @@ export async function POST(req: Request) {
     const isOpenRouterModel = (config?.model ?? '').includes('/');
     
     // Configure provider options based on model type
-    let providerOptions: any = undefined;
+    type ProviderOptions = 
+      | {
+          openrouter: {
+            reasoning: {
+              exclude: boolean;
+            };
+          };
+        }
+      | {
+          google: {
+            thinkingConfig: {
+              thinkingBudget: number;
+              includeThoughts: boolean;
+            };
+          };
+        }
+      | undefined;
+    
+    let providerOptions: ProviderOptions = undefined;
     
     if (isGeminiModel) {
       if (isOpenRouterModel) {
