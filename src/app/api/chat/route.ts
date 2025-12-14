@@ -23,30 +23,6 @@ interface ChatRequest {
 export async function POST(req: Request) {
   try {
     const requestBody = await req.json();
-    
-    // Console log the entire request to see what's being sent
-    console.log('=== FULL CHAT REQUEST ===');
-    console.log('Request body keys:', Object.keys(requestBody));
-    console.log('Messages count:', requestBody.messages?.length || 0);
-    console.log('Target role:', requestBody.target_role);
-    console.log('Config:', JSON.stringify(requestBody.config, null, 2));
-    console.log('Job:', requestBody.job ? 'Job object present' : 'No job');
-    console.log('Resume present:', !!requestBody.resume);
-    
-    if (requestBody.resume) {
-      console.log('Resume keys:', Object.keys(requestBody.resume));
-      console.log('Resume first_name:', requestBody.resume.first_name);
-      console.log('Resume last_name:', requestBody.resume.last_name);
-      console.log('Resume target_role:', requestBody.resume.target_role);
-      console.log('Work experience count:', requestBody.resume.work_experience?.length || 0);
-      console.log('Education count:', requestBody.resume.education?.length || 0);
-      console.log('Skills count:', requestBody.resume.skills?.length || 0);
-      console.log('Projects count:', requestBody.resume.projects?.length || 0);
-    }
-    
-    console.log('Full request body:', JSON.stringify(requestBody, null, 2));
-    console.log('=== END CHAT REQUEST ===');
-
     const { messages, target_role, config, job, resume }: ChatRequest = requestBody;
 
     // Get subscription plan and user ID
@@ -82,23 +58,40 @@ export async function POST(req: Request) {
     // Initialize the AI client using the provided config and plan.
     const aiClient = initializeAIClient(config, isPro);
 
-    console.log('THE AI Client isss:', aiClient);
-
     // Some models (e.g., GPT-5 / GPT-5 Mini) only support the default temperature (1)
     const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5'].includes(config?.model ?? '');
+    
     // Gemini models support a thinking phase—explicitly disable it to avoid added latency/cost
-    const geminiThinkingDisabled =
-      (config?.model ?? '').toLowerCase().includes('gemini-3');
-    const providerOptions = geminiThinkingDisabled
-      ? {
+    // For OpenRouter models, use the unified 'reasoning' parameter via providerOptions.openrouter
+    const isGeminiModel = (config?.model ?? '').toLowerCase().includes('gemini-3');
+    const isOpenRouterModel = (config?.model ?? '').includes('/');
+    
+    // Configure provider options based on model type
+    let providerOptions: any = undefined;
+    
+    if (isGeminiModel) {
+      if (isOpenRouterModel) {
+        // OpenRouter models: use reasoning parameter via providerOptions.openrouter
+        // Set exclude: true to disable reasoning tokens in response (model still thinks internally)
+        providerOptions = {
+          openrouter: {
+            reasoning: {
+              exclude: true,
+            },
+          },
+        };
+      } else {
+        // Direct Google models: use provider-specific options
+        providerOptions = {
           google: {
             thinkingConfig: {
               thinkingBudget: 0,
               includeThoughts: false,
             },
           },
-        }
-      : undefined;
+        };
+      }
+    }
 
     // Use custom prompt if provided, otherwise fall back to default
     const baseSystemPrompt = config?.customPrompts?.aiAssistant 
@@ -149,7 +142,6 @@ export async function POST(req: Request) {
         delayInMs: 20, // optional: defaults to 10ms
         chunking: 'word', // optional: defaults to 'word'
       }),
-    
     });
 
     return result.toDataStreamResponse({

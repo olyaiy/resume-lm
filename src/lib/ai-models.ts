@@ -146,7 +146,7 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'gemini-3-pro-preview',
+    id: 'google/gemini-3-pro-preview',
     name: 'Gemini 3 Pro Preview',
     provider: 'openrouter',
     features: {
@@ -295,6 +295,8 @@ const MODEL_ALIASES: Record<string, string> = {
   'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
   // Allow DeepSeek without the nitro suffix
   'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
+  // Legacy Gemini 3 model ID without provider prefix
+  'gemini-3-pro-preview': 'google/gemini-3-pro-preview',
 }
 
 // ========================
@@ -328,7 +330,7 @@ export const MODEL_DESIGNATIONS = {
   FRONTIER_ALT: 'gpt-5',
   
   // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: 'gemini-3-pro-preview',
+  BALANCED: 'google/gemini-3-pro-preview',
   
   // Vision-capable model for image analysis
   VISION: 'gpt-5',

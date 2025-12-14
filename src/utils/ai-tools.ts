@@ -76,7 +76,6 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
               'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
               'X-Title': 'ResumeLM'
             },
-            
           })(resolvedModelId) as LanguageModelV1;
         }
         // Regular OpenAI models
