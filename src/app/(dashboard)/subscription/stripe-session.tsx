@@ -30,6 +30,13 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
 
         const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/subscription/checkout-return?session_id={CHECKOUT_SESSION_ID}`;
 
+    console.log('🧾 Creating checkout session', {
+      userId: user.id,
+      priceId,
+      includeTrial,
+      returnUrl
+    });
+
         const session = await stripe.checkout.sessions.create({
             customer: customerId,
             ui_mode: "embedded",

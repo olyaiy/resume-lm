@@ -3,6 +3,7 @@
 import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/supabase";
+import { deleteCustomerAndData } from "@/utils/actions/stripe/actions";
 
 interface AuthResult {
   success: boolean;
@@ -248,9 +249,8 @@ export async function deleteUserAccount(formData: FormData) {
     const { supabase: authClient, user } = await getAuthenticatedClient()
     const { supabase: serviceClient } = await getServiceClient()
 
-    // Delete user from auth
-    const { error: authError } = await serviceClient.auth.admin.deleteUser(user.id)
-    if (authError) throw new Error(authError.message)
+    // Delete subscription + Stripe customer + subscription record
+    await deleteCustomerAndData(user.id)
 
     // Delete user data from profiles table
     const { error: profileError } = await serviceClient
@@ -268,6 +268,10 @@ export async function deleteUserAccount(formData: FormData) {
 
     if (resumeError) throw new Error(resumeError.message)
 
+    // Delete user from auth last
+    const { error: authError } = await serviceClient.auth.admin.deleteUser(user.id)
+    if (authError) throw new Error(authError.message)
+
     // Sign out after deletion
     await authClient.auth.signOut()
   } catch (error) {
@@ -275,5 +279,5 @@ export async function deleteUserAccount(formData: FormData) {
     throw error
   }
 
-  redirect('//')
+  redirect('/')
 } 

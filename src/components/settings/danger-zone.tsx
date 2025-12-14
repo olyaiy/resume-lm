@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -12,14 +13,19 @@ interface DangerZoneProps {
   subscriptionStatus?: string;
 }
 
-function SubmitButton() {
+interface SubmitButtonProps {
+  isEnabled: boolean;
+}
+
+function SubmitButton({ isEnabled }: SubmitButtonProps) {
   const { pending } = useFormStatus()
+  const isDisabled = pending || !isEnabled
 
   return (
     <AlertDialogAction
       type="submit"
       className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-      disabled={pending}
+      disabled={isDisabled}
     >
       {pending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
       Delete Account
@@ -28,6 +34,9 @@ function SubmitButton() {
 }
 
 export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
+  const [confirmation, setConfirmation] = useState("")
+  const isConfirmed = confirmation === "DELETE"
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between p-4 rounded-lg border border-destructive/50 bg-destructive/5">
@@ -38,7 +47,7 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
           </p>
           {subscriptionStatus === 'active' && (
             <p className="text-sm text-muted-foreground mt-2">
-              You currently have an active subscription. Please cancel your subscription above before deleting your account.
+              You currently have an active subscription. Cancel above to avoid future charges before deleting your account.
             </p>
           )}
         </div>
@@ -47,7 +56,6 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
             <Button 
               variant="destructive"
               className="bg-rose-500 hover:bg-rose-600"
-              disabled={subscriptionStatus === 'active'}
             >
               Delete Account
             </Button>
@@ -69,13 +77,15 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
                     name="confirm"
                     placeholder="DELETE"
                     className="bg-white/50"
+                    value={confirmation}
+                    onChange={(event) => setConfirmation(event.target.value.toUpperCase())}
                     required
                   />
                 </div>
               </div>
               <AlertDialogFooter>
                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <SubmitButton />
+                <SubmitButton isEnabled={isConfirmed} />
               </AlertDialogFooter>
             </form>
           </AlertDialogContent>

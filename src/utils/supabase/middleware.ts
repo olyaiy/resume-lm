@@ -54,7 +54,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser()
   
   // Debug logging
-  console.log('👤 User authenticated:', !!user)
+  console.log('👤 User authenticated:', !!user, 'user_id:', user?.id)
 
   // Create a new headers object with the existing headers
   // Given an incoming request...
@@ -82,25 +82,31 @@ export async function updateSession(request: NextRequest) {
 
   // Check if route requires subscription
   const pathname = request.nextUrl.pathname
+  console.log('🛡️ Route check:', { pathname, isExempt: isSubscriptionExemptRoute(pathname) })
+
   if (!isSubscriptionExemptRoute(pathname)) {
     // Check if user has an active subscription or trial
+    console.log('🧭 Subscription check for path:', pathname)
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('stripe_subscription_id, subscription_status, current_period_end')
+      .select('stripe_subscription_id, subscription_status, current_period_end, trial_end')
       .eq('user_id', user.id)
       .maybeSingle()
 
-    // User needs a subscription if they don't have a stripe_subscription_id
-    // (meaning they haven't gone through checkout/trial yet)
-    const hasActiveSubscription = subscription?.stripe_subscription_id && (
-      subscription.subscription_status === 'active' ||
-      (subscription.subscription_status === 'canceled' && 
-       subscription.current_period_end && 
-       new Date(subscription.current_period_end) > new Date())
-    )
+    console.log('📦 Subscription record:', {
+      stripe_subscription_id: subscription?.stripe_subscription_id,
+      subscription_status: subscription?.subscription_status,
+      current_period_end: subscription?.current_period_end,
+      trial_end: subscription?.trial_end,
+    })
 
-    if (!hasActiveSubscription) {
-      console.log('🚫 User has no active subscription, redirecting to start-trial')
+    // Only allow users whose subscription status is active or canceled
+    const validStatus = subscription?.subscription_status === 'active' || subscription?.subscription_status === 'canceled'
+
+    console.log('✅ validStatus:', validStatus, 'raw_status:', subscription?.subscription_status)
+
+    if (!validStatus) {
+      console.log('🚫 User subscription status not valid, redirecting to start-trial')
       const url = request.nextUrl.clone()
       url.pathname = '/start-trial'
       return NextResponse.redirect(url)

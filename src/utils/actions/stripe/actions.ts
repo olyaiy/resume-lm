@@ -191,8 +191,17 @@ export async function deleteCustomerAndData(uuid: string) {
     .single();
 
   if (subscription?.stripe_customer_id) {
-    // Delete customer in Stripe
-    await stripe.customers.del(subscription.stripe_customer_id);
+    // Delete customer in Stripe (ignore if customer doesn't exist in current Stripe mode)
+    try {
+      await stripe.customers.del(subscription.stripe_customer_id);
+    } catch (error: unknown) {
+      const stripeError = error as { code?: string };
+      // Ignore "resource_missing" errors (customer created in different Stripe mode)
+      if (stripeError.code !== 'resource_missing') {
+        throw error;
+      }
+      console.warn(`Stripe customer ${subscription.stripe_customer_id} not found (likely created in different Stripe mode), continuing with deletion`);
+    }
   }
 
   // Delete subscription record
@@ -337,6 +346,16 @@ export async function checkSubscriptionPlan() {
   // Treat active trial users as Pro
   const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
 
+  console.log('🧮 checkSubscriptionPlan', {
+    userId: user.id,
+    subscription_plan: data?.subscription_plan,
+    subscription_status: data?.subscription_status,
+    current_period_end: data?.current_period_end,
+    trial_end: data?.trial_end,
+    isTrialing,
+    effectivePlan
+  });
+
   return {
     plan: effectivePlan,
     status: data?.subscription_status || '',
@@ -346,8 +365,7 @@ export async function checkSubscriptionPlan() {
   };
 }
 
-// Check if user has any active subscription (for middleware gating)
-// Returns true if user has started a trial or has an active subscription
+// Check if user has ever started a subscription/trial (used for gating)
 export async function hasActiveSubscriptionOrTrial(userId: string): Promise<boolean> {
   const supabase = await createServiceClient();
 
@@ -361,20 +379,8 @@ export async function hasActiveSubscriptionOrTrial(userId: string): Promise<bool
     return false;
   }
 
-  // User has an active subscription if they have a stripe_subscription_id
-  // This means they've gone through checkout (trial or paid)
-  if (data.stripe_subscription_id) {
-    // Check if subscription is still valid (active or within period)
-    if (data.subscription_status === 'active') {
-      return true;
-    }
-    // Even if canceled, check if they still have access until period end
-    if (data.subscription_status === 'canceled' && data.current_period_end) {
-      return new Date(data.current_period_end) > new Date();
-    }
-  }
-
-  return false;
+  // If they've ever had a Stripe subscription ID, they've gone through checkout/trial.
+  return Boolean(data.stripe_subscription_id);
 }
 
 export async function getSubscriptionPlan(returnId?: boolean) {
