@@ -321,19 +321,60 @@ export async function checkSubscriptionPlan() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) return { plan: '', status: '', currentPeriodEnd: '' };
+  if (!user) return { plan: '', status: '', currentPeriodEnd: '', trialEnd: '', isTrialing: false };
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, current_period_end')
+    .select('subscription_plan, subscription_status, current_period_end, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Check if user is currently in an active trial
+  const isTrialing = data?.trial_end 
+    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
+    : false;
+
+  // Treat active trial users as Pro
+  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+
   return {
-    plan: data?.subscription_plan || '',
+    plan: effectivePlan,
     status: data?.subscription_status || '',
-    currentPeriodEnd: data?.current_period_end || ''
+    currentPeriodEnd: data?.current_period_end || '',
+    trialEnd: data?.trial_end || '',
+    isTrialing
   };
+}
+
+// Check if user has any active subscription (for middleware gating)
+// Returns true if user has started a trial or has an active subscription
+export async function hasActiveSubscriptionOrTrial(userId: string): Promise<boolean> {
+  const supabase = await createServiceClient();
+
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('stripe_subscription_id, subscription_status, trial_end, current_period_end')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return false;
+  }
+
+  // User has an active subscription if they have a stripe_subscription_id
+  // This means they've gone through checkout (trial or paid)
+  if (data.stripe_subscription_id) {
+    // Check if subscription is still valid (active or within period)
+    if (data.subscription_status === 'active') {
+      return true;
+    }
+    // Even if canceled, check if they still have access until period end
+    if (data.subscription_status === 'canceled' && data.current_period_end) {
+      return new Date(data.current_period_end) > new Date();
+    }
+  }
+
+  return false;
 }
 
 export async function getSubscriptionPlan(returnId?: boolean) {
@@ -344,18 +385,26 @@ export async function getSubscriptionPlan(returnId?: boolean) {
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan')
+    .select('subscription_plan, subscription_status, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Check if user is currently in an active trial
+  const isTrialing = data?.trial_end 
+    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
+    : false;
+
+  // Treat active trial users as Pro
+  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+
   if (returnId) {
     return {
-      plan: data?.subscription_plan || '',
+      plan: effectivePlan,
       id: user.id || ''
     };
   }
 
-  return data?.subscription_plan || '';
+  return effectivePlan;
 }
 
 export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {

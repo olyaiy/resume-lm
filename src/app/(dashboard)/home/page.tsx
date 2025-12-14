@@ -46,7 +46,9 @@ export default async function Home({
   const fallbackSubscription = {
     plan: '',
     status: '',
-    currentPeriodEnd: ''
+    currentPeriodEnd: '',
+    trialEnd: '',
+    isTrialing: false
   };
 
   let data;

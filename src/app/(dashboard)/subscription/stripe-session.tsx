@@ -9,10 +9,11 @@ const stripe = new Stripe(apiKey);
 
 interface NewSessionOptions {
     priceId: string;
+    includeTrial?: boolean;
 }
 
 // Function to create a Stripe Checkout Session
-export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
+export const postStripeSession = async ({ priceId, includeTrial = false }: NewSessionOptions) => {
     // Check if user is authenticated
     const { authenticated, user } = await checkAuth();
     
@@ -41,6 +42,14 @@ export const postStripeSession = async ({ priceId }: NewSessionOptions) => {
             mode: "subscription",
             allow_promotion_codes: true,
             return_url: returnUrl,
+            // Require credit card upfront
+            payment_method_collection: 'always',
+            // Add 7-day trial if this is a trial signup
+            ...(includeTrial && {
+                subscription_data: {
+                    trial_period_days: 7,
+                },
+            }),
         });
 
         if (!session.client_secret) {

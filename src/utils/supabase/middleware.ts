@@ -1,6 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
+// Routes that don't require subscription (but may require auth)
+const SUBSCRIPTION_EXEMPT_ROUTES = [
+  '/start-trial',
+  '/subscription/checkout',
+  '/subscription/checkout-return',
+  '/auth',
+  '/api',
+]
+
+function isSubscriptionExemptRoute(pathname: string): boolean {
+  return SUBSCRIPTION_EXEMPT_ROUTES.some(route => pathname.startsWith(route))
+}
+
 export async function updateSession(request: NextRequest) {
   // Debug logging
   console.log('🔍 Middleware running on:', request.nextUrl.pathname)
@@ -65,6 +78,33 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
     return NextResponse.redirect(url)
+  }
+
+  // Check if route requires subscription
+  const pathname = request.nextUrl.pathname
+  if (!isSubscriptionExemptRoute(pathname)) {
+    // Check if user has an active subscription or trial
+    const { data: subscription } = await supabase
+      .from('subscriptions')
+      .select('stripe_subscription_id, subscription_status, current_period_end')
+      .eq('user_id', user.id)
+      .maybeSingle()
+
+    // User needs a subscription if they don't have a stripe_subscription_id
+    // (meaning they haven't gone through checkout/trial yet)
+    const hasActiveSubscription = subscription?.stripe_subscription_id && (
+      subscription.subscription_status === 'active' ||
+      (subscription.subscription_status === 'canceled' && 
+       subscription.current_period_end && 
+       new Date(subscription.current_period_end) > new Date())
+    )
+
+    if (!hasActiveSubscription) {
+      console.log('🚫 User has no active subscription, redirecting to start-trial')
+      const url = request.nextUrl.clone()
+      url.pathname = '/start-trial'
+      return NextResponse.redirect(url)
+    }
   }
 
   console.log('✅ User authenticated, allowing access')
