@@ -110,14 +110,20 @@ export async function manageSubscriptionStatusChange(
   const priceIdToPlan: Record<string, 'free' | 'pro'> = {
     [process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!]: 'pro'
   };
-  const plan = priceIdToPlan[subscription.items.data[0].price.id] || 'free';
+  const derivedPlan = priceIdToPlan[subscription.items.data[0].price.id] || 'free';
+
+  // Normalize plan: if the subscription is not active, force plan to free
+  const normalizedPlan =
+    subscription.status === 'active' && !subscription.cancel_at_period_end
+      ? derivedPlan
+      : 'free';
 
   // Prepare subscription data
   const subscriptionData: Partial<Subscription> = {
     user_id: uuid,
     stripe_subscription_id: subscription.id,
     stripe_customer_id: customerId,
-    subscription_plan: plan,
+    subscription_plan: normalizedPlan,
     subscription_status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
     current_period_end: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
     trial_end: subscription.trial_end 
