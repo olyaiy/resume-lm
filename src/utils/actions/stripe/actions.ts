@@ -59,8 +59,9 @@ async function upsertCustomerToSupabase(uuid: string, customerId: string) {
     .upsert({
       user_id: uuid,
       stripe_customer_id: customerId,
+      // Keep the record neutral until a real trial/subscription is created
       subscription_plan: 'free',
-      subscription_status: 'active',
+      subscription_status: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString()
     }, {

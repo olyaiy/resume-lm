@@ -73,6 +73,7 @@ interface UserData {
     subscription_plan?: string;
     subscription_status?: string;
     current_period_end?: string;
+    trial_end?: string | null;
     [key: string]: unknown;
   } | null;
   resume_count: number;
@@ -90,6 +91,7 @@ type SortableColumns =
   | 'skills_count'
   | 'subscription_status'
   | 'current_period_end'
+  | 'trial_end'
   | 'resume_count'; // Added resume_count
 
 export default function UsersTable() {
@@ -100,6 +102,7 @@ export default function UsersTable() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterPlan, setFilterPlan] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
+  const [filterTrial, setFilterTrial] = useState<'all' | 'active' | 'ended' | 'none'>('all');
   const [sortDescriptor, setSortDescriptor] = useState<SortDescriptor<SortableColumns>>({
     column: 'created_at',
     direction: 'descending',
@@ -145,127 +148,162 @@ export default function UsersTable() {
       day: 'numeric',
     });
   }
-  
-    const handleSort = (column: SortableColumns) => {
-      setSortDescriptor((prev) => ({
-        column,
-        direction:
-          prev.column === column && prev.direction === 'ascending'
-            ? 'descending'
-            : 'ascending',
-      }));
+
+  const getTrialMeta = (trialEnd?: string | null) => {
+    if (!trialEnd) {
+      return { hasTrial: false, isTrialing: false, isExpired: false, displayDate: 'N/A' };
+    }
+
+    const parsed = new Date(trialEnd);
+    if (Number.isNaN(parsed.getTime())) {
+      return { hasTrial: true, isTrialing: false, isExpired: false, displayDate: 'Invalid date' };
+    }
+
+    const isTrialing = parsed.getTime() > Date.now();
+    return {
+      hasTrial: true,
+      isTrialing,
+      isExpired: !isTrialing,
+      displayDate: formatDate(trialEnd),
     };
+  };
   
-    const filteredUsers = useMemo(() => {
-      return users.filter((item) => {
-        // Subscription Plan Filter
-        const plan = item.subscription?.subscription_plan || 'none';
-        if (filterPlan !== 'all' && plan !== filterPlan) {
-          return false;
-        }
-        
-        // Subscription Status Filter
-        const status = item.subscription?.subscription_status || 'none';
-         if (filterStatus !== 'all' && status !== filterStatus) {
-          return false;
-        }
+  const handleSort = (column: SortableColumns) => {
+    setSortDescriptor((prev) => ({
+      column,
+      direction:
+        prev.column === column && prev.direction === 'ascending'
+          ? 'descending'
+          : 'ascending',
+    }));
+  };
 
-        // Search Term Filter (if searchTerm is present)
-        if (searchTerm) {
-          const lowerSearchTerm = searchTerm.toLowerCase();
-          const name = item.profile?.first_name && item.profile?.last_name
-            ? `${item.profile.first_name} ${item.profile.last_name}`.toLowerCase()
-            : '';
-          const email = item.user.email?.toLowerCase() || '';
-          const location = item.profile?.location?.toLowerCase() || '';
-          // Plan and status already checked above, but include in search text
-          const planText = item.subscription?.subscription_plan?.toLowerCase() || '';
-          const statusText = item.subscription?.subscription_status?.toLowerCase() || '';
+  const filteredUsers = useMemo(() => {
+    return users.filter((item) => {
+      // Subscription Plan Filter
+      const plan = item.subscription?.subscription_plan || 'none';
+      if (filterPlan !== 'all' && plan !== filterPlan) {
+        return false;
+      }
+      
+      // Subscription Status Filter
+      const status = item.subscription?.subscription_status || 'none';
+       if (filterStatus !== 'all' && status !== filterStatus) {
+        return false;
+      }
 
-          return (
-            email.includes(lowerSearchTerm) ||
-            name.includes(lowerSearchTerm) ||
-            location.includes(lowerSearchTerm) ||
-            planText.includes(lowerSearchTerm) || // Allow searching plan/status text too
-            statusText.includes(lowerSearchTerm)
-          );
-        }
-        
-        // If no search term and passed plan/status filters, include the user
-        return true;
-      });
-    }, [users, searchTerm, filterPlan, filterStatus]);
-  
-    const sortedUsers = useMemo(() => {
-      return [...filteredUsers].sort((a, b) => {
-        const { column, direction } = sortDescriptor;
-        let valA: string | number | null = null;
-        let valB: string | number | null = null;
-  
-        // Helper to handle null/undefined dates for sorting
-        const getDateValue = (dateStr?: string | null): number => {
-          return dateStr ? new Date(dateStr).getTime() : 0;
-        };
-  
-        switch (column) {
-          case 'email':
-            valA = a.user.email || '';
-            valB = b.user.email || '';
-            break;
-          case 'created_at':
-            valA = getDateValue(a.user.created_at);
-            valB = getDateValue(b.user.created_at);
-            break;
-          case 'last_sign_in_at':
-            valA = getDateValue(a.user.last_sign_in_at);
-            valB = getDateValue(b.user.last_sign_in_at);
-            break;
-          case 'name':
-            valA = `${a.profile?.first_name || ''} ${a.profile?.last_name || ''}`.trim().toLowerCase();
-            valB = `${b.profile?.first_name || ''} ${b.profile?.last_name || ''}`.trim().toLowerCase();
-            break;
-          case 'subscription_plan':
-            valA = a.subscription?.subscription_plan || '';
-            valB = b.subscription?.subscription_plan || '';
-            break;
-          case 'location':
-            valA = a.profile?.location || '';
-            valB = b.profile?.location || '';
-            break;
-          case 'work_experience_count':
-            valA = a.profile?.work_experience?.length || 0;
-            valB = b.profile?.work_experience?.length || 0;
-            break;
-          case 'education_count':
-            valA = a.profile?.education?.length || 0;
-            valB = b.profile?.education?.length || 0;
-            break;
-          case 'skills_count':
-             valA = a.profile?.skills?.length || 0;
-             valB = b.profile?.skills?.length || 0;
-             break;
-          case 'subscription_status':
-            valA = a.subscription?.subscription_status || '';
-            valB = b.subscription?.subscription_status || '';
-            break;
-          case 'current_period_end':
-            valA = getDateValue(a.subscription?.current_period_end);
-            valB = getDateValue(b.subscription?.current_period_end);
-            break;
-          case 'resume_count':
-             valA = a.resume_count || 0;
-             valB = b.resume_count || 0;
-             break;
-          default:
-            // Should not happen if all SortableColumns are handled
-            console.warn(`Unhandled sort column: ${column}`);
-            return 0;
-        }
-  
-        const comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
-        return direction === 'ascending' ? comparison : -comparison;
-      });
-    }, [filteredUsers, sortDescriptor]);
+      // Trial Filter
+      const trialMeta = getTrialMeta(item.subscription?.trial_end ?? null);
+      if (filterTrial === 'active' && !trialMeta.isTrialing) {
+        return false;
+      }
+      if (filterTrial === 'ended' && !trialMeta.isExpired) {
+        return false;
+      }
+      if (filterTrial === 'none' && trialMeta.hasTrial) {
+        return false;
+      }
+
+      // Search Term Filter (if searchTerm is present)
+      if (searchTerm) {
+        const lowerSearchTerm = searchTerm.toLowerCase();
+        const name = item.profile?.first_name && item.profile?.last_name
+          ? `${item.profile.first_name} ${item.profile.last_name}`.toLowerCase()
+          : '';
+        const email = item.user.email?.toLowerCase() || '';
+        const location = item.profile?.location?.toLowerCase() || '';
+        // Plan and status already checked above, but include in search text
+        const planText = item.subscription?.subscription_plan?.toLowerCase() || '';
+        const statusText = item.subscription?.subscription_status?.toLowerCase() || '';
+
+        return (
+          email.includes(lowerSearchTerm) ||
+          name.includes(lowerSearchTerm) ||
+          location.includes(lowerSearchTerm) ||
+          planText.includes(lowerSearchTerm) || // Allow searching plan/status text too
+          statusText.includes(lowerSearchTerm)
+        );
+      }
+      
+      // If no search term and passed plan/status filters, include the user
+      return true;
+    });
+  }, [users, searchTerm, filterPlan, filterStatus, filterTrial]);
+
+  const sortedUsers = useMemo(() => {
+    return [...filteredUsers].sort((a, b) => {
+      const { column, direction } = sortDescriptor;
+      let valA: string | number | null = null;
+      let valB: string | number | null = null;
+
+      // Helper to handle null/undefined dates for sorting
+      const getDateValue = (dateStr?: string | null): number => {
+        return dateStr ? new Date(dateStr).getTime() : 0;
+      };
+
+      switch (column) {
+        case 'email':
+          valA = a.user.email || '';
+          valB = b.user.email || '';
+          break;
+        case 'created_at':
+          valA = getDateValue(a.user.created_at);
+          valB = getDateValue(b.user.created_at);
+          break;
+        case 'last_sign_in_at':
+          valA = getDateValue(a.user.last_sign_in_at);
+          valB = getDateValue(b.user.last_sign_in_at);
+          break;
+        case 'name':
+          valA = `${a.profile?.first_name || ''} ${a.profile?.last_name || ''}`.trim().toLowerCase();
+          valB = `${b.profile?.first_name || ''} ${b.profile?.last_name || ''}`.trim().toLowerCase();
+          break;
+        case 'subscription_plan':
+          valA = a.subscription?.subscription_plan || '';
+          valB = b.subscription?.subscription_plan || '';
+          break;
+        case 'location':
+          valA = a.profile?.location || '';
+          valB = b.profile?.location || '';
+          break;
+        case 'work_experience_count':
+          valA = a.profile?.work_experience?.length || 0;
+          valB = b.profile?.work_experience?.length || 0;
+          break;
+        case 'education_count':
+          valA = a.profile?.education?.length || 0;
+          valB = b.profile?.education?.length || 0;
+          break;
+        case 'skills_count':
+          valA = a.profile?.skills?.length || 0;
+          valB = b.profile?.skills?.length || 0;
+          break;
+        case 'subscription_status':
+          valA = a.subscription?.subscription_status || '';
+          valB = b.subscription?.subscription_status || '';
+          break;
+        case 'current_period_end':
+          valA = getDateValue(a.subscription?.current_period_end);
+          valB = getDateValue(b.subscription?.current_period_end);
+          break;
+        case 'trial_end':
+          valA = getDateValue(a.subscription?.trial_end);
+          valB = getDateValue(b.subscription?.trial_end);
+          break;
+        case 'resume_count':
+          valA = a.resume_count || 0;
+          valB = b.resume_count || 0;
+          break;
+        default:
+          // Should not happen if all SortableColumns are handled
+          console.warn(`Unhandled sort column: ${column}`);
+          return 0;
+      }
+
+      const comparison = valA < valB ? -1 : valA > valB ? 1 : 0;
+      return direction === 'ascending' ? comparison : -comparison;
+    });
+  }, [filteredUsers, sortDescriptor]);
 
   // Moved uniquePlans and uniqueStatuses calculation above these checks
 
@@ -290,6 +328,24 @@ export default function UsersTable() {
     );
   }
 
+  const renderTrialBadge = (trialMeta: ReturnType<typeof getTrialMeta>) => {
+    if (!trialMeta.hasTrial) {
+      return <Badge variant="outline">No Trial</Badge>;
+    }
+
+    const badgeClass = trialMeta.isTrialing
+      ? 'bg-blue-100 text-blue-800 hover:bg-blue-200'
+      : 'bg-slate-100 text-slate-800 hover:bg-slate-200';
+
+    return (
+      <Badge className={badgeClass}>
+        {trialMeta.isTrialing
+          ? `Trialing · ends ${trialMeta.displayDate}`
+          : `Trial ended ${trialMeta.displayDate}`}
+      </Badge>
+    );
+  };
+
   const renderSortIcon = (column: SortableColumns) => {
     if (sortDescriptor.column !== column) {
       return <ArrowUpDown className="ml-2 h-4 w-4 opacity-30" />;
@@ -308,8 +364,8 @@ export default function UsersTable() {
           onChange={(e) => setSearchTerm(e.target.value)}
           className="max-w-sm"
         />
-        <div className="flex space-x-2">
-           <Select value={filterPlan} onValueChange={setFilterPlan}>
+        <div className="flex flex-wrap gap-2">
+          <Select value={filterPlan} onValueChange={setFilterPlan}>
             <SelectTrigger className="w-[180px]">
               <SelectValue placeholder="Filter by plan" />
             </SelectTrigger>
@@ -319,6 +375,17 @@ export default function UsersTable() {
                   {plan === 'all' ? 'All Plans' : plan === 'none' ? 'No Plan' : plan.toUpperCase()}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+          <Select value={filterTrial} onValueChange={(value) => setFilterTrial(value as typeof filterTrial)}>
+            <SelectTrigger className="w-[190px]">
+              <SelectValue placeholder="Filter by trial" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Trial States</SelectItem>
+              <SelectItem value="active">Active Trial</SelectItem>
+              <SelectItem value="ended">Trial Ended</SelectItem>
+              <SelectItem value="none">Never Started Trial</SelectItem>
             </SelectContent>
           </Select>
           <Select value={filterStatus} onValueChange={setFilterStatus}>
@@ -349,7 +416,7 @@ export default function UsersTable() {
             <Table>
               <TableCaption>
                 {`Showing ${sortedUsers.length} of ${users.length} users.`}
-                { (filterPlan !== 'all' || filterStatus !== 'all' || searchTerm) &&
+                { (filterPlan !== 'all' || filterStatus !== 'all' || filterTrial !== 'all' || searchTerm) &&
                   ` (Filtered from ${users.length} total)`
                 }
               </TableCaption>
@@ -381,18 +448,23 @@ export default function UsersTable() {
                       Plan {renderSortIcon('subscription_plan')}
                     </Button>
                   </TableHead>
-                   <TableHead>
+                  <TableHead>
+                    <Button variant="ghost" onClick={() => handleSort('trial_end')} className="px-0 hover:bg-transparent">
+                      Trial {renderSortIcon('trial_end')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('subscription_status')} className="px-0 hover:bg-transparent">
                       Status {renderSortIcon('subscription_status')}
                     </Button>
                   </TableHead>
-                   <TableHead>
+                  <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('current_period_end')} className="px-0 hover:bg-transparent">
                       Expires {renderSortIcon('current_period_end')}
                     </Button>
                   </TableHead>
-                   {/* Added Resume Count column */}
-                   <TableHead>
+                  {/* Added Resume Count column */}
+                  <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('resume_count')} className="px-0 hover:bg-transparent">
                       Resumes {renderSortIcon('resume_count')}
                     </Button>
@@ -400,52 +472,57 @@ export default function UsersTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedUsers.map((item) => (
-                  <TableRow
-                    key={item.user.id}
-                    onClick={() => router.push(`/admin/${item.user.id}`)}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
-                    <TableCell>{formatDate(item.user.created_at)}</TableCell>
-                    <TableCell>{formatDate(item.user.last_sign_in_at)}</TableCell>
-                    <TableCell>
-                      {item.profile?.first_name && item.profile?.last_name 
-                        ? `${item.profile.first_name} ${item.profile.last_name}`
-                        : 'Not set'}
-                    </TableCell>
-                    {/* Moved Subscription cells here */}
-                    <TableCell>
-                      {item.subscription?.subscription_plan ? (
-                        <Badge className={
-                          item.subscription.subscription_plan === 'pro'
-                            ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
-                            : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
-                        }>
-                          {item.subscription.subscription_plan.toUpperCase()}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">No Plan</Badge>
-                      )}
-                    </TableCell>
-                     <TableCell>
-                      {item.subscription?.subscription_status ? (
-                        <Badge className={
-                          item.subscription.subscription_status === 'active'
-                            ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                            : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
-                        }>
-                          {item.subscription.subscription_status.toUpperCase()}
-                        </Badge>
-                      ) : (
-                        <Badge variant="outline">N/A</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>{formatDate(item.subscription?.current_period_end)}</TableCell>
-                    {/* Added Resume Count cell */}
-                    <TableCell className="text-center">{item.resume_count}</TableCell>
-                  </TableRow>
-                ))}
+                {sortedUsers.map((item) => {
+                  const trialMeta = getTrialMeta(item.subscription?.trial_end ?? null);
+
+                  return (
+                    <TableRow
+                      key={item.user.id}
+                      onClick={() => router.push(`/admin/${item.user.id}`)}
+                      className="cursor-pointer hover:bg-muted/50"
+                    >
+                      <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
+                      <TableCell>{formatDate(item.user.created_at)}</TableCell>
+                      <TableCell>{formatDate(item.user.last_sign_in_at)}</TableCell>
+                      <TableCell>
+                        {item.profile?.first_name && item.profile?.last_name 
+                          ? `${item.profile.first_name} ${item.profile.last_name}`
+                          : 'Not set'}
+                      </TableCell>
+                      {/* Moved Subscription cells here */}
+                      <TableCell>
+                        {item.subscription?.subscription_plan ? (
+                          <Badge className={
+                            item.subscription.subscription_plan === 'pro'
+                              ? 'bg-purple-100 text-purple-800 hover:bg-purple-200'
+                              : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                          }>
+                            {item.subscription.subscription_plan.toUpperCase()}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">No Plan</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{renderTrialBadge(trialMeta)}</TableCell>
+                      <TableCell>
+                        {item.subscription?.subscription_status ? (
+                          <Badge className={
+                            item.subscription.subscription_status === 'active'
+                              ? 'bg-green-100 text-green-800 hover:bg-green-200'
+                              : 'bg-orange-100 text-orange-800 hover:bg-orange-200'
+                          }>
+                            {item.subscription.subscription_status.toUpperCase()}
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline">N/A</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>{formatDate(item.subscription?.current_period_end)}</TableCell>
+                      {/* Added Resume Count cell */}
+                      <TableCell className="text-center">{item.resume_count}</TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
@@ -456,13 +533,13 @@ export default function UsersTable() {
             <Table>
                <TableCaption>
                  {`Showing ${sortedUsers.filter(u => u.profile).length} profiles from ${sortedUsers.length} filtered users.`}
-                 { (filterPlan !== 'all' || filterStatus !== 'all' || searchTerm) &&
+                 { (filterPlan !== 'all' || filterStatus !== 'all' || filterTrial !== 'all' || searchTerm) &&
                   ` (Filtered from ${users.length} total)`
                  }
               </TableCaption>
               <TableHeader>
                 <TableRow>
-                   <TableHead>
+                  <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('email')} className="px-0 hover:bg-transparent">
                       Email {renderSortIcon('email')}
                     </Button>
@@ -470,6 +547,11 @@ export default function UsersTable() {
                   <TableHead>
                     <Button variant="ghost" onClick={() => handleSort('name')} className="px-0 hover:bg-transparent">
                       Name {renderSortIcon('name')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button variant="ghost" onClick={() => handleSort('trial_end')} className="px-0 hover:bg-transparent">
+                      Trial {renderSortIcon('trial_end')}
                     </Button>
                   </TableHead>
                   <TableHead>
@@ -495,42 +577,47 @@ export default function UsersTable() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedUsers.map((item) => (
-                  <TableRow
-                    key={item.user.id}
-                    onClick={() => router.push(`/admin/${item.user.id}`)}
-                    className="cursor-pointer hover:bg-muted/50"
-                  >
-                    <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
-                    <TableCell>
-                      {item.profile?.first_name && item.profile?.last_name 
-                        ? `${item.profile.first_name} ${item.profile.last_name}`
-                        : 'Not set'}
-                    </TableCell>
-                    <TableCell>{item.profile?.location || 'Not set'}</TableCell>
-                    <TableCell>
-                      {item.profile?.work_experience && Array.isArray(item.profile.work_experience) ? (
-                        <Badge variant="outline">{item.profile.work_experience.length} entries</Badge>
-                      ) : (
-                        <Badge variant="outline">0</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.profile?.education && Array.isArray(item.profile.education) ? (
-                        <Badge variant="outline">{item.profile.education.length} entries</Badge>
-                      ) : (
-                        <Badge variant="outline">0</Badge>
-                      )}
-                    </TableCell>
-                    <TableCell>
-                      {item.profile?.skills && Array.isArray(item.profile.skills) ? (
-                        <Badge variant="outline">{item.profile.skills.length} entries</Badge>
-                      ) : (
-                        <Badge variant="outline">0</Badge>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {sortedUsers.map((item) => {
+                  const trialMeta = getTrialMeta(item.subscription?.trial_end ?? null);
+
+                  return (
+                    <TableRow
+                      key={item.user.id}
+                      onClick={() => router.push(`/admin/${item.user.id}`)}
+                      className="cursor-pointer hover:bg-muted/50"
+                    >
+                      <TableCell className="font-medium">{item.user.email || 'N/A'}</TableCell>
+                      <TableCell>
+                        {item.profile?.first_name && item.profile?.last_name 
+                          ? `${item.profile.first_name} ${item.profile.last_name}`
+                          : 'Not set'}
+                      </TableCell>
+                      <TableCell>{renderTrialBadge(trialMeta)}</TableCell>
+                      <TableCell>{item.profile?.location || 'Not set'}</TableCell>
+                      <TableCell>
+                        {item.profile?.work_experience && Array.isArray(item.profile.work_experience) ? (
+                          <Badge variant="outline">{item.profile.work_experience.length} entries</Badge>
+                        ) : (
+                          <Badge variant="outline">0</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.profile?.education && Array.isArray(item.profile.education) ? (
+                          <Badge variant="outline">{item.profile.education.length} entries</Badge>
+                        ) : (
+                          <Badge variant="outline">0</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        {item.profile?.skills && Array.isArray(item.profile.skills) ? (
+                          <Badge variant="outline">{item.profile.skills.length} entries</Badge>
+                        ) : (
+                          <Badge variant="outline">0</Badge>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>
