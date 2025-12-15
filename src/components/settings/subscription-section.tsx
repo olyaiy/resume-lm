@@ -40,9 +40,15 @@ export function SubscriptionSection() {
   const subscription_plan = profile?.subscription_plan;
   const subscription_status = profile?.subscription_status;
   const current_period_end = profile?.current_period_end;
+  const trial_end = profile?.trial_end;
   
-  const isPro = subscription_plan?.toLowerCase() === 'pro';
+  const trialEndDate = trial_end ? new Date(trial_end) : null;
+  const isTrialing = Boolean(trialEndDate && trialEndDate > new Date());
+
+  const effectivePlan = isTrialing ? 'pro' : subscription_plan;
+  const isPro = effectivePlan?.toLowerCase() === 'pro';
   const isCanceling = subscription_status === 'canceled';
+  const hasProAccess = isPro || isTrialing;
 
   const handlePortalSession = async () => {
     try {
@@ -70,6 +76,14 @@ export function SubscriptionSection() {
         month: 'long', 
         day: 'numeric'
       })
+    : null;
+
+  const trialDaysRemaining = isTrialing && trialEndDate
+    ? Math.max(0, Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    : 0;
+
+  const trialEndLabel = trialEndDate
+    ? trialEndDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
     : null;
 
   if (isLoadingProfile) {
@@ -111,7 +125,21 @@ export function SubscriptionSection() {
               Your Pro access ends on {endDate}. Reactivate to keep your premium features.
             </p>
           </>
-        ) : isPro ? (
+        ) : isTrialing ? (
+          <>
+            <div className="flex items-center justify-center mb-2">
+              <Badge variant="outline" className="text-blue-700 border-blue-300 bg-blue-50">
+                {trialDaysRemaining > 0 ? `${trialDaysRemaining} days left in trial` : 'Trial ends today'}
+              </Badge>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Free trial active — Pro unlocked
+            </h2>
+            <p className="text-gray-600 max-w-lg mx-auto">
+              Enjoy full Pro access during your trial. After {trialEndLabel || 'the trial'}, you&apos;ll continue on the Pro plan at $20/month unless you cancel in the billing portal.
+            </p>
+          </>
+        ) : hasProAccess ? (
           <>
             <div className="flex items-center justify-center mb-2">
               <Crown className="h-6 w-6 text-purple-500 mr-2" />
@@ -161,7 +189,7 @@ export function SubscriptionSection() {
         {/* Left Column - Benefits */}
         <div className="space-y-6">
           <h3 className="text-lg font-semibold text-gray-900">
-            {isPro ? "Your Pro Benefits" : "What you get with Pro"}
+            {hasProAccess ? "Your Pro Benefits" : "What you get with Pro"}
           </h3>
           
           <div className="space-y-3">
@@ -215,16 +243,16 @@ export function SubscriptionSection() {
         </div>
 
         {/* Right Column - Pricing */}
-        <div className="space-y-6">
+      <div className="space-y-6">
           <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm relative overflow-hidden">
-            {!isPro && (
+            {!hasProAccess && (
               <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600" />
             )}
             
             <div className="text-center mb-6">
               <div className="flex items-center justify-center mb-2">
                 <h4 className="text-xl font-bold text-gray-900">ResumeLM Pro</h4>
-                {!isPro && (
+                {!hasProAccess && (
                   <Badge className="ml-2 bg-blue-100 text-blue-700 text-xs">Most Popular</Badge>
                 )}
               </div>
@@ -234,7 +262,7 @@ export function SubscriptionSection() {
                 <span className="text-gray-600">/month</span>
               </div>
               
-              {!isPro && (
+              {!hasProAccess && (
                 <div className="space-y-1 text-xs text-gray-600">
                   <p>💰 Pays for itself with one interview</p>
                   <p>💼 Compare: Resume writers charge $260+</p>
@@ -259,7 +287,7 @@ export function SubscriptionSection() {
             </div>
 
             {/* Risk Reduction */}
-            {!isPro && (
+            {!hasProAccess && (
               <div className="flex items-center justify-center space-x-2 mb-4 p-2 bg-green-50 rounded-lg border border-green-200">
                 <Shield className="h-4 w-4 text-green-600" />
                 <span className="text-xs text-green-700 font-medium">
@@ -274,7 +302,7 @@ export function SubscriptionSection() {
               disabled={isLoading}
               className={cn(
                 "w-full py-3 font-semibold rounded-lg transition-all duration-300",
-                isPro
+                hasProAccess
                   ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl"
               )}
@@ -284,8 +312,8 @@ export function SubscriptionSection() {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                   <span>Loading...</span>
                 </div>
-              ) : isPro ? (
-                "Manage Subscription"
+              ) : hasProAccess ? (
+                isTrialing ? "Manage trial / billing" : "Manage Subscription"
               ) : (
                 <div className="flex items-center justify-center space-x-2">
                   <span>Upgrade to Pro</span>
@@ -294,7 +322,7 @@ export function SubscriptionSection() {
               )}
             </Button>
 
-            {!isPro && (
+            {!hasProAccess && (
               <p className="text-center text-xs text-gray-500 mt-3">
                 Cancel anytime • No hidden fees
               </p>
