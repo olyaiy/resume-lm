@@ -4,7 +4,6 @@ import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
 import { AppHeader } from "@/components/layout/app-header";
 import { createClient } from "@/utils/supabase/server";
-import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react"
 import Link from "next/link";
@@ -87,18 +86,29 @@ export default async function RootLayout({
   
   let showUpgradeButton = false;
   let isProPlan = false;
+  let upgradeButtonVariant: 'trial' | 'upgrade' = 'upgrade';
   if (user) {
     try {
-      const profile = await getSubscriptionStatus();
-      const isPro = profile?.subscription_plan?.toLowerCase()?.includes('pro') && 
-                    profile?.subscription_status !== 'canceled';
-      isProPlan = isPro || false;
-      // Show upgrade button only if user is not on pro plan or has canceled
+      const { data: subscription } = await supabase
+        .from('subscriptions')
+        .select('subscription_plan, subscription_status')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      const subscriptionPlan = subscription?.subscription_plan?.toLowerCase() ?? 'free';
+      const subscriptionStatus = subscription?.subscription_status ?? null;
+
+      const isPro = subscriptionPlan === 'pro' && subscriptionStatus === 'active';
+      const needsTrial = subscriptionStatus !== 'active' && subscriptionStatus !== 'canceled';
+
+      isProPlan = isPro;
       showUpgradeButton = !isPro;
+      upgradeButtonVariant = needsTrial ? 'trial' : 'upgrade';
     } catch {
       // If there's an error, we'll show the upgrade button by default
       showUpgradeButton = true;
       isProPlan = false;
+      upgradeButtonVariant = 'upgrade';
     }
   }
 
@@ -114,7 +124,13 @@ export default async function RootLayout({
           </div>
         )}
         <div className="relative min-h-screen h-screen flex flex-col">
-          {user && <AppHeader showUpgradeButton={showUpgradeButton} isProPlan={isProPlan} />}
+          {user && (
+            <AppHeader
+              showUpgradeButton={showUpgradeButton}
+              isProPlan={isProPlan}
+              upgradeButtonVariant={upgradeButtonVariant}
+            />
+          )}
           {/* Padding for header and footer */}
           <main className="py-14 h-full">
             {children}

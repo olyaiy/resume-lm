@@ -14,14 +14,21 @@ import { useState, useEffect, useRef } from "react";
 import { ModelSelector } from "@/components/shared/model-selector";
 import { getDefaultModel } from "@/lib/ai-models";
 import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
+import { TrialStartButton } from "@/components/trial/trial-start-button";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
   showUpgradeButton?: boolean;
   isProPlan?: boolean;
+  upgradeButtonVariant?: 'trial' | 'upgrade';
 }
 
-export function AppHeader({ children, showUpgradeButton = true, isProPlan = false }: AppHeaderProps) {
+export function AppHeader({
+  children,
+  showUpgradeButton = true,
+  isProPlan = false,
+  upgradeButtonVariant = 'upgrade',
+}: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
   
   // Use synchronized hooks for instant updates across components
@@ -79,7 +86,7 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
               <nav className="hidden md:flex items-center gap-1 lg:gap-2">
                 {showUpgradeButton && (
                   <>
-                    <ProUpgradeButton />
+                    {upgradeButtonVariant === 'trial' ? <TrialStartButton /> : <ProUpgradeButton />}
                     <div className="h-4 w-px bg-purple-200/50 ml-2 lg:ml-3" />
                   </>
                 )}
@@ -129,7 +136,12 @@ export function AppHeader({ children, showUpgradeButton = true, isProPlan = fals
                     <SheetTitle>Menu</SheetTitle>
                   </SheetHeader>
                   <div className="flex flex-col gap-4 pt-6">
-                    {showUpgradeButton && <ProUpgradeButton className="w-full" />}
+                    {showUpgradeButton &&
+                      (upgradeButtonVariant === 'trial' ? (
+                        <TrialStartButton className="w-full" />
+                      ) : (
+                        <ProUpgradeButton className="w-full" />
+                      ))}
                     
                     {/* Mobile Model Selector */}
                     <div className="px-1">
