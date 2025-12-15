@@ -10,11 +10,12 @@ import { PageTitle } from "./page-title";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, type MouseEvent } from "react";
 import { ModelSelector } from "@/components/shared/model-selector";
 import { getDefaultModel } from "@/lib/ai-models";
 import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
 import { TrialStartButton } from "@/components/trial/trial-start-button";
+import { useTrialGate } from "@/components/trial/trial-gate";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
@@ -30,6 +31,7 @@ export function AppHeader({
   upgradeButtonVariant = 'upgrade',
 }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const trialGate = useTrialGate();
   
   // Use synchronized hooks for instant updates across components
   const { apiKeys } = useApiKeys();
@@ -51,6 +53,17 @@ export function AppHeader({
 
   const handleModelChange = (modelId: string) => {
     setDefaultModel(modelId);
+  };
+
+  const handleProfileClick = (event: MouseEvent<HTMLAnchorElement>) => {
+    if (trialGate.enabled) {
+      event.preventDefault();
+      event.stopPropagation();
+      trialGate.open();
+      setIsOpen(false);
+      return;
+    }
+    setIsOpen(false);
   };
 
   return (
@@ -108,6 +121,7 @@ export function AppHeader({
                 <div className="flex items-center px-2 lg:px-3 py-1">
                   <Link 
                     href="/profile" 
+                    onClick={handleProfileClick}
                     className={cn(
                       "flex items-center gap-1.5 px-2 lg:px-3 py-1",
                       "text-sm font-medium text-purple-600/80 hover:text-purple-800",
@@ -158,7 +172,7 @@ export function AppHeader({
                     
                     <Link
                       href="/profile"
-                      onClick={() => setIsOpen(false)}
+                      onClick={handleProfileClick}
                       className={cn(
                         "flex items-center gap-2 px-4 py-2 rounded-md",
                         "text-sm font-medium text-purple-600/80 hover:text-purple-800",
@@ -169,7 +183,10 @@ export function AppHeader({
                       Profile
                     </Link>
                     <div className="px-4">
-                      <SettingsButton className="w-full justify-start" />
+                      <SettingsButton
+                        className="w-full justify-start"
+                        onAllowedNavigation={() => setIsOpen(false)}
+                      />
                     </div>
                     <div className="px-4">
                       <LogoutButton className="w-full justify-start" />
