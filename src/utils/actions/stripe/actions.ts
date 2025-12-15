@@ -422,7 +422,7 @@ export async function hasActiveSubscriptionOrTrial(userId: string): Promise<bool
 }
 
 export async function getSubscriptionPlan(returnId: true): Promise<{ plan: string; id: string }>;
-export async function getSubscriptionPlan(returnId?: false): Promise<string>;
+export async function getSubscriptionPlan(returnId?: boolean): Promise<string | { plan: string; id: string }>;
 export async function getSubscriptionPlan(returnId?: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
