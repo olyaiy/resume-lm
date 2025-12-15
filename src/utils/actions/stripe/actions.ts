@@ -112,9 +112,10 @@ export async function manageSubscriptionStatusChange(
   };
   const derivedPlan = priceIdToPlan[subscription.items.data[0].price.id] || 'free';
 
-  // Normalize plan: if the subscription is not active, force plan to free
+  // Normalize plan: only count plan as 'pro' while Stripe considers the subscription active-like.
+  // Note: Stripe uses 'trialing' during trials, so treat it as active.
   const normalizedPlan =
-    subscription.status === 'active' && !subscription.cancel_at_period_end
+    subscription.status === 'active' || subscription.status === 'trialing'
       ? derivedPlan
       : 'free';
 
@@ -124,7 +125,12 @@ export async function manageSubscriptionStatusChange(
     stripe_subscription_id: subscription.id,
     stripe_customer_id: customerId,
     subscription_plan: normalizedPlan,
-    subscription_status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
+    // DB constraint only supports 'active' | 'canceled', so treat Stripe 'trialing' as 'active'
+    subscription_status: subscription.cancel_at_period_end
+      ? 'canceled'
+      : subscription.status === 'active' || subscription.status === 'trialing'
+        ? 'active'
+        : 'canceled',
     current_period_end: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
     trial_end: subscription.trial_end 
       ? new Date(subscription.trial_end * 1000).toISOString()
@@ -336,7 +342,16 @@ export async function checkSubscriptionPlan() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) return { plan: '', status: '', currentPeriodEnd: '', trialEnd: '', isTrialing: false };
+  if (!user) {
+    return {
+      plan: '',
+      status: '',
+      currentPeriodEnd: '',
+      trialEnd: '',
+      isTrialing: false,
+      hasProAccess: false,
+    };
+  }
 
   const { data } = await supabase
     .from('subscriptions')
@@ -344,13 +359,19 @@ export async function checkSubscriptionPlan() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // Check if user is currently in an active trial
-  const isTrialing = data?.trial_end 
-    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
-    : false;
+  const now = new Date();
+  const trialEnd = data?.trial_end ? new Date(data.trial_end) : null;
+  const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
 
-  // Treat active trial users as Pro
-  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+  const isTrialing = Boolean(trialEnd && trialEnd > now);
+  const hasCanceledButActiveAccess =
+    data?.subscription_status === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
+
+  const hasProAccess =
+    data?.subscription_plan === 'pro' &&
+    (data.subscription_status === 'active' || isTrialing || hasCanceledButActiveAccess);
+
+  const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
 
   console.log('🧮 checkSubscriptionPlan', {
     userId: user.id,
@@ -359,15 +380,17 @@ export async function checkSubscriptionPlan() {
     current_period_end: data?.current_period_end,
     trial_end: data?.trial_end,
     isTrialing,
-    effectivePlan
+    hasProAccess,
+    effectivePlan,
   });
-
+  
   return {
     plan: effectivePlan,
     status: data?.subscription_status || '',
     currentPeriodEnd: data?.current_period_end || '',
     trialEnd: data?.trial_end || '',
-    isTrialing
+    isTrialing,
+    hasProAccess,
   };
 }
 
@@ -397,17 +420,23 @@ export async function getSubscriptionPlan(returnId?: boolean) {
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, trial_end')
+    .select('subscription_plan, subscription_status, current_period_end, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // Check if user is currently in an active trial
-  const isTrialing = data?.trial_end 
-    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
-    : false;
+  const now = new Date();
+  const trialEnd = data?.trial_end ? new Date(data.trial_end) : null;
+  const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
 
-  // Treat active trial users as Pro
-  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+  const isTrialing = Boolean(trialEnd && trialEnd > now);
+  const hasCanceledButActiveAccess =
+    data?.subscription_status === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
+
+  const hasProAccess =
+    data?.subscription_plan === 'pro' &&
+    (data.subscription_status === 'active' || isTrialing || hasCanceledButActiveAccess);
+
+  const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
 
   if (returnId) {
     return {

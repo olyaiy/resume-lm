@@ -49,7 +49,8 @@ export default async function Home({
     status: '',
     currentPeriodEnd: '',
     trialEnd: '',
-    isTrialing: false
+    isTrialing: false,
+    hasProAccess: false,
   };
 
   let data;
@@ -99,8 +100,8 @@ export default async function Home({
   const baseResumes = sortResumes(unsortedBaseResumes, baseSort, baseDirection);
   const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
   
-  // Check if user is on Pro plan
-  const isProPlan = subscription.plan === 'pro' && subscription.status !== 'canceled';
+  // Check if user has Pro access (paid, canceling-but-active, or trialing)
+  const isProPlan = subscription.hasProAccess;
   const needsTrial = subscription.status !== 'active' && subscription.status !== 'canceled';
 
   // console.log(subscription);

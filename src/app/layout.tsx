@@ -91,18 +91,28 @@ export default async function RootLayout({
     try {
       const { data: subscription } = await supabase
         .from('subscriptions')
-        .select('subscription_plan, subscription_status')
+        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
         .eq('user_id', user.id)
         .maybeSingle();
 
       const subscriptionPlan = subscription?.subscription_plan?.toLowerCase() ?? 'free';
       const subscriptionStatus = subscription?.subscription_status ?? null;
+      const currentPeriodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end) : null;
+      const trialEnd = subscription?.trial_end ? new Date(subscription.trial_end) : null;
 
-      const isPro = subscriptionPlan === 'pro' && subscriptionStatus === 'active';
-      const needsTrial = subscriptionStatus !== 'active' && subscriptionStatus !== 'canceled';
+      const now = new Date();
+      const isTrialing = Boolean(trialEnd && trialEnd > now);
+      const hasCanceledButActiveAccess =
+        subscriptionStatus === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
 
-      isProPlan = isPro;
-      showUpgradeButton = !isPro;
+      const hasProAccess =
+        subscriptionPlan === 'pro' && (subscriptionStatus === 'active' || isTrialing || hasCanceledButActiveAccess);
+
+      const hasEverStartedTrialOrSubscription = Boolean(subscription?.stripe_subscription_id);
+      const needsTrial = !hasEverStartedTrialOrSubscription;
+
+      isProPlan = hasProAccess;
+      showUpgradeButton = !hasProAccess;
       upgradeButtonVariant = needsTrial ? 'trial' : 'upgrade';
     } catch {
       // If there's an error, we'll show the upgrade button by default
