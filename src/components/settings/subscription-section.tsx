@@ -330,22 +330,6 @@ export function SubscriptionSection() {
           </div>
 
           {/* Additional CTA for canceling users */}
-          {isCanceling && (
-            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
-              <div className="text-center">
-                <h5 className="font-semibold text-amber-900 mb-1 text-sm">Limited Time Offer</h5>
-                <p className="text-xs text-amber-700 mb-3">
-                  Reactivate now and get 2 months for the price of 1
-                </p>
-                <Button
-                  onClick={handlePortalSession}
-                  className="bg-amber-600 hover:bg-amber-700 text-white text-sm py-2 px-4"
-                >
-                  Reactivate & Save 50%
-                </Button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>
