@@ -102,13 +102,19 @@ export default async function RootLayout({
 
       const now = new Date();
       const isTrialing = Boolean(trialEnd && trialEnd > now);
-      const hasCanceledButActiveAccess =
-        subscriptionStatus === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
+      const hasStripeSubscription = Boolean(subscription?.stripe_subscription_id);
+      const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
+
+      // Treat trialing + cancel-at-period-end users as Pro until their access window ends.
+      const hasManualProAccess = subscriptionPlan === 'pro' && subscriptionStatus === 'active';
+      const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
+      const hasCancelingProAccess =
+        subscriptionPlan === 'pro' && subscriptionStatus === 'canceled' && isWithinAccessWindow;
 
       const hasProAccess =
-        subscriptionPlan === 'pro' && (subscriptionStatus === 'active' || isTrialing || hasCanceledButActiveAccess);
+        hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
 
-      const hasEverStartedTrialOrSubscription = Boolean(subscription?.stripe_subscription_id);
+      const hasEverStartedTrialOrSubscription = hasStripeSubscription;
       const needsTrial = !hasEverStartedTrialOrSubscription;
 
       isProPlan = hasProAccess;

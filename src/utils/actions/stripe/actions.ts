@@ -355,7 +355,7 @@ export async function checkSubscriptionPlan() {
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, current_period_end, trial_end')
+    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -364,12 +364,20 @@ export async function checkSubscriptionPlan() {
   const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
 
   const isTrialing = Boolean(trialEnd && trialEnd > now);
-  const hasCanceledButActiveAccess =
-    data?.subscription_status === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
+  const hasStripeSubscription = Boolean(data?.stripe_subscription_id);
+  const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
+
+  // Grant Pro while the Stripe subscription exists and hasn't expired (trial or paid, including cancel-at-period-end)
+  const hasManualProAccess =
+    data?.subscription_plan === 'pro' && data.subscription_status === 'active';
+  const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
+  const hasCancelingProAccess =
+    data?.subscription_plan === 'pro' &&
+    data.subscription_status === 'canceled' &&
+    isWithinAccessWindow;
 
   const hasProAccess =
-    data?.subscription_plan === 'pro' &&
-    (data.subscription_status === 'active' || isTrialing || hasCanceledButActiveAccess);
+    hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
 
   const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
 
@@ -377,6 +385,7 @@ export async function checkSubscriptionPlan() {
     userId: user.id,
     subscription_plan: data?.subscription_plan,
     subscription_status: data?.subscription_status,
+    stripe_subscription_id: data?.stripe_subscription_id,
     current_period_end: data?.current_period_end,
     trial_end: data?.trial_end,
     isTrialing,
@@ -412,15 +421,20 @@ export async function hasActiveSubscriptionOrTrial(userId: string): Promise<bool
   return Boolean(data.stripe_subscription_id);
 }
 
+export async function getSubscriptionPlan(returnId: true): Promise<{ plan: string; id: string }>;
+export async function getSubscriptionPlan(returnId?: false): Promise<string>;
 export async function getSubscriptionPlan(returnId?: boolean) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) return '';
+  if (!user) {
+    if (returnId) return { plan: '', id: '' };
+    return '';
+  }
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, current_period_end, trial_end')
+    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
@@ -429,12 +443,19 @@ export async function getSubscriptionPlan(returnId?: boolean) {
   const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
 
   const isTrialing = Boolean(trialEnd && trialEnd > now);
-  const hasCanceledButActiveAccess =
-    data?.subscription_status === 'canceled' && Boolean(currentPeriodEnd && currentPeriodEnd > now);
+  const hasStripeSubscription = Boolean(data?.stripe_subscription_id);
+  const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
+
+  const hasManualProAccess =
+    data?.subscription_plan === 'pro' && data.subscription_status === 'active';
+  const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
+  const hasCancelingProAccess =
+    data?.subscription_plan === 'pro' &&
+    data.subscription_status === 'canceled' &&
+    isWithinAccessWindow;
 
   const hasProAccess =
-    data?.subscription_plan === 'pro' &&
-    (data.subscription_status === 'active' || isTrialing || hasCanceledButActiveAccess);
+    hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
 
   const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
 
