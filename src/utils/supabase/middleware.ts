@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 // Routes that don't require subscription (but may require auth)
 const SUBSCRIPTION_EXEMPT_ROUTES = [
+  '/home',
   '/start-trial',
   '/subscription/checkout',
   '/subscription/checkout-return',
@@ -16,7 +17,8 @@ function isSubscriptionExemptRoute(pathname: string): boolean {
 
 export async function updateSession(request: NextRequest) {
   // Debug logging
-  console.log('🔍 Middleware running on:', request.nextUrl.pathname)
+  console.log('🔍 updateSession running on:', request.nextUrl.pathname)
+  const pathname = request.nextUrl.pathname
   
   let supabaseResponse = NextResponse.next({
     request,
@@ -73,6 +75,17 @@ export async function updateSession(request: NextRequest) {
 
   // Check if user is authenticated and redirect if needed
   if (!user) {
+    // Allow access to public routes without a session (avoid redirect loops on '/')
+    const isPublicRoute =
+      pathname === '/' ||
+      pathname.startsWith('/auth') ||
+      pathname.startsWith('/blog')
+
+    if (isPublicRoute) {
+      console.log('✅ Allowing unauthenticated access to public route:', pathname)
+      return supabaseResponse
+    }
+
     // If no user is authenticated, redirect to the landing page
     console.log('🚫 Redirecting unauthenticated user to landing page')
     const url = request.nextUrl.clone()
@@ -81,7 +94,6 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Check if route requires subscription
-  const pathname = request.nextUrl.pathname
   console.log('🛡️ Route check:', { pathname, isExempt: isSubscriptionExemptRoute(pathname) })
 
   if (!isSubscriptionExemptRoute(pathname)) {
@@ -108,7 +120,7 @@ export async function updateSession(request: NextRequest) {
     if (!validStatus) {
       console.log('🚫 User subscription status not valid, redirecting to start-trial')
       const url = request.nextUrl.clone()
-      url.pathname = '/start-trial'
+      url.pathname = '/home'
       return NextResponse.redirect(url)
     }
   }

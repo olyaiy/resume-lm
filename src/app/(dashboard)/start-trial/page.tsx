@@ -9,11 +9,12 @@ import {
   CreditCard,
   Shield, 
   Crown,
-  Star,
   Zap,
   ArrowRight,
   Clock,
-  Sparkles
+  Sparkles,
+  Users,
+  Brain
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
@@ -27,21 +28,6 @@ const features = [
   "Premium ATS-optimized templates",
   "Cover letter generation",
   "Priority customer support"
-];
-
-const testimonials = [
-  {
-    name: "Sarah Chen",
-    role: "Software Engineer at Google",
-    content: "ResumeLM helped me land 3 interviews in my first week.",
-    avatar: "SC"
-  },
-  {
-    name: "Marcus Johnson",
-    role: "Product Manager at Meta", 
-    content: "Went from 2% to 15% response rate. Game changer!",
-    avatar: "MJ"
-  }
 ];
 
 export default function StartTrialPage() {
@@ -123,33 +109,30 @@ export default function StartTrialPage() {
               </div>
             </div>
 
-            {/* Testimonials */}
-            <div className="space-y-3">
-              {testimonials.map((testimonial, index) => (
-                <div key={index} className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-100/50 p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-sm font-medium flex-shrink-0">
-                      {testimonial.avatar}
-                    </div>
-                    <div>
-                      <p className="text-sm text-gray-700 mb-1">&ldquo;{testimonial.content}&rdquo;</p>
-                      <p className="text-xs text-gray-500">
-                        <strong>{testimonial.name}</strong> • {testimonial.role}
-                      </p>
-                    </div>
+            {/* Product facts */}
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-100/50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 bg-purple-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Users className="h-4 w-4 text-purple-700" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">1,800+ users</p>
+                    <p className="text-xs text-gray-600">Growing every week</p>
                   </div>
                 </div>
-              ))}
-            </div>
-
-            {/* Rating */}
-            <div className="flex items-center justify-center gap-2 text-sm text-gray-600">
-              <div className="flex">
-                {[...Array(5)].map((_, i) => (
-                  <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                ))}
               </div>
-              <span>4.9/5 from 12,000+ users</span>
+              <div className="bg-white/60 backdrop-blur-sm rounded-xl border border-purple-100/50 p-4">
+                <div className="flex items-start gap-3">
+                  <div className="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <Brain className="h-4 w-4 text-indigo-700" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Latest AI models</p>
+                    <p className="text-xs text-gray-600">Multiple providers & fallbacks</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </motion.div>
 
@@ -241,5 +224,3 @@ export default function StartTrialPage() {
     </div>
   );
 }
-
-
