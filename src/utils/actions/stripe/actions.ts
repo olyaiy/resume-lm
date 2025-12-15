@@ -197,8 +197,17 @@ export async function deleteCustomerAndData(uuid: string) {
     .single();
 
   if (subscription?.stripe_customer_id) {
-    // Delete customer in Stripe
-    await stripe.customers.del(subscription.stripe_customer_id);
+    // Delete customer in Stripe (ignore if customer doesn't exist in current Stripe mode)
+    try {
+      await stripe.customers.del(subscription.stripe_customer_id);
+    } catch (error: unknown) {
+      const stripeError = error as { code?: string };
+      // Ignore "resource_missing" errors (customer created in different Stripe mode)
+      if (stripeError.code !== 'resource_missing') {
+        throw error;
+      }
+      console.warn(`Stripe customer ${subscription.stripe_customer_id} not found (likely created in different Stripe mode), continuing with deletion`);
+    }
   }
 
   // Delete subscription record
@@ -327,19 +336,57 @@ export async function checkSubscriptionPlan() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   
-  if (!user) return { plan: '', status: '', currentPeriodEnd: '' };
+  if (!user) return { plan: '', status: '', currentPeriodEnd: '', trialEnd: '', isTrialing: false };
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, current_period_end')
+    .select('subscription_plan, subscription_status, current_period_end, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Check if user is currently in an active trial
+  const isTrialing = data?.trial_end 
+    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
+    : false;
+
+  // Treat active trial users as Pro
+  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+
+  console.log('🧮 checkSubscriptionPlan', {
+    userId: user.id,
+    subscription_plan: data?.subscription_plan,
+    subscription_status: data?.subscription_status,
+    current_period_end: data?.current_period_end,
+    trial_end: data?.trial_end,
+    isTrialing,
+    effectivePlan
+  });
+
   return {
-    plan: data?.subscription_plan || '',
+    plan: effectivePlan,
     status: data?.subscription_status || '',
-    currentPeriodEnd: data?.current_period_end || ''
+    currentPeriodEnd: data?.current_period_end || '',
+    trialEnd: data?.trial_end || '',
+    isTrialing
   };
+}
+
+// Check if user has ever started a subscription/trial (used for gating)
+export async function hasActiveSubscriptionOrTrial(userId: string): Promise<boolean> {
+  const supabase = await createServiceClient();
+
+  const { data, error } = await supabase
+    .from('subscriptions')
+    .select('stripe_subscription_id, subscription_status, trial_end, current_period_end')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (error || !data) {
+    return false;
+  }
+
+  // If they've ever had a Stripe subscription ID, they've gone through checkout/trial.
+  return Boolean(data.stripe_subscription_id);
 }
 
 export async function getSubscriptionPlan(returnId?: boolean) {
@@ -350,18 +397,26 @@ export async function getSubscriptionPlan(returnId?: boolean) {
 
   const { data } = await supabase
     .from('subscriptions')
-    .select('subscription_plan')
+    .select('subscription_plan, subscription_status, trial_end')
     .eq('user_id', user.id)
     .maybeSingle();
 
+  // Check if user is currently in an active trial
+  const isTrialing = data?.trial_end 
+    ? new Date(data.trial_end) > new Date() && data.subscription_status === 'active'
+    : false;
+
+  // Treat active trial users as Pro
+  const effectivePlan = isTrialing ? 'pro' : (data?.subscription_plan || '');
+
   if (returnId) {
     return {
-      plan: data?.subscription_plan || '',
+      plan: effectivePlan,
       id: user.id || ''
     };
   }
 
-  return data?.subscription_plan || '';
+  return effectivePlan;
 }
 
 export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {

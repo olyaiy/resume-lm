@@ -24,6 +24,7 @@ import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { getDashboardData } from "@/utils/actions";
 import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
+import { TrialGateProvider } from "@/components/trial/trial-gate";
 
 
 
@@ -46,7 +47,9 @@ export default async function Home({
   const fallbackSubscription = {
     plan: '',
     status: '',
-    currentPeriodEnd: ''
+    currentPeriodEnd: '',
+    trialEnd: '',
+    isTrialing: false
   };
 
   let data;
@@ -98,6 +101,7 @@ export default async function Home({
   
   // Check if user is on Pro plan
   const isProPlan = subscription.plan === 'pro';
+  const needsTrial = subscription.status !== 'active' && subscription.status !== 'canceled';
 
   // console.log(subscription);
   
@@ -127,7 +131,7 @@ export default async function Home({
   }
 
   return (
-    
+    <TrialGateProvider enabled={needsTrial}>
     <main className="min-h-screen relative sm:pb-12 pb-40">
 
       {/* Welcome Dialog for New Signups */}
@@ -205,5 +209,6 @@ export default async function Home({
         </div>
       </div>
     </main>
+    </TrialGateProvider>
   );
 }

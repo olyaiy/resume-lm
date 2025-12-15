@@ -11,32 +11,15 @@ const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
 );
 
-// function StatusCard({ title, children, isLoading }: { 
-//     title: string; 
-//     children: React.ReactNode; 
-//     isLoading: boolean;
-// }) {
-//     return (
-//         <div className="p-4 rounded-lg bg-white/50 backdrop-blur-sm border border-gray-200">
-//             <h3 className="text-lg font-semibold mb-2">{title}</h3>
-//             {isLoading ? (
-//                 <div className="space-y-2">
-//                     <Skeleton className="h-4 w-3/4" />
-//                     <Skeleton className="h-4 w-1/2" />
-//                 </div>
-//             ) : children}
-//         </div>
-//     );
-// }
-
 export function CheckoutForm() {
     const searchParams = useSearchParams()
     const priceId = searchParams.get('price_id')!
+    const includeTrial = searchParams.get('trial') === 'true'
 
     const fetchClientSecret = useCallback(async () => {
-        const stripeResponse = await postStripeSession({ priceId });
+        const stripeResponse = await postStripeSession({ priceId, includeTrial });
         return stripeResponse.clientSecret;
-    }, [priceId]);
+    }, [priceId, includeTrial]);
 
     React.useEffect(() => {
         async function checkStatuses() {
