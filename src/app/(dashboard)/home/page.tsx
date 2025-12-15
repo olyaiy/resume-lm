@@ -100,7 +100,7 @@ export default async function Home({
   const tailoredResumes = sortResumes(unsortedTailoredResumes, tailoredSort, tailoredDirection);
   
   // Check if user is on Pro plan
-  const isProPlan = subscription.plan === 'pro';
+  const isProPlan = subscription.plan === 'pro' && subscription.status !== 'canceled';
   const needsTrial = subscription.status !== 'active' && subscription.status !== 'canceled';
 
   // console.log(subscription);
@@ -155,7 +155,7 @@ export default async function Home({
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
-            { !isProPlan && <ApiKeyAlert />}
+            {!isProPlan && <ApiKeyAlert variant={needsTrial ? 'trial' : 'upgrade'} />}
             
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
