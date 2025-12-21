@@ -7,23 +7,18 @@ import { generateObject } from "ai";
 import { z } from "zod";
 import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
-import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import { PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { WorkExperience } from "@/lib/types";
 
 
 
-// Base Resume Creation 
+// Base Resume Creation
 // TEXT CONTENT -> RESUME
 export async function convertTextToResume(prompt: string, existingResume: Resume, targetRole: string, config?: AIConfig) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _unusedConfig = config; // Keep parameter for future use
-  
-  // Use fast and cheap free model for text parsing
-  const hardcodedConfig = { model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE, apiKeys: [] };
-  const aiClient = initializeAIClient(hardcodedConfig);
-
+  const subscriptionPlan = await getSubscriptionPlan();
+  const isPro = subscriptionPlan === 'pro';
+  const aiClient = initializeAIClient(config, isPro, isPro);
   
   const { object } = await generateObject({
     model: aiClient,
