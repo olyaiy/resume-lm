@@ -98,8 +98,8 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
 export const AI_MODELS: AIModel[] = [
   // OpenAI Models
   {
-    id: 'gpt-5',
-    name: 'GPT-5',
+    id: 'gpt-5.2',
+    name: 'GPT-5.2',
     provider: 'openai',
     features: {
       isRecommended: true,
@@ -114,11 +114,28 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
+    id: 'gpt-5.2-pro',
+    name: 'GPT-5.2 Pro',
+    provider: 'openai',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 400000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: true
+    }
+  },
+  {
     id: 'gpt-5.1-chat',
     name: 'GPT-5.1',
     provider: 'openai',
     features: {
-      isRecommended: true,
+      isRecommended: false,
       isUnstable: false,
       maxTokens: 128000,
       supportsVision: true,
@@ -266,7 +283,7 @@ export const AI_MODELS: AIModel[] = [
     name: 'Claude Haiku 4.5',
     provider: 'anthropic',
     features: {
-      isRecommended: true,
+      isRecommended: false,
       isUnstable: false,
       maxTokens: 200000,
       supportsVision: true,
@@ -277,7 +294,23 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     }
   },
-
+  {
+    id: 'claude-opus-4-5-20251101',
+    name: 'Claude Opus 4.5',
+    provider: 'anthropic',
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 200000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: true
+    }
+  },
 
 ]
 
@@ -293,6 +326,11 @@ const MODEL_ALIASES: Record<string, string> = {
   'claude-3-sonnet-20240229': 'claude-sonnet-4-20250514',
   // Shorthand for Claude Sonnet 4.5
   'claude-sonnet-4.5': 'claude-sonnet-4-5-20250929',
+  // Shorthand for Claude Opus 4.5
+  'claude-opus-4.5': 'claude-opus-4-5-20251101',
+  // GPT-5.2 snapshot aliases
+  'gpt-5.2-2025-12-11': 'gpt-5.2',
+  'gpt-5.2-pro-2025-12-11': 'gpt-5.2-pro',
   // Allow DeepSeek without the nitro suffix
   'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
   // Legacy Gemini 3 model ID without provider prefix
@@ -304,7 +342,7 @@ const MODEL_ALIASES: Record<string, string> = {
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: 'claude-sonnet-4-20250514',
+  PRO_USER: 'gpt-5.2',
   FREE_USER: 'deepseek/deepseek-v3.2:nitro'
 } as const
 
@@ -318,25 +356,19 @@ export const DEFAULT_MODELS = {
  */
 export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
-  FAST_CHEAP: 'gpt-5.1-chat',
-  
+  FAST_CHEAP: 'claude-sonnet-4-5-20250929',
   // Alternative fast & cheap option (free for all users)
   FAST_CHEAP_FREE: 'deepseek/deepseek-v3.2:nitro',
-  
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: 'claude-sonnet-4-20250514',
-  
+  FRONTIER: 'gpt-5.2',
   // Alternative frontier model
-  FRONTIER_ALT: 'gpt-5',
-  
+  FRONTIER_ALT: 'claude-opus-4-5-20251101',
   // Balanced model - good quality but faster/cheaper than frontier
   BALANCED: 'google/gemini-3-pro-preview',
-  
   // Vision-capable model for image analysis
-  VISION: 'gpt-5',
-  
+  VISION: 'claude-sonnet-4-5-20250929',
   // Default models by user type
-  DEFAULT_PRO: 'claude-sonnet-4-20250514',
+  DEFAULT_PRO: 'gpt-5.2',
   DEFAULT_FREE: 'deepseek/deepseek-v3.2:nitro'
 } as const
 
