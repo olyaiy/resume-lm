@@ -327,7 +327,7 @@ export const resumeScoreSchema = z.object({
       reason: z.string().optional()
     })]).optional()
   ).optional(),
-  overallImprovements: z.array(z.string()),
+  overallImprovements: z.array(z.string()).optional(),
   // Job-specific improvements for tailored resumes
   jobSpecificImprovements: z.array(z.string()).optional(),
   isTailoredResume: z.boolean().optional()
