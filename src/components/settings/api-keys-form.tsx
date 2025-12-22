@@ -74,7 +74,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
         case 'anthropic':
           return MODEL_DESIGNATIONS.FRONTIER
         case 'openai':
-          return MODEL_DESIGNATIONS.FRONTIER_ALT
+          return MODEL_DESIGNATIONS.FRONTIER
         case 'openrouter':
           return MODEL_DESIGNATIONS.BALANCED
         default:

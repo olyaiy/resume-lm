@@ -331,6 +331,8 @@ const MODEL_ALIASES: Record<string, string> = {
   // GPT-5.2 snapshot aliases
   'gpt-5.2-2025-12-11': 'gpt-5.2',
   'gpt-5.2-pro-2025-12-11': 'gpt-5.2-pro',
+  // Legacy GPT-5 reference → latest GPT-5.2
+  'gpt-5': 'gpt-5.2',
   // Allow DeepSeek without the nitro suffix
   'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
   // Legacy Gemini 3 model ID without provider prefix
