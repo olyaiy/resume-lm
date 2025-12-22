@@ -83,7 +83,7 @@ export interface ResumeScoreMetrics {
     };
   };
 
-  overallImprovements: string[];
+  overallImprovements?: string[];
   jobSpecificImprovements?: string[];
   isTailoredResume?: boolean;
 }
@@ -222,6 +222,8 @@ export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps)
     );
   }
 
+  const keyImprovements = scoreData.overallImprovements ?? [];
+
   // When we have score data, show the full analysis
   return (
     <div className="space-y-4">
@@ -279,7 +281,7 @@ export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps)
         </CardHeader>
         <CardContent className="pt-0">
           <div className="space-y-2">
-            {scoreData.overallImprovements.slice(0, 5).map((improvement, index) => (
+            {keyImprovements.slice(0, 5).map((improvement, index) => (
               <motion.div
                 key={index}
                 initial={{ opacity: 0, x: -10 }}

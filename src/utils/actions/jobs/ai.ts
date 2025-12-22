@@ -12,6 +12,22 @@ import { initializeAIClient } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
 import { checkRateLimit } from '@/lib/rateLimiter';
 
+// Build model candidates list - prioritize user's selected model if provided
+function getModelCandidates(config?: AIConfig) {
+  const fallbackModels: AIConfig[] = [
+    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
+    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
+  ];
+
+  // If user has a model selected, try it first before fallbacks
+  const modelCandidates: AIConfig[] = config?.model
+    ? [{ model: config.model, apiKeys: config.apiKeys || [] }, ...fallbackModels]
+    : fallbackModels;
+  return modelCandidates;
+}
 
 export async function tailorResumeToJob(
   resume: Resume,
@@ -21,13 +37,7 @@ export async function tailorResumeToJob(
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
   const overallStart = Date.now();
-  const modelCandidates: AIConfig[] = [
-    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] }, // prioritize GLM for tailoring
-    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // courtesy fast model
-    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
-    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
-  ];
+  const modelCandidates = getModelCandidates(config);
 
   // Check rate limit once per tailoring request
   await checkRateLimit(id);
@@ -98,13 +108,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
   const overallStart = Date.now();
-  const modelCandidates: AIConfig[] = [
-    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] }, // prioritize GLM for parsing
-    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] }, // fast/free courtesy model for formatting
-    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
-    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
-  ];
+  const modelCandidates = getModelCandidates(config);
 
   // Check rate limit once per formatting request
   await checkRateLimit(id);

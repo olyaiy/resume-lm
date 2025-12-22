@@ -5,6 +5,9 @@ import { redirect } from "next/navigation";
 import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/supabase";
 import { deleteCustomerAndData } from "@/utils/actions/stripe/actions";
 
+// Auto-create Pro subscription for new users (for local development)
+const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
+
 interface AuthResult {
   success: boolean;
   error?: string;
@@ -47,7 +50,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`
     }
   }
-  const { error: signupError } = await supabase.auth.signUp(data);
+  const { data: signupData, error: signupError } = await supabase.auth.signUp(data);
 
   if (signupError) {
     // Log detailed error information
@@ -58,6 +61,22 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       name: signupError.name
     });
     return { success: false, error: signupError.message }
+  }
+
+  // In production, subscriptions are managed via Stripe webhooks
+  if (signupData.user && AUTO_PRO_SUBSCRIPTION) {
+    const { error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .upsert({
+        user_id: signupData.user.id,
+        subscription_plan: 'pro',
+        subscription_status: 'active',
+      }, { onConflict: 'user_id' });
+
+    if (subscriptionError) {
+      console.warn('Failed to create pro subscription:', subscriptionError.message);
+      // Don't fail signup if subscription creation fails
+    }
   }
 
   return { success: true }

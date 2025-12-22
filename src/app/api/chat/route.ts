@@ -58,8 +58,8 @@ export async function POST(req: Request) {
     // Initialize the AI client using the provided config and plan.
     const aiClient = initializeAIClient(config, isPro);
 
-    // Some models (e.g., GPT-5 / GPT-5 Mini) only support the default temperature (1)
-    const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5'].includes(config?.model ?? '');
+    // Some models (e.g., GPT-5 family / GPT-5 Mini) only support the default temperature (1)
+    const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5', 'gpt-5.2', 'gpt-5.2-pro'].includes(config?.model ?? '');
     
     // Gemini models support a thinking phase—explicitly disable it to avoid added latency/cost
     // For OpenRouter models, use the unified 'reasoning' parameter via providerOptions.openrouter
