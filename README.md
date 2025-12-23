@@ -176,6 +176,38 @@ pnpm dev
 
 Visit `http://localhost:3000` to see your local ResumeLM instance!
 
+### 🐳 Docker Setup (Alternative)
+
+Run the complete stack locally with Docker Compose - includes Supabase, PostgreSQL, Redis, and all services:
+
+```bash
+# 1. Copy environment file and add your AI API key
+cp .env.example .env.local
+# Edit .env.local and add at least one: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY
+
+# 2. Start Docker services
+cd docker
+docker compose --env-file ../.env.local up -d
+
+# 3. Wait for services to be healthy (~60 seconds)
+docker compose --env-file ../.env.local ps
+
+# 4. Run the app locally (from project root)
+cd ..
+pnpm dev
+```
+
+**Login:** http://localhost:3000 with `admin@admin.com` / `Admin123` (Pro subscription auto-granted)
+
+| Service | URL | Description |
+|---------|-----|-------------|
+| **App** | http://localhost:3000 | Next.js application |
+| **Supabase API** | http://localhost:54321 | API Gateway |
+| **Supabase Studio** | http://localhost:54323 | Database dashboard |
+| **Redis Commander** | http://localhost:8081 | Redis management UI |
+
+> 📖 See [docker/DOCKER.md](docker/DOCKER.md) for full Docker documentation including full-stack mode.
+
 ## 📊 Database Architecture
 
 ### Core Tables Structure
