@@ -16,6 +16,8 @@ const withMDX = mdx({
 });
 
 const nextConfig: NextConfig = {
+  // Enable standalone output for Docker builds
+  output: 'standalone',
   experimental: {
     turbo: {
       // ...
