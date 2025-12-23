@@ -1,0 +1,561 @@
+# ResumeLM Local Development Stack
+# This docker-compose file provides a full local development environment
+# including Supabase (PostgreSQL, Auth, Storage, etc.), Redis, and the Next.js app
+
+services:
+  # ============================================
+  # Supabase Services
+  # ============================================
+  
+  # PostgreSQL Database
+  db:
+    image: supabase/postgres:15.14.1.066
+    container_name: resumelm-db
+    healthcheck:
+      test: pg_isready -U supabase_admin -h localhost
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    command:
+      - postgres
+      - -c
+      - config_file=/etc/postgresql/postgresql.conf
+      - -c
+      - log_min_messages=fatal
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+    ports:
+      - "54322:5432"
+    environment:
+      POSTGRES_HOST: /var/run/postgresql
+      PGPORT: 5432
+      POSTGRES_PORT: 5432
+      PGPASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+      PGDATABASE: postgres
+      POSTGRES_DB: postgres
+      JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      JWT_EXP: 3600
+    volumes:
+      - db-data:/var/lib/postgresql/data
+      - ./supabase/volumes/db/init:/docker-entrypoint-initdb.d:ro
+    networks:
+      - resumelm-network
+
+  # Supabase Studio (Dashboard) - Dev only, skip in production
+  studio:
+    image: supabase/studio:2025.12.17-sha-43f4f7f
+    container_name: resumelm-studio
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"const h=require('http'),os=require('os');h.get('http://'+os.hostname()+':3000/',(r)=>{if(r.statusCode<200||r.statusCode>=400)process.exit(1)}).on('error',()=>process.exit(1))\""]
+      timeout: 10s
+      interval: 10s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      kong:
+        condition: service_healthy
+    environment:
+      STUDIO_PG_META_URL: http://meta:8080
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+      DEFAULT_ORGANIZATION_NAME: ResumeLM
+      DEFAULT_PROJECT_NAME: ResumeLM Local
+      SUPABASE_URL: http://kong:8000
+      SUPABASE_PUBLIC_URL: http://localhost:54321
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q}
+      AUTH_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      LOGFLARE_API_KEY: ${LOGFLARE_API_KEY:-local-logflare-key}
+      LOGFLARE_URL: http://analytics:4000
+      NEXT_PUBLIC_ENABLE_LOGS: true
+      NEXT_ANALYTICS_BACKEND_PROVIDER: postgres
+    ports:
+      - "54323:3000"
+    networks:
+      - resumelm-network
+
+  # Kong API Gateway
+  kong:
+    image: kong:2.8.1
+    container_name: resumelm-kong
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+    entrypoint: bash -c 'eval "echo \"$$(cat ~/temp.yml)\"" > ~/kong.yml && /docker-entrypoint.sh kong docker-start'
+    ports:
+      - "54321:8000"
+      - "54320:8443"
+    depends_on:
+      auth:
+        condition: service_healthy
+    environment:
+      KONG_DATABASE: "off"
+      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      KONG_DNS_ORDER: LAST,A,CNAME
+      KONG_PLUGINS: request-transformer,cors,key-auth,acl,basic-auth
+      KONG_NGINX_PROXY_PROXY_BUFFER_SIZE: 160k
+      KONG_NGINX_PROXY_PROXY_BUFFERS: 64 160k
+      SUPABASE_ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE}
+      SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q}
+      DASHBOARD_USERNAME: supabase
+      DASHBOARD_PASSWORD: ${DASHBOARD_PASSWORD:-supabase}
+    volumes:
+      - ./supabase/volumes/api/kong.yml:/home/kong/temp.yml:ro
+    healthcheck:
+      test: ["CMD", "kong", "health"]
+      interval: 10s
+      timeout: 10s
+      retries: 5
+    networks:
+      - resumelm-network
+
+  # GoTrue Auth Service
+  auth:
+    image: supabase/gotrue:v2.184.0
+    container_name: resumelm-auth
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:9999/health"]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    restart: unless-stopped
+    environment:
+      GOTRUE_API_HOST: 0.0.0.0
+      GOTRUE_API_PORT: 9999
+      API_EXTERNAL_URL: http://localhost:54321
+      GOTRUE_DB_DRIVER: postgres
+      GOTRUE_DB_DATABASE_URL: postgres://supabase_auth_admin:${POSTGRES_PASSWORD:-postgres-dev-password}@db:5432/postgres
+      GOTRUE_SITE_URL: http://localhost:3000
+      GOTRUE_URI_ALLOW_LIST: "*"
+      GOTRUE_DISABLE_SIGNUP: false
+      GOTRUE_JWT_ADMIN_ROLES: service_role
+      GOTRUE_JWT_AUD: authenticated
+      GOTRUE_JWT_DEFAULT_GROUP_NAME: authenticated
+      GOTRUE_JWT_EXP: 3600
+      GOTRUE_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      GOTRUE_EXTERNAL_EMAIL_ENABLED: true
+      GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED: false
+      GOTRUE_MAILER_AUTOCONFIRM: true
+      GOTRUE_SMTP_ADMIN_EMAIL: admin@resumelm.local
+      GOTRUE_SMTP_HOST: inbucket
+      GOTRUE_SMTP_PORT: 2500
+      GOTRUE_SMTP_USER: admin@resumelm.local
+      GOTRUE_SMTP_PASS: password
+      GOTRUE_SMTP_SENDER_NAME: ResumeLM
+      GOTRUE_MAILER_URLPATHS_INVITE: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_CONFIRMATION: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_RECOVERY: /auth/v1/verify
+      GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE: /auth/v1/verify
+      GOTRUE_EXTERNAL_PHONE_ENABLED: false
+      GOTRUE_SMS_AUTOCONFIRM: true
+      GOTRUE_RATE_LIMIT_HEADER: X-Forwarded-For
+    networks:
+      - resumelm-network
+
+  # PostgREST API
+  rest:
+    image: postgrest/postgrest:v14.1
+    container_name: resumelm-rest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PGRST_DB_URI: postgres://authenticator:${POSTGRES_PASSWORD:-postgres-dev-password}@db:5432/postgres
+      PGRST_DB_SCHEMAS: public,storage,graphql_public
+      PGRST_DB_ANON_ROLE: anon
+      PGRST_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      PGRST_DB_USE_LEGACY_GUCS: "false"
+      PGRST_APP_SETTINGS_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      PGRST_APP_SETTINGS_JWT_EXP: 3600
+    command: "postgrest"
+    networks:
+      - resumelm-network
+
+  # Realtime Server
+  realtime:
+    image: supabase/realtime:v2.68.0
+    container_name: resumelm-realtime
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 256M
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-sSfL", "-o", "/dev/null", "http://localhost:4000/"]
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: 'SET search_path TO _realtime'
+      DB_ENC_KEY: supabasekey12345
+      API_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      SECRET_KEY_BASE: ${SECRET_KEY_BASE:-UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: 10000
+      APP_NAME: realtime
+      SEED_SELF_HOST: true
+      REPLICATION_MODE: RLS
+      REPLICATION_POLL_INTERVAL: 100
+      SECURE_CHANNELS: true
+      SLOT_NAME: supabase_realtime_rls
+      TEMPORARY_SLOT: true
+    command: >
+      sh -c "/app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server"
+    networks:
+      - resumelm-network
+
+  # Storage API
+  storage:
+    image: supabase/storage-api:v1.33.0
+    container_name: resumelm-storage
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    depends_on:
+      db:
+        condition: service_healthy
+      rest:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://0.0.0.0:5000/status"]
+      timeout: 5s
+      interval: 10s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    environment:
+      ANON_KEY: ${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE}
+      SERVICE_KEY: ${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q}
+      POSTGREST_URL: http://rest:3000
+      PGRST_JWT_SECRET: ${JWT_SECRET:-your-super-secret-jwt-token-with-at-least-32-characters-long}
+      DATABASE_URL: postgres://supabase_storage_admin:${POSTGRES_PASSWORD:-postgres-dev-password}@db:5432/postgres
+      FILE_SIZE_LIMIT: 52428800
+      STORAGE_BACKEND: file
+      FILE_STORAGE_BACKEND_PATH: /var/lib/storage
+      TENANT_ID: stub
+      REGION: stub
+      GLOBAL_S3_BUCKET: stub
+      ENABLE_IMAGE_TRANSFORMATION: true
+      IMGPROXY_URL: http://imgproxy:8080
+    volumes:
+      - storage-data:/var/lib/storage
+    networks:
+      - resumelm-network
+
+  # Image Proxy for Storage
+  imgproxy:
+    image: darthsim/imgproxy:v3.8.0
+    container_name: resumelm-imgproxy
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.05'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "imgproxy", "health"]
+      timeout: 5s
+      interval: 5s
+      retries: 3
+    environment:
+      IMGPROXY_BIND: ":8080"
+      IMGPROXY_LOCAL_FILESYSTEM_ROOT: /
+      IMGPROXY_USE_ETAG: true
+      IMGPROXY_ENABLE_WEBP_DETECTION: true
+    volumes:
+      - storage-data:/var/lib/storage:ro
+    networks:
+      - resumelm-network
+
+  # Meta service for Studio
+  meta:
+    image: supabase/postgres-meta:v0.95.1
+    container_name: resumelm-meta
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 128M
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+    networks:
+      - resumelm-network
+
+  # Inbucket (local email testing) - Dev only, skip in production
+  inbucket:
+    image: inbucket/inbucket:3.1.1
+    container_name: resumelm-inbucket
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 64M
+        reservations:
+          cpus: '0.01'
+          memory: 16M
+    restart: unless-stopped
+    ports:
+      - "54324:9000"   # Web UI
+      - "54325:2500"   # SMTP
+    networks:
+      - resumelm-network
+
+  # Analytics (Logflare for logging) - Optional, can skip in production
+  analytics:
+    image: supabase/logflare:1.27.0
+    container_name: resumelm-analytics
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.1'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-sSfL", "-o", "/dev/null", "http://localhost:4000/health"]
+      timeout: 5s
+      interval: 5s
+      retries: 10
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      LOGFLARE_NODE_HOST: 127.0.0.1
+      DB_USERNAME: supabase_admin
+      DB_DATABASE: postgres
+      DB_HOSTNAME: db
+      DB_PORT: 5432
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres-dev-password}
+      DB_SCHEMA: _analytics
+      LOGFLARE_API_KEY: ${LOGFLARE_API_KEY:-local-logflare-key}
+      LOGFLARE_SINGLE_TENANT: true
+      LOGFLARE_SUPABASE_MODE: true
+      POSTGRES_BACKEND_URL: postgresql://supabase_admin:${POSTGRES_PASSWORD:-postgres-dev-password}@db:5432/postgres
+      POSTGRES_BACKEND_SCHEMA: _analytics
+      LOGFLARE_FEATURE_FLAG_OVERRIDE: multibackend=true
+    networks:
+      - resumelm-network
+
+  # ============================================
+  # Redis for Rate Limiting & Caching
+  # ============================================
+  redis:
+    image: redis:7-alpine
+    container_name: resumelm-redis
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 128M
+        reservations:
+          cpus: '0.05'
+          memory: 16M
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - resumelm-network
+
+  # Redis Commander (optional web UI for Redis) - Dev only, skip in production
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: resumelm-redis-commander
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '0.2'
+          memory: 256M
+        reservations:
+          cpus: '0.01'
+          memory: 64M
+    healthcheck:
+      test: ["CMD", "/redis-commander/bin/healthcheck.js"]
+      timeout: 30s
+      interval: 30s
+      retries: 3
+      start_period: 30s
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    ports:
+      - "8081:8081"
+    networks:
+      - resumelm-network
+
+  # ============================================
+  # Next.js Application
+  # ============================================
+  # Local dev:   docker compose up -d (backend only, then run pnpm dev locally)
+  # Full stack:  docker compose up -d --profile full (includes app)
+  app:
+    profiles: ["full"]
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: production
+    container_name: resumelm-app
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+    depends_on:
+      kong:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - NODE_ENV=production
+      # Supabase config (defaults for Docker, overridable)
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://host.docker.internal:54321}
+      - NEXT_PUBLIC_SUPABASE_ANON_KEY=${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE}
+      - SUPABASE_SERVICE_ROLE_KEY=${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q}
+      - NEXT_PUBLIC_SITE_URL=${NEXT_PUBLIC_SITE_URL:-http://localhost:3000}
+      # Redis (defaults for local Docker Redis, overridable)
+      - REDIS_URL=${REDIS_URL:-redis://redis:6379}
+      - USE_LOCAL_REDIS=${USE_LOCAL_REDIS:-true}
+      # Stripe (from .env, optional)
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:-}
+      - NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=${NEXT_PUBLIC_STRIPE_PRO_PRICE_ID:-}
+      # AI Provider API Keys (from .env)
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      # Dev convenience (configurable with defaults)
+      - AUTO_PRO_SUBSCRIPTION=${AUTO_PRO_SUBSCRIPTION:-true}
+    networks:
+      - resumelm-network
+
+  # ============================================
+  # Database Seeder (runs once on startup)
+  # ============================================
+  seeder:
+    image: curlimages/curl:latest
+    container_name: resumelm-seeder
+    depends_on:
+      auth:
+        condition: service_healthy
+    volumes:
+      - ./scripts/seed-admin.sh:/seed-admin.sh:ro
+    environment:
+      - AUTH_SERVICE_URL=http://auth:9999
+      - SUPABASE_URL=http://kong:8000
+      - SUPABASE_ANON_KEY=${ANON_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE}
+      - SUPABASE_SERVICE_KEY=${SERVICE_ROLE_KEY:-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q}
+      # Admin user seeding (configurable with defaults)
+      - SEED_ADMIN_EMAIL=${SEED_ADMIN_EMAIL:-admin@admin.com}
+      - SEED_ADMIN_PASSWORD=${SEED_ADMIN_PASSWORD:-Admin123}
+      # Auto-grant Pro subscription to seeded admin user
+      - AUTO_PRO_SUBSCRIPTION=${AUTO_PRO_SUBSCRIPTION:-true}
+    entrypoint: ["/bin/sh", "/seed-admin.sh"]
+    networks:
+      - resumelm-network
+    restart: "no"
+
+volumes:
+  db-data:
+  storage-data:
+  redis-data:
+
+networks:
+  resumelm-network:
+    driver: bridge
