@@ -87,6 +87,11 @@ COPY src ./src
 COPY public ./public
 COPY content ./content
 
+# Base path for serving app at a subpath (e.g., /resumelm)
+# This is baked into the build and cannot be changed at runtime
+ARG NEXT_PUBLIC_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
+
 # Build with placeholder values - replaced at runtime by entrypoint.sh
 # This allows a single image to work across all environments
 ENV NEXT_PUBLIC_SUPABASE_URL="__NEXT_PUBLIC_SUPABASE_URL__" \

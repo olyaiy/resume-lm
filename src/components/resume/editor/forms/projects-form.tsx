@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { useState, useRef, useEffect, memo } from "react";
 import {
@@ -769,11 +769,11 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
         errorMessage={errorMessage}
         onUpgrade={() => {
           setShowErrorDialog(false);
-          window.location.href = '/subscription';
+          window.location.href = withBasePath('/subscription');
         }}
         onSettings={() => {
           setShowErrorDialog(false);
-          window.location.href = '/settings';
+          window.location.href = withBasePath('/settings');
         }}
       />
     </>

@@ -1,7 +1,7 @@
 import { Resume, Job } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { FileText, Trash2, Plus, Sparkles, Loader2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { useState } from 'react';
 import { readStreamableValue } from 'ai/rsc';
 import type { AIConfig } from "@/utils/ai-tools";
@@ -248,11 +248,11 @@ export function CoverLetterPanel({
         errorMessage={errorMessage}
         onUpgrade={() => {
           setShowErrorDialog(false);
-          window.location.href = '/subscription';
+          window.location.href = withBasePath('/subscription');
         }}
         onSettings={() => {
           setShowErrorDialog(false);
-          window.location.href = '/settings';
+          window.location.href = withBasePath('/settings');
         }}
       />
     </div>

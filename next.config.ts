@@ -18,6 +18,9 @@ const withMDX = mdx({
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker builds
   output: 'standalone',
+  // Support serving the app at a path prefix (e.g., /app)
+  // Set NEXT_PUBLIC_BASE_PATH env var to enable (e.g., NEXT_PUBLIC_BASE_PATH=/app)
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   experimental: {
     turbo: {
       // ...

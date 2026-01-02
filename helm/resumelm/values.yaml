@@ -4,7 +4,11 @@
 global:
   # Namespace to deploy all components to
   namespace: "resume-lm"
-  # Base path for all services (if ingress supports path-based routing)
+  # Base path for serving the app at a subpath (e.g., "/resume" serves at example.com/resume/)
+  # When set:
+  #   - Sets NEXT_PUBLIC_BASE_PATH env var for Next.js
+  #   - Ingress path auto-updates from "/" to this value
+  # Note: Do NOT use path rewrite/strip - Next.js expects requests at the full basePath
   basePath: ""
   # Storage class for persistent volumes
   storageClass: ""

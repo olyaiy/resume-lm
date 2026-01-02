@@ -29,7 +29,11 @@ spec:
       http:
         paths:
           {{- range .paths }}
-          - path: {{ .path }}
+          {{- $effectivePath := .path }}
+          {{- if and $.Values.global.basePath (eq .path "/") }}
+          {{- $effectivePath = $.Values.global.basePath }}
+          {{- end }}
+          - path: {{ $effectivePath }}
             pathType: {{ .pathType }}
             backend:
               service:

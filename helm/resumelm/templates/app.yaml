@@ -101,9 +101,14 @@ spec:
             # Auto Pro Subscription
             - name: AUTO_PRO_SUBSCRIPTION
               value: {{ .Values.admin.autoProSubscription | quote }}
+            {{- if .Values.global.basePath }}
+            # Base path for serving the app at a subpath (e.g., /app)
+            - name: NEXT_PUBLIC_BASE_PATH
+              value: {{ .Values.global.basePath | quote }}
+            {{- end }}
           livenessProbe:
             httpGet:
-              path: /
+              path: {{ .Values.global.basePath | default "" }}/
               port: http
             initialDelaySeconds: 60
             periodSeconds: 10
@@ -111,7 +116,7 @@ spec:
             failureThreshold: 6
           readinessProbe:
             httpGet:
-              path: /
+              path: {{ .Values.global.basePath | default "" }}/
               port: http
             initialDelaySeconds: 30
             periodSeconds: 5
