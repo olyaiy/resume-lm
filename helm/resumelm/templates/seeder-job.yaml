@@ -1,0 +1,177 @@
+{{- if .Values.seeder.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "resumelm.fullname" . }}-seeder
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: seeder
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  backoffLimit: {{ .Values.seeder.backoffLimit }}
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: seeder
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      {{- include "resumelm.nodeSelector" . | nindent 6 }}
+      {{- include "resumelm.affinity" . | nindent 6 }}
+      restartPolicy: OnFailure
+      containers:
+        - name: seeder
+          image: "{{ .Values.seeder.image.repository }}:{{ .Values.seeder.image.tag }}"
+          imagePullPolicy: {{ .Values.seeder.image.pullPolicy }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+
+              # Check if admin email/password are set
+              if [ -z "$SEED_ADMIN_EMAIL" ] || [ -z "$SEED_ADMIN_PASSWORD" ]; then
+                echo "No admin credentials provided, skipping seeder"
+                exit 0
+              fi
+
+              # Wait for auth service to be ready
+              echo "Waiting for auth service..."
+              until curl -sf http://{{ include "resumelm.authHost" . }}:9999/health; do
+                echo "Auth service not ready, waiting..."
+                sleep 2
+              done
+              echo "Auth service is ready!"
+
+              # Wait for Kong to be ready
+              echo "Waiting for Kong..."
+              until curl -s "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}/auth/v1/" 2>/dev/null | grep -q "message"; do
+                sleep 2
+              done
+              echo "Kong is ready!"
+
+              # Wait for GoTrue to finish migrations by checking if signup endpoint is ready
+              echo "Waiting for GoTrue migrations to complete..."
+              MAX_ATTEMPTS=30
+              ATTEMPT=0
+              while [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+                # Try a test signup request - if migrations aren't done, it will fail
+                TEST_RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" \
+                  "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}/auth/v1/signup" \
+                  -H "apikey: $SUPABASE_ANON_KEY" \
+                  -H "Content-Type: application/json" \
+                  -d '{"email":"test@test.test","password":"testtest"}' 2>/dev/null || echo "000")
+
+                # 200, 400, or 422 means the endpoint is working (even if request is invalid)
+                if [ "$TEST_RESPONSE" = "200" ] || [ "$TEST_RESPONSE" = "400" ] || [ "$TEST_RESPONSE" = "422" ]; then
+                  echo "GoTrue is ready!"
+                  break
+                fi
+
+                ATTEMPT=$((ATTEMPT + 1))
+                echo "  Attempt $ATTEMPT/$MAX_ATTEMPTS - GoTrue not ready yet (HTTP $TEST_RESPONSE)"
+                sleep 2
+              done
+
+              if [ $ATTEMPT -eq $MAX_ATTEMPTS ]; then
+                echo "Warning: GoTrue may not be fully ready, proceeding anyway..."
+              fi
+
+              echo "Creating admin user: $SEED_ADMIN_EMAIL"
+
+              # Create admin user via public signup endpoint
+              # The database trigger will automatically create profile and Pro subscription
+              RESPONSE=$(curl -s -w "\n%{http_code}" \
+                "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}/auth/v1/signup" \
+                -H "apikey: $SUPABASE_ANON_KEY" \
+                -H "Content-Type: application/json" \
+                -d "{
+                  \"email\": \"$SEED_ADMIN_EMAIL\",
+                  \"password\": \"$SEED_ADMIN_PASSWORD\"
+                }")
+
+              HTTP_CODE=$(echo "$RESPONSE" | tail -n1)
+              BODY=$(echo "$RESPONSE" | sed '$d')
+
+              if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
+                USER_ID=$(echo "$BODY" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
+                echo "Admin user created successfully (ID: $USER_ID)"
+
+                # Grant Pro subscription if AUTO_PRO_SUBSCRIPTION is enabled
+                if [ "$AUTO_PRO_SUBSCRIPTION" = "true" ] && [ -n "$USER_ID" ]; then
+                  echo "Granting Pro subscription to admin user..."
+
+                  # Wait for REST API to be ready
+                  echo "Waiting for REST API..."
+                  REST_ATTEMPTS=0
+                  while [ $REST_ATTEMPTS -lt 30 ]; do
+                    REST_CHECK=$(curl -s -o /dev/null -w "%{http_code}" \
+                      "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}/rest/v1/" \
+                      -H "apikey: $SUPABASE_SERVICE_KEY" 2>/dev/null || echo "000")
+                    if [ "$REST_CHECK" = "200" ]; then
+                      echo "REST API is ready!"
+                      break
+                    fi
+                    REST_ATTEMPTS=$((REST_ATTEMPTS + 1))
+                    sleep 2
+                  done
+
+                  # Insert subscription via PostgREST (uses service role key to bypass RLS)
+                  SUB_RESPONSE=$(curl -s -w "\n%{http_code}" \
+                    "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}/rest/v1/subscriptions" \
+                    -H "apikey: $SUPABASE_SERVICE_KEY" \
+                    -H "Authorization: Bearer $SUPABASE_SERVICE_KEY" \
+                    -H "Content-Type: application/json" \
+                    -H "Prefer: resolution=merge-duplicates" \
+                    -d "{
+                      \"user_id\": \"$USER_ID\",
+                      \"subscription_plan\": \"pro\",
+                      \"subscription_status\": \"active\"
+                    }")
+
+                  SUB_HTTP_CODE=$(echo "$SUB_RESPONSE" | tail -n1)
+                  if [ "$SUB_HTTP_CODE" = "200" ] || [ "$SUB_HTTP_CODE" = "201" ]; then
+                    echo "Pro subscription granted successfully"
+                  else
+                    echo "Warning: Failed to grant Pro subscription (HTTP $SUB_HTTP_CODE)"
+                    echo "You can manually grant it in Supabase Studio"
+                  fi
+                fi
+
+                echo ""
+                echo "Admin user setup complete!"
+                echo "Login with: $SEED_ADMIN_EMAIL / [your configured password]"
+              elif echo "$BODY" | grep -q "already been registered"; then
+                echo "Admin user already exists"
+              else
+                echo "Failed to create admin user. HTTP $HTTP_CODE"
+                echo "Response: $BODY"
+                # Don't fail the job - the stack should still work
+              fi
+          env:
+            - name: AUTO_PRO_SUBSCRIPTION
+              value: {{ .Values.admin.autoProSubscription | quote }}
+            - name: SUPABASE_SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: SERVICE_ROLE_KEY
+            - name: SEED_ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: SEED_ADMIN_EMAIL
+            - name: SEED_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: SEED_ADMIN_PASSWORD
+            - name: SUPABASE_ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: ANON_KEY
+{{- end }}

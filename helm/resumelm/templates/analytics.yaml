@@ -1,0 +1,99 @@
+{{- if .Values.analytics.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-analytics
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: analytics
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: analytics
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: analytics
+          image: "{{ .Values.analytics.image.repository }}:{{ .Values.analytics.image.tag }}"
+          imagePullPolicy: {{ .Values.analytics.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: LOGFLARE_NODE_HOST
+              value: "127.0.0.1"
+            - name: DB_USERNAME
+              value: supabase_admin
+            - name: DB_DATABASE
+              value: postgres
+            - name: DB_HOSTNAME
+              value: {{ include "resumelm.dbHost" . }}
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTGRES_PASSWORD
+            - name: DB_SCHEMA
+              value: _analytics
+            - name: LOGFLARE_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: LOGFLARE_API_KEY
+            - name: LOGFLARE_SINGLE_TENANT
+              value: {{ .Values.analytics.config.singleTenant | quote }}
+            - name: LOGFLARE_SUPABASE_MODE
+              value: {{ .Values.analytics.config.supabaseMode | quote }}
+            - name: POSTGRES_BACKEND_URL
+              value: "postgresql://supabase_admin:$(DB_PASSWORD)@{{ include "resumelm.dbHost" . }}:5432/postgres"
+            - name: POSTGRES_BACKEND_SCHEMA
+              value: _analytics
+            - name: LOGFLARE_FEATURE_FLAG_OVERRIDE
+              value: "multibackend=true"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 10
+          resources:
+            {{- toYaml .Values.analytics.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resumelm.fullname" . }}-analytics
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics
+spec:
+  type: ClusterIP
+  ports:
+    - port: 4000
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "resumelm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: analytics
+{{- end }}

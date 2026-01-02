@@ -1,0 +1,16 @@
+{{- if and .Values.redis.enabled (not .Values.redis.external.enabled) .Values.redis.persistence.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "resumelm.fullname" . }}-redis
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cache
+spec:
+  accessModes:
+    - {{ .Values.redis.persistence.accessMode }}
+  {{- include "resumelm.storageClass" . | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ .Values.redis.persistence.size }}
+{{- end }}

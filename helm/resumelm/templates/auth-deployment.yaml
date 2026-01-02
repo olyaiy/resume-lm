@@ -1,0 +1,120 @@
+{{- if .Values.auth.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-auth
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: auth
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: auth
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: auth
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      {{- include "resumelm.nodeSelector" . | nindent 6 }}
+      {{- include "resumelm.affinity" . | nindent 6 }}
+      containers:
+        - name: auth
+          image: "{{ .Values.auth.image.repository }}:{{ .Values.auth.image.tag }}"
+          imagePullPolicy: {{ .Values.auth.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 9999
+              protocol: TCP
+          env:
+            # POSTGRES_PASSWORD must be defined before DATABASE_URL for $(VAR) substitution to work
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTGRES_PASSWORD
+            - name: GOTRUE_API_HOST
+              value: "0.0.0.0"
+            - name: GOTRUE_API_PORT
+              value: "9999"
+            - name: API_EXTERNAL_URL
+              value: "http://{{ include "resumelm.kongHost" . }}:{{ .Values.kong.service.httpPort }}"
+            - name: GOTRUE_DB_DRIVER
+              value: postgres
+            - name: GOTRUE_DB_DATABASE_URL
+              value: "postgres://supabase_auth_admin:$(POSTGRES_PASSWORD)@{{ include "resumelm.dbHost" . }}:5432/postgres"
+            - name: GOTRUE_SITE_URL
+              value: {{ .Values.auth.config.siteUrl | quote }}
+            - name: GOTRUE_URI_ALLOW_LIST
+              value: {{ .Values.auth.config.uriAllowList | quote }}
+            - name: GOTRUE_DISABLE_SIGNUP
+              value: {{ .Values.auth.config.disableSignup | quote }}
+            - name: GOTRUE_JWT_ADMIN_ROLES
+              value: service_role
+            - name: GOTRUE_JWT_AUD
+              value: authenticated
+            - name: GOTRUE_JWT_DEFAULT_GROUP_NAME
+              value: authenticated
+            - name: GOTRUE_JWT_EXP
+              value: {{ .Values.auth.config.jwtExpiry | quote }}
+            - name: GOTRUE_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: JWT_SECRET
+            - name: GOTRUE_EXTERNAL_EMAIL_ENABLED
+              value: "true"
+            - name: GOTRUE_EXTERNAL_ANONYMOUS_USERS_ENABLED
+              value: "false"
+            - name: GOTRUE_MAILER_AUTOCONFIRM
+              value: {{ .Values.auth.config.mailerAutoconfirm | quote }}
+            - name: GOTRUE_SMTP_ADMIN_EMAIL
+              value: {{ .Values.auth.config.smtpAdminEmail | quote }}
+            {{- if .Values.inbucket.enabled }}
+            - name: GOTRUE_SMTP_HOST
+              value: {{ include "resumelm.inbucketHost" . }}
+            - name: GOTRUE_SMTP_PORT
+              value: "2500"
+            - name: GOTRUE_SMTP_USER
+              value: {{ .Values.auth.config.smtpAdminEmail | quote }}
+            - name: GOTRUE_SMTP_PASS
+              value: "password"
+            {{- end }}
+            - name: GOTRUE_SMTP_SENDER_NAME
+              value: {{ .Values.auth.config.smtpSenderName | quote }}
+            - name: GOTRUE_MAILER_URLPATHS_INVITE
+              value: /auth/v1/verify
+            - name: GOTRUE_MAILER_URLPATHS_CONFIRMATION
+              value: /auth/v1/verify
+            - name: GOTRUE_MAILER_URLPATHS_RECOVERY
+              value: /auth/v1/verify
+            - name: GOTRUE_MAILER_URLPATHS_EMAIL_CHANGE
+              value: /auth/v1/verify
+            - name: GOTRUE_EXTERNAL_PHONE_ENABLED
+              value: "false"
+            - name: GOTRUE_SMS_AUTOCONFIRM
+              value: "true"
+            - name: GOTRUE_RATE_LIMIT_HEADER
+              value: X-Forwarded-For
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.auth.resources | nindent 12 }}
+{{- end }}

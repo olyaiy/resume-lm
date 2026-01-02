@@ -1,0 +1,405 @@
+# ResumeLM Helm Chart Values
+# All services enabled by default; disable individually as needed
+
+global:
+  # Namespace to deploy all components to
+  namespace: "resume-lm"
+  # Base path for all services (if ingress supports path-based routing)
+  basePath: ""
+  # Storage class for persistent volumes
+  storageClass: ""
+  # Image pull secrets (if using private registries)
+  imagePullSecrets: []
+  # Node selector for all pods (e.g., to exclude slow nodes)
+  nodeSelector: {}
+  # Affinity rules for all pods
+  affinity: {}
+
+# =============================================================================
+# Secrets Configuration
+# =============================================================================
+secrets:
+  # JWT secret - must be at least 32 characters
+  jwtSecret: "your-super-secret-jwt-token-with-at-least-32-characters-long"
+  # Database password
+  postgresPassword: "postgres-dev-password"
+  # Supabase API Keys (generated from JWT secret)
+  # These are the default demo keys - replace in production
+  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
+  serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
+  # Dashboard password for Supabase Studio
+  dashboardPassword: "supabase"
+  # Logflare API key
+  logflareApiKey: "local-logflare-key"
+  # Realtime secret key base
+  realtimeSecretKeyBase: "UpNVntn3cDxHJpq99YMc1T1AQgQpc8kfYTuRgBiYa15BLrx8etQoXz3gZv1/u2oq"
+
+# =============================================================================
+# Admin Seed Configuration
+# =============================================================================
+admin:
+  # Set to create an admin user on first startup
+  email: "admin@admin.com"
+  password: "Admin123"
+  # Auto Pro subscription for seeded admin user (default: false, enable via override)
+  autoProSubscription: false
+
+# =============================================================================
+# AI Provider API Keys
+# =============================================================================
+ai:
+  openaiApiKey: ""
+  anthropicApiKey: ""
+  openrouterApiKey: ""
+
+# =============================================================================
+# Stripe Configuration
+# =============================================================================
+stripe:
+  secretKey: "sk_test_placeholder"
+  webhookSecret: "whsec_placeholder"
+  publishableKey: "pk_test_placeholder"
+  proPriceId: "price_placeholder"
+
+# =============================================================================
+# Ingress Configuration
+# =============================================================================
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: resumelm.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+# =============================================================================
+# PostgreSQL Database
+# =============================================================================
+db:
+  enabled: true
+  # Use an external database instead of deploying one
+  external:
+    enabled: false
+    host: ""
+    port: 5432
+    database: "postgres"
+    # Password should still be set in secrets.postgresPassword
+  image:
+    repository: supabase/postgres
+    tag: "15.14.1.066"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "1"
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  persistence:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteOnce
+  # Additional PostgreSQL configuration
+  config:
+    maxConnections: 100
+    sharedBuffers: 256MB
+
+# =============================================================================
+# Kong API Gateway
+# =============================================================================
+kong:
+  enabled: true
+  image:
+    repository: kong
+    tag: "2.8.1"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  service:
+    type: ClusterIP
+    httpPort: 8000
+    httpsPort: 8443
+
+# =============================================================================
+# GoTrue Auth Service
+# =============================================================================
+auth:
+  enabled: true
+  image:
+    repository: supabase/gotrue
+    tag: "v2.184.0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  # Auth configuration
+  config:
+    siteUrl: "http://localhost:3000"
+    uriAllowList: "*"
+    disableSignup: false
+    jwtExpiry: 3600
+    mailerAutoconfirm: true
+    smtpAdminEmail: "admin@resumelm.local"
+    smtpSenderName: "ResumeLM"
+
+# =============================================================================
+# PostgREST API
+# =============================================================================
+rest:
+  enabled: true
+  image:
+    repository: postgrest/postgrest
+    tag: "v14.1"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  config:
+    dbSchemas: "public,storage,graphql_public"
+    dbAnonRole: "anon"
+
+# =============================================================================
+# Realtime Server
+# =============================================================================
+realtime:
+  enabled: true
+  image:
+    repository: supabase/realtime
+    tag: "v2.68.0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+  config:
+    dbEncKey: "supabasekey12345"
+    replicationMode: "RLS"
+    replicationPollInterval: 100
+    secureChannels: true
+    slotName: "supabase_realtime_rls"
+
+# =============================================================================
+# Storage API
+# =============================================================================
+storage:
+  enabled: true
+  image:
+    repository: supabase/storage-api
+    tag: "v1.33.0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  persistence:
+    enabled: true
+    size: 10Gi
+    accessMode: ReadWriteOnce
+  config:
+    fileSizeLimit: 52428800
+    storageBackend: "file"
+    enableImageTransformation: true
+
+# =============================================================================
+# Image Proxy
+# =============================================================================
+imgproxy:
+  # Disabled: ARM64 binary incompatible with Raspberry Pi Cortex-A72
+  enabled: false
+  image:
+    repository: ghcr.io/imgproxy/imgproxy
+    tag: "v3.30"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "1"
+      memory: 512Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+  config:
+    useEtag: true
+    enableWebpDetection: true
+
+# =============================================================================
+# Postgres Meta (for Studio) - Dev only
+# =============================================================================
+meta:
+  enabled: false
+  image:
+    repository: supabase/postgres-meta
+    tag: "v0.95.1"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+
+# =============================================================================
+# Supabase Studio (Dashboard) - Dev only
+# =============================================================================
+studio:
+  enabled: false
+  image:
+    repository: supabase/studio
+    tag: "2025.12.17-sha-43f4f7f"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+  service:
+    type: ClusterIP
+    port: 3000
+
+# =============================================================================
+# Inbucket (Email Testing) - Dev only
+# =============================================================================
+inbucket:
+  enabled: false
+  image:
+    repository: inbucket/inbucket
+    tag: "3.1.1"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 64Mi
+    requests:
+      cpu: 10m
+      memory: 16Mi
+  service:
+    webPort: 9000
+    smtpPort: 2500
+
+# =============================================================================
+# Analytics (Logflare) - Optional
+# =============================================================================
+analytics:
+  enabled: false
+  image:
+    repository: supabase/logflare
+    tag: "1.27.0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 100m
+      memory: 512Mi
+  config:
+    singleTenant: true
+    supabaseMode: true
+
+# =============================================================================
+# Redis
+# =============================================================================
+redis:
+  enabled: true
+  # Use an external Redis instead of deploying one
+  external:
+    enabled: false
+    # Full Redis URL (e.g., redis://user:password@host:6379)
+    url: ""
+  image:
+    repository: redis
+    tag: "7-alpine"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 16Mi
+  persistence:
+    enabled: true
+    size: 1Gi
+    accessMode: ReadWriteOnce
+  config:
+    appendonly: true
+
+# =============================================================================
+# Redis Commander - Dev only
+# =============================================================================
+redisCommander:
+  enabled: false
+  image:
+    repository: rediscommander/redis-commander
+    tag: "0.8.0"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 10m
+      memory: 64Mi
+  service:
+    type: ClusterIP
+    port: 8081
+
+# =============================================================================
+# Next.js Application
+# =============================================================================
+app:
+  enabled: true
+  image:
+    repository: ghcr.io/zees-dev/resume-lm
+    tag: "f9d7215"
+    pullPolicy: IfNotPresent
+  resources:
+    limits:
+      cpu: "2"
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 512Mi
+  service:
+    type: ClusterIP
+    port: 3000
+  # Environment
+  nodeEnv: "production"
+  # Site URL for auth redirects
+  siteUrl: "http://localhost:3000"
+
+# =============================================================================
+# Seeder Job
+# =============================================================================
+seeder:
+  enabled: true
+  image:
+    repository: curlimages/curl
+    tag: "8.11.1"
+    pullPolicy: IfNotPresent
+  # Runs as a Kubernetes Job, not a Deployment
+  backoffLimit: 3

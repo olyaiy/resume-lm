@@ -1,0 +1,75 @@
+{{- if .Values.rest.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-rest
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: rest-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: rest-api
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: rest-api
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      {{- include "resumelm.nodeSelector" . | nindent 6 }}
+      {{- include "resumelm.affinity" . | nindent 6 }}
+      containers:
+        - name: rest
+          image: "{{ .Values.rest.image.repository }}:{{ .Values.rest.image.tag }}"
+          imagePullPolicy: {{ .Values.rest.image.pullPolicy }}
+          command: ["postgrest"]
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTGRES_PASSWORD
+            - name: PGRST_DB_URI
+              value: "postgres://authenticator:$(POSTGRES_PASSWORD)@{{ include "resumelm.dbHost" . }}:5432/postgres"
+            - name: PGRST_DB_SCHEMAS
+              value: {{ .Values.rest.config.dbSchemas | quote }}
+            - name: PGRST_DB_ANON_ROLE
+              value: {{ .Values.rest.config.dbAnonRole | quote }}
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: JWT_SECRET
+            - name: PGRST_DB_USE_LEGACY_GUCS
+              value: "false"
+            - name: PGRST_APP_SETTINGS_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: JWT_SECRET
+            - name: PGRST_APP_SETTINGS_JWT_EXP
+              value: "3600"
+          livenessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.rest.resources | nindent 12 }}
+{{- end }}

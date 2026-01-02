@@ -1,0 +1,154 @@
+{{- if .Values.kong.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "resumelm.kongConfigMapName" . }}
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+data:
+  kong.yml: |
+    _format_version: "1.1"
+
+    consumers:
+      - username: anon
+        keyauth_credentials:
+          - key: ${SUPABASE_ANON_KEY}
+      - username: service_role
+        keyauth_credentials:
+          - key: ${SUPABASE_SERVICE_KEY}
+
+    acls:
+      - consumer: anon
+        group: anon
+      - consumer: service_role
+        group: admin
+
+    services:
+      - name: auth-v1-open
+        url: http://{{ include "resumelm.authHost" . }}:9999/verify
+        routes:
+          - name: auth-v1-open
+            strip_path: true
+            paths:
+              - /auth/v1/verify
+        plugins:
+          - name: cors
+
+      - name: auth-v1-open-callback
+        url: http://{{ include "resumelm.authHost" . }}:9999/callback
+        routes:
+          - name: auth-v1-open-callback
+            strip_path: true
+            paths:
+              - /auth/v1/callback
+        plugins:
+          - name: cors
+
+      - name: auth-v1-open-authorize
+        url: http://{{ include "resumelm.authHost" . }}:9999/authorize
+        routes:
+          - name: auth-v1-open-authorize
+            strip_path: true
+            paths:
+              - /auth/v1/authorize
+        plugins:
+          - name: cors
+
+      - name: auth-v1
+        _comment: "GoTrue: /auth/v1/* -> http://auth:9999/*"
+        url: http://{{ include "resumelm.authHost" . }}:9999
+        routes:
+          - name: auth-v1-all
+            strip_path: true
+            paths:
+              - /auth/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      - name: rest-v1
+        _comment: "PostgREST: /rest/v1/* -> http://rest:3000/*"
+        url: http://{{ include "resumelm.restHost" . }}:3000
+        routes:
+          - name: rest-v1-all
+            strip_path: true
+            paths:
+              - /rest/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      - name: realtime-v1
+        _comment: "Realtime: /realtime/v1/* -> http://realtime:4000/socket/*"
+        url: http://{{ include "resumelm.realtimeHost" . }}:4000/socket
+        routes:
+          - name: realtime-v1-all
+            strip_path: true
+            paths:
+              - /realtime/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      - name: storage-v1
+        _comment: "Storage: /storage/v1/* -> http://storage:5000/*"
+        url: http://{{ include "resumelm.storageHost" . }}:5000
+        routes:
+          - name: storage-v1-all
+            strip_path: true
+            paths:
+              - /storage/v1/
+        plugins:
+          - name: cors
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+                - anon
+
+      - name: meta
+        _comment: "pg-meta: /pg/* -> http://meta:8080/*"
+        url: http://{{ include "resumelm.metaHost" . }}:8080
+        routes:
+          - name: meta-all
+            strip_path: true
+            paths:
+              - /pg/
+        plugins:
+          - name: key-auth
+            config:
+              hide_credentials: false
+          - name: acl
+            config:
+              hide_groups_header: true
+              allow:
+                - admin
+{{- end }}
