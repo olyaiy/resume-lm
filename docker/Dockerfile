@@ -87,12 +87,8 @@ COPY src ./src
 COPY public ./public
 COPY content ./content
 
-# Base path for serving app at a subpath (e.g., /resumelm)
-# This is baked into the build and cannot be changed at runtime
-ARG NEXT_PUBLIC_BASE_PATH=""
-ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
-
 # Build with placeholder values - replaced at runtime by entrypoint.sh
+# Base path uses placeholder in next.config.ts: /__NEXT_BASEPATH_PLACEHOLDER__
 # This allows a single image to work across all environments
 ENV NEXT_PUBLIC_SUPABASE_URL="__NEXT_PUBLIC_SUPABASE_URL__" \
     NEXT_PUBLIC_SUPABASE_ANON_KEY="__NEXT_PUBLIC_SUPABASE_ANON_KEY__" \
@@ -137,7 +133,8 @@ ENV NODE_ENV=production \
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+    && adduser --system --uid 1001 nextjs \
+    && chown nextjs:nodejs /app
 
 # Copy entrypoint script (must be before USER switch, owned by root, executable by all)
 COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh

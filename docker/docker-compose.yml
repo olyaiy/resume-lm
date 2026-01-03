@@ -482,8 +482,6 @@ services:
       context: ..
       dockerfile: docker/Dockerfile
       target: production
-      args:
-        - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-}
     container_name: resumelm-app
     restart: unless-stopped
     deploy:

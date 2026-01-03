@@ -5,9 +5,12 @@ import { Footer } from "@/components/layout/footer";
 import { AppHeader } from "@/components/layout/app-header";
 import { createClient } from "@/utils/supabase/server";
 import { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
+
+// Only enable Vercel Analytics when running on Vercel platform
+const isVercel = process.env.VERCEL === '1';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -150,7 +153,7 @@ export default async function RootLayout({
           {/* Padding for header and footer */}
           <main className="py-14 h-full">
             {children}
-            <Analytics />
+            {isVercel && <Analytics />}
           </main>
           {user && <Footer /> }
         </div>

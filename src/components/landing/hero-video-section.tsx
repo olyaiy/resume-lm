@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/dialog';
 import { PlayCircle, Sparkles } from 'lucide-react';
 import Image from 'next/image';
+import { withBasePath } from '@/lib/utils';
 export function HeroVideoSection() {
   const [isOpen, setIsOpen] = useState(false);
 
@@ -72,7 +73,7 @@ export function HeroVideoSection() {
               controls
               autoPlay={isOpen}
               className="h-full w-full"
-              src="/ResumeLM.mp4"
+              src={withBasePath("/ResumeLM.mp4")}
             />
           </div>
         </DialogContent>
