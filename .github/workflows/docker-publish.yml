@@ -115,8 +115,8 @@ jobs:
             type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
             # On main push or workflow_dispatch: use sha
             type=sha,prefix=,enable=${{ github.event_name != 'release' }}
-            # Latest tag only on release
-            type=raw,value=latest,enable=${{ github.event_name == 'release' }}
+            # Latest tag on release OR push to main
+            type=raw,value=latest,enable=${{ github.event_name == 'release' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
 
       - name: Create manifest list and push
         working-directory: /tmp/digests
