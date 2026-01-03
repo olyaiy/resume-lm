@@ -4,10 +4,13 @@
 
 📱 Application:
 {{- if .Values.ingress.enabled }}
-  Access ResumeLM at: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ (index .Values.ingress.hosts 0).host }}
+  Access ResumeLM at: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ (index .Values.ingress.hosts 0).host }}{{ .Values.global.basePath }}
 {{- else }}
   kubectl port-forward svc/{{ include "resumelm.fullname" . }}-app {{ .Values.app.service.port }}:{{ .Values.app.service.port }}
-  Then access: http://localhost:{{ .Values.app.service.port }}
+  Then access: http://localhost:{{ .Values.app.service.port }}{{ .Values.global.basePath }}
+{{- end }}
+{{- if .Values.global.basePath }}
+  Base path: {{ .Values.global.basePath }} (runtime injected)
 {{- end }}
 {{- end }}
 
