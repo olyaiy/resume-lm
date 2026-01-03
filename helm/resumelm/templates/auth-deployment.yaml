@@ -47,7 +47,7 @@ spec:
             - name: GOTRUE_DB_DATABASE_URL
               value: "postgres://supabase_auth_admin:$(POSTGRES_PASSWORD)@{{ include "resumelm.dbHost" . }}:5432/postgres"
             - name: GOTRUE_SITE_URL
-              value: {{ .Values.auth.config.siteUrl | quote }}
+              value: "{{ .Values.auth.config.siteUrl }}{{ .Values.global.basePath }}"
             - name: GOTRUE_URI_ALLOW_LIST
               value: {{ .Values.auth.config.uriAllowList | quote }}
             - name: GOTRUE_DISABLE_SIGNUP

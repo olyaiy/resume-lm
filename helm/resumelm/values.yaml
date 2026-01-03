@@ -4,10 +4,12 @@
 global:
   # Namespace to deploy all components to
   namespace: "resume-lm"
-  # Base path for serving the app at a subpath (e.g., "/resume" serves at example.com/resume/)
+  # Base path for serving the app at a subpath (e.g., "/resumelm" serves at example.com/resumelm/)
   # When set:
   #   - Sets NEXT_PUBLIC_BASE_PATH env var for Next.js
   #   - Ingress path auto-updates from "/" to this value
+  #   - Runtime injection: basePath is injected at container startup (not baked into image)
+  #   - Same image works for any basePath configuration
   # Note: Do NOT use path rewrite/strip - Next.js expects requests at the full basePath
   basePath: ""
   # Storage class for persistent volumes
@@ -379,7 +381,8 @@ app:
   enabled: true
   image:
     repository: ghcr.io/zees-dev/resume-lm
-    tag: "f9d7215"
+    # Use 'latest' for most recent build, or pin to specific commit SHA
+    tag: "latest"
     pullPolicy: IfNotPresent
   resources:
     limits:

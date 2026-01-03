@@ -45,7 +45,7 @@ spec:
                   name: {{ include "resumelm.secretName" . }}
                   key: SERVICE_ROLE_KEY
             - name: NEXT_PUBLIC_SITE_URL
-              value: {{ .Values.app.siteUrl | quote }}
+              value: "{{ .Values.app.siteUrl }}{{ .Values.global.basePath }}"
             # Redis
             - name: REDIS_URL
               value: {{ include "resumelm.redisUrl" . | quote }}
