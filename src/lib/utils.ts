@@ -8,18 +8,16 @@ export function cn(...inputs: ClassValue[]) {
 /**
  * Get the base path for the application.
  * Used for constructing URLs that bypass Next.js router (e.g., window.location.href, fetch).
- * Reads from Next.js runtime data which is set after entrypoint.sh placeholder substitution.
+ * 
+ * IMPORTANT: Uses a placeholder that gets replaced at runtime by entrypoint.sh.
+ * The placeholder /__NEXT_BASEPATH_PLACEHOLDER__ is replaced with the actual
+ * NEXT_PUBLIC_BASE_PATH value when the container starts.
  */
 export function getBasePath(): string {
-  // Client-side: read from Next.js runtime data
-  if (typeof window !== 'undefined') {
-    const nextData = window.__NEXT_DATA__ as { basePath?: string } | undefined;
-    if (nextData?.basePath) {
-      return nextData.basePath;
-    }
-  }
-  // Server-side: read from env (will be placeholder until runtime substitution)
-  return process.env.NEXT_PUBLIC_BASE_PATH || '';
+  // This placeholder is replaced at runtime by entrypoint.sh with the actual basePath
+  // e.g., "/__NEXT_BASEPATH_PLACEHOLDER__" becomes "/resumelm" or "" (empty string)
+  const basePath = '/__NEXT_BASEPATH_PLACEHOLDER__';
+  return basePath;
 }
 
 /**
