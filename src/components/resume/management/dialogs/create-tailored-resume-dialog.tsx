@@ -18,7 +18,7 @@ import { BaseResumeSelector } from "../base-resume-selector";
 import { ImportMethodRadioGroup } from "../import-method-radio-group";
 import { JobDescriptionInput } from "../job-description-input";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -628,11 +628,11 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
         errorMessage={errorMessage}
         onUpgrade={() => {
           setShowErrorDialog(false);
-          window.location.href = '/subscription';
+          window.location.href = withBasePath('/subscription');
         }}
         onSettings={() => {
           setShowErrorDialog(false);
-          window.location.href = '/settings';
+          window.location.href = withBasePath('/settings');
         }}
       />
     </>

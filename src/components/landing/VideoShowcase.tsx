@@ -1,6 +1,7 @@
 "use client"
 import { useRef, useState, useEffect } from "react"
 import { Play, Maximize2 } from "lucide-react"
+import { withBasePath } from "@/lib/utils"
 
 export function VideoShowcase() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -72,11 +73,11 @@ export function VideoShowcase() {
               className="relative aspect-video w-full cursor-pointer" 
               onClick={togglePlay}
             >
-              <video 
+              <video
                 ref={videoRef}
                 className="w-full h-full object-cover rounded-2xl"
-                src="/ResumeLM.mp4"
-                poster="/thumbnail.png"
+                src={withBasePath("/ResumeLM.mp4")}
+                poster={withBasePath("/thumbnail.png")}
                 onEnded={() => setIsPlaying(false)}
               />
               

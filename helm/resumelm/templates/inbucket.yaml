@@ -1,0 +1,57 @@
+{{- if .Values.inbucket.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-inbucket
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: inbucket
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: inbucket
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: inbucket
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: inbucket
+          image: "{{ .Values.inbucket.image.repository }}:{{ .Values.inbucket.image.tag }}"
+          imagePullPolicy: {{ .Values.inbucket.image.pullPolicy }}
+          ports:
+            - name: web
+              containerPort: 9000
+              protocol: TCP
+            - name: smtp
+              containerPort: 2500
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.inbucket.resources | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resumelm.fullname" . }}-inbucket
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: inbucket
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.inbucket.service.webPort }}
+      targetPort: web
+      protocol: TCP
+      name: web
+    - port: {{ .Values.inbucket.service.smtpPort }}
+      targetPort: smtp
+      protocol: TCP
+      name: smtp
+  selector:
+    {{- include "resumelm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: inbucket
+{{- end }}

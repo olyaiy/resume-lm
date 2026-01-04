@@ -1,0 +1,83 @@
+🚀 ResumeLM has been deployed!
+
+{{- if .Values.app.enabled }}
+
+📱 Application:
+{{- if .Values.ingress.enabled }}
+  Access ResumeLM at: http{{ if $.Values.ingress.tls }}s{{ end }}://{{ (index .Values.ingress.hosts 0).host }}{{ .Values.global.basePath }}
+{{- else }}
+  kubectl port-forward svc/{{ include "resumelm.fullname" . }}-app {{ .Values.app.service.port }}:{{ .Values.app.service.port }}
+  Then access: http://localhost:{{ .Values.app.service.port }}{{ .Values.global.basePath }}
+{{- end }}
+{{- if .Values.global.basePath }}
+  Base path: {{ .Values.global.basePath }} (runtime injected)
+{{- end }}
+{{- end }}
+
+🔌 Supabase API:
+  kubectl port-forward svc/{{ include "resumelm.fullname" . }}-kong {{ .Values.kong.service.httpPort }}:{{ .Values.kong.service.httpPort }}
+  API URL: http://localhost:{{ .Values.kong.service.httpPort }}
+
+{{- if .Values.studio.enabled }}
+
+📊 Supabase Studio (Dashboard):
+  kubectl port-forward svc/{{ include "resumelm.fullname" . }}-studio {{ .Values.studio.service.port }}:{{ .Values.studio.service.port }}
+  Dashboard: http://localhost:{{ .Values.studio.service.port }}
+{{- end }}
+
+{{- if .Values.redisCommander.enabled }}
+
+🔴 Redis Commander:
+  kubectl port-forward svc/{{ include "resumelm.fullname" . }}-redis-commander {{ .Values.redisCommander.service.port }}:{{ .Values.redisCommander.service.port }}
+  Redis UI: http://localhost:{{ .Values.redisCommander.service.port }}
+{{- end }}
+
+{{- if .Values.inbucket.enabled }}
+
+📧 Inbucket (Email Testing):
+  kubectl port-forward svc/{{ include "resumelm.fullname" . }}-inbucket {{ .Values.inbucket.service.webPort }}:{{ .Values.inbucket.service.webPort }}
+  Email UI: http://localhost:{{ .Values.inbucket.service.webPort }}
+{{- end }}
+
+🔐 Default Admin Credentials:
+  Email: {{ .Values.admin.email }}
+  Password: {{ .Values.admin.password }}
+{{- if .Values.admin.autoProSubscription }}
+  Note: Auto Pro subscription is ENABLED
+{{- end }}
+
+🗄️  Database Connection:
+  Host:     {{ include "resumelm.fullname" . }}-db
+  Port:     5432
+  Database: postgres
+  User:     postgres
+
+📝 Useful Commands:
+
+Check pod status:
+  kubectl get pods -l app.kubernetes.io/instance={{ .Release.Name }}
+
+View application logs:
+  kubectl logs -f deployment/{{ include "resumelm.fullname" . }}-app
+
+Check seeder job:
+  kubectl logs job/{{ include "resumelm.fullname" . }}-seeder
+
+Connect to database:
+  kubectl exec -it deployment/{{ include "resumelm.fullname" . }}-db -- psql -U postgres
+
+⚙️  Enabled Services:
+{{- if .Values.db.enabled }}  ✓ PostgreSQL Database{{- end }}
+{{- if .Values.kong.enabled }}  ✓ Kong API Gateway{{- end }}
+{{- if .Values.auth.enabled }}  ✓ GoTrue Auth{{- end }}
+{{- if .Values.rest.enabled }}  ✓ PostgREST API{{- end }}
+{{- if .Values.realtime.enabled }}  ✓ Realtime{{- end }}
+{{- if .Values.storage.enabled }}  ✓ Storage API{{- end }}
+{{- if .Values.imgproxy.enabled }}  ✓ Imgproxy{{- end }}
+{{- if .Values.redis.enabled }}  ✓ Redis{{- end }}
+{{- if .Values.app.enabled }}  ✓ Next.js App{{- end }}
+{{- if .Values.studio.enabled }}  ✓ Supabase Studio{{- end }}
+{{- if .Values.meta.enabled }}  ✓ Postgres Meta{{- end }}
+{{- if .Values.analytics.enabled }}  ✓ Analytics (Logflare){{- end }}
+{{- if .Values.inbucket.enabled }}  ✓ Inbucket (Email){{- end }}
+{{- if .Values.redisCommander.enabled }}  ✓ Redis Commander{{- end }}
