@@ -77,6 +77,13 @@ jobs:
           echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
           helm push ./packages/*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
 
+      - name: Push latest tag
+        run: |
+          # Re-package with 'latest' version for users who don't want to specify version
+          sed -i "s/^version:.*/version: latest/" ${{ env.CHART_PATH }}/Chart.yaml
+          helm package ${{ env.CHART_PATH }} -d ./packages-latest
+          helm push ./packages-latest/*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
+
       - name: Summary
         run: |
           cat >> $GITHUB_STEP_SUMMARY << 'EOF'
@@ -86,11 +93,14 @@ jobs:
           |----------|-------|
           | Chart | `resumelm` |
           | Version | `${{ steps.version.outputs.version }}` |
+          | Latest | `latest` |
           | Registry | `${{ env.REGISTRY }}/${{ github.repository_owner }}/charts` |
 
+          ### Install with latest (recommended)
           ```bash
           helm install resumelm oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts/resumelm \
-            --version ${{ steps.version.outputs.version }} \
+            --version latest \
             --namespace resume-lm --create-namespace
           ```
+
           EOF
