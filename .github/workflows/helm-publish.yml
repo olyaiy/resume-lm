@@ -1,0 +1,96 @@
+name: Helm Chart Publish
+
+on:
+  push:
+    branches: [main]
+    paths: ['helm/**', '.github/workflows/helm-publish.yml']
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version_override:
+        description: 'Override chart version (leave empty to use Chart.yaml version)'
+        required: false
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  REGISTRY: ghcr.io
+  CHART_PATH: helm/resumelm
+
+jobs:
+  validate:
+    name: Validate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+      - name: Lint and template
+        run: |
+          helm lint ${{ env.CHART_PATH }} --strict
+          helm template test ${{ env.CHART_PATH }} \
+            --set studio.enabled=true \
+            --set meta.enabled=true \
+            --set inbucket.enabled=true \
+            --set analytics.enabled=true \
+            --set redisCommander.enabled=true \
+            --set imgproxy.enabled=true \
+            --set ingress.enabled=true \
+            > /dev/null
+
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    needs: validate
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: azure/setup-helm@v4
+        with:
+          version: 'v3.14.0'
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION=$(grep '^version:' ${{ env.CHART_PATH }}/Chart.yaml | awk '{print $2}')
+          if [ -n "${{ inputs.version_override }}" ]; then
+            VERSION="${{ inputs.version_override }}"
+          elif [ "${{ github.event_name }}" == "release" ]; then
+            VERSION="${{ github.ref_name }}"
+            VERSION="${VERSION#v}"
+          elif [ "${{ github.event_name }}" == "push" ]; then
+            VERSION="${VERSION}-$(echo ${{ github.sha }} | cut -c1-7)"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Package and push
+        run: |
+          sed -i "s/^version:.*/version: ${{ steps.version.outputs.version }}/" ${{ env.CHART_PATH }}/Chart.yaml
+          helm package ${{ env.CHART_PATH }} -d ./packages
+          echo ${{ secrets.GITHUB_TOKEN }} | helm registry login ${{ env.REGISTRY }} -u ${{ github.actor }} --password-stdin
+          helm push ./packages/*.tgz oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts
+
+      - name: Summary
+        run: |
+          cat >> $GITHUB_STEP_SUMMARY << 'EOF'
+          ## Helm Chart Published
+
+          | Property | Value |
+          |----------|-------|
+          | Chart | `resumelm` |
+          | Version | `${{ steps.version.outputs.version }}` |
+          | Registry | `${{ env.REGISTRY }}/${{ github.repository_owner }}/charts` |
+
+          ```bash
+          helm install resumelm oci://${{ env.REGISTRY }}/${{ github.repository_owner }}/charts/resumelm \
+            --version ${{ steps.version.outputs.version }} \
+            --namespace resume-lm --create-namespace
+          ```
+          EOF

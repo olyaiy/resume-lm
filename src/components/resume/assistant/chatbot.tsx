@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Bot, Trash2, Pencil, ChevronDown, RefreshCw } from "lucide-react";
 import { Education, Project, Resume, Skill, WorkExperience, Job } from '@/lib/types';
 import { Message } from 'ai';
-import { cn } from '@/lib/utils';
+import { cn, withBasePath } from '@/lib/utils';
 import { ToolInvocation } from 'ai';
 import { MemoizedMarkdown } from '@/components/ui/memoized-markdown';
 import { Suggestion } from './suggestions';
@@ -87,7 +87,7 @@ export default function ChatBot({ resume, onResumeChange, job }: ChatBotProps) {
   };
   
   const { messages, error, append, isLoading, addToolResult, stop, setMessages } = useChat({
-    api: '/api/chat',
+    api: withBasePath('/api/chat'),
     body: {
       target_role: resume.target_role,
       resume: resume,

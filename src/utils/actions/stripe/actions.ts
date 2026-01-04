@@ -289,7 +289,8 @@ export async function createCheckoutSession(priceId: string) {
     throw new Error('User not authenticated');
   }
 
-  const response = await fetch('/api/create-checkout-session', {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const response = await fetch(`${basePath}/api/create-checkout-session`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -318,7 +319,8 @@ export async function cancelSubscription() {
     throw new Error('User not authenticated');
   }
 
-  const response = await fetch('/api/cancel-subscription', {
+  const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
+  const response = await fetch(`${basePath}/api/cancel-subscription`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

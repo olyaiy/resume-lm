@@ -88,6 +88,7 @@ COPY public ./public
 COPY content ./content
 
 # Build with placeholder values - replaced at runtime by entrypoint.sh
+# Base path uses placeholder in next.config.ts: /__NEXT_BASEPATH_PLACEHOLDER__
 # This allows a single image to work across all environments
 ENV NEXT_PUBLIC_SUPABASE_URL="__NEXT_PUBLIC_SUPABASE_URL__" \
     NEXT_PUBLIC_SUPABASE_ANON_KEY="__NEXT_PUBLIC_SUPABASE_ANON_KEY__" \
@@ -132,7 +133,8 @@ ENV NODE_ENV=production \
 
 # Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs \
-    && adduser --system --uid 1001 nextjs
+    && adduser --system --uid 1001 nextjs \
+    && chown nextjs:nodejs /app
 
 # Copy entrypoint script (must be before USER switch, owned by root, executable by all)
 COPY --chmod=755 docker/entrypoint.sh /entrypoint.sh

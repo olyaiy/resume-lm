@@ -10,7 +10,7 @@ import { Resume } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { addTextToResume } from "@/utils/actions/resumes/ai";
 import pdfToText from "react-pdftotext";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 
 interface TextImportDialogProps {
@@ -215,7 +215,7 @@ export function TextImportDialog({
                   variant="outline"
                   size="sm"
                   className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
-                  onClick={() => window.location.href = '/settings'}
+                  onClick={() => window.location.href = withBasePath('/settings')}
                 >
                   Set API Keys in Settings
                 </Button>

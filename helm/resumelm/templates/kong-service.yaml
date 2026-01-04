@@ -1,0 +1,23 @@
+{{- if .Values.kong.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resumelm.fullname" . }}-kong
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+spec:
+  type: {{ .Values.kong.service.type }}
+  ports:
+    - port: {{ .Values.kong.service.httpPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+    - port: {{ .Values.kong.service.httpsPort }}
+      targetPort: https
+      protocol: TCP
+      name: https
+  selector:
+    {{- include "resumelm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: api-gateway
+{{- end }}

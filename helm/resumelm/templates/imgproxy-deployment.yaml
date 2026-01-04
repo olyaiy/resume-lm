@@ -1,0 +1,70 @@
+{{- if .Values.imgproxy.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-imgproxy
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: imgproxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: imgproxy
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: imgproxy
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      containers:
+        - name: imgproxy
+          image: "{{ .Values.imgproxy.image.repository }}:{{ .Values.imgproxy.image.tag }}"
+          imagePullPolicy: {{ .Values.imgproxy.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: IMGPROXY_BIND
+              value: ":8080"
+            - name: IMGPROXY_LOCAL_FILESYSTEM_ROOT
+              value: /
+            - name: IMGPROXY_USE_ETAG
+              value: {{ .Values.imgproxy.config.useEtag | quote }}
+            - name: IMGPROXY_ENABLE_WEBP_DETECTION
+              value: {{ .Values.imgproxy.config.enableWebpDetection | quote }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            failureThreshold: 3
+          resources:
+            {{- toYaml .Values.imgproxy.resources | nindent 12 }}
+          volumeMounts:
+            - name: storage-data
+              mountPath: /var/lib/storage
+              readOnly: true
+      volumes:
+        - name: storage-data
+          {{- if .Values.storage.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "resumelm.fullname" . }}-storage
+            readOnly: true
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}

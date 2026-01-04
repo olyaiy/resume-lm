@@ -1,0 +1,108 @@
+{{- if .Values.storage.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-storage
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: storage
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: storage
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: storage
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      {{- include "resumelm.nodeSelector" . | nindent 6 }}
+      {{- include "resumelm.affinity" . | nindent 6 }}
+      containers:
+        - name: storage
+          image: "{{ .Values.storage.image.repository }}:{{ .Values.storage.image.tag }}"
+          imagePullPolicy: {{ .Values.storage.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "5000"
+            - name: ANON_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: ANON_KEY
+            - name: SERVICE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: SERVICE_ROLE_KEY
+            - name: POSTGREST_URL
+              value: "http://{{ include "resumelm.restHost" . }}:3000"
+            - name: PGRST_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: JWT_SECRET
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTGRES_PASSWORD
+            - name: DATABASE_URL
+              value: "postgres://supabase_storage_admin:$(POSTGRES_PASSWORD)@{{ include "resumelm.dbHost" . }}:5432/postgres"
+            - name: FILE_SIZE_LIMIT
+              value: {{ .Values.storage.config.fileSizeLimit | quote }}
+            - name: STORAGE_BACKEND
+              value: {{ .Values.storage.config.storageBackend | quote }}
+            - name: FILE_STORAGE_BACKEND_PATH
+              value: /var/lib/storage
+            - name: TENANT_ID
+              value: stub
+            - name: REGION
+              value: stub
+            - name: GLOBAL_S3_BUCKET
+              value: stub
+            - name: ENABLE_IMAGE_TRANSFORMATION
+              value: {{ .Values.storage.config.enableImageTransformation | quote }}
+            {{- if .Values.imgproxy.enabled }}
+            - name: IMGPROXY_URL
+              value: "http://{{ include "resumelm.imgproxyHost" . }}:8080"
+            {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /status
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.storage.resources | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/storage
+      volumes:
+        - name: data
+          {{- if .Values.storage.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ include "resumelm.fullname" . }}-storage
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+{{- end }}
