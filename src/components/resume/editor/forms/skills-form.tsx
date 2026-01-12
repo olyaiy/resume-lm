@@ -4,7 +4,7 @@ import { Skill, Profile } from "@/lib/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
@@ -38,6 +38,16 @@ export function SkillsForm({
 
   const removeSkillCategory = (index: number) => {
     onChange(skills.filter((_, i) => i !== index));
+  };
+
+  const moveSkillCategory = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= skills.length) return;
+
+    const updated = [...skills];
+    const [item] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, item);
+    onChange(updated);
   };
 
   const addSkill = (categoryIndex: number) => {
@@ -213,6 +223,37 @@ export function SkillsForm({
                   </div>
                 </div>
               </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => moveSkillCategory(index, -1)}
+                disabled={index === 0}
+                className={cn(
+                  "h-6 w-8 text-rose-700 hover:text-rose-800",
+                  "bg-white/70 hover:bg-white",
+                  "border border-rose-200/70",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                <ChevronUp className="h-4 w-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => moveSkillCategory(index, 1)}
+                disabled={index === skills.length - 1}
+                className={cn(
+                  "h-6 w-8 text-rose-700 hover:text-rose-800",
+                  "bg-white/70 hover:bg-white",
+                  "border border-rose-200/70",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+              >
+                <ChevronDown className="h-4 w-4" />
+              </Button>
             </div>
           </CardContent>
         </Card>

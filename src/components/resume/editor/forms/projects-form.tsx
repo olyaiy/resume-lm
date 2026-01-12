@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X } from "lucide-react";
+import { Plus, Trash2, GripVertical, Loader2, Sparkles, Check, X, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { useState, useRef, useEffect, memo } from "react";
@@ -102,6 +102,16 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
 
   const removeProject = (index: number) => {
     onChange(projects.filter((_, i) => i !== index));
+  };
+
+  const moveProject = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= projects.length) return;
+
+    const updated = [...projects];
+    const [item] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, item);
+    onChange(updated);
   };
 
   const handleImportFromProfile = (importedProjects: Project[]) => {
@@ -754,6 +764,36 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
                         ADD TECHNOLOGY
                       </div>
                     </div>
+                  </div>
+                  <div className="flex justify-end gap-2 pt-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveProject(index, -1)}
+                      disabled={index === 0}
+                      className={cn(
+                        "h-6 w-8 text-violet-700 hover:text-violet-800",
+                        "bg-white/70 hover:bg-white",
+                        "border border-violet-200/70",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveProject(index, 1)}
+                      disabled={index === projects.length - 1}
+                      className={cn(
+                        "h-6 w-8 text-violet-700 hover:text-violet-800",
+                        "bg-white/70 hover:bg-white",
+                        "border border-violet-200/70",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>

@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles } from "lucide-react";
+import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
@@ -106,6 +106,16 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
 
   const removeExperience = (index: number) => {
     onChange(experiences.filter((_, i) => i !== index));
+  };
+
+  const moveExperience = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= experiences.length) return;
+
+    const updated = [...experiences];
+    const [item] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, item);
+    onChange(updated);
   };
 
   const handleImportFromProfile = (importedExperiences: WorkExperience[]) => {
@@ -669,6 +679,37 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
                         hoverText: "hover:text-purple-700"
                       }}
                     />
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveExperience(index, -1)}
+                      disabled={index === 0}
+                      className={cn(
+                        "h-6 w-8 text-cyan-700 hover:text-cyan-800",
+                        "bg-white/70 hover:bg-white",
+                        "border border-cyan-200/70",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      <ChevronUp className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => moveExperience(index, 1)}
+                      disabled={index === experiences.length - 1}
+                      className={cn(
+                        "h-6 w-8 text-cyan-700 hover:text-cyan-800",
+                        "bg-white/70 hover:bg-white",
+                        "border border-cyan-200/70",
+                        "disabled:opacity-50 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      <ChevronDown className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               </div>

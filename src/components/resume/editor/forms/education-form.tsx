@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { memo } from 'react';
 import { cn } from "@/lib/utils";
@@ -53,6 +53,16 @@ export const EducationForm = memo(function EducationFormComponent({
 
   const removeEducation = (index: number) => {
     onChange(education.filter((_, i) => i !== index));
+  };
+
+  const moveEducation = (index: number, direction: -1 | 1) => {
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= education.length) return;
+
+    const updated = [...education];
+    const [item] = updated.splice(index, 1);
+    updated.splice(newIndex, 0, item);
+    onChange(updated);
   };
 
   const handleImportFromProfile = (importedEducation: Education[]) => {
@@ -272,6 +282,36 @@ export const EducationForm = memo(function EducationFormComponent({
               </div>
             </div>
           </CardContent>
+          <div className="flex justify-end gap-2 pb-1 pr-2">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => moveEducation(index, -1)}
+              disabled={index === 0}
+              className={cn(
+                "h-6 w-8 text-indigo-700 hover:text-indigo-800",
+                "bg-white/70 hover:bg-white",
+                "border border-indigo-200/70",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              <ChevronUp className="h-4 w-4" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => moveEducation(index, 1)}
+              disabled={index === education.length - 1}
+              className={cn(
+                "h-6 w-8 text-indigo-700 hover:text-indigo-800",
+                "bg-white/70 hover:bg-white",
+                "border border-indigo-200/70",
+                "disabled:opacity-50 disabled:cursor-not-allowed"
+              )}
+            >
+              <ChevronDown className="h-4 w-4" />
+            </Button>
+          </div>
         </Card>
       ))}
     </div>
