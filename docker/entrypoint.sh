@@ -25,12 +25,14 @@ inject_basepath() {
 
   if [ -n "$basepath" ]; then
     echo "Injecting basePath: $basepath"
+    export NEXT_PUBLIC_BASE_PATH="$basepath"
     # Replace placeholder in .next directory (js, html, css for fonts/assets)
     find /app/.next -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" \) -exec sed -i "s|$placeholder|$basepath|g" {} + 2>/dev/null || true
     # Replace in standalone server.js
     sed -i "s|$placeholder|$basepath|g" /app/server.js 2>/dev/null || true
   else
     echo "Removing basePath placeholder (serving at root)"
+    export NEXT_PUBLIC_BASE_PATH=""
     # Remove placeholder in .next directory (js, html, css for fonts/assets)
     find /app/.next -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" \) -exec sed -i "s|$placeholder||g" {} + 2>/dev/null || true
     # Remove in standalone server.js

@@ -19,9 +19,9 @@ const nextConfig: NextConfig = {
   // Enable standalone output for Docker builds
   output: 'standalone',
   // Support serving the app at a path prefix (e.g., /resumelm)
-  // Docker builds use a placeholder that gets replaced at runtime by entrypoint.sh
-  // Local dev uses NEXT_PUBLIC_BASE_PATH env var directly
-  basePath: process.env.NEXT_PUBLIC_BASE_PATH ?? '/__NEXT_BASEPATH_PLACEHOLDER__',
+  // Local dev/Vercel default to root; Docker builds set NEXT_PUBLIC_BASE_PATH to the
+  // placeholder /__NEXT_BASEPATH_PLACEHOLDER__ which entrypoint.sh replaces at runtime.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
   // Custom image loader to handle runtime basePath injection
   // The default Next.js image optimizer doesn't work with runtime basePath because
   // it makes internal HTTP requests without the basePath prefix

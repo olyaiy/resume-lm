@@ -5,6 +5,8 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
 
+const BASEPATH_PLACEHOLDER = '/__NEXT_BASEPATH_PLACEHOLDER__';
+
 /**
  * Get the base path for the application.
  * Used for constructing URLs that bypass Next.js router (e.g., window.location.href, fetch).
@@ -14,10 +16,22 @@ export function cn(...inputs: ClassValue[]) {
  * NEXT_PUBLIC_BASE_PATH value when the container starts.
  */
 export function getBasePath(): string {
-  // This placeholder is replaced at runtime by entrypoint.sh with the actual basePath
-  // e.g., "/__NEXT_BASEPATH_PLACEHOLDER__" becomes "/resumelm" or "" (empty string)
-  const basePath = '/__NEXT_BASEPATH_PLACEHOLDER__';
-  return basePath;
+  // Prefer explicit env var when available (local dev, Vercel, or runtime-injected Docker)
+  const envBasePath = process.env.NEXT_PUBLIC_BASE_PATH;
+  if (envBasePath && envBasePath !== BASEPATH_PLACEHOLDER) {
+    return envBasePath;
+  }
+
+  // Fallback to Next runtime data when available in the browser
+  if (typeof window !== 'undefined') {
+    const runtimeBasePath = window.__NEXT_DATA__?.basePath;
+    if (runtimeBasePath && runtimeBasePath !== BASEPATH_PLACEHOLDER) {
+      return runtimeBasePath;
+    }
+  }
+
+  // Default to root when unset or when the placeholder hasn't been replaced
+  return '';
 }
 
 /**

@@ -14,8 +14,13 @@ interface ImageLoaderProps {
   quality?: number;
 }
 
-// Get basePath from environment or use placeholder for Docker builds
-const basePath = process.env.NEXT_PUBLIC_BASE_PATH ?? '/__NEXT_BASEPATH_PLACEHOLDER__';
+const BASEPATH_PLACEHOLDER = '/__NEXT_BASEPATH_PLACEHOLDER__';
+
+// Get basePath from environment; default to root when unset or still placeholder
+const basePath =
+  process.env.NEXT_PUBLIC_BASE_PATH && process.env.NEXT_PUBLIC_BASE_PATH !== BASEPATH_PLACEHOLDER
+    ? process.env.NEXT_PUBLIC_BASE_PATH
+    : '';
 
 export default function imageLoader({ src }: ImageLoaderProps): string {
   // External URLs (http://, https://) - return as-is
