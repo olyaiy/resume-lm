@@ -1,0 +1,19 @@
+{{- if .Values.auth.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "resumelm.fullname" . }}-auth
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: auth
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9999
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "resumelm.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: auth
+{{- end }}

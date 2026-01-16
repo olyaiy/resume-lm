@@ -17,6 +17,32 @@ inject_env() {
   fi
 }
 
+# Handle basePath substitution
+# The placeholder /__NEXT_BASEPATH_PLACEHOLDER__ is replaced with actual basePath or removed
+inject_basepath() {
+  local placeholder="/__NEXT_BASEPATH_PLACEHOLDER__"
+  local basepath="${NEXT_PUBLIC_BASE_PATH:-}"
+
+  if [ -n "$basepath" ]; then
+    echo "Injecting basePath: $basepath"
+    export NEXT_PUBLIC_BASE_PATH="$basepath"
+    # Replace placeholder in .next directory (js, html, css for fonts/assets)
+    find /app/.next -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" \) -exec sed -i "s|$placeholder|$basepath|g" {} + 2>/dev/null || true
+    # Replace in standalone server.js
+    sed -i "s|$placeholder|$basepath|g" /app/server.js 2>/dev/null || true
+  else
+    echo "Removing basePath placeholder (serving at root)"
+    export NEXT_PUBLIC_BASE_PATH=""
+    # Remove placeholder in .next directory (js, html, css for fonts/assets)
+    find /app/.next -type f \( -name "*.js" -o -name "*.html" -o -name "*.css" \) -exec sed -i "s|$placeholder||g" {} + 2>/dev/null || true
+    # Remove in standalone server.js
+    sed -i "s|$placeholder||g" /app/server.js 2>/dev/null || true
+  fi
+}
+
+# Inject basePath first (order matters for routing)
+inject_basepath
+
 # Inject all NEXT_PUBLIC_* variables
 inject_env "__NEXT_PUBLIC_SUPABASE_URL__" "NEXT_PUBLIC_SUPABASE_URL"
 inject_env "__NEXT_PUBLIC_SUPABASE_ANON_KEY__" "NEXT_PUBLIC_SUPABASE_ANON_KEY"

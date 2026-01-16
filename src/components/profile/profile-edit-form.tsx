@@ -33,7 +33,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { AlertTriangle } from "lucide-react";
 import { importResume, updateProfile } from "@/utils/actions/profiles/actions";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import pdfToText from "react-pdftotext";
 
 interface ProfileEditFormProps {
@@ -525,7 +525,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                               variant="outline"
                               size="sm"
                               className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
-                              onClick={() => window.location.href = '/settings'}
+                              onClick={() => window.location.href = withBasePath('/settings')}
                             >
                               Set API Keys in Settings
                             </Button>
@@ -653,7 +653,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                               variant="outline"
                               size="sm"
                               className="text-red-600 border-red-200 hover:bg-red-50/50 w-auto mx-auto"
-                              onClick={() => window.location.href = '/settings'}
+                              onClick={() => window.location.href = withBasePath('/settings')}
                             >
                               Set API Keys in Settings
                             </Button>

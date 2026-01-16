@@ -1,0 +1,16 @@
+apiVersion: v2
+name: resumelm
+description: ResumeLM - AI-powered resume builder with Supabase backend
+type: application
+version: 0.1.0
+appVersion: "1.0.0"
+keywords:
+  - resume
+  - ai
+  - supabase
+  - nextjs
+maintainers:
+  - name: ResumeLM Team
+home: https://github.com/resumelm/resume-lm
+sources:
+  - https://github.com/resumelm/resume-lm

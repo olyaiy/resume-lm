@@ -1,0 +1,51 @@
+{{- if .Values.ingress.enabled -}}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ include "resumelm.fullname" . }}
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.ingress.className }}
+  ingressClassName: {{ .Values.ingress.className }}
+  {{- end }}
+  {{- if .Values.ingress.tls }}
+  tls:
+    {{- range .Values.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          {{- $effectivePath := .path }}
+          {{- if and $.Values.global.basePath (eq .path "/") }}
+          {{- $effectivePath = $.Values.global.basePath }}
+          {{- end }}
+          - path: {{ $effectivePath }}
+            pathType: {{ .pathType }}
+            backend:
+              service:
+                {{- if $.Values.app.enabled }}
+                name: {{ include "resumelm.fullname" $ }}-app
+                port:
+                  number: {{ $.Values.app.service.port }}
+                {{- else }}
+                name: {{ include "resumelm.fullname" $ }}-kong
+                port:
+                  number: {{ $.Values.kong.service.httpPort }}
+                {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

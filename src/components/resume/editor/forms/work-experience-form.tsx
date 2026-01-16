@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus, Trash2, GripVertical, Check, X, Loader2, Sparkles, ChevronUp, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 
@@ -757,11 +757,11 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
         errorMessage={errorMessage}
         onUpgrade={() => {
           setShowErrorDialog(false);
-          window.location.href = '/subscription';
+          window.location.href = withBasePath('/subscription');
         }}
         onSettings={() => {
           setShowErrorDialog(false);
-          window.location.href = '/settings';
+          window.location.href = withBasePath('/settings');
         }}
       />
     </>

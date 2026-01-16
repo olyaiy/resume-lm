@@ -18,6 +18,17 @@ const withMDX = mdx({
 const nextConfig: NextConfig = {
   // Enable standalone output for Docker builds
   output: 'standalone',
+  // Support serving the app at a path prefix (e.g., /resumelm)
+  // Local dev/Vercel default to root; Docker builds set NEXT_PUBLIC_BASE_PATH to the
+  // placeholder /__NEXT_BASEPATH_PLACEHOLDER__ which entrypoint.sh replaces at runtime.
+  basePath: process.env.NEXT_PUBLIC_BASE_PATH || '',
+  // Custom image loader to handle runtime basePath injection
+  // The default Next.js image optimizer doesn't work with runtime basePath because
+  // it makes internal HTTP requests without the basePath prefix
+  images: {
+    loader: 'custom',
+    loaderFile: './src/lib/image-loader.ts',
+  },
   experimental: {
     turbo: {
       // ...

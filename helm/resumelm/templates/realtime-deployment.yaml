@@ -1,0 +1,104 @@
+{{- if .Values.realtime.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "resumelm.fullname" . }}-realtime
+  labels:
+    {{- include "resumelm.labels" . | nindent 4 }}
+    app.kubernetes.io/component: realtime
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "resumelm.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: realtime
+  template:
+    metadata:
+      labels:
+        {{- include "resumelm.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: realtime
+    spec:
+      {{- include "resumelm.imagePullSecrets" . | nindent 6 }}
+      {{- include "resumelm.nodeSelector" . | nindent 6 }}
+      {{- include "resumelm.affinity" . | nindent 6 }}
+      containers:
+        - name: realtime
+          image: "{{ .Values.realtime.image.repository }}:{{ .Values.realtime.image.tag }}"
+          imagePullPolicy: {{ .Values.realtime.image.pullPolicy }}
+          command:
+            - sh
+            - -c
+            - /app/bin/migrate && /app/bin/realtime eval 'Realtime.Release.seeds(Realtime.Repo)' && /app/bin/server
+          ports:
+            - name: http
+              containerPort: 4000
+              protocol: TCP
+          env:
+            - name: PORT
+              value: "4000"
+            - name: DB_HOST
+              value: {{ include "resumelm.dbHost" . }}
+            - name: DB_PORT
+              value: "5432"
+            - name: DB_USER
+              value: supabase_admin
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTGRES_PASSWORD
+            - name: DB_NAME
+              value: postgres
+            - name: DB_AFTER_CONNECT_QUERY
+              value: "SET search_path TO _realtime"
+            - name: DB_ENC_KEY
+              value: {{ .Values.realtime.config.dbEncKey | quote }}
+            - name: API_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: JWT_SECRET
+            - name: SECRET_KEY_BASE
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: SECRET_KEY_BASE
+            - name: ERL_AFLAGS
+              value: "-proto_dist inet_tcp"
+            - name: DNS_NODES
+              value: "''"
+            - name: RLIMIT_NOFILE
+              value: "10000"
+            - name: APP_NAME
+              value: realtime
+            - name: SEED_SELF_HOST
+              value: "true"
+            - name: REPLICATION_MODE
+              value: {{ .Values.realtime.config.replicationMode | quote }}
+            - name: REPLICATION_POLL_INTERVAL
+              value: {{ .Values.realtime.config.replicationPollInterval | quote }}
+            - name: SECURE_CHANNELS
+              value: {{ .Values.realtime.config.secureChannels | quote }}
+            - name: SLOT_NAME
+              value: {{ .Values.realtime.config.slotName | quote }}
+            - name: TEMPORARY_SLOT
+              value: "true"
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            timeoutSeconds: 10
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 6
+          resources:
+            {{- toYaml .Values.realtime.resources | nindent 12 }}
+{{- end }}

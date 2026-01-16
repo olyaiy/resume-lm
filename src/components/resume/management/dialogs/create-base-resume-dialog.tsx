@@ -9,7 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Profile, WorkExperience, Education, Skill, Project, Resume } from "@/lib/types";
 import { toast } from "@/hooks/use-toast";
 import { Loader2, FileText, Copy, Wand2, Upload } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, withBasePath } from "@/lib/utils";
 import { createBaseResume } from "@/utils/actions/resumes/actions";
 import pdfToText from "react-pdftotext";
 
@@ -636,11 +636,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           errorMessage={errorMessage}
           onUpgrade={() => {
             setShowErrorDialog(false);
-            window.location.href = '/subscription';
+            window.location.href = withBasePath('/subscription');
           }}
           onSettings={() => {
             setShowErrorDialog(false);
-            window.location.href = '/settings';
+            window.location.href = withBasePath('/settings');
           }}
         />
 
