@@ -71,6 +71,26 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
   const textareaRefs = useRef<{ [key: number]: HTMLTextAreaElement }>({});
   const [newTechnologies, setNewTechnologies] = useState<{ [key: number]: string }>({});
 
+  const reorderIndexMap = <T,>(map: Record<number, T>, from: number, to: number): Record<number, T> => {
+    const updated: Record<number, T> = {};
+
+    Object.entries(map).forEach(([key, value]) => {
+      const idx = Number(key);
+
+      if (idx === from) {
+        updated[to] = value;
+      } else if (from < to && idx > from && idx <= to) {
+        updated[idx - 1] = value;
+      } else if (from > to && idx >= to && idx < from) {
+        updated[idx + 1] = value;
+      } else {
+        updated[idx] = value;
+      }
+    });
+
+    return updated;
+  };
+
   // Effect to focus textarea when popover opens
   useEffect(() => {
     Object.entries(popoverOpen).forEach(([index, isOpen]) => {
@@ -108,9 +128,22 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= projects.length) return;
 
+    const reorder = <T,>(map: Record<number, T>) => reorderIndexMap(map, index, newIndex);
+
     const updated = [...projects];
     const [item] = updated.splice(index, 1);
     updated.splice(newIndex, 0, item);
+
+    setAiSuggestions((prev) => reorder(prev));
+    setLoadingAI((prev) => reorder(prev));
+    setLoadingPointAI((prev) => reorder(prev));
+    setAiConfig((prev) => reorder(prev));
+    setPopoverOpen((prev) => reorder(prev));
+    setImprovedPoints((prev) => reorder(prev));
+    setImprovementConfig((prev) => reorder(prev));
+    setNewTechnologies((prev) => reorder(prev));
+    textareaRefs.current = reorder(textareaRefs.current);
+
     onChange(updated);
   };
 

@@ -23,6 +23,26 @@ export function SkillsForm({
 }: SkillsFormProps) {
   const [newSkills, setNewSkills] = useState<{ [key: number]: string }>({});
 
+  const reorderIndexMap = <T,>(map: Record<number, T>, from: number, to: number): Record<number, T> => {
+    const updated: Record<number, T> = {};
+
+    Object.entries(map).forEach(([key, value]) => {
+      const idx = Number(key);
+
+      if (idx === from) {
+        updated[to] = value;
+      } else if (from < to && idx > from && idx <= to) {
+        updated[idx - 1] = value;
+      } else if (from > to && idx >= to && idx < from) {
+        updated[idx + 1] = value;
+      } else {
+        updated[idx] = value;
+      }
+    });
+
+    return updated;
+  };
+
   const addSkillCategory = () => {
     onChange([{
       category: "",
@@ -44,9 +64,13 @@ export function SkillsForm({
     const newIndex = index + direction;
     if (newIndex < 0 || newIndex >= skills.length) return;
 
+    const reorder = <T,>(map: Record<number, T>) => reorderIndexMap(map, index, newIndex);
+
     const updated = [...skills];
     const [item] = updated.splice(index, 1);
     updated.splice(newIndex, 0, item);
+
+    setNewSkills((prev) => reorder(prev));
     onChange(updated);
   };
 
