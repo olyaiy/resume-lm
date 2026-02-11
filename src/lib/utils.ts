@@ -24,7 +24,7 @@ export function getBasePath(): string {
 
   // Fallback to Next runtime data when available in the browser
   if (typeof window !== 'undefined') {
-    const runtimeBasePath = window.__NEXT_DATA__?.basePath;
+    const runtimeBasePath = (window.__NEXT_DATA__ as { basePath?: string } | undefined)?.basePath;
     if (runtimeBasePath && runtimeBasePath !== BASEPATH_PLACEHOLDER) {
       return runtimeBasePath;
     }
