@@ -15,6 +15,13 @@ function isSubscriptionExemptRoute(pathname: string): boolean {
   return SUBSCRIPTION_EXEMPT_ROUTES.some(route => pathname.startsWith(route))
 }
 
+function isFutureDate(value: string | null | undefined): boolean {
+  if (!value) return false
+  const parsed = Date.parse(value)
+  if (Number.isNaN(parsed)) return false
+  return parsed > Date.now()
+}
+
 export async function updateSession(request: NextRequest) {
   // Debug logging
   console.log('🔍 updateSession running on:', request.nextUrl.pathname)
@@ -112,13 +119,28 @@ export async function updateSession(request: NextRequest) {
       trial_end: subscription?.trial_end,
     })
 
-    // Only allow users whose subscription status is active or canceled
-    const validStatus = subscription?.subscription_status === 'active' || subscription?.subscription_status === 'canceled'
+    const status = subscription?.subscription_status
+    const isTrialing = isFutureDate(subscription?.trial_end)
+    const isWithinAccessWindow = isFutureDate(subscription?.current_period_end)
 
-    console.log('✅ validStatus:', validStatus, 'raw_status:', subscription?.subscription_status)
+    // Access rules for protected routes:
+    // - active subscriptions are allowed
+    // - canceled subscriptions are allowed only until current_period_end
+    // - active trials are always allowed
+    const hasProtectedRouteAccess =
+      status === 'active' ||
+      isTrialing ||
+      (status === 'canceled' && isWithinAccessWindow)
 
-    if (!validStatus) {
-      console.log('🚫 User subscription status not valid, redirecting to start-trial')
+    console.log('✅ accessCheck:', {
+      status,
+      isTrialing,
+      isWithinAccessWindow,
+      hasProtectedRouteAccess,
+    })
+
+    if (!hasProtectedRouteAccess) {
+      console.log('🚫 User subscription access expired or invalid, redirecting to home')
       const url = request.nextUrl.clone()
       url.pathname = '/home'
       return NextResponse.redirect(url)
