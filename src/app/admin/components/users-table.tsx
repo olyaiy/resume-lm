@@ -79,6 +79,13 @@ interface UserData {
   resume_count: number;
 }
 
+interface TrialMeta {
+  hasTrial: boolean;
+  isTrialing: boolean;
+  isExpired: boolean;
+  displayDate: string;
+}
+
 type SortableColumns =
   | 'email'
   | 'created_at'
@@ -93,6 +100,34 @@ type SortableColumns =
   | 'current_period_end'
   | 'trial_end'
   | 'resume_count'; // Added resume_count
+
+function formatDate(dateString?: string) {
+  if (!dateString) return 'N/A';
+  return new Date(dateString).toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+}
+
+function getTrialMeta(trialEnd?: string | null): TrialMeta {
+  if (!trialEnd) {
+    return { hasTrial: false, isTrialing: false, isExpired: false, displayDate: 'N/A' };
+  }
+
+  const parsed = new Date(trialEnd);
+  if (Number.isNaN(parsed.getTime())) {
+    return { hasTrial: true, isTrialing: false, isExpired: false, displayDate: 'Invalid date' };
+  }
+
+  const isTrialing = parsed.getTime() > Date.now();
+  return {
+    hasTrial: true,
+    isTrialing,
+    isExpired: !isTrialing,
+    displayDate: formatDate(trialEnd),
+  };
+}
 
 export default function UsersTable() {
   const router = useRouter(); // Initialize router
@@ -124,10 +159,6 @@ export default function UsersTable() {
       try {
         setLoading(true);
         const data = await getUsersWithProfilesAndSubscriptions();
-        console.log('DEBUG (browser) | users fetched from server action:', {
-          total: data?.length,
-          sample: (data as unknown as UserData[])?.slice?.(0, 3) // show first 3
-        });
         setUsers(data as unknown as UserData[]);
       } catch (err) {
         console.error('Error fetching users:', err);
@@ -140,34 +171,6 @@ export default function UsersTable() {
     fetchUsers();
   }, []);
 
-  function formatDate(dateString?: string) {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
-  const getTrialMeta = (trialEnd?: string | null) => {
-    if (!trialEnd) {
-      return { hasTrial: false, isTrialing: false, isExpired: false, displayDate: 'N/A' };
-    }
-
-    const parsed = new Date(trialEnd);
-    if (Number.isNaN(parsed.getTime())) {
-      return { hasTrial: true, isTrialing: false, isExpired: false, displayDate: 'Invalid date' };
-    }
-
-    const isTrialing = parsed.getTime() > Date.now();
-    return {
-      hasTrial: true,
-      isTrialing,
-      isExpired: !isTrialing,
-      displayDate: formatDate(trialEnd),
-    };
-  };
-  
   const handleSort = (column: SortableColumns) => {
     setSortDescriptor((prev) => ({
       column,

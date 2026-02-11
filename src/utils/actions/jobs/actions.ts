@@ -86,6 +86,14 @@ export async function getJobListings({
   filters 
 }: JobListingParams) {
   const supabase = await createClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
 
   // Calculate offset
   const offset = (page - 1) * pageSize;
@@ -94,6 +102,7 @@ export async function getJobListings({
   let query = supabase
     .from('jobs')
     .select('*', { count: 'exact' })
+    .eq('user_id', user.id)
     .eq('is_active', true)
     .order('created_at', { ascending: false });
 

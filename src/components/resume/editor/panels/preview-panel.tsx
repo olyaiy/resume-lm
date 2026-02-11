@@ -21,7 +21,7 @@ export function PreviewPanel({
 }: PreviewPanelProps) {
   return (
     <ScrollArea className={cn(
-      " z-50     bg-red-500 h-full",
+      "z-50 h-full",
       resume.is_base_resume
         ? "bg-purple-50/30"
         : "bg-pink-50/60 shadow-sm shadow-pink-200/20"

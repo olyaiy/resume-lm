@@ -1,5 +1,5 @@
 import CoverLetterEditor from "./cover-letter-editor";
-import { useRef, useCallback } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useResumeContext } from '@/components/resume/editor/resume-editor-context';
@@ -10,10 +10,21 @@ interface CoverLetterProps {
     
 }
 
+function sanitizeHtmlForPreview(html: string): string {
+  return html
+    .replace(/<script[\s\S]*?>[\s\S]*?<\/script>/gi, '')
+    .replace(/\son\w+=("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/\s(href|src)=("|')\s*javascript:[^"']*("|')/gi, '');
+}
+
 
 export default function CoverLetter({ containerWidth }: CoverLetterProps) {
   const { state, dispatch } = useResumeContext();
   const contentRef = useRef<HTMLDivElement>(null);
+  const sanitizedCoverLetterContent = useMemo(
+    () => sanitizeHtmlForPreview((state.resume.cover_letter?.content as string) || ''),
+    [state.resume.cover_letter?.content]
+  );
 
   const handleContentChange = useCallback((data: Record<string, unknown>) => {
     dispatch({
@@ -57,7 +68,7 @@ export default function CoverLetter({ containerWidth }: CoverLetterProps) {
       >
         <div 
           className="p-16 prose prose-sm !max-w-none"
-          dangerouslySetInnerHTML={{ __html: (state.resume.cover_letter?.content as string) || '' }} 
+          dangerouslySetInnerHTML={{ __html: sanitizedCoverLetterContent }} 
         />
       </div>
       
@@ -82,4 +93,3 @@ export default function CoverLetter({ containerWidth }: CoverLetterProps) {
     </div>
   );
 }
-

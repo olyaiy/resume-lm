@@ -184,7 +184,7 @@ export function EditorPanel({
       </div>
 
       <div className={cn(
-        "absolute w-full bottom-0 rounded-lg border`", 
+        "absolute w-full bottom-0 rounded-lg border", 
         resume.is_base_resume
           ? "bg-purple-50/50 border-purple-200/40"
           : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"

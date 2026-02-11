@@ -13,6 +13,11 @@ interface WorkExperienceSuggestionProps {
   newValue: WorkExperience[keyof WorkExperience];
 }
 
+interface DescriptionPoint {
+  text: string;
+  isNew: boolean;
+}
+
 function getHighlightClass<T>(currentValue: T, newValue: T, fieldValue: T): string {
   return JSON.stringify(currentValue) !== JSON.stringify(newValue) && fieldValue === newValue 
     ? DIFF_HIGHLIGHT_CLASSES 
@@ -33,18 +38,17 @@ export function WorkExperienceSuggestion({
   };
 
   // Safe description comparison
-  const descriptionComparison = (current: string[] = [], suggested: string[] = []) => {
+  const descriptionComparison = (current: string[] = [], suggested: string[] = []): DescriptionPoint[] => {
     // Handle undefined/null cases and ensure arrays
     const safeCurrent = Array.isArray(current) ? current : [];
     const safeSuggested = Array.isArray(suggested) ? suggested : [];
     
     return safeSuggested.map((point = '', index) => { // Add default for point
       const currentPoint = safeCurrent[index] || '';
-      const isNew = point !== currentPoint;
-      
-      return isNew 
-        ? `<span class="${DIFF_HIGHLIGHT_CLASSES}">${point}</span>` 
-        : point;
+      return {
+        text: point,
+        isNew: point !== currentPoint,
+      };
     });
   };
 
@@ -53,7 +57,10 @@ export function WorkExperienceSuggestion({
         currentWork?.description ?? [],
         (newValue as string[]) // Type assertion since we know modifiedField='description'
       )
-    : currentWork.description ?? [];
+    : (currentWork.description ?? []).map((point) => ({
+        text: point,
+        isNew: false,
+      }));
 
   return (
     <Card className={cn(
@@ -106,10 +113,7 @@ export function WorkExperienceSuggestion({
             {highlightedDescription.map((point, index) => (
               <div key={index} className="flex items-start gap-1.5">
                 <span className="text-gray-800 mt-0.5 text-xs">•</span>
-                <p 
-                  className="text-xs text-gray-800"
-                  dangerouslySetInnerHTML={{ __html: point || 'No description provided' }}
-                />
+                <p className={cn("text-xs text-gray-800", point.isNew ? DIFF_HIGHLIGHT_CLASSES : "")}>{point.text || 'No description provided'}</p>
               </div>
             ))}
           </div>

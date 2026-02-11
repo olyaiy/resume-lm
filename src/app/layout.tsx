@@ -8,6 +8,10 @@ import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import {
+  IMPERSONATION_STATE_COOKIE_NAME,
+  parseImpersonationStateCookieValue,
+} from "@/lib/impersonation";
 
 // Only enable Vercel Analytics when running on Vercel platform
 const isVercel = process.env.VERCEL === '1';
@@ -82,9 +86,12 @@ export default async function RootLayout({
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Detect impersonation via cookie set during /admin/impersonate flow
+  // Detect impersonation via signed cookie set during /admin/impersonate flow
   const cookieStore = await cookies();
-  const isImpersonating = cookieStore.get('is_impersonating')?.value === 'true';
+  const impersonationState = parseImpersonationStateCookieValue(
+    cookieStore.get(IMPERSONATION_STATE_COOKIE_NAME)?.value
+  );
+  const isImpersonating = Boolean(impersonationState);
 
   
   let showUpgradeButton = false;
