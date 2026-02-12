@@ -96,7 +96,6 @@ interface ResumeScorePanelProps {
 }
 
 const LOCAL_STORAGE_KEY = 'resumelm-resume-scores';
-const MODEL_STORAGE_KEY = 'resumelm-default-model';
 const MAX_SCORES = 10;
 
 interface StoredScoreEntry {
@@ -112,11 +111,6 @@ function camelCaseToReadable(text: string): string {
     .replace(/([a-z])([A-Z])/g, '$1 $2')
     // Capitalize first letter
     .replace(/^./, str => str.toUpperCase());
-}
-
-function getModelFromStorage(): string {
-  if (typeof window === "undefined") return "";
-  return localStorage.getItem(MODEL_STORAGE_KEY) ?? "";
 }
 
 function getResumeForScoring(resume: Resume) {
@@ -219,7 +213,7 @@ function updateStoredScores(resumeId: string, entry: StoredScoreEntry) {
 export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps) {
   const { apiKeys } = useApiKeys();
   const { defaultModel } = useDefaultModel();
-  const selectedModel = useMemo(() => defaultModel || getModelFromStorage(), [defaultModel]);
+  const selectedModel = useMemo(() => defaultModel, [defaultModel]);
   const scoreSignature = useMemo(
     () => createScoreSignature(resume, job, selectedModel),
     [resume, job, selectedModel]

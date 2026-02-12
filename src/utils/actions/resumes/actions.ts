@@ -469,9 +469,41 @@ export async function generateResumeScore(
 
   const isTailoredResume = job && !resume.is_base_resume;
 
+  const resumeForScoring = {
+    target_role: resume.target_role,
+    is_base_resume: resume.is_base_resume,
+    contact: {
+      first_name: resume.first_name,
+      last_name: resume.last_name,
+      email: resume.email,
+      phone_number: resume.phone_number,
+      location: resume.location,
+      website: resume.website,
+      linkedin_url: resume.linkedin_url,
+      github_url: resume.github_url,
+    },
+    work_experience: resume.work_experience,
+    education: resume.education,
+    skills: resume.skills,
+    projects: resume.projects,
+  };
+
+  const jobForScoring = job
+    ? {
+        company_name: job.company_name,
+        position_title: job.position_title,
+        description: job.description,
+        location: job.location,
+        salary_range: job.salary_range,
+        keywords: job.keywords,
+        work_location: job.work_location,
+        employment_type: job.employment_type,
+      }
+    : null;
+
   try {
     let prompt = `
-    Generate a comprehensive score for this resume: ${JSON.stringify(resume)}
+    Generate a comprehensive score for this resume: ${JSON.stringify(resumeForScoring)}
     
     MUST include a 'miscellaneous' field with 2-3 metrics following this format:
     {
@@ -491,7 +523,7 @@ export async function generateResumeScore(
     if (isTailoredResume) {
       prompt += `
       
-      THIS IS A TAILORED RESUME FOR A SPECIFIC JOB. Job details: ${JSON.stringify(job)}
+      THIS IS A TAILORED RESUME FOR A SPECIFIC JOB. Job details: ${JSON.stringify(jobForScoring)}
       
       IMPORTANT: Since this is a tailored resume, you MUST include the 'jobAlignment' field with detailed analysis:
       
