@@ -41,14 +41,22 @@ export function SubscriptionSection() {
   const subscription_status = profile?.subscription_status;
   const current_period_end = profile?.current_period_end;
   const trial_end = profile?.trial_end;
-  
-  const trialEndDate = trial_end ? new Date(trial_end) : null;
-  const isTrialing = Boolean(trialEndDate && trialEndDate > new Date());
 
-  const effectivePlan = isTrialing ? 'pro' : subscription_plan;
-  const isPro = effectivePlan?.toLowerCase() === 'pro';
-  const isCanceling = subscription_status === 'canceled';
-  const hasProAccess = isPro || isTrialing;
+  const now = new Date();
+  const trialEndDate = trial_end ? new Date(trial_end) : null;
+  const currentPeriodEndDate = current_period_end ? new Date(current_period_end) : null;
+
+  const isTrialing = Boolean(trialEndDate && trialEndDate > now);
+  const isWithinAccessWindow = Boolean(currentPeriodEndDate && currentPeriodEndDate > now);
+  const isProPlan = subscription_plan?.toLowerCase() === 'pro';
+
+  const hasProAccess =
+    (subscription_status === 'active' && isProPlan) ||
+    isTrialing ||
+    (subscription_status === 'canceled' && isWithinAccessWindow);
+
+  const isCanceling = subscription_status === 'canceled' && hasProAccess;
+  const isExpiredProAccess = subscription_status === 'canceled' && !hasProAccess;
 
   const handlePortalSession = async () => {
     try {
@@ -67,7 +75,7 @@ export function SubscriptionSection() {
 
   // Calculate days remaining for canceling plan
   const daysRemaining = current_period_end
-    ? Math.max(0, Math.ceil((new Date(current_period_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(0, Math.ceil((new Date(current_period_end).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
 
   const endDate = current_period_end 
@@ -79,7 +87,7 @@ export function SubscriptionSection() {
     : null;
 
   const trialDaysRemaining = isTrialing && trialEndDate
-    ? Math.max(0, Math.ceil((trialEndDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+    ? Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
     : 0;
 
   const trialEndLabel = trialEndDate
@@ -123,6 +131,23 @@ export function SubscriptionSection() {
             </h2>
             <p className="text-gray-600 max-w-lg mx-auto">
               Your Pro access ends on {endDate}. Reactivate to keep your premium features.
+            </p>
+          </>
+        ) : isExpiredProAccess ? (
+          <>
+            <div className="flex items-center justify-center mb-2">
+              <Clock className="h-6 w-6 text-rose-500 mr-2" />
+              <Badge variant="outline" className="text-rose-700 border-rose-300 bg-rose-50">
+                Access expired
+              </Badge>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Your Pro access has expired
+            </h2>
+            <p className="text-gray-600 max-w-lg mx-auto">
+              {endDate
+                ? `Your previous Pro access ended on ${endDate}. Upgrade to regain premium features.`
+                : "Your previous Pro access has ended. Upgrade to regain premium features."}
             </p>
           </>
         ) : isTrialing ? (
