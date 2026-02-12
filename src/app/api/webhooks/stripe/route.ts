@@ -75,10 +75,7 @@ async function handleSubscriptionChange(
       planId: subscriptionData.planId,
       data: subscriptionData
     });
-    
-    // Log but don't throw the error to prevent webhook failure response
-    // This allows the webhook to acknowledge receipt even if DB update fails
-    console.error('Continuing webhook processing despite error...');
+    throw error;
   }
 }
 
@@ -244,27 +241,18 @@ export async function POST(req: Request) {
           status: subscription.status
         });
         
-        try {
-          await handleSubscriptionChange(
-            subscription.customer as string,
-            {
-              subscriptionId: subscription.id,
-              planId: 'free',
-              status: 'canceled',
-              currentPeriodEnd: null,
-              trialEnd: null,
-              cancelAtPeriodEnd: false
-            }
-          );
-          console.log('✅ Subscription deletion processed successfully');
-        } catch (error) {
-          console.error('❌ Failed to process subscription deletion:', {
-            error: error instanceof Error ? error.message : 'Unknown error',
+        await handleSubscriptionChange(
+          subscription.customer as string,
+          {
             subscriptionId: subscription.id,
-            customerId: subscription.customer
-          });
-          // Continue processing the webhook even if this fails
-        }
+            planId: 'free',
+            status: 'canceled',
+            currentPeriodEnd: null,
+            trialEnd: null,
+            cancelAtPeriodEnd: false
+          }
+        );
+        console.log('✅ Subscription deletion processed successfully');
         break;
       }
 

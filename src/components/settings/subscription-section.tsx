@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, TrendingUp } from "lucide-react"
@@ -13,6 +14,7 @@ export function SubscriptionSection() {
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<SubscriptionSnapshot | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchSubscriptionStatus() {
@@ -41,7 +43,15 @@ export function SubscriptionSection() {
     trialEndLabel,
   } = subscriptionAccessState;
 
-  const handlePortalSession = async () => {
+  const handleSubscriptionAction = async () => {
+    if (!hasProAccess) {
+      const priceId = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID;
+      if (priceId) {
+        router.push(`/subscription/checkout?price_id=${priceId}`);
+      }
+      return;
+    }
+
     try {
       setIsLoading(true);
       const result = await createPortalSession();
@@ -289,7 +299,7 @@ export function SubscriptionSection() {
 
             {/* CTA Button */}
             <Button
-              onClick={handlePortalSession}
+              onClick={handleSubscriptionAction}
               disabled={isLoading}
               className={cn(
                 "w-full py-3 font-semibold rounded-lg transition-all duration-300",

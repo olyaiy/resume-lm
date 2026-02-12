@@ -37,7 +37,7 @@ export default async function ResumesPage({
         return modifier * (a.target_role?.localeCompare(b.target_role || '') || 0);
       case 'createdAt':
       default:
-        return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        return modifier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     }
   });
 

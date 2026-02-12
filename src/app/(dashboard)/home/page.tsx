@@ -74,9 +74,9 @@ export default async function Home({
 
   // Get sort parameters for both sections
   const baseSort = (params.baseSort as SortOption) || 'createdAt';
-  const baseDirection = (params.baseDirection as SortDirection) || 'asc';
+  const baseDirection = (params.baseDirection as SortDirection) || 'desc';
   const tailoredSort = (params.tailoredSort as SortOption) || 'createdAt';
-  const tailoredDirection = (params.tailoredDirection as SortDirection) || 'asc';
+  const tailoredDirection = (params.tailoredDirection as SortDirection) || 'desc';
 
   // Sort function
   function sortResumes(resumes: ResumeSummary[], sort: SortOption, direction: SortDirection) {
@@ -89,8 +89,8 @@ export default async function Home({
           return modifier * ((a.target_role || '').localeCompare(b.target_role || '') || 0);
         case 'createdAt':
         default:
-          return modifier * (new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-      
+          return modifier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+       
     }
     });
   }
