@@ -8,6 +8,7 @@ import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
+import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import {
   IMPERSONATION_STATE_COOKIE_NAME,
   parseImpersonationStateCookieValue,
@@ -124,42 +125,44 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        {isImpersonating && user && (
-          <div className="bg-amber-500 text-white text-center text-sm py-2">
-            Impersonating&nbsp;<span className="font-semibold">{user.email ?? user.id}</span>.&nbsp;
-            <Link href="/stop-impersonation" className="underline font-medium">
-              Stop impersonating
-            </Link>
-          </div>
-        )}
-        <div className="relative min-h-screen h-screen flex flex-col">
-          {user && (
-            <AppHeader
-              showUpgradeButton={showUpgradeButton}
-              isProPlan={isProPlan}
-              upgradeButtonVariant={upgradeButtonVariant}
-            />
+        <PostHogProvider>
+          {isImpersonating && user && (
+            <div className="bg-amber-500 text-white text-center text-sm py-2">
+              Impersonating&nbsp;<span className="font-semibold">{user.email ?? user.id}</span>.&nbsp;
+              <Link href="/stop-impersonation" className="underline font-medium">
+                Stop impersonating
+              </Link>
+            </div>
           )}
-          {/* Padding for header and footer */}
-          <main className="py-14 h-full">
-            {children}
-            {isVercel && <Analytics />}
-          </main>
-          {user && <Footer /> }
-        </div>
-        <Toaster 
-          richColors 
-          position="top-right" 
-          closeButton 
-          toastOptions={{
-            style: {
-              fontSize: '1rem',
-              padding: '16px',
-              minWidth: '400px',
-              maxWidth: '500px'
-            }
-          }}
-        />
+          <div className="relative min-h-screen h-screen flex flex-col">
+            {user && (
+              <AppHeader
+                showUpgradeButton={showUpgradeButton}
+                isProPlan={isProPlan}
+                upgradeButtonVariant={upgradeButtonVariant}
+              />
+            )}
+            {/* Padding for header and footer */}
+            <main className="py-14 h-full">
+              {children}
+              {isVercel && <Analytics />}
+            </main>
+            {user && <Footer /> }
+          </div>
+          <Toaster
+            richColors
+            position="top-right"
+            closeButton
+            toastOptions={{
+              style: {
+                fontSize: '1rem',
+                padding: '16px',
+                minWidth: '400px',
+                maxWidth: '500px'
+              }
+            }}
+          />
+        </PostHogProvider>
       </body>
     </html>
   );

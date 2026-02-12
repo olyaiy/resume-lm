@@ -10,6 +10,49 @@ import { generateObject } from "ai";
 import { initializeAIClient } from "@/utils/ai-tools";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
 import { getSubscriptionPlan } from "../stripe/actions";
+import { getSubscriptionAccessState } from "@/lib/subscription-access";
+import {
+  FREE_PLAN_RESUME_LIMITS,
+  getResumeLimitExceededMessage,
+  type ResumeLimitType,
+} from "@/lib/resume-limits";
+
+async function assertResumeQuota(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  userId: string,
+  type: ResumeLimitType
+) {
+  const { data: subscription, error: subscriptionError } = await supabase
+    .from('subscriptions')
+    .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
+    .eq('user_id', userId)
+    .maybeSingle();
+
+  if (subscriptionError) {
+    throw new Error('Failed to validate subscription access');
+  }
+
+  const accessState = getSubscriptionAccessState(subscription);
+  if (accessState.hasProAccess) {
+    return;
+  }
+
+  const isBaseResume = type === 'base';
+  const { count, error: countError } = await supabase
+    .from('resumes')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', userId)
+    .eq('is_base_resume', isBaseResume);
+
+  if (countError) {
+    throw new Error('Failed to validate resume limits');
+  }
+
+  const limit = FREE_PLAN_RESUME_LIMITS[type];
+  if ((count ?? 0) >= limit) {
+    throw new Error(getResumeLimitExceededMessage(type));
+  }
+}
 
 
 //  SUPABASE ACTIONS
@@ -173,6 +216,8 @@ export async function createBaseResume(
     throw new Error('User not authenticated');
   }
 
+  await assertResumeQuota(supabase, user.id, 'base');
+
   let profile = null;
   if (importOption !== 'fresh') {
     const { data, error: profileError } = await supabase
@@ -294,6 +339,8 @@ export async function createTailoredResume(
     throw new Error('User not authenticated');
   }
 
+  await assertResumeQuota(supabase, user.id, 'tailored');
+
   const newResume = {
     ...tailoredContent,
     user_id: user.id,
@@ -344,6 +391,8 @@ export async function copyResume(resumeId: string): Promise<Resume> {
   if (fetchError || !sourceResume) {
     throw new Error('Resume not found or access denied');
   }
+
+  await assertResumeQuota(supabase, user.id, sourceResume.is_base_resume ? 'base' : 'tailored');
 
   // Exclude auto-generated fields that shouldn't be copied
   // eslint-disable-next-line @typescript-eslint/no-unused-vars

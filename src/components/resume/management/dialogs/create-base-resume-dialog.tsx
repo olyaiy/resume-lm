@@ -211,6 +211,16 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           setOpen(false);
           return;
         } catch (error: Error | unknown) {
+          if (error instanceof Error && error.message.includes('Free plan limit reached')) {
+            setErrorMessage({
+              title: "Limit Reached",
+              description: error.message,
+            });
+            setShowErrorDialog(true);
+            setIsCreating(false);
+            return;
+          }
+
           if (error instanceof Error && (
             error.message.toLowerCase().includes('api key') || 
             error.message.toLowerCase().includes('unauthorized') ||
@@ -266,6 +276,15 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       setOpen(false);
     } catch (error) {
       console.error('Create resume error:', error);
+      if (error instanceof Error && error.message.includes('Free plan limit reached')) {
+        setErrorMessage({
+          title: "Limit Reached",
+          description: error.message,
+        });
+        setShowErrorDialog(true);
+        return;
+      }
+
       setErrorMessage({
         title: "Error",
         description: "Failed to create resume. Please try again."
