@@ -4,6 +4,8 @@ import { createClient, createServiceClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/supabase";
 import { deleteCustomerAndData } from "@/utils/actions/stripe/actions";
+import { loginSchema, signupSchema } from "@/lib/auth-schemas";
+import type { AuthFormState } from "@/components/auth/auth-form-state";
 
 // Auto-create Pro subscription for new users (for local development)
 const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
@@ -15,6 +17,20 @@ interface AuthResult {
 
 interface GithubAuthResult extends AuthResult {
   url?: string;
+}
+
+function mapLoginErrorMessage(message?: string): string {
+  if (!message) return "Unable to sign in right now. Please try again.";
+
+  const normalized = message.toLowerCase();
+  if (normalized.includes("invalid login credentials")) {
+    return "Invalid credentials. If you just signed up, check your email for a verification link.";
+  }
+  if (normalized.includes("email not confirmed")) {
+    return "Please confirm your email before signing in.";
+  }
+
+  return message;
 }
 
 // Login
@@ -81,6 +97,66 @@ export async function signup(formData: FormData): Promise<AuthResult> {
 
   return { success: true }
 } 
+
+export async function loginWithState(
+  _previousState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const parsedData = loginSchema.safeParse({
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  if (!parsedData.success) {
+    return {
+      status: "error",
+      message: "Please fix the highlighted fields.",
+      fieldErrors: parsedData.error.flatten().fieldErrors,
+    };
+  }
+
+  const result = await login(formData);
+  if (!result.success) {
+    return {
+      status: "error",
+      message: mapLoginErrorMessage(result.error),
+    };
+  }
+
+  return { status: "success" };
+}
+
+export async function signupWithState(
+  _previousState: AuthFormState,
+  formData: FormData
+): Promise<AuthFormState> {
+  const parsedData = signupSchema.safeParse({
+    name: formData.get('name'),
+    email: formData.get('email'),
+    password: formData.get('password'),
+  });
+
+  if (!parsedData.success) {
+    return {
+      status: "error",
+      message: "Please fix the highlighted fields.",
+      fieldErrors: parsedData.error.flatten().fieldErrors,
+    };
+  }
+
+  const result = await signup(formData);
+  if (!result.success) {
+    return {
+      status: "error",
+      message: result.error ?? "Failed to create your account.",
+    };
+  }
+
+  return {
+    status: "success",
+    message: "Account created. Check your email to confirm your account.",
+  };
+}
 
 // Logout 
 export async function logout() {

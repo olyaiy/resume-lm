@@ -13,6 +13,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import Script from "next/script";
 import { toSafeJsonScript } from "@/lib/html-safety";
+import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 
 // Page-specific metadata that extends the base metadata from layout.tsx
 export const metadata: Metadata = {
@@ -68,52 +69,54 @@ export default async function Page() {
           __html: toSafeJsonScript(structuredData)
         }}
       />
-    
-      <main aria-label="ResumeLM landing page" className=" ">
-        {/* Simplified Navigation */}
-        <nav aria-label="Main navigation" className="border-b border-gray-200 fixed top-0 w-full bg-white/95 z-[1000] transition-all duration-300 shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <Logo />
-              <NavLinks />
-            </div>
-          </div>
-        </nav>
-        
-        {/* Background component */}
-        <Background />
-        
-        {/* Main content */}
-        <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-24 flex flex-col justify-center">
-          {/* Hero Section */}
-          <Hero />
-        </div>
-        
-        {/* Video Showcase Section */}
-        <section id="product-demo">
-          <VideoShowcase />
-        </section>
-        
-        {/* Feature Highlights Section */}
-        <section id="features" aria-labelledby="features-heading">
-          <FeatureHighlights />
-        </section>
-        
-        {/* Creator Story Section */}
-        <section id="about" aria-labelledby="about-heading">
-          <CreatorStory />
-        </section>
-        
-        {/* Pricing Plans Section */}
-        <section id="pricing" aria-labelledby="pricing-heading">
-          <PricingPlans />
-        </section>
-        
-        {/* FAQ Section */}
-        <FAQ />
 
-        <Footer variant="static"/>
-      </main>
+      <AuthDialogProvider>
+        <main aria-label="ResumeLM landing page" className=" ">
+          {/* Simplified Navigation */}
+          <nav aria-label="Main navigation" className="border-b border-gray-200 fixed top-0 w-full bg-white/95 z-[1000] transition-all duration-300 shadow-sm">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="flex items-center justify-between h-16">
+                <Logo />
+                <NavLinks />
+              </div>
+            </div>
+          </nav>
+
+          {/* Background component */}
+          <Background />
+
+          {/* Main content */}
+          <div className="relative z-10 mx-auto px-4 sm:px-6 lg:px-24 flex flex-col justify-center">
+            {/* Hero Section */}
+            <Hero />
+          </div>
+
+          {/* Video Showcase Section */}
+          <section id="product-demo">
+            <VideoShowcase />
+          </section>
+
+          {/* Feature Highlights Section */}
+          <section id="features" aria-labelledby="features-heading">
+            <FeatureHighlights />
+          </section>
+
+          {/* Creator Story Section */}
+          <section id="about" aria-labelledby="about-heading">
+            <CreatorStory />
+          </section>
+
+          {/* Pricing Plans Section */}
+          <section id="pricing" aria-labelledby="pricing-heading">
+            <PricingPlans />
+          </section>
+
+          {/* FAQ Section */}
+          <FAQ />
+
+          <Footer variant="static" />
+        </main>
+      </AuthDialogProvider>
     </>
   );
 }

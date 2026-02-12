@@ -13,6 +13,7 @@ import { Footer } from "@/components/layout/footer";
 import { SplitContent } from "@/components/ui/split-content";
 import { NavLinks } from "@/components/layout/nav-links";
 import { ModelShowcase } from "@/components/landing/model-showcase";
+import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -70,9 +71,10 @@ export default async function LoginPage({
 
   return (
     <>
-      <main className="relative overflow-x-hidden selection:bg-violet-200/50 ">
-        {/* Error Dialog */}
-        <ErrorDialog isOpen={!!showErrorDialog} />
+      <AuthDialogProvider>
+        <main className="relative overflow-x-hidden selection:bg-violet-200/50 ">
+          {/* Error Dialog */}
+          <ErrorDialog isOpen={!!showErrorDialog} />
 
        
 
@@ -288,8 +290,9 @@ export default async function LoginPage({
             <CreatorStory />
           </div>
         </div>
-      </main>
-      <Footer variant="static"/>
+        </main>
+        <Footer variant="static"/>
+      </AuthDialogProvider>
     </>
   );
 }

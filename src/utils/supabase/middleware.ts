@@ -1,9 +1,13 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 
-// Routes that don't require subscription (but may require auth)
+// Routes available on the free plan (auth still required)
 const SUBSCRIPTION_EXEMPT_ROUTES = [
   '/home',
+  '/profile',
+  '/resumes',
+  '/settings',
+  '/subscription',
   '/start-trial',
   '/subscription/checkout',
   '/subscription/checkout-return',
