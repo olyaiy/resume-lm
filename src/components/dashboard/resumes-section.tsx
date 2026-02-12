@@ -14,7 +14,6 @@ import { Pagination, PaginationContent, PaginationItem } from '@/components/ui/p
 import { useState, useOptimistic, useTransition } from 'react';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import { toast } from 'sonner';
-import { useTrialGate } from '@/components/trial/trial-gate';
 
 // Extended Resume type for optimistic updates
 interface OptimisticResume extends ResumeSummary {
@@ -50,8 +49,6 @@ export function ResumesSection({
   baseResumes = [],
   canCreateMore
 }: ResumesSectionProps) {
-  const trialGate = useTrialGate();
-
   // Optimistic state for deletions
   const [optimisticResumes, removeOptimisticResume] = useOptimistic(
     resumes as OptimisticResume[],
@@ -188,19 +185,17 @@ export function ResumesSection({
 
   // Create Resume Card Component
   const CreateResumeCard = () => (
-    trialGate.enabled ? (
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          trialGate.open();
-        }}
-        className={cn(
+    <CreateResumeDialog
+      type={type}
+      profile={profile}
+      {...(type === 'tailored' && { baseResumes })}
+    >
+      <button className={cn(
         "aspect-[8.5/11] rounded-lg",
         "relative overflow-hidden",
         "border-2 border-dashed transition-all duration-500",
         "group/new-resume flex flex-col items-center justify-center gap-4",
-        type === 'base' 
+        type === 'base'
           ? "border-purple-300/70 hover:border-purple-400"
           : "border-pink-300/70 hover:border-pink-400",
         type === 'base'
@@ -212,8 +207,7 @@ export function ResumesSection({
           ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
           : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
         "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500 w-full sm:w-auto mr-8 sm:mr-0"
-      )}
-      >
+      )}>
         <div className={cn(
           "relative z-10 flex flex-col items-center",
           "transform transition-all duration-500",
@@ -235,7 +229,7 @@ export function ResumesSection({
               "group-hover/new-resume:scale-110"
             )} />
           </div>
-          
+
           <span className={cn(
             "mt-4 text-sm font-medium",
             "transition-all duration-500",
@@ -244,7 +238,7 @@ export function ResumesSection({
           )}>
             Create {type === 'base' ? 'Base' : 'Tailored'} Resume
           </span>
-          
+
           <span className={cn(
             "mt-2 text-xs",
             "transition-all duration-500 opacity-0",
@@ -255,73 +249,7 @@ export function ResumesSection({
           </span>
         </div>
       </button>
-    ) : (
-      <CreateResumeDialog 
-        type={type} 
-        profile={profile}
-        {...(type === 'tailored' && { baseResumes })}
-      >
-        <button className={cn(
-          "aspect-[8.5/11] rounded-lg",
-          "relative overflow-hidden",
-          "border-2 border-dashed transition-all duration-500",
-          "group/new-resume flex flex-col items-center justify-center gap-4",
-          type === 'base' 
-            ? "border-purple-300/70 hover:border-purple-400"
-            : "border-pink-300/70 hover:border-pink-400",
-          type === 'base'
-            ? "bg-gradient-to-br from-purple-50/80 via-purple-50/40 to-purple-100/60"
-            : "bg-gradient-to-br from-pink-50/80 via-pink-50/40 to-pink-100/60",
-          "hover:shadow-lg hover:shadow-purple-100/50 hover:-translate-y-1",
-          "after:absolute after:inset-0 after:bg-gradient-to-br",
-          type === 'base'
-            ? "after:from-purple-600/[0.03] after:to-indigo-600/[0.03]"
-            : "after:from-pink-600/[0.03] after:to-rose-600/[0.03]",
-          "after:opacity-0 hover:after:opacity-100 after:transition-opacity after:duration-500 w-full sm:w-auto mr-8 sm:mr-0"
-        )}>
-          <div className={cn(
-            "relative z-10 flex flex-col items-center",
-            "transform transition-all duration-500",
-            "group-hover/new-resume:scale-105"
-          )}>
-            <div className={cn(
-              "h-12 w-12 rounded-xl",
-              "flex items-center justify-center",
-              "transform transition-all duration-500",
-              "shadow-sm group-hover/new-resume:shadow-md",
-              type === 'base'
-                ? "bg-gradient-to-br from-purple-100 to-purple-50"
-                : "bg-gradient-to-br from-pink-100 to-pink-50",
-              "group-hover/new-resume:scale-110"
-            )}>
-              <config.icon className={cn(
-                "h-5 w-5 transition-all duration-500",
-                type === 'base' ? "text-purple-600" : "text-pink-600",
-                "group-hover/new-resume:scale-110"
-              )} />
-            </div>
-            
-            <span className={cn(
-              "mt-4 text-sm font-medium",
-              "transition-all duration-500",
-              type === 'base' ? "text-purple-600" : "text-pink-600",
-              "group-hover/new-resume:font-semibold"
-            )}>
-              Create {type === 'base' ? 'Base' : 'Tailored'} Resume
-            </span>
-            
-            <span className={cn(
-              "mt-2 text-xs",
-              "transition-all duration-500 opacity-0",
-              type === 'base' ? "text-purple-500" : "text-pink-500",
-              "group-hover/new-resume:opacity-70"
-            )}>
-              Click to start
-            </span>
-          </div>
-        </button>
-      </CreateResumeDialog>
-    )
+    </CreateResumeDialog>
   );
 
   // Limit Reached Card Component
@@ -436,14 +364,7 @@ export function ResumesSection({
               </div>
             ) : (
               // Normal clickable resume
-              <Link
-                href={`/resumes/${resume.id}`}
-                onClick={(e) => {
-                  if (!trialGate.enabled) return;
-                  e.preventDefault();
-                  trialGate.open();
-                }}
-              >
+              <Link href={`/resumes/${resume.id}`}>
                 <MiniResumePreview
                   name={resume.name}
                   type={type}
@@ -457,15 +378,11 @@ export function ResumesSection({
             {/* Action Buttons */}
             {!resume.isOptimistic && (
               <div className="absolute bottom-2 left-2 flex gap-2">
-                {trialGate.enabled ? (
+                <AlertDialogTrigger asChild>
                   <Button
                     size="icon"
                     variant="ghost"
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      trialGate.open();
-                    }}
+                    disabled={isDeleting}
                     className={cn(
                       "h-8 w-8 rounded-lg",
                       "bg-rose-50/80 hover:bg-rose-100/80",
@@ -474,56 +391,16 @@ export function ResumesSection({
                       "shadow-sm",
                       "transition-all duration-300",
                       "hover:scale-105 hover:shadow-md",
-                      "hover:-translate-y-0.5"
+                      "hover:-translate-y-0.5",
+                      isDeleting && "opacity-50 cursor-not-allowed"
                     )}
                   >
                     <Trash2 className="h-4 w-4" />
                   </Button>
-                ) : (
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      disabled={isDeleting}
-                      className={cn(
-                        "h-8 w-8 rounded-lg",
-                        "bg-rose-50/80 hover:bg-rose-100/80",
-                        "text-rose-600 hover:text-rose-700",
-                        "border border-rose-200/60",
-                        "shadow-sm",
-                        "transition-all duration-300",
-                        "hover:scale-105 hover:shadow-md",
-                        "hover:-translate-y-0.5",
-                        isDeleting && "opacity-50 cursor-not-allowed"
-                      )}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </AlertDialogTrigger>
-                )}
+                </AlertDialogTrigger>
                 
                 {/* Copy Button - Check if can create more */}
-                {trialGate.enabled ? (
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={() => {
-                      trialGate.open();
-                    }}
-                    className={cn(
-                      "h-8 w-8 rounded-lg",
-                      "bg-teal-50/80 hover:bg-teal-100/80",
-                      "text-teal-600 hover:text-teal-700",
-                      "border border-teal-200/60",
-                      "shadow-sm",
-                      "transition-all duration-300",
-                      "hover:scale-105 hover:shadow-md",
-                      "hover:-translate-y-0.5"
-                    )}
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                ) : canCreateMore ? (
+                {canCreateMore ? (
                   <Button
                     size="icon"
                     variant="ghost"

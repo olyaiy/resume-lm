@@ -3,8 +3,6 @@
 import { Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
-import type { MouseEvent } from "react";
-import { useTrialGate } from "@/components/trial/trial-gate";
 
 interface SettingsButtonProps {
   className?: string;
@@ -12,15 +10,7 @@ interface SettingsButtonProps {
 }
 
 export function SettingsButton({ className, onAllowedNavigation }: SettingsButtonProps) {
-  const trialGate = useTrialGate();
-
-  const handleClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (trialGate.enabled) {
-      event.preventDefault();
-      event.stopPropagation();
-      trialGate.open();
-      return;
-    }
+  const handleClick = () => {
     onAllowedNavigation?.();
   };
 

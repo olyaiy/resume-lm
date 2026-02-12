@@ -10,12 +10,11 @@ import { PageTitle } from "./page-title";
 import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { useState, useEffect, useRef, type MouseEvent } from "react";
+import { useState, useEffect, useRef } from "react";
 import { ModelSelector } from "@/components/shared/model-selector";
 import { getDefaultModel } from "@/lib/ai-models";
 import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
 import { TrialStartButton } from "@/components/trial/trial-start-button";
-import { useTrialGate } from "@/components/trial/trial-gate";
 
 interface AppHeaderProps {
   children?: React.ReactNode;
@@ -31,7 +30,6 @@ export function AppHeader({
   upgradeButtonVariant = 'upgrade',
 }: AppHeaderProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const trialGate = useTrialGate();
   
   // Use synchronized hooks for instant updates across components
   const { apiKeys } = useApiKeys();
@@ -55,14 +53,7 @@ export function AppHeader({
     setDefaultModel(modelId);
   };
 
-  const handleProfileClick = (event: MouseEvent<HTMLAnchorElement>) => {
-    if (trialGate.enabled) {
-      event.preventDefault();
-      event.stopPropagation();
-      trialGate.open();
-      setIsOpen(false);
-      return;
-    }
+  const handleProfileClick = () => {
     setIsOpen(false);
   };
 

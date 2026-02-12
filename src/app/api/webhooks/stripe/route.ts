@@ -20,6 +20,64 @@ const relevantEvents = new Set([
   'customer.deleted'
 ]);
 
+type ServiceSupabaseClient = Awaited<ReturnType<typeof createServiceClient>>;
+
+async function reserveWebhookEvent(
+  supabase: ServiceSupabaseClient,
+  event: Stripe.Event
+): Promise<'process' | 'skip'> {
+  const { data: existingEvent, error: existingEventError } = await supabase
+    .from('stripe_webhook_events')
+    .select('event_id, processed_at')
+    .eq('event_id', event.id)
+    .maybeSingle();
+
+  if (existingEventError) throw existingEventError;
+
+  if (existingEvent?.processed_at) {
+    return 'skip';
+  }
+
+  if (!existingEvent) {
+    const { error: insertError } = await supabase
+      .from('stripe_webhook_events')
+      .insert({
+        event_id: event.id,
+        event_type: event.type,
+      });
+
+    if (insertError) {
+      const isDuplicateEvent = (insertError as { code?: string }).code === '23505';
+      if (!isDuplicateEvent) throw insertError;
+
+      const { data: duplicateEvent, error: duplicateEventError } = await supabase
+        .from('stripe_webhook_events')
+        .select('event_id, processed_at')
+        .eq('event_id', event.id)
+        .maybeSingle();
+
+      if (duplicateEventError) throw duplicateEventError;
+      if (duplicateEvent?.processed_at) {
+        return 'skip';
+      }
+    }
+  }
+
+  return 'process';
+}
+
+async function markWebhookEventProcessed(
+  supabase: ServiceSupabaseClient,
+  eventId: string
+): Promise<void> {
+  const { error } = await supabase
+    .from('stripe_webhook_events')
+    .update({ processed_at: new Date().toISOString() })
+    .eq('event_id', eventId);
+
+  if (error) throw error;
+}
+
 async function handleSubscriptionChange(
   stripeCustomerId: string,
   subscriptionData: {
@@ -144,6 +202,19 @@ export async function POST(req: Request) {
       );
     }
 
+    const supabase = await createServiceClient();
+    const webhookEventAction = await reserveWebhookEvent(supabase, event);
+    if (webhookEventAction === 'skip') {
+      console.log('↩️ Duplicate webhook event already processed, skipping:', event.id);
+      return new Response(
+        JSON.stringify({ received: true, processed: false, duplicate: true }),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Handle the event based on type
     switch (event.type) {
       case 'checkout.session.completed': {
@@ -258,7 +329,6 @@ export async function POST(req: Request) {
 
       case 'customer.deleted': {
         const customer = event.data.object as Stripe.Customer;
-        const supabase = await createServiceClient();
 
         try {
           const { error } = await supabase
@@ -283,6 +353,8 @@ export async function POST(req: Request) {
         console.log(`⚠️ Unhandled event type: ${event.type}`);
       }
     }
+
+    await markWebhookEventProcessed(supabase, event.id);
 
     console.log('✅ Webhook processed successfully:', {
       eventType: event.type,
