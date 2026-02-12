@@ -7,10 +7,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { RefreshCw, TrendingUp, Target, Award } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { generateResumeScore } from "@/utils/actions/resumes/actions";
 import { Resume, Job as JobType } from "@/lib/types";
-import { ApiKey } from "@/utils/ai-tools";
+import { useApiKeys, useDefaultModel } from "@/hooks/use-api-keys";
+import { toast } from "@/hooks/use-toast";
 
 export interface ResumeScoreMetrics {
   overallScore: {
@@ -95,7 +96,14 @@ interface ResumeScorePanelProps {
 }
 
 const LOCAL_STORAGE_KEY = 'resumelm-resume-scores';
+const MODEL_STORAGE_KEY = 'resumelm-default-model';
 const MAX_SCORES = 10;
+
+interface StoredScoreEntry {
+  score: ResumeScoreMetrics;
+  signature: string;
+  generatedAt: string;
+}
 
 // Helper function to convert camelCase to readable labels
 function camelCaseToReadable(text: string): string {
@@ -106,31 +114,102 @@ function camelCaseToReadable(text: string): string {
     .replace(/^./, str => str.toUpperCase());
 }
 
-function getStoredScores(resumeId: string): ResumeScoreMetrics | null {
+function getModelFromStorage(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(MODEL_STORAGE_KEY) ?? "";
+}
+
+function getResumeForScoring(resume: Resume) {
+  return {
+    ...resume,
+    section_configs: undefined,
+    section_order: undefined
+  };
+}
+
+function getJobForScoring(job?: JobType | null) {
+  if (!job) return null;
+
+  return {
+    ...job,
+    employment_type: job.employment_type || undefined
+  };
+}
+
+function hashContent(content: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < content.length; i += 1) {
+    hash ^= content.charCodeAt(i);
+    hash += (hash << 1) + (hash << 4) + (hash << 7) + (hash << 8) + (hash << 24);
+  }
+
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function createScoreSignature(resume: Resume, job: JobType | null | undefined, model: string): string {
+  const payload = {
+    resume: getResumeForScoring(resume),
+    job: getJobForScoring(job),
+    model
+  };
+
+  return hashContent(JSON.stringify(payload));
+}
+
+function parseStoredScoreEntry(raw: unknown): StoredScoreEntry | null {
+  if (!raw || typeof raw !== "object") return null;
+
+  const candidate = raw as Record<string, unknown>;
+  if (typeof candidate.signature !== "string") return null;
+  if (!candidate.score || typeof candidate.score !== "object") return null;
+
+  return {
+    score: candidate.score as ResumeScoreMetrics,
+    signature: candidate.signature,
+    generatedAt: typeof candidate.generatedAt === "string" ? candidate.generatedAt : ""
+  };
+}
+
+function getStoredScores(resumeId: string, signature: string): ResumeScoreMetrics | null {
+  if (typeof window === "undefined") return null;
+
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (!stored) return null;
     
-    const scores = new Map(JSON.parse(stored));
-    return scores.get(resumeId) as ResumeScoreMetrics | null;
+    const scores = new Map<string, unknown>(JSON.parse(stored));
+    const storedEntry = parseStoredScoreEntry(scores.get(resumeId));
+
+    if (!storedEntry) return null;
+    if (storedEntry.signature !== signature) return null;
+
+    return storedEntry.score;
   } catch (error) {
     console.error('Error reading stored scores:', error);
     return null;
   }
 }
 
-function updateStoredScores(resumeId: string, score: ResumeScoreMetrics) {
+function updateStoredScores(resumeId: string, entry: StoredScoreEntry) {
+  if (typeof window === "undefined") return;
+
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
-    const scores = stored ? new Map(JSON.parse(stored)) : new Map();
+    const scores = stored ? new Map<string, StoredScoreEntry>(JSON.parse(stored)) : new Map<string, StoredScoreEntry>();
+
+    if (scores.has(resumeId)) {
+      scores.delete(resumeId);
+    }
 
     // Maintain only MAX_SCORES entries
     if (scores.size >= MAX_SCORES) {
       const oldestKey = scores.keys().next().value;
-      scores.delete(oldestKey);
+      if (oldestKey) {
+        scores.delete(oldestKey);
+      }
     }
 
-    scores.set(resumeId, score);
+    scores.set(resumeId, entry);
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(Array.from(scores)));
   } catch (error) {
     console.error('Error storing score:', error);
@@ -138,51 +217,60 @@ function updateStoredScores(resumeId: string, score: ResumeScoreMetrics) {
 }
 
 export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps) {
+  const { apiKeys } = useApiKeys();
+  const { defaultModel } = useDefaultModel();
+  const selectedModel = useMemo(() => defaultModel || getModelFromStorage(), [defaultModel]);
+  const scoreSignature = useMemo(
+    () => createScoreSignature(resume, job, selectedModel),
+    [resume, job, selectedModel]
+  );
   const [isCalculating, setIsCalculating] = useState(false);
   const [scoreData, setScoreData] = useState<ResumeScoreMetrics | null>(() => {
-    // Initialize with stored score if available
-    return getStoredScores(resume.id);
+    return getStoredScores(resume.id, scoreSignature);
   });
 
-  // Add useEffect for initial load
   useEffect(() => {
-    const storedScore = getStoredScores(resume.id);
-    if (storedScore) {
-      setScoreData(storedScore);
-    }
-  }, [resume.id]);
+    const storedScore = getStoredScores(resume.id, scoreSignature);
+    setScoreData(storedScore);
+  }, [resume.id, scoreSignature]);
 
   const handleRecalculate = async () => {
+    if (!selectedModel) {
+      toast({
+        title: "Model required",
+        description: "Select an AI model before generating a resume score.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsCalculating(true);
     try {
-        const MODEL_STORAGE_KEY = 'resumelm-default-model';
-        // const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
-  
-        const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
-        // const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
-        const apiKeys: string[] = [];
-        
-      // Convert job type to match the expected schema
-      const jobForScoring = job ? {
-        ...job,
-        employment_type: job.employment_type || undefined
-      } : null;
-
       // Call the generateResumeScore action with current resume
-      const newScore = await generateResumeScore({
-        ...resume,
-        section_configs: undefined,
-        section_order: undefined
-      }, jobForScoring, {
-        model: selectedModel || '',
-        apiKeys: apiKeys as unknown as ApiKey[]
+      const newScore = await generateResumeScore(getResumeForScoring(resume), getJobForScoring(job), {
+        model: selectedModel,
+        apiKeys,
       });
 
       // Update state and storage
-      setScoreData(newScore as ResumeScoreMetrics);
-      updateStoredScores(resume.id, newScore as ResumeScoreMetrics);
+      const scoreMetrics = newScore as ResumeScoreMetrics;
+      setScoreData(scoreMetrics);
+      updateStoredScores(resume.id, {
+        score: scoreMetrics,
+        signature: scoreSignature,
+        generatedAt: new Date().toISOString()
+      });
     } catch (error) {
       console.error("Error generating score:", error);
+      const description = error instanceof Error
+        ? `${error.message} Check your model selection and API keys in Settings, then try again.`
+        : "Failed to generate resume score. Check your model selection and API keys in Settings, then try again.";
+
+      toast({
+        title: "Resume score failed",
+        description,
+        variant: "destructive",
+      });
     } finally {
       setIsCalculating(false);
     }

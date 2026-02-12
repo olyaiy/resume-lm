@@ -469,10 +469,6 @@ export async function generateResumeScore(
 
   const isTailoredResume = job && !resume.is_base_resume;
 
-  console.log("RESUME IS", resume);
-  console.log("JOB IS", job);
-  console.log("IS TAILORED RESUME", isTailoredResume);
-
   try {
     let prompt = `
     Generate a comprehensive score for this resume: ${JSON.stringify(resume)}
