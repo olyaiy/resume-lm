@@ -3,18 +3,25 @@
 "use server"
 
 import { SettingsContent } from '@/components/settings/settings-content'
-import { checkSubscriptionPlan } from '@/utils/actions/stripe/actions';
 import { createClient } from '@/utils/supabase/server'
+import { getSubscriptionAccessState } from '@/lib/subscription-access';
 
 
 export default async function SettingsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
+  const { data: subscription } = user
+    ? await supabase
+        .from('subscriptions')
+        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
+        .eq('user_id', user.id)
+        .maybeSingle()
+    : { data: null };
 
-    // Check if user is on Pro plan
-    const subscription = await checkSubscriptionPlan();
-    const isProPlan = subscription.plan === 'pro';
+  const subscriptionState = getSubscriptionAccessState(subscription);
+  const isProPlan = subscriptionState.hasProAccess;
+  const subscriptionStatus = subscription?.subscription_status ?? '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
@@ -22,7 +29,8 @@ export default async function SettingsPage() {
         <SettingsContent 
           user={user} 
           isProPlan={isProPlan}
-          subscriptionStatus={subscription.status}
+          subscriptionStatus={subscriptionStatus}
+          subscriptionSnapshot={subscription}
         />
       </main>
     </div>

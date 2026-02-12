@@ -1,37 +1,23 @@
 'use client'
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, TrendingUp } from "lucide-react"
 import { cn } from '@/lib/utils';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
-import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
 import { getSubscriptionAccessState, type SubscriptionSnapshot } from '@/lib/subscription-access';
 
-export function SubscriptionSection() {
+interface SubscriptionSectionProps {
+  initialProfile: SubscriptionSnapshot | null;
+}
+
+export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState<SubscriptionSnapshot | null>(null);
-  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const router = useRouter();
 
-  useEffect(() => {
-    async function fetchSubscriptionStatus() {
-      try {
-        const data = await getSubscriptionStatus();
-        setProfile(data);
-      } catch (error) {
-        console.error('Error fetching subscription status:', error);
-      } finally {
-        setIsLoadingProfile(false);
-      }
-    }
-
-    fetchSubscriptionStatus();
-  }, []);
-
-  const subscriptionAccessState = getSubscriptionAccessState(profile);
+  const subscriptionAccessState = getSubscriptionAccessState(initialProfile);
   const {
     hasProAccess,
     isCanceling,
@@ -67,20 +53,6 @@ export function SubscriptionSection() {
   };
 
   const endDate = currentPeriodEndLabel;
-
-  if (isLoadingProfile) {
-    return (
-      <div className="space-y-6 relative min-h-[400px] flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <div className="h-16 w-16 bg-gradient-to-br from-blue-100 to-purple-100 rounded-2xl animate-pulse" />
-          <div className="space-y-2 text-center">
-            <div className="h-6 w-48 bg-gradient-to-r from-slate-200 to-slate-100 rounded-lg animate-pulse" />
-            <div className="h-4 w-64 bg-gradient-to-r from-slate-100 to-slate-200 rounded-lg animate-pulse" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-8">

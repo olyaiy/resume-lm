@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { getSubscriptionAccessState } from '@/lib/subscription-access'
 
 // Routes available on the free plan (auth still required)
 const SUBSCRIPTION_EXEMPT_ROUTES = [
@@ -17,13 +18,6 @@ const SUBSCRIPTION_EXEMPT_ROUTES = [
 
 function isSubscriptionExemptRoute(pathname: string): boolean {
   return SUBSCRIPTION_EXEMPT_ROUTES.some(route => pathname.startsWith(route))
-}
-
-function isFutureDate(value: string | null | undefined): boolean {
-  if (!value) return false
-  const parsed = Date.parse(value)
-  if (Number.isNaN(parsed)) return false
-  return parsed > Date.now()
 }
 
 export async function updateSession(request: NextRequest) {
@@ -112,7 +106,7 @@ export async function updateSession(request: NextRequest) {
     console.log('🧭 Subscription check for path:', pathname)
     const { data: subscription } = await supabase
       .from('subscriptions')
-      .select('stripe_subscription_id, subscription_status, current_period_end, trial_end')
+      .select('subscription_plan, stripe_subscription_id, subscription_status, current_period_end, trial_end')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -123,23 +117,13 @@ export async function updateSession(request: NextRequest) {
       trial_end: subscription?.trial_end,
     })
 
-    const status = subscription?.subscription_status
-    const isTrialing = isFutureDate(subscription?.trial_end)
-    const isWithinAccessWindow = isFutureDate(subscription?.current_period_end)
-
-    // Access rules for protected routes:
-    // - active subscriptions are allowed
-    // - canceled subscriptions are allowed only until current_period_end
-    // - active trials are always allowed
-    const hasProtectedRouteAccess =
-      status === 'active' ||
-      isTrialing ||
-      (status === 'canceled' && isWithinAccessWindow)
+    const subscriptionState = getSubscriptionAccessState(subscription)
+    const hasProtectedRouteAccess = subscriptionState.hasProAccess
 
     console.log('✅ accessCheck:', {
-      status,
-      isTrialing,
-      isWithinAccessWindow,
+      status: subscription?.subscription_status,
+      isTrialing: subscriptionState.isTrialing,
+      isWithinAccessWindow: subscriptionState.isWithinAccessWindow,
       hasProtectedRouteAccess,
     })
 

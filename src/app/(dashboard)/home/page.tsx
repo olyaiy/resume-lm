@@ -102,7 +102,7 @@ export default async function Home({
   
   // Check if user has Pro access (paid, canceling-but-active, or trialing)
   const isProPlan = subscription.hasProAccess;
-  const needsTrial = subscription.status !== 'active' && subscription.status !== 'canceled';
+  const shouldGateResumeActions = false;
 
   // console.log(subscription);
   
@@ -132,7 +132,7 @@ export default async function Home({
   }
 
   return (
-    <TrialGateProvider enabled={needsTrial}>
+    <TrialGateProvider enabled={shouldGateResumeActions}>
     <main className="min-h-screen relative sm:pb-12 pb-40">
 
       {/* Welcome Dialog for New Signups */}
@@ -156,7 +156,7 @@ export default async function Home({
           {/* Profile Overview */}
           <div className="mb-6 space-y-4">
             {/* API Key Alert */}
-            {!isProPlan && <ApiKeyAlert variant={needsTrial ? 'trial' : 'upgrade'} />}
+            {!isProPlan && <ApiKeyAlert variant="upgrade" />}
             
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">

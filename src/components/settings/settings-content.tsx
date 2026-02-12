@@ -9,6 +9,7 @@ import { User } from "@supabase/supabase-js"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useEffect, useState } from "react"
+import type { SubscriptionSnapshot } from "@/lib/subscription-access"
 
 const sections = [
   { id: "security", title: "Security", description: "Manage your email and password settings", icon: "🔒" },
@@ -22,9 +23,10 @@ interface SettingsContentProps {
   user: User | null;
   isProPlan: boolean;
   subscriptionStatus: string;
+  subscriptionSnapshot: SubscriptionSnapshot | null;
 }
 
-export function SettingsContent({ user, isProPlan, subscriptionStatus }: SettingsContentProps) {
+export function SettingsContent({ user, isProPlan, subscriptionStatus, subscriptionSnapshot }: SettingsContentProps) {
   const [activeSection, setActiveSection] = useState<string>("security")
 
   useEffect(() => {
@@ -113,7 +115,7 @@ export function SettingsContent({ user, isProPlan, subscriptionStatus }: Setting
             <CardDescription>Manage your subscription and billing settings</CardDescription>
           </CardHeader>
           <CardContent>
-            <SubscriptionSection />
+            <SubscriptionSection initialProfile={subscriptionSnapshot} />
           </CardContent>
         </Card>
 
