@@ -57,26 +57,37 @@ export async function checkAdminStatus(): Promise<boolean> {
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    console.error('Admin Check: Error fetching user or user not authenticated.', authError);
+    console.error('Admin check failed to resolve user', authError);
     return false; // Not authenticated, definitely not admin
   }
 
-  // Check the admins table for this user
-  const { data: adminData, error: dbError } = await supabase
+  // Primary source of truth: profiles.is_admin
+  const { data: profileData, error: profileError } = await supabase
+    .from('profiles')
+    .select('is_admin')
+    .eq('user_id', user.id)
+    .maybeSingle();
+
+  if (!profileError) {
+    return profileData?.is_admin === true;
+  }
+
+  // Backward compatibility for older databases still using public.admins
+  const { data: adminData, error: adminError } = await supabase
     .from('admins')
     .select('is_admin')
     .eq('user_id', user.id)
     .maybeSingle();
 
-  // Detailed logging for RLS debugging
-  if (dbError) {
-      console.error(`Admin Check DB Error: Failed to query admins table for user ${user.id}. RLS issue?`, { code: dbError.code, message: dbError.message, details: dbError.details, hint: dbError.hint });
-      return false; // Error occurred, assume not admin for safety
-  } else {
-      console.log(`Admin Check DB Success: Query for user ${user.id} returned:`, adminData);
+  if (adminError) {
+    console.error('Admin check failed for profiles/admins lookup', {
+      userId: user.id,
+      profileError: profileError.message,
+      adminError: adminError.message,
+    });
+    return false;
   }
 
-  // If adminData exists and is_admin is true, return true
   return adminData?.is_admin === true;
 }
 

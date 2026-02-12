@@ -12,6 +12,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import Script from "next/script";
+import { toSafeJsonScript } from "@/lib/html-safety";
 
 // Page-specific metadata that extends the base metadata from layout.tsx
 export const metadata: Metadata = {
@@ -37,6 +38,25 @@ export default async function Page() {
   if (user) {
     redirect("/home");
   }
+
+  const structuredData = {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "ResumeLM",
+    "applicationCategory": "BusinessApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
+    "operatingSystem": "Web",
+    "aggregateRating": {
+      "@type": "AggregateRating",
+      "ratingValue": "4.8",
+      "ratingCount": "500"
+    }
+  };
   
   return (
     <>
@@ -45,24 +65,7 @@ export default async function Page() {
         id="schema-data"
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify({
-            "@context": "https://schema.org",
-            "@type": "SoftwareApplication",
-            "name": "ResumeLM",
-            "applicationCategory": "BusinessApplication",
-            "offers": {
-              "@type": "Offer",
-              "price": "0",
-              "priceCurrency": "USD"
-            },
-            "description": "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
-            "operatingSystem": "Web",
-            "aggregateRating": {
-              "@type": "AggregateRating",
-              "ratingValue": "4.8",
-              "ratingCount": "500"
-            }
-          })
+          __html: toSafeJsonScript(structuredData)
         }}
       />
     

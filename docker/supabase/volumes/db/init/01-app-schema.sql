@@ -128,6 +128,7 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   website text NULL,
   linkedin_url text NULL,
   github_url text NULL,
+  is_admin boolean NOT NULL DEFAULT false,
   work_experience jsonb NULL DEFAULT '[]'::jsonb,
   education jsonb NULL DEFAULT '[]'::jsonb,
   skills jsonb NULL DEFAULT '[]'::jsonb,
@@ -136,6 +137,9 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   CONSTRAINT profiles_pkey PRIMARY KEY (user_id),
   CONSTRAINT profiles_user_id_key UNIQUE (user_id)
 ) TABLESPACE pg_default;
+
+ALTER TABLE public.profiles
+  ADD COLUMN IF NOT EXISTS is_admin boolean NOT NULL DEFAULT false;
 
 -- Create updated_at trigger for profiles
 DROP TRIGGER IF EXISTS update_profiles_updated_at ON public.profiles;

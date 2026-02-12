@@ -79,7 +79,7 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
     if (!profile) return;
     
     // List of fields to copy from profile
-    const fieldsToFill: (keyof Profile)[] = [
+    const fieldsToFill = [
       'first_name',
       'last_name',
       'email',
@@ -88,7 +88,7 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
       'website',
       'linkedin_url',
       'github_url'
-    ];
+    ] as const satisfies Array<keyof Resume>;
 
     // Copy each field if it exists in the profile
     fieldsToFill.forEach((field) => {

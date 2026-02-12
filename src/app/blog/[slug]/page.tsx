@@ -2,6 +2,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
+import { toSafeJsonScript } from "@/lib/html-safety";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import { Calendar, ArrowLeft, Clock } from "lucide-react";
 import Link from "next/link";
@@ -90,6 +91,37 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
   // Calculate reading time (rough estimate)
   const wordCount = post.content.split(/\s+/).length;
   const readingTime = Math.ceil(wordCount / 200); // Average reading speed
+  const structuredData = {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: post.frontMatter.title,
+    description: post.frontMatter.description,
+    image: 'https://resumelm.com/og.webp',
+    datePublished: new Date(post.frontMatter.date).toISOString(),
+    dateModified: new Date(post.frontMatter.date).toISOString(),
+    author: {
+      '@type': 'Organization',
+      name: 'ResumeLM Team',
+      url: 'https://resumelm.com',
+    },
+    publisher: {
+      '@type': 'Organization',
+      name: 'ResumeLM',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://resumelm.com/og.webp',
+      },
+      url: 'https://resumelm.com',
+    },
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': `https://resumelm.com/blog/${slug}`,
+    },
+    articleSection: 'Career Advice',
+    keywords: 'resume builder, tech jobs, Vancouver tech, career advice, AI resume, job search',
+    wordCount,
+    timeRequired: `PT${readingTime}M`,
+  };
 
   return (
     <main className="min-h-screen relative">
@@ -154,37 +186,7 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{
-              __html: JSON.stringify({
-                '@context': 'https://schema.org',
-                '@type': 'Article',
-                headline: post.frontMatter.title,
-                description: post.frontMatter.description,
-                image: 'https://resumelm.com/og.webp',
-                datePublished: new Date(post.frontMatter.date).toISOString(),
-                dateModified: new Date(post.frontMatter.date).toISOString(),
-                author: {
-                  '@type': 'Organization',
-                  name: 'ResumeLM Team',
-                  url: 'https://resumelm.com',
-                },
-                publisher: {
-                  '@type': 'Organization',
-                  name: 'ResumeLM',
-                  logo: {
-                    '@type': 'ImageObject',
-                    url: 'https://resumelm.com/og.webp',
-                  },
-                  url: 'https://resumelm.com',
-                },
-                mainEntityOfPage: {
-                  '@type': 'WebPage',
-                  '@id': `https://resumelm.com/blog/${slug}`,
-                },
-                articleSection: 'Career Advice',
-                keywords: 'resume builder, tech jobs, Vancouver tech, career advice, AI resume, job search',
-                wordCount: wordCount,
-                timeRequired: `PT${readingTime}M`,
-              }),
+              __html: toSafeJsonScript(structuredData),
             }}
           />
           

@@ -48,13 +48,25 @@ export function JobListingsCard() {
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user) {
-        const { data: profile } = await supabase
+        const { data: profile, error: profileError } = await supabase
           .from('profiles')
           .select('is_admin')
           .eq('user_id', user.id)
-          .single();
-        
-        setIsAdmin(profile?.is_admin ?? false);
+          .maybeSingle();
+
+        if (!profileError) {
+          setIsAdmin(profile?.is_admin === true);
+          return;
+        }
+
+        // Backward compatibility for deployments still using public.admins
+        const { data: adminData } = await supabase
+          .from('admins')
+          .select('is_admin')
+          .eq('user_id', user.id)
+          .maybeSingle();
+
+        setIsAdmin(adminData?.is_admin === true);
       }
     }
     

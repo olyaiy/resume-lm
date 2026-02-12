@@ -43,6 +43,27 @@ if [ "$HTTP_CODE" = "200" ] || [ "$HTTP_CODE" = "201" ]; then
   USER_ID=$(echo "$BODY" | grep -o '"id":"[^"]*"' | head -1 | cut -d'"' -f4)
   echo "Admin user created successfully (ID: ${USER_ID})"
 
+  if [ -n "$USER_ID" ]; then
+    echo "Marking seeded user as admin..."
+    ADMIN_RESPONSE=$(curl -s -w "\n%{http_code}" "http://kong:8000/rest/v1/profiles" \
+      -H "apikey: ${SUPABASE_SERVICE_KEY}" \
+      -H "Authorization: Bearer ${SUPABASE_SERVICE_KEY}" \
+      -H "Content-Type: application/json" \
+      -H "Prefer: resolution=merge-duplicates" \
+      -d "{
+        \"user_id\": \"${USER_ID}\",
+        \"email\": \"${SEED_ADMIN_EMAIL}\",
+        \"is_admin\": true
+      }")
+
+    ADMIN_HTTP_CODE=$(echo "$ADMIN_RESPONSE" | tail -n1)
+    if [ "$ADMIN_HTTP_CODE" = "200" ] || [ "$ADMIN_HTTP_CODE" = "201" ]; then
+      echo "Admin role granted successfully"
+    else
+      echo "Warning: Failed to grant admin role (HTTP ${ADMIN_HTTP_CODE})"
+    fi
+  fi
+
   # Grant Pro subscription if AUTO_PRO_SUBSCRIPTION is enabled
   if [ "${AUTO_PRO_SUBSCRIPTION:-false}" = "true" ] && [ -n "$USER_ID" ]; then
     echo "Granting Pro subscription to admin user..."
