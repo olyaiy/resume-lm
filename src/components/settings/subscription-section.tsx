@@ -7,19 +7,11 @@ import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, Tr
 import { cn } from '@/lib/utils';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { getSubscriptionStatus } from '@/utils/actions/stripe/actions';
-
-interface Profile {
-  subscription_plan: string | null;
-  subscription_status: string | null;
-  current_period_end: string | null;
-  trial_end: string | null;
-  stripe_customer_id: string | null;
-  stripe_subscription_id: string | null;
-}
+import { getSubscriptionAccessState, type SubscriptionSnapshot } from '@/lib/subscription-access';
 
 export function SubscriptionSection() {
   const [isLoading, setIsLoading] = useState(false);
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<SubscriptionSnapshot | null>(null);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
 
   useEffect(() => {
@@ -37,26 +29,17 @@ export function SubscriptionSection() {
     fetchSubscriptionStatus();
   }, []);
 
-  const subscription_plan = profile?.subscription_plan;
-  const subscription_status = profile?.subscription_status;
-  const current_period_end = profile?.current_period_end;
-  const trial_end = profile?.trial_end;
-
-  const now = new Date();
-  const trialEndDate = trial_end ? new Date(trial_end) : null;
-  const currentPeriodEndDate = current_period_end ? new Date(current_period_end) : null;
-
-  const isTrialing = Boolean(trialEndDate && trialEndDate > now);
-  const isWithinAccessWindow = Boolean(currentPeriodEndDate && currentPeriodEndDate > now);
-  const isProPlan = subscription_plan?.toLowerCase() === 'pro';
-
-  const hasProAccess =
-    (subscription_status === 'active' && isProPlan) ||
-    isTrialing ||
-    (subscription_status === 'canceled' && isWithinAccessWindow);
-
-  const isCanceling = subscription_status === 'canceled' && hasProAccess;
-  const isExpiredProAccess = subscription_status === 'canceled' && !hasProAccess;
+  const subscriptionAccessState = getSubscriptionAccessState(profile);
+  const {
+    hasProAccess,
+    isCanceling,
+    isExpiredProAccess,
+    isTrialing,
+    daysRemaining,
+    currentPeriodEndLabel,
+    trialDaysRemaining,
+    trialEndLabel,
+  } = subscriptionAccessState;
 
   const handlePortalSession = async () => {
     try {
@@ -73,26 +56,7 @@ export function SubscriptionSection() {
     }
   };
 
-  // Calculate days remaining for canceling plan
-  const daysRemaining = current_period_end
-    ? Math.max(0, Math.ceil((new Date(current_period_end).getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-    : 0;
-
-  const endDate = current_period_end 
-    ? new Date(current_period_end).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long', 
-        day: 'numeric'
-      })
-    : null;
-
-  const trialDaysRemaining = isTrialing && trialEndDate
-    ? Math.max(0, Math.ceil((trialEndDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24)))
-    : 0;
-
-  const trialEndLabel = trialEndDate
-    ? trialEndDate.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })
-    : null;
+  const endDate = currentPeriodEndLabel;
 
   if (isLoadingProfile) {
     return (
@@ -130,7 +94,9 @@ export function SubscriptionSection() {
               Pro access ending soon
             </h2>
             <p className="text-gray-600 max-w-lg mx-auto">
-              Your Pro access ends on {endDate}. Reactivate to keep your premium features.
+              {endDate
+                ? `Your Pro access ends on ${endDate}. Reactivate to keep your premium features.`
+                : "Your Pro access is ending soon. Reactivate to keep your premium features."}
             </p>
           </>
         ) : isExpiredProAccess ? (

@@ -18,8 +18,9 @@ import {
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
+import { getSubscriptionAccessState, type SubscriptionSnapshot } from '@/lib/subscription-access';
 
-interface Profile {
+interface Profile extends SubscriptionSnapshot {
   subscription_plan: string | null;
   subscription_status: string | null;
   current_period_end: string | null;
@@ -56,12 +57,18 @@ const testimonials = [
 export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscriptionPageProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  
-  const isPro = initialProfile?.subscription_plan?.toLowerCase() === 'pro';
-  const isCanceling = initialProfile?.subscription_status === 'canceled';
+
+  const subscriptionAccessState = getSubscriptionAccessState(initialProfile);
+  const {
+    hasProAccess,
+    isCanceling,
+    isExpiredProAccess,
+    daysRemaining,
+    currentPeriodEndLabel,
+  } = subscriptionAccessState;
 
   const handleUpgrade = async () => {
-    if (isPro) {
+    if (hasProAccess) {
       // Handle portal session for existing pro users
       try {
         setIsLoading(true);
@@ -83,18 +90,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
     }
   };
 
-  // Calculate days remaining for canceling users
-  const daysRemaining = initialProfile?.current_period_end
-    ? Math.max(0, Math.ceil((new Date(initialProfile.current_period_end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)))
-    : 0;
-
-  const endDate = initialProfile?.current_period_end 
-    ? new Date(initialProfile.current_period_end).toLocaleDateString('en-US', {
-        year: 'numeric',
-        month: 'long', 
-        day: 'numeric'
-      })
-    : null;
+  const endDate = currentPeriodEndLabel;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/50 relative overflow-hidden">
@@ -123,10 +119,29 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                 Don&apos;t lose your competitive edge
               </h1>
               <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-                Your Pro access ends on {endDate}. Keep the momentum going and continue landing interviews.
+                {endDate
+                  ? `Your Pro access ends on ${endDate}. Keep the momentum going and continue landing interviews.`
+                  : "Your Pro access is ending soon. Keep the momentum going and continue landing interviews."}
               </p>
             </>
-          ) : isPro ? (
+          ) : isExpiredProAccess ? (
+            <>
+              <div className="flex items-center justify-center mb-4">
+                <Clock className="h-8 w-8 text-rose-500 mr-3" />
+                <Badge variant="outline" className="text-rose-700 border-rose-300 bg-rose-50">
+                  Access expired
+                </Badge>
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Your Pro access has expired
+              </h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                {endDate
+                  ? `Your previous Pro access ended on ${endDate}. Upgrade to unlock premium features again.`
+                  : "Your previous Pro access has ended. Upgrade to unlock premium features again."}
+              </p>
+            </>
+          ) : hasProAccess ? (
             <>
               <div className="flex items-center justify-center mb-4">
                 <Crown className="h-8 w-8 text-purple-500 mr-3" />
@@ -188,7 +203,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
             {/* Key Benefits */}
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold text-gray-900">
-                {isPro ? "Your Pro Benefits" : "What you get with Pro"}
+                {hasProAccess ? "Your Pro Benefits" : "What you get with Pro"}
               </h2>
               
               <div className="grid gap-4">
@@ -268,14 +283,14 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
           >
             {/* Pricing Section */}
             <div className="bg-white rounded-2xl border border-gray-200 p-8 shadow-lg relative overflow-hidden">
-              {!isPro && (
+              {!hasProAccess && (
                 <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 to-purple-600" />
               )}
               
               <div className="text-center mb-6">
                 <div className="flex items-center justify-center mb-2">
                   <h3 className="text-2xl font-bold text-gray-900">ResumeLM Pro</h3>
-                  {!isPro && (
+                  {!hasProAccess && (
                     <Badge className="ml-3 bg-blue-100 text-blue-700">Most Popular</Badge>
                   )}
                 </div>
@@ -285,7 +300,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                   <span className="text-gray-600">/month</span>
                 </div>
                 
-                {!isPro && (
+                {!hasProAccess && (
                   <div className="space-y-2 text-sm text-gray-600">
                     <p>💰 <strong>Pays for itself</strong> with one interview</p>
                     <p>⏰ Less than one lunch per month</p>
@@ -312,7 +327,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
               </div>
 
               {/* Risk Reduction */}
-              {!isPro && (
+              {!hasProAccess && (
                 <div className="flex items-center justify-center space-x-4 mb-6 p-3 bg-green-50 rounded-lg border border-green-200">
                   <Shield className="h-5 w-5 text-green-600" />
                   <span className="text-sm text-green-700 font-medium">
@@ -327,7 +342,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                 disabled={isLoading}
                 className={cn(
                   "w-full py-6 text-lg font-semibold rounded-xl transition-all duration-300",
-                  isPro
+                  hasProAccess
                     ? "bg-gray-100 text-gray-700 hover:bg-gray-200"
                     : "bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 )}
@@ -337,7 +352,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     <span>Processing...</span>
                   </div>
-                ) : isPro ? (
+                ) : hasProAccess ? (
                   "Manage Subscription"
                 ) : (
                   <div className="flex items-center justify-center space-x-2">
@@ -347,7 +362,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                 )}
               </Button>
 
-              {!isPro && (
+              {!hasProAccess && (
                 <p className="text-center text-xs text-gray-500 mt-4">
                   Cancel anytime • No hidden fees • Instant access
                 </p>

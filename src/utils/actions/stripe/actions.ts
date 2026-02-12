@@ -4,6 +4,7 @@ import { Stripe } from "stripe";
 import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
 import { revalidatePath } from "next/cache";
+import { getSubscriptionAccessState } from '@/lib/subscription-access';
 
 // Lazy-initialize Stripe only when needed (allows running without Stripe for local dev)
 let _stripe: Stripe | null = null;
@@ -372,27 +373,8 @@ export async function checkSubscriptionPlan() {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  const now = new Date();
-  const trialEnd = data?.trial_end ? new Date(data.trial_end) : null;
-  const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
-
-  const isTrialing = Boolean(trialEnd && trialEnd > now);
-  const hasStripeSubscription = Boolean(data?.stripe_subscription_id);
-  const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
-
-  // Grant Pro while the Stripe subscription exists and hasn't expired (trial or paid, including cancel-at-period-end)
-  const hasManualProAccess =
-    data?.subscription_plan === 'pro' && data.subscription_status === 'active';
-  const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
-  const hasCancelingProAccess =
-    data?.subscription_plan === 'pro' &&
-    data.subscription_status === 'canceled' &&
-    isWithinAccessWindow;
-
-  const hasProAccess =
-    hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
-
-  const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
+  const subscriptionState = getSubscriptionAccessState(data);
+  const effectivePlan = data ? subscriptionState.effectivePlan : '';
 
   console.log('🧮 checkSubscriptionPlan', {
     userId: user.id,
@@ -401,8 +383,8 @@ export async function checkSubscriptionPlan() {
     stripe_subscription_id: data?.stripe_subscription_id,
     current_period_end: data?.current_period_end,
     trial_end: data?.trial_end,
-    isTrialing,
-    hasProAccess,
+    isTrialing: subscriptionState.isTrialing,
+    hasProAccess: subscriptionState.hasProAccess,
     effectivePlan,
   });
   
@@ -411,8 +393,8 @@ export async function checkSubscriptionPlan() {
     status: data?.subscription_status || '',
     currentPeriodEnd: data?.current_period_end || '',
     trialEnd: data?.trial_end || '',
-    isTrialing,
-    hasProAccess,
+    isTrialing: subscriptionState.isTrialing,
+    hasProAccess: subscriptionState.hasProAccess,
   };
 }
 
@@ -451,26 +433,8 @@ export async function getSubscriptionPlan(returnId?: boolean) {
     .eq('user_id', user.id)
     .maybeSingle();
 
-  const now = new Date();
-  const trialEnd = data?.trial_end ? new Date(data.trial_end) : null;
-  const currentPeriodEnd = data?.current_period_end ? new Date(data.current_period_end) : null;
-
-  const isTrialing = Boolean(trialEnd && trialEnd > now);
-  const hasStripeSubscription = Boolean(data?.stripe_subscription_id);
-  const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
-
-  const hasManualProAccess =
-    data?.subscription_plan === 'pro' && data.subscription_status === 'active';
-  const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
-  const hasCancelingProAccess =
-    data?.subscription_plan === 'pro' &&
-    data.subscription_status === 'canceled' &&
-    isWithinAccessWindow;
-
-  const hasProAccess =
-    hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
-
-  const effectivePlan = data ? (hasProAccess ? 'pro' : 'free') : '';
+  const subscriptionState = getSubscriptionAccessState(data);
+  const effectivePlan = data ? subscriptionState.effectivePlan : '';
 
   if (returnId) {
     return {

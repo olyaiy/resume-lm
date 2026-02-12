@@ -12,6 +12,7 @@ import {
   IMPERSONATION_STATE_COOKIE_NAME,
   parseImpersonationStateCookieValue,
 } from "@/lib/impersonation";
+import { getSubscriptionAccessState } from "@/lib/subscription-access";
 
 // Only enable Vercel Analytics when running on Vercel platform
 const isVercel = process.env.VERCEL === '1';
@@ -105,27 +106,9 @@ export default async function RootLayout({
         .eq('user_id', user.id)
         .maybeSingle();
 
-      const subscriptionPlan = subscription?.subscription_plan?.toLowerCase() ?? 'free';
-      const subscriptionStatus = subscription?.subscription_status ?? null;
-      const currentPeriodEnd = subscription?.current_period_end ? new Date(subscription.current_period_end) : null;
-      const trialEnd = subscription?.trial_end ? new Date(subscription.trial_end) : null;
-
-      const now = new Date();
-      const isTrialing = Boolean(trialEnd && trialEnd > now);
-      const hasStripeSubscription = Boolean(subscription?.stripe_subscription_id);
-      const isWithinAccessWindow = Boolean(currentPeriodEnd && currentPeriodEnd > now);
-
-      // Treat trialing + cancel-at-period-end users as Pro until their access window ends.
-      const hasManualProAccess = subscriptionPlan === 'pro' && subscriptionStatus === 'active';
-      const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
-      const hasCancelingProAccess =
-        subscriptionPlan === 'pro' && subscriptionStatus === 'canceled' && isWithinAccessWindow;
-
-      const hasProAccess =
-        hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
-
-      const hasEverStartedTrialOrSubscription = hasStripeSubscription;
-      const needsTrial = !hasEverStartedTrialOrSubscription;
+      const subscriptionState = getSubscriptionAccessState(subscription);
+      const hasProAccess = subscriptionState.hasProAccess;
+      const needsTrial = subscriptionState.needsTrial;
 
       isProPlan = hasProAccess;
       showUpgradeButton = !hasProAccess;
