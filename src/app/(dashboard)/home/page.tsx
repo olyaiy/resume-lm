@@ -24,7 +24,6 @@ import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { getDashboardData } from "@/utils/actions";
 import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
-import { FREE_PLAN_RESUME_LIMITS } from "@/lib/resume-limits";
 
 
 
@@ -69,8 +68,6 @@ export default async function Home({
   }
 
   const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;
-  const baseResumesCount = unsortedBaseResumes.length;
-  const tailoredResumesCount = unsortedTailoredResumes.length;
 
   // Get sort parameters for both sections
   const baseSort = (params.baseSort as SortOption) || 'createdAt';
@@ -105,9 +102,9 @@ export default async function Home({
 
   // console.log(subscription);
   
-  // Free plan limits
-  const canCreateBase = isProPlan || baseResumesCount < FREE_PLAN_RESUME_LIMITS.base;
-  const canCreateTailored = isProPlan || tailoredResumesCount < FREE_PLAN_RESUME_LIMITS.tailored;
+  // Free plan limits - bypassed for unlimited
+  const canCreateBase = true;
+  const canCreateTailored = true;
 
 
   // Display a friendly message if no profile exists

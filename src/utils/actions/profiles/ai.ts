@@ -19,6 +19,7 @@ export async function formatProfileWithAI(
       
       const { object } = await generateObject({
         model: aiClient as LanguageModelV1,
+        maxTokens: 16384, // Ensure enough tokens for full resume JSON output
         schema: z.object({
           content: z.object({
             first_name: z.string().optional(),
@@ -60,15 +61,15 @@ export async function formatProfileWithAI(
             })).optional()
           })
         }),
-        prompt: `Please analyze this resume text and extract all relevant information into a structured profile format. 
+        prompt: `Please analyze this resume text and extract all relevant information into a structured profile format.
                 Include all sections (personal info, work experience, education, skills, projects) if present.
                 Ensure all arrays (like description, technologies, achievements) are properly formatted as arrays.
                 For any missing or unclear information, use optional fields rather than making assumptions.
-  
+
                 Resume Text:
   ${userMessages}`,
         // Use custom prompt if provided in config, otherwise fall back to default
-        system: config?.customPrompts?.resumeFormatter 
+        system: config?.customPrompts?.resumeFormatter
           ?? (RESUME_FORMATTER_SYSTEM_MESSAGE.content as string),
       });
 

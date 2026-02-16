@@ -44,6 +44,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
   
   const { object } = await generateObject({
     model: aiClient,
+    maxTokens: 16384, // Ensure enough tokens for full resume JSON output
     schema: z.object({
       content: textImportSchema
     }),
@@ -217,13 +218,14 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       // Text Import for profile
       export async function processTextImport(text: string, config?: AIConfig) {
           const aiClient = initializeAIClient(config);
-          
+
           // Use custom prompt if provided in config, otherwise fall back to default
-          const systemPrompt = config?.customPrompts?.textAnalyzer 
+          const systemPrompt = config?.customPrompts?.textAnalyzer
             ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
 
           const { object } = await generateObject({
           model: aiClient,
+          maxTokens: 16384, // Ensure enough tokens for full resume JSON output
           schema: z.object({
               content: textImportSchema
           }),
@@ -264,13 +266,14 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           const subscriptionPlan = await getSubscriptionPlan();
           const isPro = subscriptionPlan === 'pro';
           const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
-  
+
           // Use custom prompt if provided in config, otherwise fall back to default
-          const systemPrompt = config?.customPrompts?.textAnalyzer 
+          const systemPrompt = config?.customPrompts?.textAnalyzer
             ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
-          
+
           const { object } = await generateObject({
           model: aiClient,
+          maxTokens: 16384, // Ensure enough tokens for full resume JSON output
           schema: z.object({
               content: textImportSchema
           }),

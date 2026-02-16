@@ -179,8 +179,25 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'openai/gpt-oss-120b',
-    name: 'GPT-OSS 120B',
+    id: 'openai/gpt-oss-120b:free',
+    name: 'GPT-OSS 120B (Free)',
+    provider: 'openrouter',
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      isFree: true,
+      maxTokens: 131072,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'openai/gpt-oss-20b:free',
+    name: 'GPT-OSS 20B (Free)',
     provider: 'openrouter',
     features: {
       isRecommended: false,
@@ -196,14 +213,31 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'openai/gpt-oss-20b',
-    name: 'GPT-OSS 20B',
+    id: 'qwen/qwen3-coder:free',
+    name: 'Qwen3 Coder (Free)',
     provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
       isFree: true,
-      maxTokens: 131072,
+      maxTokens: 262000,
+      supportsVision: false,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'deepseek/deepseek-r1-0528:free',
+    name: 'DeepSeek R1 (Free)',
+    provider: 'openrouter',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      isFree: true,
+      maxTokens: 163840,
       supportsVision: false,
       supportsTools: true
     },
@@ -345,7 +379,7 @@ const MODEL_ALIASES: Record<string, string> = {
 
 export const DEFAULT_MODELS = {
   PRO_USER: 'gpt-5.2',
-  FREE_USER: 'deepseek/deepseek-v3.2:nitro'
+  FREE_USER: 'openai/gpt-oss-120b:free'
 } as const
 
 // ========================
@@ -360,7 +394,7 @@ export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
   FAST_CHEAP: 'claude-sonnet-4-5-20250929',
   // Alternative fast & cheap option (free for all users)
-  FAST_CHEAP_FREE: 'deepseek/deepseek-v3.2:nitro',
+  FAST_CHEAP_FREE: 'openai/gpt-oss-120b:free',
   // Frontier model for complex tasks, deep analysis, best quality
   FRONTIER: 'gpt-5.2',
   // Alternative frontier model
@@ -371,7 +405,7 @@ export const MODEL_DESIGNATIONS = {
   VISION: 'claude-sonnet-4-5-20250929',
   // Default models by user type
   DEFAULT_PRO: 'gpt-5.2',
-  DEFAULT_FREE: 'deepseek/deepseek-v3.2:nitro'
+  DEFAULT_FREE: 'openai/gpt-oss-120b:free'
 } as const
 
 // Type for model designations

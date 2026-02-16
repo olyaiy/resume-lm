@@ -15,13 +15,28 @@ export type { ApiKey, AIConfig } from '@/lib/ai-models';
 // Hidden/internal-only models that should not appear in the public selector
 type HiddenModel = Pick<AIModel, 'id' | 'provider' | 'features' | 'availability'>;
 const HIDDEN_MODELS: Record<string, HiddenModel> = {
-  'openai/gpt-5-nano': {
-    id: 'openai/gpt-5-nano',
+  'nvidia/nemotron-nano-9b-v2:free': {
+    id: 'nvidia/nemotron-nano-9b-v2:free',
     provider: 'openrouter',
     features: {
       isFree: true,
       isUnstable: false,
-      maxTokens: 400000,
+      maxTokens: 131072,
+      supportsVision: false,
+      supportsTools: true,
+    },
+    availability: {
+      requiresApiKey: false,
+      requiresPro: false,
+    },
+  },
+  'z-ai/glm-4.5-air:free': {
+    id: 'z-ai/glm-4.5-air:free',
+    provider: 'openrouter',
+    features: {
+      isFree: true,
+      isUnstable: false,
+      maxTokens: 131072,
       supportsVision: false,
       supportsTools: true,
     },
