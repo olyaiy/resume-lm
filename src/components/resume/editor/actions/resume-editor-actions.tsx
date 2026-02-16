@@ -130,34 +130,42 @@ export function ResumeEditorActions({
                     if (downloadOptions.coverLetter && resume.has_cover_letter) {
                       // Dynamically import html2pdf only when needed
                       const html2pdf = (await import('html2pdf.js')).default;
-                      
+
                       const coverLetterElement = document.getElementById('cover-letter-content');
                       if (!coverLetterElement) {
                         throw new Error('Cover letter content not found');
                       }
 
+                      // Clone the element and make it visible for html2pdf capture
+                      const clonedElement = coverLetterElement.cloneNode(true) as HTMLElement;
+                      clonedElement.id = 'cover-letter-content-clone';
+                      clonedElement.style.cssText = 'position: fixed; left: 0; top: 0; width: 816px; z-index: -9999; background: white;';
+                      document.body.appendChild(clonedElement);
+
                       const opt = {
-                        margin: [0, 0, -0.5, 0],
+                        margin: [0.5, 0.5, 0.5, 0.5],
                         filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
                         html2canvas: {
-                          backgroundColor: 'red',
+                          backgroundColor: '#ffffff',
                           useCORS: true,
                           letterRendering: true,
-                          // width: 700,
-                          // height: 1000,
-                          // windowWidth: 700,
-                          logging: true,
-                          // windowHeight: 2000
+                          scale: 2,
+                          logging: false,
                         },
-                        jsPDF: { 
-                          unit: 'in', 
-                          format: 'letter', 
-                          orientation: 'portrait' 
+                        jsPDF: {
+                          unit: 'in',
+                          format: 'letter',
+                          orientation: 'portrait'
                         }
                       };
 
-                      await html2pdf().set(opt).from(coverLetterElement).save();
+                      try {
+                        await html2pdf().set(opt).from(clonedElement).save();
+                      } finally {
+                        // Clean up cloned element
+                        document.body.removeChild(clonedElement);
+                      }
                     }
 
                     toast({
