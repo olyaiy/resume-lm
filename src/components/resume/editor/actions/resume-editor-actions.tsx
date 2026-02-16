@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { pdf } from '@react-pdf/renderer';
 import { TextImport } from "../../text-import";
 import { ResumePDFDocument } from "../preview/resume-pdf-document";
+import { CoverLetterPDFDocument } from "../preview/cover-letter-pdf-document";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
 
@@ -128,44 +129,25 @@ export function ResumeEditorActions({
 
                     // Download Cover Letter if selected and exists
                     if (downloadOptions.coverLetter && resume.has_cover_letter) {
-                      // Dynamically import html2pdf only when needed
-                      const html2pdf = (await import('html2pdf.js')).default;
+                      // Get cover letter content directly from resume state
+                      const coverLetterContent = (resume.cover_letter as { content?: string })?.content;
 
-                      const coverLetterElement = document.getElementById('cover-letter-content');
-                      if (!coverLetterElement) {
-                        throw new Error('Cover letter content not found');
+                      if (!coverLetterContent) {
+                        throw new Error('Cover letter content is empty. Please save your cover letter first.');
                       }
 
-                      // Clone the element and make it visible for html2pdf capture
-                      const clonedElement = coverLetterElement.cloneNode(true) as HTMLElement;
-                      clonedElement.id = 'cover-letter-content-clone';
-                      clonedElement.style.cssText = 'position: fixed; left: 0; top: 0; width: 816px; z-index: -9999; background: white;';
-                      document.body.appendChild(clonedElement);
-
-                      const opt = {
-                        margin: [0.5, 0.5, 0.5, 0.5],
-                        filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: {
-                          backgroundColor: '#ffffff',
-                          useCORS: true,
-                          letterRendering: true,
-                          scale: 2,
-                          logging: false,
-                        },
-                        jsPDF: {
-                          unit: 'in',
-                          format: 'letter',
-                          orientation: 'portrait'
-                        }
-                      };
-
-                      try {
-                        await html2pdf().set(opt).from(clonedElement).save();
-                      } finally {
-                        // Clean up cloned element
-                        document.body.removeChild(clonedElement);
-                      }
+                      // Use React PDF (same as resume) for reliable PDF generation
+                      const coverLetterBlob = await pdf(
+                        <CoverLetterPDFDocument content={coverLetterContent} />
+                      ).toBlob();
+                      const coverLetterUrl = URL.createObjectURL(coverLetterBlob);
+                      const coverLetterLink = document.createElement('a');
+                      coverLetterLink.href = coverLetterUrl;
+                      coverLetterLink.download = `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`;
+                      document.body.appendChild(coverLetterLink);
+                      coverLetterLink.click();
+                      document.body.removeChild(coverLetterLink);
+                      URL.revokeObjectURL(coverLetterUrl);
                     }
 
                     toast({
