@@ -14,10 +14,11 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - api/webhooks (webhook endpoints)
+     * - api/v1 (JWT-authenticated API routes)
      * - blog (blog section)
      * - image files (svg, png, jpg, etc.)
      * Run on all other routes to protect them
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|api/v1|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 }
