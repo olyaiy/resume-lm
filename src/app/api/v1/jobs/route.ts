@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import {
-  authenticateWithClient,
   getAuthenticatedServiceClient,
   validateRequest,
   hasValidationData,

@@ -1,6 +1,5 @@
 import { NextRequest } from 'next/server';
 import {
-  authenticateRequest,
   getAuthenticatedServiceClient,
   apiResponse,
   validateRequest,
@@ -9,7 +8,6 @@ import {
 import { handleAPIError, NotFoundError } from '@/lib/api-errors';
 import { generateResumeScore } from '@/utils/actions/resumes/actions';
 import { tailorResumeToJob } from '@/utils/actions/jobs/ai';
-import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
 import type { Job, Resume } from '@/lib/types';
 import type { ResumeScoreMetrics } from '@/lib/zod-schemas';

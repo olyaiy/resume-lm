@@ -11,7 +11,6 @@ import {
 import { handleAPIError } from '@/lib/api-errors';
 import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
-import type { Resume, WorkExperience, Education, Skill, Project } from '@/lib/types';
 
 // Schema for POST request body
 const createResumeSchema = z.object({
