@@ -10,7 +10,6 @@ import { generateResumeScore } from '@/utils/actions/resumes/actions';
 import { tailorResumeToJob } from '@/utils/actions/jobs/ai';
 import { z } from 'zod';
 import type { Resume } from '@/lib/types';
-import type { simplifiedResumeSchema } from '@/lib/zod-schemas';
 
 // Schema for POST request body
 const tailorResumeSchema = z.object({
