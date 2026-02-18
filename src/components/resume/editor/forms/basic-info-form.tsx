@@ -77,8 +77,8 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
 
   const handleFillFromProfile = () => {
     if (!profile) return;
-    
-    // List of fields to copy from profile
+
+    // List of basic text fields to copy from profile
     const fieldsToFill = [
       'first_name',
       'last_name',
@@ -90,10 +90,24 @@ export const BasicInfoForm = memo(function BasicInfoFormComponent({
       'github_url'
     ] as const satisfies Array<keyof Resume>;
 
-    // Copy each field if it exists in the profile
+    // Copy each text field if it exists in the profile
     fieldsToFill.forEach((field) => {
       if (profile[field]) {
         updateField(field, profile[field] as string);
+      }
+    });
+
+    // Also copy array fields (work_experience, education, skills, projects)
+    const arrayFieldsToFill = [
+      'work_experience',
+      'education',
+      'skills',
+      'projects'
+    ] as const;
+
+    arrayFieldsToFill.forEach((field) => {
+      if (profile[field] && Array.isArray(profile[field]) && (profile[field] as unknown[]).length > 0) {
+        dispatch({ type: 'UPDATE_FIELD', field, value: profile[field] });
       }
     });
   };

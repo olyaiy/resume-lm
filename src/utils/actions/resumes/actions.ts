@@ -22,6 +22,9 @@ async function assertResumeQuota(
   userId: string,
   type: ResumeLimitType
 ) {
+  // Bypass all quota checks - unlimited resumes
+  return;
+
   const { data: subscription, error: subscriptionError } = await supabase
     .from('subscriptions')
     .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')

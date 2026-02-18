@@ -14,11 +14,13 @@ import { checkRateLimit } from '@/lib/rateLimiter';
 
 // Build model candidates list - prioritize user's selected model if provided
 function getModelCandidates(config?: AIConfig) {
+  // Free models first (no rate limit costs), then paid models as fallback
   const fallbackModels: AIConfig[] = [
-    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-120b:free', apiKeys: config?.apiKeys || [] },
+    { model: 'qwen/qwen3-coder:free', apiKeys: config?.apiKeys || [] },
+    { model: 'nvidia/nemotron-nano-9b-v2:free', apiKeys: config?.apiKeys || [] },
+    { model: 'z-ai/glm-4.5-air:free', apiKeys: config?.apiKeys || [] },
+    { model: 'openai/gpt-oss-20b:free', apiKeys: config?.apiKeys || [] },
     { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
   ];
 

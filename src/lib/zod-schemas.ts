@@ -173,7 +173,10 @@ export const jobSchema = z.object({
   created_at: z.string().datetime(),
   updated_at: z.string().datetime(),
   keywords: z.array(z.string()).default([]),
-  work_location: z.enum(['remote', 'in_person', 'hybrid']).nullable(),
+  work_location: z.preprocess(
+    (val) => typeof val === 'string' ? val.toLowerCase() : val,
+    z.enum(['remote', 'in_person', 'hybrid']).nullable()
+  ),
   employment_type: z.preprocess(
     (val) => val === null || val === '' ? 'full_time' : val,
     z.enum(['full_time', 'part_time', 'co_op', 'internship', 'contract']).default('full_time')
@@ -190,7 +193,10 @@ export const simplifiedJobSchema = z.object({
     salary_range: z.string().nullable().optional(),
     keywords: z.array(z.string()).default([]).optional(),
     work_location: z.preprocess(
-      (val) => val === null || val === '' ? 'in_person' : val,
+      (val) => {
+        if (val === null || val === '') return 'in_person';
+        return typeof val === 'string' ? val.toLowerCase() : val;
+      },
       z.enum(['remote', 'in_person', 'hybrid']).nullable().optional()
     ),
     employment_type: z.preprocess(

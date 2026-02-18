@@ -1,6 +1,6 @@
 export const FREE_PLAN_RESUME_LIMITS = {
-  base: 2,
-  tailored: 4,
+  base: 999999,
+  tailored: 999999,
 } as const;
 
 export type ResumeLimitType = keyof typeof FREE_PLAN_RESUME_LIMITS;
