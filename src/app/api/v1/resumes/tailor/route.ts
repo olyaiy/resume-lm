@@ -1,19 +1,18 @@
 import { NextRequest } from 'next/server';
 import {
   authenticateRequest,
+  getAuthenticatedServiceClient,
   apiResponse,
   validateRequest,
   hasValidationData,
 } from '@/lib/api-utils';
 import { handleAPIError, NotFoundError, ValidationError } from '@/lib/api-errors';
-import {
-  getResumeById,
-  createTailoredResume,
-  generateResumeScore,
-} from '@/utils/actions/resumes/actions';
+import { generateResumeScore } from '@/utils/actions/resumes/actions';
 import { tailorResumeToJob } from '@/utils/actions/jobs/ai';
 import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
+import type { Resume } from '@/lib/types';
+import type { simplifiedResumeSchema } from '@/lib/zod-schemas';
 
 // Schema for POST request body
 const tailorResumeSchema = z.object({
@@ -35,8 +34,8 @@ const tailorResumeSchema = z.object({
  */
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate request
-    const user = await authenticateRequest(req);
+    // Authenticate request and get service role client
+    const { user, supabase } = await getAuthenticatedServiceClient(req);
 
     // Validate request body
     const validation = await validateRequest(req, tailorResumeSchema);
@@ -46,10 +45,16 @@ export async function POST(req: NextRequest) {
 
     const { base_resume_id, job_id, config, generate_score } = validation.data;
 
-    // Get base resume
-    const { resume: baseResume } = await getResumeById(base_resume_id);
+    // Get base resume directly from DB
+    // SECURITY: Filter by user_id to prevent unauthorized access
+    const { data: baseResume, error: resumeError } = await supabase
+      .from('resumes')
+      .select('*')
+      .eq('id', base_resume_id)
+      .eq('user_id', user.id)
+      .single();
 
-    if (!baseResume) {
+    if (resumeError || !baseResume) {
       throw new NotFoundError('Base resume not found');
     }
 
@@ -60,13 +65,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Verify ownership
-    if (baseResume.user_id !== user.id) {
-      throw new NotFoundError('Base resume not found');
-    }
-
-    // Get job details
-    const supabase = await createClient();
+    // Get job details directly from DB
+    // SECURITY: Filter by user_id to prevent unauthorized access
     const { data: job, error: jobError } = await supabase
       .from('jobs')
       .select('*')
@@ -80,26 +80,55 @@ export async function POST(req: NextRequest) {
 
     // Tailor resume content using AI
     const tailoredContent = await tailorResumeToJob(
-      baseResume,
+      baseResume as Resume,
       job as any, // eslint-disable-line @typescript-eslint/no-explicit-any
       config as any // eslint-disable-line @typescript-eslint/no-explicit-any
     );
 
-    // Create the tailored resume in database
-    const tailoredResume = await createTailoredResume(
-      baseResume,
-      job_id,
-      job.position_title,
-      job.company_name,
-      tailoredContent
-    );
+    // Quota check is bypassed as per the server action
+    // await assertResumeQuota(supabase, user.id, 'tailored');
+
+    // Create the tailored resume in database directly
+    // SECURITY: user_id is explicitly set to authenticated user
+    const newResume = {
+      ...tailoredContent,
+      user_id: user.id,
+      job_id: job_id,
+      is_base_resume: false,
+      first_name: baseResume.first_name,
+      last_name: baseResume.last_name,
+      email: baseResume.email,
+      phone_number: baseResume.phone_number,
+      location: baseResume.location,
+      website: baseResume.website,
+      linkedin_url: baseResume.linkedin_url,
+      github_url: baseResume.github_url,
+      document_settings: baseResume.document_settings,
+      section_configs: baseResume.section_configs,
+      section_order: baseResume.section_order,
+      resume_title: `${job.position_title} at ${job.company_name}`,
+      name: `${job.position_title} at ${job.company_name}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: tailoredResume, error: createError } = await supabase
+      .from('resumes')
+      .insert([newResume])
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('[POST /api/v1/resumes/tailor] Error creating tailored resume:', createError);
+      throw new Error('Failed to create tailored resume');
+    }
 
     // Optionally generate score for the tailored resume
     let score = null;
     if (generate_score) {
       try {
         score = await generateResumeScore(
-          tailoredResume,
+          tailoredResume as Resume,
           job as any, // eslint-disable-line @typescript-eslint/no-explicit-any
           config as any // eslint-disable-line @typescript-eslint/no-explicit-any
         );

@@ -1,17 +1,13 @@
 import { NextRequest } from 'next/server';
 import {
   authenticateRequest,
+  getAuthenticatedServiceClient,
   apiResponse,
   validateRequest,
   hasValidationData,
 } from '@/lib/api-utils';
 import { handleAPIError, NotFoundError } from '@/lib/api-errors';
-import {
-  getResumeById,
-  createTailoredResume,
-  generateResumeScore,
-  updateResume,
-} from '@/utils/actions/resumes/actions';
+import { generateResumeScore } from '@/utils/actions/resumes/actions';
 import { tailorResumeToJob } from '@/utils/actions/jobs/ai';
 import { createClient } from '@/utils/supabase/server';
 import { z } from 'zod';
@@ -165,8 +161,8 @@ Return the optimized resume that addresses these specific weak areas while maint
  */
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate request
-    const user = await authenticateRequest(req);
+    // Authenticate request and get service role client
+    const { user, supabase } = await getAuthenticatedServiceClient(req);
 
     // Validate request body
     const validation = await validateRequest(req, optimizeResumeSchema);
@@ -178,10 +174,16 @@ export async function POST(req: NextRequest) {
     const target_score = validation.data.target_score ?? 85;
     const max_iterations = validation.data.max_iterations ?? 5;
 
-    // Get base resume
-    const { resume: baseResume } = await getResumeById(base_resume_id);
+    // Get base resume directly from DB
+    // SECURITY: Filter by user_id to prevent unauthorized access
+    const { data: baseResume, error: resumeError } = await supabase
+      .from('resumes')
+      .select('*')
+      .eq('id', base_resume_id)
+      .eq('user_id', user.id)
+      .single();
 
-    if (!baseResume) {
+    if (resumeError || !baseResume) {
       throw new NotFoundError('Base resume not found');
     }
 
@@ -190,13 +192,8 @@ export async function POST(req: NextRequest) {
       throw new NotFoundError('Only base resumes can be optimized. Please select a base resume.');
     }
 
-    // Verify ownership
-    if (baseResume.user_id !== user.id) {
-      throw new NotFoundError('Base resume not found');
-    }
-
-    // Get job details
-    const supabase = await createClient();
+    // Get job details directly from DB
+    // SECURITY: Filter by user_id to prevent unauthorized access
     const { data: job, error: jobError } = await supabase
       .from('jobs')
       .select('*')
@@ -214,15 +211,44 @@ export async function POST(req: NextRequest) {
     // Step 1: Create initial tailored resume
     console.log('[OPTIMIZE] Step 1: Creating initial tailored resume...');
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const tailoredContent = await tailorResumeToJob(baseResume, job as any, config as any);
-    let currentResume = await createTailoredResume(
-      baseResume,
-      job_id,
-      job.position_title,
-      job.company_name,
-      tailoredContent
-    );
+    const tailoredContent = await tailorResumeToJob(baseResume as Resume, job as any, config as any);
 
+    // Create tailored resume directly in DB
+    // SECURITY: user_id is explicitly set to authenticated user
+    const newResumeData = {
+      ...tailoredContent,
+      user_id: user.id,
+      job_id: job_id,
+      is_base_resume: false,
+      first_name: baseResume.first_name,
+      last_name: baseResume.last_name,
+      email: baseResume.email,
+      phone_number: baseResume.phone_number,
+      location: baseResume.location,
+      website: baseResume.website,
+      linkedin_url: baseResume.linkedin_url,
+      github_url: baseResume.github_url,
+      document_settings: baseResume.document_settings,
+      section_configs: baseResume.section_configs,
+      section_order: baseResume.section_order,
+      resume_title: `${job.position_title} at ${job.company_name}`,
+      name: `${job.position_title} at ${job.company_name}`,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const { data: initialResume, error: createError } = await supabase
+      .from('resumes')
+      .insert([newResumeData])
+      .select()
+      .single();
+
+    if (createError) {
+      console.error('[OPTIMIZE] Error creating tailored resume:', createError);
+      throw new Error('Failed to create tailored resume');
+    }
+
+    let currentResume = initialResume as Resume;
     const optimizationHistory: OptimizationHistory[] = [];
     let currentScore = 0;
     let targetAchieved = false;
@@ -276,13 +302,28 @@ export async function POST(req: NextRequest) {
         temperature: 0.5,
       });
 
-      // Step 2e: Update resume with optimized content
+      // Step 2e: Update resume with optimized content directly in DB
       console.log(`[OPTIMIZE] Iteration ${iteration}: Updating resume...`);
-      currentResume = await updateResume(currentResume.id, {
+      const updateData = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         ...(optimizedContent.content as any),
         updated_at: new Date().toISOString(),
-      });
+      };
+
+      const { data: updatedResume, error: updateError } = await supabase
+        .from('resumes')
+        .update(updateData)
+        .eq('id', currentResume.id)
+        .eq('user_id', user.id)
+        .select()
+        .single();
+
+      if (updateError) {
+        console.error('[OPTIMIZE] Error updating resume:', updateError);
+        throw new Error('Failed to update resume');
+      }
+
+      currentResume = updatedResume as Resume;
 
       // Step 2f: Track iteration in history
       optimizationHistory.push({

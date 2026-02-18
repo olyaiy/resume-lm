@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { createClient } from '@/utils/supabase/server';
+import { createClient, createServiceClient } from '@/utils/supabase/server';
+import { createServerClient } from '@supabase/ssr';
 import { z } from 'zod';
 import type { User } from '@supabase/supabase-js';
 import { UnauthorizedError, handleAPIError } from './api-errors';
@@ -22,7 +23,36 @@ function extractToken(req: Request): string | null {
 }
 
 /**
- * Authenticate request and return user or throw UnauthorizedError
+ * Create an authenticated Supabase client using a Bearer token
+ * This is for API routes that use Bearer token authentication instead of cookies
+ */
+export async function createAuthenticatedClient(token: string) {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL!;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+
+  const client = createServerClient(
+    supabaseUrl,
+    supabaseAnonKey,
+    {
+      cookies: {
+        getAll: () => [],
+        setAll: () => {},
+      },
+    }
+  );
+
+  // Set the session using the access token
+  await client.auth.setSession({
+    access_token: token,
+    refresh_token: '' // Not needed for this use case
+  });
+
+  return client;
+}
+
+/**
+ * Authenticate request and return authenticated user
+ * Uses service role client to verify JWT tokens from Authorization header
  * @throws {UnauthorizedError} If authentication fails
  */
 export async function authenticateRequest(req: Request): Promise<User> {
@@ -32,7 +62,8 @@ export async function authenticateRequest(req: Request): Promise<User> {
     throw new UnauthorizedError('Missing or invalid authorization token');
   }
 
-  const supabase = await createClient();
+  // Use service role client to verify the JWT token
+  const supabase = await createServiceClient();
 
   // Verify token and get user
   const { data: { user }, error } = await supabase.auth.getUser(token);
@@ -42,6 +73,45 @@ export async function authenticateRequest(req: Request): Promise<User> {
   }
 
   return user;
+}
+
+/**
+ * Authenticate request and return both user and authenticated Supabase client
+ * @throws {UnauthorizedError} If authentication fails
+ */
+export async function authenticateWithClient(req: Request): Promise<{ user: User; supabase: Awaited<ReturnType<typeof createAuthenticatedClient>> }> {
+  const token = extractToken(req);
+
+  if (!token) {
+    throw new UnauthorizedError('Missing or invalid authorization token');
+  }
+
+  // Create authenticated client
+  const authenticatedClient = await createAuthenticatedClient(token);
+
+  // Verify token and get user using the authenticated client
+  const { data: { user }, error } = await authenticatedClient.auth.getUser();
+
+  if (error || !user) {
+    throw new UnauthorizedError('Invalid or expired token');
+  }
+
+  return { user, supabase: authenticatedClient };
+}
+
+/**
+ * Authenticate request and return both user and service role Supabase client
+ * Service role client bypasses RLS - MUST filter by user.id manually for security
+ * @throws {UnauthorizedError} If authentication fails
+ */
+export async function getAuthenticatedServiceClient(req: Request): Promise<{ user: User; supabase: Awaited<ReturnType<typeof createServiceClient>> }> {
+  // First verify the user's JWT token
+  const user = await authenticateRequest(req);
+
+  // Then create a service role client (bypasses RLS)
+  const supabase = await createServiceClient();
+
+  return { user, supabase };
 }
 
 /**

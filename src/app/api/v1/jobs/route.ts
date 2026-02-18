@@ -1,13 +1,13 @@
 import { NextRequest } from 'next/server';
 import {
-  authenticateRequest,
+  authenticateWithClient,
+  getAuthenticatedServiceClient,
   validateRequest,
   hasValidationData,
   apiResponse,
 } from '@/lib/api-utils';
 import { createJobRequestSchema } from '@/lib/api-schemas';
-import { handleAPIError, NotFoundError } from '@/lib/api-errors';
-import { createJob, getJobListings } from '@/utils/actions/jobs/actions';
+import { handleAPIError } from '@/lib/api-errors';
 
 /**
  * GET /api/v1/jobs
@@ -15,16 +15,14 @@ import { createJob, getJobListings } from '@/utils/actions/jobs/actions';
  */
 export async function GET(req: NextRequest) {
   try {
-    // Authenticate request
-    await authenticateRequest(req);
+    // Authenticate request and get service role client
+    const { user, supabase } = await getAuthenticatedServiceClient(req);
 
     // Parse and validate query parameters
     const url = new URL(req.url);
     const queryParams = {
       page: url.searchParams.get('page') || '1',
       limit: url.searchParams.get('limit') || '10',
-      is_active: url.searchParams.get('is_active'),
-      search: url.searchParams.get('search'),
     };
 
     // Convert page and limit to numbers
@@ -56,19 +54,43 @@ export async function GET(req: NextRequest) {
       filters.keywords = keywords;
     }
 
-    // Call server action to get job listings
-    const result = await getJobListings({
-      page,
-      pageSize,
-      filters: Object.keys(filters).length > 0 ? filters : undefined
-    });
+    // Get jobs from database using authenticated Supabase client
+    const offset = (page - 1) * pageSize;
+
+    // Build query
+    let query = supabase
+      .from('jobs')
+      .select('*', { count: 'exact' })
+      .eq('user_id', user.id)
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    // Apply filters if they exist
+    if (filters.workLocation) {
+      query = query.eq('work_location', filters.workLocation);
+    }
+    if (filters.employmentType) {
+      query = query.eq('employment_type', filters.employmentType);
+    }
+    if (filters.keywords && filters.keywords.length > 0) {
+      query = query.contains('keywords', filters.keywords);
+    }
+
+    // Add pagination
+    const { data: jobs, error, count } = await query
+      .range(offset, offset + pageSize - 1);
+
+    if (error) {
+      console.error('Error fetching jobs:', error);
+      throw new Error('Failed to fetch job listings');
+    }
 
     // Return paginated response
     return apiResponse({
-      jobs: result.jobs,
-      totalCount: result.totalCount,
-      currentPage: result.currentPage,
-      totalPages: result.totalPages,
+      jobs,
+      totalCount: count ?? 0,
+      currentPage: page,
+      totalPages: Math.ceil((count ?? 0) / pageSize),
     });
   } catch (error) {
     return handleAPIError(error);
@@ -81,8 +103,8 @@ export async function GET(req: NextRequest) {
  */
 export async function POST(req: NextRequest) {
   try {
-    // Authenticate request
-    await authenticateRequest(req);
+    // Authenticate request and get service role client
+    const { user, supabase } = await getAuthenticatedServiceClient(req);
 
     // Validate request body
     const validation = await validateRequest(req, createJobRequestSchema);
@@ -93,12 +115,31 @@ export async function POST(req: NextRequest) {
 
     const jobData = validation.data;
 
-    // Call server action to create job
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const job = await createJob(jobData as any);
+    // Create job directly in database using service role client
+    // SECURITY: user_id is explicitly set to authenticated user
+    const jobRecord = {
+      user_id: user.id,
+      company_name: jobData.company_name,
+      position_title: jobData.position_title,
+      job_url: jobData.job_url || null,
+      description: jobData.description || null,
+      location: jobData.location || null,
+      salary_range: jobData.salary_range || null,
+      keywords: jobData.keywords || [],
+      work_location: jobData.work_location || 'in_person',
+      employment_type: jobData.employment_type || 'full_time',
+      is_active: true
+    };
 
-    if (!job) {
-      throw new NotFoundError('Failed to create job');
+    const { data: job, error } = await supabase
+      .from('jobs')
+      .insert([jobRecord])
+      .select()
+      .single();
+
+    if (error) {
+      console.error('[POST /api/v1/jobs] Error creating job:', error);
+      throw new Error('Failed to create job');
     }
 
     // Return created job
