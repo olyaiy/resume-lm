@@ -98,8 +98,8 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '0.5'
-          memory: 512M
+          cpus: '2.0'
+          memory: 2G
         reservations:
           cpus: '0.1'
           memory: 256M
@@ -467,7 +467,7 @@ services:
     environment:
       REDIS_HOSTS: local:redis:6379
     ports:
-      - "8082:8081"
+      - "9082:8081"
     networks:
       - resumelm-network-dev
 
