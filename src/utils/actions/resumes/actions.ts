@@ -6,8 +6,9 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { initializeAIClient } from "@/utils/ai-tools";
+import { getModelById } from "@/lib/ai-models";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
 import { getSubscriptionPlan } from "../stripe/actions";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
@@ -55,11 +56,76 @@ async function assertResumeQuota(
 }
 
 
+async function generateObjectWithLlamaFallback({ model, schema, prompt, isLlamaCpp }: { model: any, schema: any, prompt: string, isLlamaCpp: boolean }) {
+  if (isLlamaCpp) {
+    try {
+      const { object } = await generateObject({ model, schema, prompt });
+      return { object };
+    } catch (err) {
+      console.warn('generateObject failed for llama.cpp, falling back to generateText with manual parsing');
+      const fallbackPrompt = `
+      You are a resume scoring system.
+      Return ONLY valid JSON.
+      Do NOT explain anything.
+      Do NOT include markdown.
+      Do NOT rename keys.
+      Use EXACTLY this structure:
+
+      {
+        "overallScore": { "score": 0, "reason": "" },
+        "completeness": {
+            "contactInformation": { "score": 0, "reason": "" },
+            "detailLevel": { "score": 0, "reason": "" }
+        },
+        "impactScore": {
+            "activeVoiceUsage": { "score": 0, "reason": "" },
+            "quantifiedAchievements": { "score": 0, "reason": "" }
+        },
+        "roleMatch": {
+            "skillsRelevance": { "score": 0, "reason": "" },
+            "experienceAlignment": { "score": 0, "reason": "" },
+            "educationFit": { "score": 0, "reason": "" }
+        },
+        "jobAlignment": {
+            "keywordMatch": { "score": 0, "reason": "" },
+            "requirementsMatch": { "score": 0, "reason": "" },
+            "companyFit": { "score": 0, "reason": "" }
+        },
+        "isTailoredResume": false,
+        "jobSpecificImprovements": []
+      }
+
+      Now evaluate this resume:
+      ${prompt}
+      `;
+      const { text } = await generateText({ model, prompt: fallbackPrompt });
+      try {
+        const cleanedText = text.replace(/```json/g, '').replace(/```/g, '').trim();
+        const parsed = JSON.parse(cleanedText);
+        return { object: schema.parse(parsed) };
+      } catch (parseErr) {
+        console.error('Failed to parse fallback text from llama.cpp', text);
+        throw parseErr;
+      }
+    }
+  }
+
+  // Normal mode
+  const { object } = await generateObject({
+    model,
+    schema,
+    prompt,
+  });
+
+  return object;
+}
+
+
 //  SUPABASE ACTIONS
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile; job: Job | null }> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -104,8 +170,8 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
       }
     }
 
-    return { 
-      resume: resumeResult.data, 
+    return {
+      resume: resumeResult.data,
       profile: profileResult.data,
       job
     };
@@ -117,7 +183,7 @@ export async function getResumeById(resumeId: string): Promise<{ resume: Resume;
 export async function updateResume(resumeId: string, data: Partial<Resume>): Promise<Resume> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -138,9 +204,9 @@ export async function updateResume(resumeId: string, data: Partial<Resume>): Pro
 }
 
 export async function deleteResume(resumeId: string): Promise<void> {
-    const supabase = await createClient();
+  const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -192,7 +258,7 @@ export async function deleteResume(resumeId: string): Promise<void> {
 }
 
 export async function createBaseResume(
-  name: string, 
+  name: string,
   importOption: 'import-profile' | 'fresh' | 'import-resume' = 'import-profile',
   selectedContent?: {
     first_name?: string;
@@ -211,7 +277,7 @@ export async function createBaseResume(
 ): Promise<Resume> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -225,7 +291,7 @@ export async function createBaseResume(
       .select('*')
       .eq('user_id', user.id)
       .single();
-    
+
     if (profileError) {
       console.error('Profile fetch error:', profileError);
     }
@@ -245,7 +311,7 @@ export async function createBaseResume(
     website: importOption === 'import-resume' ? selectedContent?.website || '' : importOption === 'fresh' ? '' : profile?.website || '',
     linkedin_url: importOption === 'import-resume' ? selectedContent?.linkedin_url || '' : importOption === 'fresh' ? '' : profile?.linkedin_url || '',
     github_url: importOption === 'import-resume' ? selectedContent?.github_url || '' : importOption === 'fresh' ? '' : profile?.github_url || '',
-    work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent 
+    work_experience: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
       ? selectedContent.work_experience
       : [],
     education: (importOption === 'import-profile' || importOption === 'import-resume') && selectedContent
@@ -334,7 +400,7 @@ export async function createTailoredResume(
 
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
+
   if (userError || !user) {
     throw new Error('User not authenticated');
   }
@@ -376,7 +442,7 @@ export async function createTailoredResume(
 export async function copyResume(resumeId: string): Promise<Resume> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -432,7 +498,7 @@ export async function copyResume(resumeId: string): Promise<Resume> {
 export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<number> {
   const supabase = await createClient();
   const { data: { user }, error } = await supabase.auth.getUser();
-  
+
   if (error || !user) {
     throw new Error('User not authenticated');
   }
@@ -457,11 +523,11 @@ export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<n
 
 
 export async function generateResumeScore(
-  resume: Resume, 
+  resume: Resume,
   job?: ZodJob | null,
   config?: AIConfig
 ) {
-  
+
 
   const subscriptionPlan = await getSubscriptionPlan();
   const isPro = subscriptionPlan === 'pro';
@@ -490,15 +556,15 @@ export async function generateResumeScore(
 
   const jobForScoring = job
     ? {
-        company_name: job.company_name,
-        position_title: job.position_title,
-        description: job.description,
-        location: job.location,
-        salary_range: job.salary_range,
-        keywords: job.keywords,
-        work_location: job.work_location,
-        employment_type: job.employment_type,
-      }
+      company_name: job.company_name,
+      position_title: job.position_title,
+      description: job.description,
+      location: job.location,
+      salary_range: job.salary_range,
+      keywords: job.keywords,
+      work_location: job.work_location,
+      employment_type: job.employment_type,
+    }
     : null;
 
   try {
@@ -559,10 +625,14 @@ export async function generateResumeScore(
       `;
     }
 
-    const { object } = await generateObject({
+    const providerId = config?.model ? getModelById(config.model)?.provider : undefined;
+    const isLlamaCpp = providerId === 'llama.cpp';
+
+    const { object } = await generateObjectWithLlamaFallback({
       model: aiClient,
       schema: resumeScoreSchema,
-      prompt
+      prompt,
+      isLlamaCpp
     });
 
     // console.log("THE OUTPUTTED object", object);

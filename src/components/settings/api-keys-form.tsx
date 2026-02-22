@@ -18,12 +18,12 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
   // Use synchronized hooks for API keys and default model
   const { apiKeys, setApiKeys } = useApiKeys()
   const { defaultModel, setDefaultModel } = useDefaultModel()
-  
+
   // UI-specific local state
   const [visibleKeys, setVisibleKeys] = useState<Record<ServiceName, boolean>>({} as Record<ServiceName, boolean>)
   const [newKeyValues, setNewKeyValues] = useState<Record<ServiceName, string>>({} as Record<ServiceName, string>)
   const [copiedKey, setCopiedKey] = useState<ServiceName | null>(null)
-  
+
   // Track if we've initialized the default model
   const hasInitialized = useRef(false)
 
@@ -31,7 +31,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
   useEffect(() => {
     if (hasInitialized.current) return
     hasInitialized.current = true
-    
+
     // Only set default if there's no model selected
     if (!defaultModel) {
       if (isProPlan) {
@@ -107,10 +107,10 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     const currentModel = AI_MODELS.find(m => m.id === defaultModel)
     if (currentModel?.provider === service) {
       // Find first available model that has API key
-      const firstAvailableModel = AI_MODELS.find(m => 
+      const firstAvailableModel = AI_MODELS.find(m =>
         apiKeys.some(k => k.service === m.provider && k.service !== service)
       )
-      
+
       if (firstAvailableModel) {
         setDefaultModel(firstAvailableModel.id)
         toast.info(`Switched to ${firstAvailableModel.name}`)
@@ -123,7 +123,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
     toast.success('API key removed successfully')
   }
 
-  const getExistingKey = (service: ServiceName) => 
+  const getExistingKey = (service: ServiceName) =>
     apiKeys.find(k => k.service === service)
 
   const handleModelChange = (modelId: string) => {
@@ -188,7 +188,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
             const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
 
             return (
-              <div 
+              <div
                 key={provider.id}
                 className={cn(
                   "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40"
@@ -221,8 +221,8 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                         onClick={() => handleCopyKey(provider.id, existingKey.key)}
                         className={cn(
                           "h-7 px-2 transition-colors",
-                          copiedKey === provider.id 
-                            ? "text-emerald-500 hover:text-emerald-600" 
+                          copiedKey === provider.id
+                            ? "text-emerald-500 hover:text-emerald-600"
                             : "text-muted-foreground hover:text-gray-900"
                         )}
                       >
@@ -279,27 +279,29 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                       >
                         {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                       </Button>
-                      <Button 
+                      <Button
                         className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 h-9 px-4 text-sm transition-colors"
                         onClick={() => handleUpdateKey(provider.id)}
                       >
                         Save
                       </Button>
                     </div>
-                    <a 
-                      href={provider.apiLink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
-                    >
-                      Get your {provider.name} API key →
-                    </a>
+                    {provider.apiLink && (
+                      <a
+                        href={provider.apiLink}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
+                      >
+                        Get your {provider.name} API key →
+                      </a>
+                    )}
                   </>
                 )}
 
                 {providerModels.length > 0 && (
                   <div className="text-xs text-muted-foreground mt-2">
-                    Available models: {providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
+                    Available models: {provider.id === 'llama.cpp' ? '(Single local model)' : providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
                   </div>
                 )}
               </div>
@@ -319,7 +321,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
               const providerModels = AI_MODELS.filter(model => model.provider === provider.id)
 
               return (
-                <div 
+                <div
                   key={provider.id}
                   className={cn(
                     "p-4 rounded-lg bg-white/30 border transition-all hover:bg-white/40",
@@ -329,7 +331,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                   <div className="absolute top-2 right-2 bg-amber-100 text-amber-800 px-2 py-1 rounded-full text-xs font-medium">
                     Unstable
                   </div>
-                  
+
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
                       <Label className="text-sm font-medium text-gray-800">{provider.name}</Label>
@@ -357,8 +359,8 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                           onClick={() => handleCopyKey(provider.id, existingKey.key)}
                           className={cn(
                             "h-7 px-2 transition-colors",
-                            copiedKey === provider.id 
-                              ? "text-emerald-500 hover:text-emerald-600" 
+                            copiedKey === provider.id
+                              ? "text-emerald-500 hover:text-emerald-600"
                               : "text-muted-foreground hover:text-gray-900"
                           )}
                         >
@@ -396,7 +398,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                       <div className="flex gap-2">
                         <Input
                           type={isVisible ? "text" : "password"}
-                          placeholder="Enter API key"
+                          placeholder={provider.id === 'llama.cpp' ? "Enter API URL" : "Enter API key"}
                           value={newKeyValues[provider.id] || ''}
                           onChange={(e) => setNewKeyValues(prev => ({
                             ...prev,
@@ -415,27 +417,29 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
                         >
                           {isVisible ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
                         </Button>
-                        <Button 
+                        <Button
                           className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700 h-9 px-4 text-sm transition-colors"
                           onClick={() => handleUpdateKey(provider.id)}
                         >
                           Save
                         </Button>
                       </div>
-                      <a 
-                        href={provider.apiLink}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
-                      >
-                        Get your {provider.name} API key →
-                      </a>
+                      {provider.apiLink && (
+                        <a
+                          href={provider.apiLink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block mt-2 text-xs text-teal-600 hover:text-teal-700 underline underline-offset-2"
+                        >
+                          Get your {provider.name} API key →
+                        </a>
+                      )}
                     </>
                   )}
 
                   {providerModels.length > 0 && (
                     <div className="text-xs text-muted-foreground mt-2">
-                      Available models: {providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
+                      Available models: {provider.id === 'llama.cpp' ? '(Single local model)' : providerModels.map(m => `${m.name}${m.features.isUnstable ? ' (Unstable)' : ''}`).join(', ')}
                     </div>
                   )}
                 </div>

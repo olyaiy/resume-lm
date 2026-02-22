@@ -32,7 +32,7 @@ interface ModelSelectorProps {
 function UnavailableModelPopover({ children, model }: { children: React.ReactNode; model: AIModel }) {
   const [open, setOpen] = useState(false)
   const provider = getProviderById(model.provider)
-  
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -44,9 +44,9 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
           {children}
         </div>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-80 z-50" 
-        side="right" 
+      <PopoverContent
+        className="w-80 z-50"
+        side="right"
         align="start"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -60,7 +60,7 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
               To use this model, you need either a Pro subscription or a {provider?.name} API key.
             </p>
           </div>
-          
+
           <div className="space-y-2">
             {/* Pro Option */}
             <div className="p-3 rounded-lg border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-purple-100/30">
@@ -111,16 +111,16 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
   )
 }
 
-export function ModelSelector({ 
-  value, 
-  onValueChange, 
-  apiKeys, 
-  isProPlan, 
+export function ModelSelector({
+  value,
+  onValueChange,
+  apiKeys,
+  isProPlan,
   className,
   placeholder = "Select an AI model",
   showToast = true
 }: ModelSelectorProps) {
-  
+
   const isModelSelectable = (modelId: string) => {
     return isModelAvailable(modelId, isProPlan, apiKeys)
   }
@@ -159,27 +159,31 @@ export function ModelSelector({
         {getModelsByProvider().map((group, groupIndex) => (
           <div key={group.provider}>
             <SelectGroup>
-              <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
-                <div className="flex items-center gap-2">
-                  {getProviderById(group.provider)?.logo && (
-                    <Image
-                      src={getProviderById(group.provider)!.logo!}
-                      alt={`${group.name} logo`}
-                      width={14}
-                      height={14}
-                      className="rounded-sm"
-                    />
-                  )}
-                  {group.name}
-                </div>
-              </SelectLabel>
+              {group.provider !== 'llama.cpp' && (
+                <SelectLabel className="text-xs font-semibold text-muted-foreground px-2 py-1.5">
+                  <div className="flex items-center gap-2">
+                    {getProviderById(group.provider)?.logo && (
+                      <Image
+                        src={getProviderById(group.provider)!.logo!}
+                        alt={`${group.name} logo`}
+                        width={14}
+                        height={14}
+                        className="rounded-sm"
+                      />
+                    )}
+                    {group.name}
+                  </div>
+                </SelectLabel>
+              )}
               {group.models.map((model) => {
                 const provider = getProviderById(model.provider)
                 const isSelectable = isModelSelectable(model.id)
-                
+
+                const displayName = group.provider === 'llama.cpp' ? provider?.name : model.name;
+
                 const selectItem = (
-                  <SelectItem 
-                    key={model.id} 
+                  <SelectItem
+                    key={model.id}
                     value={model.id}
                     disabled={!isSelectable}
                     className={cn(
@@ -198,7 +202,7 @@ export function ModelSelector({
                         />
                       )}
                       <div className="flex items-center gap-2 min-w-0 flex-1">
-                        <span className="truncate font-medium">{model.name}</span>
+                        <span className="truncate font-medium">{displayName}</span>
                         {model.features.isRecommended && (
                           <span className="text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full text-xs font-medium flex-shrink-0">
                             Recommended

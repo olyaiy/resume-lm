@@ -87,7 +87,16 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
     envKey: 'OPENROUTER_API_KEY',
     sdkInitializer: 'openrouter',
     unstable: false
-    
+
+  },
+  'llama.cpp': {
+    id: 'llama.cpp',
+    name: 'LLaMA.cpp',
+    apiLink: '',
+    logo: '/logos/llama-cpp.png',
+    envKey: 'LLAMA_CPP_BASE_URL',
+    sdkInitializer: 'openai',
+    unstable: true
   },
 }
 
@@ -143,6 +152,22 @@ export const AI_MODELS: AIModel[] = [
     },
     availability: {
       requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'llama_cpp',
+    name: 'LLaMA CPP',
+    provider: 'llama.cpp',
+    features: {
+      isRecommended: true,
+      isUnstable: true,
+      maxTokens: 16384,
+      supportsVision: false,
+      supportsTools: false
+    },
+    availability: {
+      requiresApiKey: false,
       requiresPro: false
     }
   },
@@ -425,8 +450,8 @@ export function isModelAvailable(
   const model = getModelById(modelId)
   if (!model) return false
 
-  // Free model allowance
-  if (model.features.isFree) return true
+  // Free model allowance or local llama.cpp
+  if (model.features.isFree || model.provider === 'llama.cpp') return true
 
   // Check if this is an OpenRouter model (contains forward slash)
   if (modelId.includes('/')) {
@@ -457,7 +482,7 @@ export function getModelProvider(modelId: string): AIProvider | undefined {
  * Group models by provider for display
  */
 export function groupModelsByProvider(): GroupedModels[] {
-  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'openrouter']
+  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'openrouter', 'llama.cpp']
   const grouped = new Map<ServiceName, AIModel[]>()
 
   // Group models by provider
@@ -473,7 +498,7 @@ export function groupModelsByProvider(): GroupedModels[] {
     .map(providerId => {
       const provider = getProviderById(providerId)
       if (!provider) return null
-      
+
       return {
         provider: providerId,
         name: provider.name,
@@ -496,9 +521,9 @@ export function getSelectableModels(isPro: boolean, apiKeys: ApiKey[]): AIModel[
 export function getModelSDKConfig(modelId: string): { provider: AIProvider; modelId: string } | undefined {
   const model = getModelById(modelId)
   if (!model) return undefined
-  
+
   const provider = getProviderById(model.provider)
   if (!provider) return undefined
-  
+
   return { provider, modelId }
 }
