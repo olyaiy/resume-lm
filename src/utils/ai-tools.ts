@@ -36,8 +36,8 @@ const HIDDEN_MODELS: Record<string, HiddenModel> = {
  * Initializes an AI client based on the provided configuration
  * Falls back to default OpenAI configuration if no config is provided
  */
-export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {
-  void useThinking; // Keep for future use
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export function initializeAIClient(config?: AIConfig, isPro?: boolean, _useThinking?: boolean) {
 
   // Handle Pro subscription with environment variables
   if (isPro && config) {

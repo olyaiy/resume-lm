@@ -328,10 +328,6 @@ export async function createTailoredResume(
   companyName: string,
   tailoredContent: z.infer<typeof simplifiedResumeSchema>
 ) {
-  console.log('[createTailoredResume] Received jobId:', jobId);
-  console.log('[createTailoredResume] baseResume ID:', baseResume?.id);
-  console.log('[createTailoredResume] Is jobId valid UUID?:', /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(jobId || ''));
-
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
@@ -452,7 +448,7 @@ export async function countResumes(type: 'base' | 'tailored' | 'all'): Promise<n
     throw new Error('Failed to count resumes');
   }
 
-  return count || -1;
+  return count ?? 0;
 }
 
 

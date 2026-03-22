@@ -89,28 +89,21 @@ export async function generate(input: string, config?: AIConfig) {
    `;
 
     (async () => {
-      const { textStream } = streamText({
-        model: aiClient as LanguageModelV1,
-        system,
-        prompt: input,
-        onFinish: ({ usage }) => {
-         const { promptTokens, completionTokens, totalTokens } = usage;
-  
-         // your own logic, e.g. for saving the chat history or recording usage
-         console.log('----------Usage:----------');
-         console.log('Prompt tokens:', promptTokens);
-         console.log('Completion tokens:', completionTokens);
-         console.log('Total tokens:', totalTokens);
-       },
- 
-      });
+      try {
+        const { textStream } = streamText({
+          model: aiClient as LanguageModelV1,
+          system,
+          prompt: input,
+        });
 
-      for await (const delta of textStream) {
-        stream.update(delta);
+        for await (const delta of textStream) {
+          stream.update(delta);
+        }
+
+        stream.done();
+      } catch (err) {
+        stream.error(err instanceof Error ? err : new Error('Failed to generate cover letter'));
       }
-
-     
-      stream.done();
     })();
 
     return { output: stream.value };

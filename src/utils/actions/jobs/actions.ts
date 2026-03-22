@@ -56,13 +56,15 @@ export async function deleteJob(jobId: string): Promise<void> {
   const { data: affectedResumes } = await supabase
     .from('resumes')
     .select('id')
-    .eq('job_id', jobId);
+    .eq('job_id', jobId)
+    .eq('user_id', user.id);
 
   // Delete the job
   const { error: deleteError } = await supabase
     .from('jobs')
     .delete()
-    .eq('id', jobId);
+    .eq('id', jobId)
+    .eq('user_id', user.id);
 
   if (deleteError) {
     console.error('Delete error:', deleteError);
@@ -138,11 +140,17 @@ export async function getJobListings({
 
 export async function deleteTailoredJob(jobId: string): Promise<void> {
   const supabase = await createClient();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    throw new Error('User not authenticated');
+  }
 
   const { error } = await supabase
     .from('jobs')
     .update({ is_active: false })
-    .eq('id', jobId);
+    .eq('id', jobId)
+    .eq('user_id', user.id);
 
   if (error) {
     throw new Error('Failed to delete job');
@@ -186,4 +194,4 @@ export async function createEmptyJob(): Promise<Job> {
 
   revalidatePath('/', 'layout');
   return data;
-} 
+}  

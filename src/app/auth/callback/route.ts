@@ -8,9 +8,12 @@ export async function GET(request: NextRequest) {
   const next = requestUrl.searchParams.get('next')
 
   if (code) {
-    // Ensure you pass cookies correctly. For App Router, it's a function.
     const supabase = await createClient()
-    await supabase.auth.exchangeCodeForSession(code)
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) {
+      // Redirect to login with error indication if code exchange fails
+      return NextResponse.redirect(new URL('/auth/login?error=auth_callback_failed', requestUrl.origin))
+    }
   }
 
   // URL to redirect to after sign in process completes
@@ -20,6 +23,6 @@ export async function GET(request: NextRequest) {
   
   // Construct the full redirect URL
   return NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
-} 
+}  
 
 
