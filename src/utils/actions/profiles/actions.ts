@@ -37,7 +37,6 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
   const { data: { user }, error: userError } = await supabase.auth.getUser();
   
   if (userError || !user) {
-    void userError
     throw new Error(`Failed to fetch current profile: ${userError?.message || 'Unknown error'}`);
   }
 
@@ -49,7 +48,6 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
     .single();
 
   if (fetchError) {
-    void fetchError
     throw new Error(`Failed to fetch current profile: ${fetchError.message}`);
   }
 

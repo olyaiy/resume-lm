@@ -355,6 +355,14 @@ export async function deleteUserAccount(formData: FormData) {
     
     if (profileError) throw new Error(profileError.message)
 
+    // Delete user's jobs
+    const { error: jobError } = await serviceClient
+      .from('jobs')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (jobError) throw new Error(jobError.message)
+
     // Delete user's resumes
     const { error: resumeError } = await serviceClient
       .from('resumes')
@@ -375,4 +383,4 @@ export async function deleteUserAccount(formData: FormData) {
   }
 
   redirect('/')
-} 
+}  

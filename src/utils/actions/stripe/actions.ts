@@ -247,8 +247,6 @@ export async function getSubscriptionStatus() {
     throw new Error('User not authenticated');
   }
 
-  console.log(' looking for user ', user.id);
-
   const { data: subscription, error: subscriptionError } = await supabase
     .from('subscriptions')
     .select(`
@@ -264,10 +262,9 @@ export async function getSubscriptionStatus() {
 
   if (subscriptionError) {
     // If no subscription found, return a default free plan instead of throwing
-    void subscriptionError
     if (subscriptionError.code === 'PGRST116') {
       return {
-        subscription_plan: 'Free',
+        subscription_plan: 'free',
         subscription_status: 'active',
         current_period_end: null,
         trial_end: null,
@@ -305,18 +302,6 @@ export async function checkSubscriptionPlan() {
   const subscriptionState = getSubscriptionAccessState(data);
   const effectivePlan = data ? subscriptionState.effectivePlan : '';
 
-  console.log('🧮 checkSubscriptionPlan', {
-    userId: user.id,
-    subscription_plan: data?.subscription_plan,
-    subscription_status: data?.subscription_status,
-    stripe_subscription_id: data?.stripe_subscription_id,
-    current_period_end: data?.current_period_end,
-    trial_end: data?.trial_end,
-    isTrialing: subscriptionState.isTrialing,
-    hasProAccess: subscriptionState.hasProAccess,
-    effectivePlan,
-  });
-  
   return {
     plan: effectivePlan,
     status: data?.subscription_status || '',
