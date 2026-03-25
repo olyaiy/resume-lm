@@ -502,70 +502,93 @@ export async function generateResumeScore(
     : null;
 
   try {
-    let prompt = `
-    Generate a comprehensive score for this resume: ${JSON.stringify(resumeForScoring)}
-    
-    MUST include a 'miscellaneous' field with 2-3 metrics following this format:
-    {
-      "metricName": {
-        "score": number,
-        "reason": "string explanation"
-      }
-    }
-    Example: 
-    "keywordOptimization": {
-      "score": 85,
-      "reason": "Good use of industry keywords but could add more variation"
-    }
-    `;
+    const systemPrompt = `You are an expert resume analyst and career coach. You provide precise, actionable resume scoring based on proven best practices from professional recruiters, ATS systems, and hiring managers.
 
-    // Enhanced prompt for tailored resumes with job context
+SCORING SCALE (apply consistently):
+- 0-30: Critical issues. Missing essential content or major problems that would cause immediate rejection.
+- 31-50: Below average. Significant gaps or weak content that reduces competitiveness.
+- 51-70: Average. Meets basic standards but has clear room for improvement.
+- 71-85: Good. Solid resume with minor areas to polish.
+- 86-100: Excellent. Professional-grade content that stands out. Reserve 95+ for truly exceptional resumes.
+
+Be honest and calibrated. Most resumes should score between 45-75. Do not inflate scores.
+
+SCORING CRITERIA:
+
+1. COMPLETENESS
+   - contactInformation: Does the resume include name, email, phone, location, and relevant links (LinkedIn/GitHub/portfolio)? Missing any = lower score.
+   - detailLevel: Are work experiences, projects, and education described with sufficient detail? Are there enough bullet points per role (3-5 ideal)?
+
+2. IMPACT SCORE
+   - activeVoiceUsage: Do bullet points start with strong action verbs (Engineered, Led, Optimized, etc.)? Penalize passive voice, weak verbs (helped, worked on, responsible for).
+   - quantifiedAchievements: Are achievements backed by specific metrics (%, $, time saved, users, team size)? At least 40% of bullets should have quantified results.
+
+3. ROLE MATCH
+   - skillsRelevance: Are listed skills relevant to the target role? Are critical skills for the role present?
+   - experienceAlignment: Does work experience demonstrate progression and relevance to the target role?
+   - educationFit: Is education relevant? Is GPA included when strong (>3.5)? Are relevant coursework/achievements listed?
+
+4. ATS COMPATIBILITY
+   - keywordOptimization: Does the resume use industry-standard terminology and keywords for the target role? Are key technical terms and tools mentioned?
+   - formatting: Is the resume well-formatted for ATS parsing? Clean section headers, no tables/graphics that ATS can't read, standard section names.
+   - sectionStructure: Are sections logically ordered (skills near top for technical roles)? Are standard sections present (Experience, Education, Skills, Projects)?
+
+5. BREVITY & CLARITY
+   - conciseness: Are bullet points concise (1-2 lines each)? No filler words or unnecessary verbosity? Total resume length appropriate (1-2 pages)?
+   - bulletPointQuality: Does each bullet follow the formula: [Action Verb] + [Task/Context] + [Result/Impact]? No duty-listing without impact?
+   - readability: Is language clear and professional? No jargon without context? Consistent tense and formatting?
+
+PRIORITIZED ACTIONS:
+Provide 3-5 specific, actionable improvements ranked by impact. Each action should:
+- Have a clear priority level (high/medium/low)
+- Specify which category it belongs to (e.g., "Impact", "ATS", "Completeness")
+- Give a concrete, specific instruction the user can immediately act on
+
+OVERALL SCORE CALCULATION:
+Weight the categories as follows:
+- Impact Score: 25%
+- Role Match: 25%
+- ATS Compatibility: 20%
+- Completeness: 15%
+- Brevity & Clarity: 15%
+
+Provide 3-5 overall improvement suggestions in 'overallImprovements'. Each should be specific and actionable, not generic advice.`;
+
+    let userPrompt = `Analyze and score this resume for the target role of "${resumeForScoring.target_role}".
+
+RESUME DATA:
+${JSON.stringify(resumeForScoring, null, 2)}`;
+
     if (isTailoredResume) {
-      prompt += `
-      
-      THIS IS A TAILORED RESUME FOR A SPECIFIC JOB. Job details: ${JSON.stringify(jobForScoring)}
-      
-      IMPORTANT: Since this is a tailored resume, you MUST include the 'jobAlignment' field with detailed analysis:
-      
-      1. KEYWORD MATCH ANALYSIS:
-         - Compare resume content with job description keywords
-         - Identify matched keywords and missing critical keywords
-         - Score based on keyword density and relevance
-      
-      2. REQUIREMENTS MATCH ANALYSIS:
-         - Analyze how well the resume addresses job requirements
-         - Identify which requirements are clearly addressed
-         - Highlight gaps where requirements aren't demonstrated
-      
-      3. COMPANY FIT ANALYSIS:
-         - Assess alignment with company culture/values (if mentioned in job description)
-         - Evaluate positioning for this specific role
-         - Suggest improvements for better company alignment
-      
-      ALSO INCLUDE:
-      - Set 'isTailoredResume' to true
-      - Provide 'jobSpecificImprovements' with 3-5 specific suggestions for this job
-      - Weight the overall score more heavily on job alignment factors
-      
-      Focus on actionable insights that help the candidate better align their resume with this specific opportunity.
-      `;
+      userPrompt += `
+
+THIS IS A TAILORED RESUME for a specific job. Set 'isTailoredResume' to true.
+
+JOB DETAILS:
+${JSON.stringify(jobForScoring, null, 2)}
+
+ADDITIONAL ANALYSIS REQUIRED for 'jobAlignment':
+
+1. KEYWORD MATCH: Compare resume content against the job description. List all matched keywords and all critical missing keywords. Score based on coverage of important terms.
+
+2. REQUIREMENTS MATCH: Map each stated job requirement to evidence in the resume. List which requirements are clearly demonstrated and which have gaps.
+
+3. COMPANY FIT: Assess how well the resume positions the candidate for this specific company and role. Provide actionable suggestions.
+
+Also provide 'jobSpecificImprovements' with 3-5 targeted suggestions to better align with this specific job. Weight overall score more heavily on job alignment (add ~10% weight from other categories to job alignment).`;
     } else {
-      prompt += `
-      
-      This is a base resume (not tailored to a specific job).
-      - Set 'isTailoredResume' to false
-      - Do NOT include the 'jobAlignment' field
-      - Focus on general resume best practices and improvements
-      `;
+      userPrompt += `
+
+This is a base resume (not tailored to a specific job). Set 'isTailoredResume' to false. Do NOT include the 'jobAlignment' field. Focus on general resume strength and best practices.`;
     }
 
     const { object } = await generateObject({
       model: aiClient,
       schema: resumeScoreSchema,
-      prompt
+      system: systemPrompt,
+      prompt: userPrompt
     });
 
-    // console.log("THE OUTPUTTED object", object);
     return object
   } catch (error) {
     console.error('Error SCORING resume:', error);
