@@ -261,6 +261,12 @@ export type WorkExperienceBulletPoints = z.infer<typeof workExperienceBulletPoin
 export type ProjectAnalysis = z.infer<typeof projectAnalysisSchema>;
 export type WorkExperienceItems = z.infer<typeof workExperienceItemsSchema>;
 
+// Reusable sub-metric shape
+const scoreMetric = z.object({
+  score: z.number().min(0).max(100),
+  reason: z.string()
+});
+
 // Add to existing zod schemas in this file
 export const resumeScoreSchema = z.object({
   overallScore: z.object({
@@ -268,39 +274,40 @@ export const resumeScoreSchema = z.object({
     reason: z.string()
   }),
   completeness: z.object({
-    contactInformation: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    }),
-    detailLevel: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    })
+    contactInformation: scoreMetric,
+    detailLevel: scoreMetric
   }),
   impactScore: z.object({
-    activeVoiceUsage: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    }),
-    quantifiedAchievements: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    })
+    activeVoiceUsage: scoreMetric,
+    quantifiedAchievements: scoreMetric
   }),
   roleMatch: z.object({
-    skillsRelevance: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    }),
-    experienceAlignment: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    }),
-    educationFit: z.object({
-      score: z.number().min(0).max(100),
-      reason: z.string()
-    })
+    skillsRelevance: scoreMetric,
+    experienceAlignment: scoreMetric,
+    educationFit: scoreMetric
   }),
+
+  // ATS compatibility analysis
+  atsCompatibility: z.object({
+    keywordOptimization: scoreMetric,
+    formatting: scoreMetric,
+    sectionStructure: scoreMetric
+  }),
+
+  // Brevity & clarity analysis
+  brevityAndClarity: z.object({
+    conciseness: scoreMetric,
+    bulletPointQuality: scoreMetric,
+    readability: scoreMetric
+  }),
+
+  // Top prioritized actions the user should take
+  prioritizedActions: z.array(z.object({
+    priority: z.enum(['high', 'medium', 'low']),
+    category: z.string(),
+    action: z.string()
+  })).optional(),
+
   // Job-specific scoring for tailored resumes
   jobAlignment: z.object({
     keywordMatch: z.object({
@@ -321,16 +328,10 @@ export const resumeScoreSchema = z.object({
       suggestions: z.array(z.string()).optional()
     })
   }).optional(),
-  miscellaneous: z.record(
-    z.union([z.number(), z.object({
-      score: z.number().min(0).max(100).optional(),
-      reason: z.string().optional()
-    })]).optional()
-  ).optional(),
   overallImprovements: z.array(z.string()).optional(),
   // Job-specific improvements for tailored resumes
   jobSpecificImprovements: z.array(z.string()).optional(),
   isTailoredResume: z.boolean().optional()
 });
 
-export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>; 
+export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>;  
