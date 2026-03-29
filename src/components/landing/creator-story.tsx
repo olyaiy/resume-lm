@@ -50,7 +50,7 @@ export function CreatorStory() {
                 fill
                 sizes="(max-width: 768px) 256px, 384px"
                 className="object-cover"
-                priority
+                loading="lazy"
               />
             </div>
           </motion.div>
@@ -113,4 +113,4 @@ export function CreatorStory() {
       </div>
     </section>
   );
-} 
+}  

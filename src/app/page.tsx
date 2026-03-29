@@ -1,19 +1,30 @@
+import dynamic from "next/dynamic";
 import { Background } from "@/components/landing/Background";
-import FeatureHighlights from "@/components/landing/FeatureHighlights";
 import { Hero } from "@/components/landing/Hero";
-import { PricingPlans } from "@/components/landing/PricingPlans";
-import { VideoShowcase } from "@/components/landing/VideoShowcase";
-import { CreatorStory } from "@/components/landing/creator-story";
-import { FAQ } from "@/components/landing/FAQ";
 import { Footer } from "@/components/layout/footer";
 import { NavLinks } from "@/components/layout/nav-links";
 import { Logo } from "@/components/ui/logo";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import Script from "next/script";
 import { toSafeJsonScript } from "@/lib/html-safety";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
+
+// Lazy-load below-the-fold sections to reduce initial JS bundle
+const VideoShowcase = dynamic(() =>
+  import("@/components/landing/VideoShowcase").then((mod) => mod.VideoShowcase)
+);
+const FeatureHighlights = dynamic(
+  () => import("@/components/landing/FeatureHighlights")
+);
+const CreatorStory = dynamic(() =>
+  import("@/components/landing/creator-story").then((mod) => mod.CreatorStory)
+);
+const PricingPlans = dynamic(() =>
+  import("@/components/landing/PricingPlans").then((mod) => mod.PricingPlans)
+);
+const FAQ = dynamic(() =>
+  import("@/components/landing/FAQ").then((mod) => mod.FAQ)
+);
 
 // Page-specific metadata that extends the base metadata from layout.tsx
 export const metadata: Metadata = {
@@ -30,15 +41,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page() {
-  // Check if user is authenticated
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // If user is authenticated, redirect to home page
-  if (user) {
-    redirect("/home");
-  }
+export default function Page() {
+  // Authenticated users are redirected to /home by middleware,
+  // so this page only renders for unauthenticated visitors.
 
   const structuredData = {
     "@context": "https://schema.org",

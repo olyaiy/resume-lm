@@ -115,9 +115,8 @@ export function SplitContent({
                   fill
                   className="object-cover rounded-xl transition-all duration-700 group-hover:scale-[1.02]"
                   sizes="(min-width: 1440px) 50vw, (min-width: 1024px) 60vw, (min-width: 768px) 80vw, 100vw"
-                  quality={100}
-                  priority
-                  loading="eager"
+                  quality={85}
+                  loading="lazy"
                   style={{
                     objectFit: 'cover',
                     transform: 'translate3d(0, 0, 0)',
@@ -189,4 +188,4 @@ export function SplitContent({
     </div>
  
   );
-} 
+}  
