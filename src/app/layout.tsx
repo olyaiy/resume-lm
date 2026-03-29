@@ -8,7 +8,12 @@ import { Metadata } from "next";
 import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
-import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import dynamic from "next/dynamic";
+
+const PostHogProvider = dynamic(
+  () => import("@/components/analytics/posthog-provider").then((mod) => mod.PostHogProvider),
+  { ssr: false }
+);
 import {
   IMPERSONATION_STATE_COOKIE_NAME,
   parseImpersonationStateCookieValue,

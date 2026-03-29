@@ -98,6 +98,15 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Redirect authenticated users away from the landing page to /home
+  // This avoids a redundant auth check in the landing page server component
+  if (pathname === '/') {
+    console.log('🏠 Redirecting authenticated user from landing to /home')
+    const url = request.nextUrl.clone()
+    url.pathname = '/home'
+    return NextResponse.redirect(url)
+  }
+
   // Check if route requires subscription
   console.log('🛡️ Route check:', { pathname, isExempt: isSubscriptionExemptRoute(pathname) })
 
