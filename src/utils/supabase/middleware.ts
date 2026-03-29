@@ -104,7 +104,11 @@ export async function updateSession(request: NextRequest) {
     console.log('🏠 Redirecting authenticated user from landing to /home')
     const url = request.nextUrl.clone()
     url.pathname = '/home'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach(cookie =>
+      redirectResponse.cookies.set(cookie.name, cookie.value)
+    )
+    return redirectResponse
   }
 
   // Check if route requires subscription

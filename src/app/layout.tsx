@@ -11,8 +11,7 @@ import { cookies } from "next/headers";
 import dynamic from "next/dynamic";
 
 const PostHogProvider = dynamic(
-  () => import("@/components/analytics/posthog-provider").then((mod) => mod.PostHogProvider),
-  { ssr: false }
+  () => import("@/components/analytics/posthog-provider").then((mod) => mod.PostHogProvider)
 );
 import {
   IMPERSONATION_STATE_COOKIE_NAME,
