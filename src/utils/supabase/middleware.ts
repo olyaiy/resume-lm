@@ -105,9 +105,7 @@ export async function updateSession(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/home'
     const redirectResponse = NextResponse.redirect(url)
-    supabaseResponse.cookies.getAll().forEach(cookie =>
-      redirectResponse.cookies.set(cookie.name, cookie.value)
-    )
+    redirectResponse.cookies.setAll(supabaseResponse.cookies.getAll())
     return redirectResponse
   }
 
