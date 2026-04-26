@@ -2,6 +2,13 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
 import { getSubscriptionAccessState } from '@/lib/subscription-access'
 
+function getSupabaseUrl(): string {
+  return (
+    process.env.SUPABASE_INTERNAL_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL!
+  )
+}
+
 // Routes available on the free plan (auth still required)
 const SUBSCRIPTION_EXEMPT_ROUTES = [
   '/home',
@@ -30,7 +37,7 @@ export async function updateSession(request: NextRequest) {
   })
 
   const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    getSupabaseUrl(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {

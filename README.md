@@ -206,6 +206,8 @@ pnpm dev
 | **Supabase Studio** | http://localhost:54323 | Database dashboard |
 | **Redis Commander** | http://localhost:8081 | Redis management UI |
 
+If the Next.js app runs in a container but the browser uses a different host to reach Supabase, set **`SUPABASE_INTERNAL_URL`** in `.env.local` to the URL the **server** should use (for example `http://host.docker.internal:54321` or your Compose service name). When unset, the app uses `NEXT_PUBLIC_SUPABASE_URL` everywhere.
+
 > 📖 See [docker/DOCKER.md](docker/DOCKER.md) for full Docker documentation including full-stack mode.
 
 ## 📊 Database Architecture
