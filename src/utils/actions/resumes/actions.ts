@@ -559,10 +559,17 @@ export async function generateResumeScore(
       `;
     }
 
+    // JSON mode + retries — some providers (e.g. OpenRouter) do not reliably
+    // use the tool path that default generateObject expects.
     const { object } = await generateObject({
       model: aiClient,
       schema: resumeScoreSchema,
-      prompt
+      mode: 'json',
+      schemaName: 'ResumeScore',
+      schemaDescription:
+        'Structured resume scoring: overallScore, completeness, impactScore, roleMatch, optional jobAlignment, miscellaneous metrics, improvements.',
+      prompt,
+      maxRetries: 2,
     });
 
     // console.log("THE OUTPUTTED object", object);
