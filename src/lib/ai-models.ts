@@ -89,6 +89,15 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
     unstable: false
     
   },
+  google: {
+    id: 'google',
+    name: 'Google (Gemini)',
+    apiLink: 'https://aistudio.google.com/apikey',
+    logo: '/logos/gemini-logo.webp',
+    envKey: 'GOOGLE_GENERATIVE_AI_API_KEY',
+    sdkInitializer: 'google',
+    unstable: false,
+  },
 }
 
 // ========================
@@ -162,9 +171,42 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     }
   },
+  // Google AI — direct API (@ai-sdk/google); use GOOGLE_GENERATIVE_AI_API_KEY or Settings
+  {
+    id: 'gemini-2.0-flash',
+    name: 'Gemini 2.0 Flash (Google AI)',
+    provider: 'google',
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 1000000,
+      supportsVision: true,
+      supportsTools: true,
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false,
+    },
+  },
+  {
+    id: 'gemini-1.5-pro',
+    name: 'Gemini 1.5 Pro (Google AI)',
+    provider: 'google',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 2000000,
+      supportsVision: true,
+      supportsTools: true,
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false,
+    },
+  },
   {
     id: 'google/gemini-3-pro-preview',
-    name: 'Gemini 3 Pro Preview',
+    name: 'Gemini 3 Pro Preview (OpenRouter)',
     provider: 'openrouter',
     features: {
       isRecommended: true,
@@ -365,6 +407,8 @@ export const MODEL_DESIGNATIONS = {
   FRONTIER: 'gpt-5.2',
   // Alternative frontier model
   FRONTIER_ALT: 'claude-opus-4-5-20251101',
+  // Default when user adds a Google AI (direct) API key
+  NATIVE_GEMINI_FLASH: 'gemini-2.0-flash',
   // Balanced model - good quality but faster/cheaper than frontier
   BALANCED: 'google/gemini-3-pro-preview',
   // Vision-capable model for image analysis
@@ -457,7 +501,7 @@ export function getModelProvider(modelId: string): AIProvider | undefined {
  * Group models by provider for display
  */
 export function groupModelsByProvider(): GroupedModels[] {
-  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'openrouter']
+  const providerOrder: ServiceName[] = ['anthropic', 'openai', 'google', 'openrouter']
   const grouped = new Map<ServiceName, AIModel[]>()
 
   // Group models by provider

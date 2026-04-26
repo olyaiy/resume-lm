@@ -151,7 +151,7 @@ SUPABASE_ANON_KEY=your_supabase_anon_key
 # AI Services
 OPENAI_API_KEY=your_openai_key
 ANTHROPIC_API_KEY=your_claude_key
-GOOGLE_AI_API_KEY=your_gemini_key
+GOOGLE_GENERATIVE_AI_API_KEY=your_gemini_key
 
 # Authentication
 NEXTAUTH_URL=http://localhost:3000
@@ -183,7 +183,7 @@ Run the complete stack locally with Docker Compose - includes Supabase, PostgreS
 ```bash
 # 1. Copy environment file and add your AI API key
 cp .env.example .env.local
-# Edit .env.local and add at least one: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY
+# Edit .env.local and add at least one: OPENAI_API_KEY, ANTHROPIC_API_KEY, OPENROUTER_API_KEY, and/or GOOGLE_GENERATIVE_AI_API_KEY (direct Gemini)
 
 # 2. Start Docker services
 cd docker
