@@ -3,7 +3,6 @@
 import { Stripe } from "stripe";
 import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
-import { revalidatePath } from "next/cache";
 import { getSubscriptionAccessState } from '@/lib/subscription-access';
 import { mapStripeSubscriptionToAppSubscription } from '@/lib/stripe/subscription-sync';
 
@@ -346,37 +345,4 @@ export async function getSubscriptionPlan(returnId?: boolean) {
   }
 
   return effectivePlan;
-}
-
-export async function toggleSubscriptionPlan(newPlan: 'free' | 'pro'): Promise<'free' | 'pro'> {
-  const supabase = await createClient();
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-  if (userError || !user) {
-    throw new Error('User not authenticated');
-  }
-
-  try {
-    // Upsert the new plan for the authenticated user
-    const { error: upsertError } = await supabase
-      .from('subscriptions')
-      .upsert({
-        user_id: user.id,
-        subscription_plan: newPlan,
-        subscription_status: 'active',
-        updated_at: new Date().toISOString()
-      }, {
-        onConflict: 'user_id'
-      });
-
-    if (upsertError) {
-      throw new Error('Failed to update subscription');
-    }
-
-    revalidatePath('/');
-    return newPlan;
-  } catch (error) {
-    console.error('Subscription toggle error:', error);
-    throw new Error('Failed to toggle subscription plan');
-  }
 }

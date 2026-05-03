@@ -93,6 +93,7 @@ Updated after Task 3 production entitlement reconciliation on May 3, 2026.
 - **Stripe duplicate subscription cleanup is partially completed.** The older duplicate subscription `sub_1TI1ShCv6RlaQFiMVwxEviBt` was canceled through the Stripe dashboard on May 3, 2026 and verified by live Stripe CLI: `status = canceled`, `canceled_at = 2026-05-03T18:43:15Z`, `ended_at = 2026-05-03T18:43:15Z`. Supabase still grants entitlement using the newer/current subscription `sub_1TI1ZbCv6RlaQFiMQHIZVzZI`.
 - **Duplicate refund is handled by Stripe/Link, not by a normal merchant refund object.** A direct dashboard refund attempt for the intended duplicate April 10, 2026 `$20 USD` charge on invoice `in_1TKYo4Cv6RlaQFiM5Qf00Gmg` / payment intent `pi_3TKZlDCv6RlaQFiM1SPXsRQd` failed with Stripe error `charge_not_refundable` and message code `payment_refund_hidden_link_refunded`: "This payment is not refundable as Stripe has already refunded it. This refund has been executed by Stripe and you have not been charged." This explains why live Stripe CLI still shows `latest_charge.amount_refunded = 0`, `latest_charge.refunded = false`, no merchant refund objects, and no invoice credit notes: the refund is hidden/Stripe-funded rather than debited from the ResumeLM Stripe balance. No additional merchant refund should be attempted for this payment unless Stripe Support says otherwise.
 - **Duplicate Checkout creation prevention is implemented, verified, and committed.** Commit `741b61a` updates the checkout server action to reject arbitrary price IDs, check live Stripe subscriptions for the customer and Pro price before creating Checkout, send users with active/trialing/past_due/unpaid/incomplete Stripe subscriptions to the billing portal, reuse matching open Checkout sessions, and create new Checkout sessions with `client_reference_id`, metadata, subscription metadata, and a stable idempotency key. Verification passed on May 3, 2026: checkout guard tests plus existing subscription tests passed (`22` tests), `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed. Note: `pnpm exec tsx` is not available as a direct package binary in this workspace, so the focused test run used the installed transitive `tsx` CLI path.
+- **Task 4 unsafe manual plan toggle is locally implemented and verified.** The self-service `toggleSubscriptionPlan` server action was removed from Stripe actions, the unused customer-facing `TogglePlanButton` component was deleted, and a safety test now checks that the Stripe actions source does not reintroduce the unsafe self-service plan toggle. Verification passed on May 3, 2026: focused safety/subscription tests passed (`23` tests), source search outside tests found no remaining `toggleSubscriptionPlan`, `TogglePlanButton`, or `toggle-plan` usage, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed.
 - **Production price note:** The deployed `resumelm.ca` client bundle contains live price id `price_1QckQwCv6RlaQFiMVN24pn3M`, matching the four live Stripe active/trialing subscriptions. Local `.env.local` still contains a stale/test-ish value, so do not use local `.env.local` as evidence for live Stripe pricing.
 - **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`. Local uncommitted changes currently visible in the working tree include unrelated files (`package.json`, `pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts.
 
@@ -767,13 +768,15 @@ git commit -m "chore: add Stripe subscription reconciliation script"
 
 ## Task 4: Remove Unsafe Manual Plan Toggle
 
+> **Progress note, 2026-05-03:** The self-service plan override path has been removed locally. `toggleSubscriptionPlan` was deleted from `src/utils/actions/stripe/actions.ts`, the unused `src/components/settings/toggle-plan-button.tsx` component was deleted, and `src/utils/actions/stripe/actions.safety.test.ts` now guards against reintroducing the unsafe self-service plan toggle. Verification passed: focused safety/subscription tests (`23` tests), source search outside tests, `pnpm exec tsc --noEmit --pretty false`, `pnpm lint`, and `pnpm build`.
+
 **Files:**
 
 - Modify: `src/utils/actions/stripe/actions.ts`
 - Modify or delete: `src/components/settings/toggle-plan-button.tsx`
 - Search: all imports/usages of `toggleSubscriptionPlan`
 
-- [ ] **Step 1: Find all call sites**
+- [x] **Step 1: Find all call sites**
 
 Run:
 
@@ -785,7 +788,7 @@ Expected:
 
 - A complete list of server action and UI usage.
 
-- [ ] **Step 2: Remove public/manual plan toggle behavior**
+- [x] **Step 2: Remove public/manual plan toggle behavior**
 
 Preferred change:
 
@@ -813,7 +816,7 @@ Expected:
 
 - Regular authenticated users cannot call any action that changes their own plan without Stripe.
 
-- [ ] **Step 3: Run verification**
+- [x] **Step 3: Run verification**
 
 ```bash
 pnpm lint
