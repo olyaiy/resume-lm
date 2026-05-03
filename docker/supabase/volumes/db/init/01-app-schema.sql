@@ -65,6 +65,10 @@ CREATE TRIGGER update_stripe_webhook_events_updated_at BEFORE
 UPDATE ON stripe_webhook_events FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.stripe_webhook_events FROM anon, authenticated;
+GRANT ALL ON TABLE public.stripe_webhook_events TO service_role;
+
 -- Jobs table
 CREATE TABLE IF NOT EXISTS public.jobs (
   id uuid NOT NULL DEFAULT uuid_generate_v4(),
