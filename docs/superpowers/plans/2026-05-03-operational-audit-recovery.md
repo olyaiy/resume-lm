@@ -231,7 +231,9 @@ Planned modified files:
 
 ## Task 1: Repair Stripe Webhook Persistence
 
-> **Progress note, 2026-05-03:** Production Supabase project `gspglrtjrmjymcmabtpq` now has `public.stripe_webhook_events`. Applied through the Supabase migration API as recorded migration `20260503022114_create_stripe_webhook_events`, and added the matching local migration file at `supabase/migrations/20260503022114_create_stripe_webhook_events.sql`. Verification confirmed the table, all expected columns, and the `update_stripe_webhook_events_updated_at` trigger. Supabase then flagged the new public table for disabled RLS, so a second production migration, `20260503022343_secure_stripe_webhook_events_rls`, enabled RLS, revoked `anon`/`authenticated` table access, and granted access to `service_role`; the matching local migration is `supabase/migrations/20260503022343_secure_stripe_webhook_events_rls.sql`. A service-role probe inserted, updated, and deleted a synthetic webhook event successfully after RLS hardening. The canonical schema files and Helm DB init file were updated with the same table and RLS hardening blocks. Remaining work in this task: replay failed Stripe webhook deliveries, then commit the repo changes.
+> **Progress note, 2026-05-03:** Production Supabase project `gspglrtjrmjymcmabtpq` now has `public.stripe_webhook_events`. Applied through the Supabase migration API as recorded migration `20260503022114_create_stripe_webhook_events`, and added the matching local migration file at `supabase/migrations/20260503022114_create_stripe_webhook_events.sql`. Verification confirmed the table, all expected columns, and the `update_stripe_webhook_events_updated_at` trigger. Supabase then flagged the new public table for disabled RLS, so a second production migration, `20260503022343_secure_stripe_webhook_events_rls`, enabled RLS, revoked `anon`/`authenticated` table access, and granted access to `service_role`; the matching local migration is `supabase/migrations/20260503022343_secure_stripe_webhook_events_rls.sql`. A service-role probe inserted, updated, and deleted a synthetic webhook event successfully after RLS hardening. The canonical schema files and Helm DB init file were updated with the same table and RLS hardening blocks. The repair was committed as `a4ea80d` and pushed to `origin/main`; GitHub Actions succeeded for both `Helm Chart Publish` and `Build and Push Docker Image`. Remaining work in this task: replay failed Stripe webhook deliveries from a logged-in Stripe dashboard session and verify rows appear in `public.stripe_webhook_events`.
+
+> **Replay blocker, 2026-05-03:** The available Browser Use control path was not exposed in this session, and the desktop Arc fallback was not logged into Stripe. No failed Stripe deliveries were replayed by Codex in this pass.
 
 **Files:**
 
@@ -343,7 +345,7 @@ Expected:
 - New rows appear in `public.stripe_webhook_events`.
 - `processed_at` is non-null for successfully processed relevant events.
 
-- [ ] **Step 7: Commit**
+- [x] ~~**Step 7: Commit**~~
 
 ```bash
 git add supabase/migrations/20260503022114_create_stripe_webhook_events.sql supabase/migrations/20260503022343_secure_stripe_webhook_events_rls.sql helm/resumelm/templates/db-init-configmap.yaml
