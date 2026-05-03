@@ -1,5 +1,6 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { LanguageModelV1 } from 'ai';
 import { 
@@ -39,61 +40,91 @@ const HIDDEN_MODELS: Record<string, HiddenModel> = {
 export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {
   void useThinking; // Keep for future use
 
-  // Handle Pro subscription with environment variables
+  // Pro: server env keys first, then keys from Settings (client sends config.apiKeys for /api/chat, etc.)
   if (isPro && config) {
-    const { model } = config;
+    const { model, apiKeys = [] } = config;
     const modelData = getModelById(model) ?? HIDDEN_MODELS[model];
     const resolvedModelId = modelData?.id ?? model;
     const provider = modelData ? getProviderById(modelData.provider) : undefined;
-    
+
     if (!modelData || !provider) {
       throw new Error(`Unknown model: ${model}`);
     }
 
-    // Get the environment key and check if it exists
-    const envKey = process.env[provider.envKey];
-    if (!envKey) {
-      throw new Error(`${provider.name} API key not found (${provider.envKey})`);
-    }
+    const userOpenRouter = apiKeys.find((k) => k.service === 'openrouter')?.key;
+    const userOpenAI = apiKeys.find((k) => k.service === 'openai')?.key;
+    const userAnthropic = apiKeys.find((k) => k.service === 'anthropic')?.key;
+    const userGoogle = apiKeys.find((k) => k.service === 'google')?.key;
 
-    // Create the appropriate SDK client based on provider
+    const openRouterKey = process.env.OPENROUTER_API_KEY || userOpenRouter;
+    const openaiKey = process.env.OPENAI_API_KEY || userOpenAI;
+    const anthropicKey = process.env.ANTHROPIC_API_KEY || userAnthropic;
+    const googleKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY || userGoogle;
+
+    const missingKeyMsg = (name: string, envVar: string) =>
+      `${name} API key not found. Add ${envVar} to .env.local and restart the dev server, or add your key in Settings → API keys.`;
+
     switch (provider.id) {
-      case 'anthropic':
-        return createAnthropic({ apiKey: envKey })(resolvedModelId) as LanguageModelV1;
-      
+      case 'anthropic': {
+        if (!anthropicKey) {
+          throw new Error(missingKeyMsg('Anthropic', 'ANTHROPIC_API_KEY'));
+        }
+        return createAnthropic({ apiKey: anthropicKey })(resolvedModelId) as LanguageModelV1;
+      }
+
       case 'openai':
-        // Check if this is actually an OpenRouter model (contains forward slash)
         if (resolvedModelId.includes('/')) {
-          // Use OpenRouter for models with provider prefix
-          const openRouterKey = process.env.OPENROUTER_API_KEY;
           if (!openRouterKey) {
-            throw new Error('OpenRouter API key not found (OPENROUTER_API_KEY)');
+            throw new Error(missingKeyMsg('OpenRouter', 'OPENROUTER_API_KEY'));
           }
           return createOpenRouter({
             apiKey: openRouterKey,
             baseURL: 'https://openrouter.ai/api/v1',
             headers: {
               'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-              'X-Title': 'ResumeLM'
+              'X-Title': 'ResumeLM',
             },
           })(resolvedModelId) as LanguageModelV1;
         }
-        // Regular OpenAI models
-        return createOpenAI({ 
-          apiKey: envKey,
-          compatibility: 'strict'
+        if (!openaiKey && openRouterKey) {
+          return createOpenRouter({
+            apiKey: openRouterKey,
+            baseURL: 'https://openrouter.ai/api/v1',
+            headers: {
+              'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
+              'X-Title': 'ResumeLM',
+            },
+          })(`openai/${resolvedModelId}`) as LanguageModelV1;
+        }
+        if (!openaiKey) {
+          throw new Error(missingKeyMsg('OpenAI', 'OPENAI_API_KEY'));
+        }
+        return createOpenAI({
+          apiKey: openaiKey,
+          compatibility: 'strict',
         })(resolvedModelId) as LanguageModelV1;
-      
-      case 'openrouter':
+
+      case 'openrouter': {
+        if (!openRouterKey) {
+          throw new Error(missingKeyMsg('OpenRouter', 'OPENROUTER_API_KEY'));
+        }
         return createOpenRouter({
-          apiKey: envKey,
+          apiKey: openRouterKey,
           baseURL: 'https://openrouter.ai/api/v1',
           headers: {
             'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
-            'X-Title': 'ResumeLM'
-          }
+            'X-Title': 'ResumeLM',
+          },
         })(resolvedModelId) as LanguageModelV1;
-      
+      }
+
+      case 'google': {
+        if (!googleKey) {
+          throw new Error(missingKeyMsg('Google Generative AI', 'GOOGLE_GENERATIVE_AI_API_KEY'));
+        }
+        return createGoogleGenerativeAI({ apiKey: googleKey })(resolvedModelId) as LanguageModelV1;
+      }
+
       default:
         throw new Error(`Unsupported provider: ${provider.id}`);
     }
@@ -186,6 +217,9 @@ export function initializeAIClient(config?: AIConfig, isPro?: boolean, useThinki
           'X-Title': 'ResumeLM'
         }
       })(resolvedModelId) as LanguageModelV1;
+
+    case 'google':
+      return createGoogleGenerativeAI({ apiKey: userApiKey })(resolvedModelId) as LanguageModelV1;
     
     default:
       throw new Error(`Unsupported provider: ${provider.id}`);
