@@ -235,6 +235,8 @@ Planned modified files:
 
 > **Replay blocker, 2026-05-03:** The available Browser Use control path was not exposed in this session, and the desktop Arc fallback was not logged into Stripe. No failed Stripe deliveries were replayed by Codex in this pass.
 
+> **Replay verification, 2026-05-03:** After a logged-in Stripe dashboard session was available, Codex replayed the unique failed live `invoice.paid` and `checkout.session.completed` events for webhook destination `https://resumelm.ca/api/webhooks/stripe`. Stripe showed the older failed delivery attempts as recovered, and production Supabase recorded both events with non-null `processed_at`: `evt_1TRt5bCv6RlaQFiMxCrcER9D` (`invoice.paid`) and `evt_1TRt5aCv6RlaQFiMRMu53Riq` (`checkout.session.completed`). A full paginated subscription check showed `2,617` subscription rows with `pro:active = 7`, up from `6` during the audit snapshot. `customer.subscription.created` failed deliveries were intentionally not replayed yet because `src/app/api/webhooks/stripe/route.ts` currently lists that event as relevant but does not handle it in the switch; replaying now would mark those events processed as no-ops and make the later handler fix harder to validate.
+
 **Files:**
 
 - Create: `supabase/migrations/20260503022114_create_stripe_webhook_events.sql`
@@ -329,12 +331,29 @@ Expected:
 - `created_at timestamp with time zone NO`
 - `updated_at timestamp with time zone NO`
 
-- [ ] **Step 6: Replay failed Stripe webhook events after the table exists**
+- [x] ~~**Step 6a: Replay handled failed Stripe webhook events after the table exists**~~
 
 In the Stripe dashboard, open the webhook destination `https://resumelm.ca/api/webhooks/stripe` and resend failed deliveries for:
 
 - `checkout.session.completed`
 - `invoice.paid`
+
+Expected:
+
+- Delivery status becomes recovered / latest delivery is `200`.
+- New rows appear in `public.stripe_webhook_events`.
+- `processed_at` is non-null for successfully processed relevant events.
+
+Observed:
+
+- `evt_1TRt5aCv6RlaQFiMRMu53Riq` (`checkout.session.completed`) processed at `2026-05-03T03:52:22.628+00:00`.
+- `evt_1TRt5bCv6RlaQFiMxCrcER9D` (`invoice.paid`) processed at `2026-05-03T03:51:32.983+00:00`.
+- Older red rows in Stripe were repeated delivery attempts for these same event IDs and showed as recovered after replay.
+
+- [ ] **Step 6b: Replay subscription lifecycle events only after Task 2 fixes explicit handling**
+
+Deferred event types:
+
 - `customer.subscription.created`
 - `customer.subscription.updated`
 - `customer.subscription.deleted`
@@ -344,6 +363,11 @@ Expected:
 - Delivery status becomes `200`.
 - New rows appear in `public.stripe_webhook_events`.
 - `processed_at` is non-null for successfully processed relevant events.
+
+Important:
+
+- Do not replay `customer.subscription.created` before `src/app/api/webhooks/stripe/route.ts` handles it explicitly.
+- The current route includes `customer.subscription.created` in `relevantEvents`, but the switch has no case for it, so replaying it now would store the event as processed without syncing subscription state.
 
 - [x] ~~**Step 7: Commit**~~
 
