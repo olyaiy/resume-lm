@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback } from "react";
+import React from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { useSearchParams } from 'next/navigation'
@@ -15,28 +15,64 @@ export function CheckoutForm() {
     const searchParams = useSearchParams()
     const priceId = searchParams.get('price_id')!
     const includeTrial = searchParams.get('trial') === 'true'
-
-    const fetchClientSecret = useCallback(async () => {
-        const stripeResponse = await postStripeSession({ priceId, includeTrial });
-        return stripeResponse.clientSecret;
-    }, [priceId, includeTrial]);
+    const [clientSecret, setClientSecret] = React.useState<string | null>(null);
+    const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     React.useEffect(() => {
-        async function checkStatuses() {
+        let isMounted = true;
+
+        async function createCheckoutSession() {
             try {
-                // Remove unused Promise.all call
-                await Promise.all([
-                    // DELETE THIS BLOCK
-                ]);
-            } finally {
-                // Empty finally block can remain
+                const stripeResponse = await postStripeSession({ priceId, includeTrial });
+
+                if (!isMounted) return;
+
+                if (stripeResponse.kind === "portal") {
+                    window.location.href = stripeResponse.url;
+                    return;
+                }
+
+                if (stripeResponse.kind === "error") {
+                    setErrorMessage(stripeResponse.message);
+                    return;
+                }
+
+                setClientSecret(stripeResponse.clientSecret);
+            } catch (error) {
+                if (!isMounted) return;
+
+                setErrorMessage(
+                    error instanceof Error
+                        ? error.message
+                        : "Unable to start checkout. Please try again."
+                );
             }
         }
 
-        checkStatuses();
-    }, []);
+        createCheckoutSession();
 
-    const options = { fetchClientSecret };
+        return () => {
+            isMounted = false;
+        };
+    }, [priceId, includeTrial]);
+
+    if (errorMessage) {
+        return (
+            <div className="rounded-md border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+                {errorMessage}
+            </div>
+        );
+    }
+
+    if (!clientSecret) {
+        return (
+            <div className="rounded-md border border-gray-200 bg-white p-4 text-sm text-gray-600">
+                Preparing secure checkout...
+            </div>
+        );
+    }
+
+    const options = { clientSecret };
 
     return (
         <div className="space-y-8">
@@ -98,4 +134,3 @@ export function CheckoutForm() {
         </div>
     );
 }
-

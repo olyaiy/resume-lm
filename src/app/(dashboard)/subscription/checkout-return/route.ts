@@ -24,8 +24,10 @@ export const GET = async (request: NextRequest) => {
   }
 
   if (session.status === "open") {
+    const trialParam = session.metadata?.include_trial === "true" ? "&trial=true" : "";
+
     return redirect(
-      `/subscription/checkout?price_id=${session.metadata?.price_id}`,
+      `/subscription/checkout?price_id=${session.metadata?.price_id}${trialParam}`,
     );
   }
 
