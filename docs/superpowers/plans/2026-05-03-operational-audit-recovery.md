@@ -80,7 +80,7 @@ Local environment caveat:
 
 ## Current Recovery Status
 
-Updated after Task 2 local verification on May 2 PDT / May 3 UTC, 2026.
+Updated after Task 3 production entitlement reconciliation on May 3, 2026.
 
 - **Task 1 persistence repair is deployed and verified.** Production Supabase now has `public.stripe_webhook_events`, RLS is enabled, `anon` and `authenticated` cannot access the table, and `service_role` can insert/update/delete as required by the webhook route.
 - **GitHub production delivery succeeded for the schema repair.** Commit `a4ea80d` added the table and RLS hardening locally, and GitHub Actions reported success for both `Helm Chart Publish` and `Build and Push Docker Image`.
@@ -89,8 +89,10 @@ Updated after Task 2 local verification on May 2 PDT / May 3 UTC, 2026.
 - **Task 2 subscription sync repair is locally implemented and verified.** The webhook route now handles `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `checkout.session.completed`, and `invoice.paid` through the same deterministic Stripe-to-Supabase sync path. `manageSubscriptionStatusChange` no longer selects the non-existent `subscriptions.id` column and now upserts by `user_id`.
 - **Subscription access is now stricter.** A row with free plan plus Stripe fields no longer grants Pro access; Pro access now requires `subscription_plan = 'pro'` with active, trialing, or canceling-with-unexpired-period state.
 - **Task 2 verification passed locally.** Focused Node tests passed with `7` tests across subscription mapping and access behavior, and `pnpm lint`, `pnpm exec tsc --noEmit --pretty false`, and `pnpm build` all passed.
-- **Do not replay `customer.subscription.created` in production until this Task 2 code is deployed.** The code now handles that event correctly, but production must be running this commit before replaying the deferred live Stripe deliveries.
-- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`. Local uncommitted changes currently visible in the working tree are unrelated to the replay work: `package.json`, `pnpm-lock.yaml`, `AGENTS.md`, and `pnpm-workspace.yaml`.
+- **Task 3 entitlement reconciliation is repaired and verified.** Stripe CLI live reads showed `4` active/trialing subscriptions, but only `3` distinct Supabase users because customer `cus_UGYZ...LYNE` has two active paid subscriptions. Production Supabase now has `3` `pro:active` rows, `0` stale `pro:active` rows, and `0` active/trialing Stripe customers missing `metadata.supabaseUUID`.
+- **Remaining Stripe billing cleanup:** One customer still has two active Stripe subscriptions: `sub_1TI1ZbCv6RlaQFiMQHIZVzZI` and `sub_1TI1ShCv6RlaQFiMVwxEviBt`. Supabase grants entitlement using `sub_1TI1ZbCv6RlaQFiMQHIZVzZI`; the duplicate older active subscription needs a deliberate cancel/refund decision in Stripe.
+- **Production price note:** The deployed `resumelm.ca` client bundle contains live price id `price_1QckQwCv6RlaQFiMVN24pn3M`, matching the four live Stripe active/trialing subscriptions. Local `.env.local` still contains a stale/test-ish value, so do not use local `.env.local` as evidence for live Stripe pricing.
+- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`. Local uncommitted changes currently visible in the working tree include unrelated files (`package.json`, `pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus the Task 3 reconciliation script and this plan update.
 
 ---
 
@@ -653,15 +655,21 @@ Actual:
 
 ## Task 3: Reconcile Stripe and Supabase
 
+> **Progress note, 2026-05-03:** Created `scripts/audit/reconcile-stripe-subscriptions.ts` and verified it with `pnpm exec tsc --noEmit --pretty false`. Because local `.env.local` has a test Stripe secret and the Stripe CLI stores a non-SDK-usable restricted live credential, the script now supports `--stripe-snapshot` so a live Stripe CLI JSON export can be used as the exact audit input. Read-only reports were saved under `tmp/audits/` and are intentionally not committed.
+>
+> **Production repair, 2026-05-03:** Live Stripe showed `4` active/trialing subscriptions on `price_1QckQwCv6RlaQFiMVN24pn3M`: two active subscriptions for user `3211e896...544f`, one trialing subscription for user `63304db8...03a8`, and one trialing subscription for user `ab9b4e12...6848`. Supabase had `7` `pro:active` rows before repair: one valid live trial, two under-entitled live Stripe users still marked free, and six stale/manual Pro grants. Codex explicitly repaired Supabase by granting Pro to users `3211e896...544f` and `ab9b4e12...6848`, and downgrading six stale/manual `pro:active` rows to free.
+>
+> **Verification, 2026-05-03:** Re-running the read-only reconciliation after repair showed `stripe active/trialing = 4`, `supabase pro:active = 3`, `active/trialing Stripe subscriptions missing or wrong in Supabase = 0`, `stale Supabase pro:active rows = 0`, and `active/trialing Stripe customers missing metadata.supabaseUUID = 0`. The report still flags `1` duplicate active/trialing Stripe user because one customer has two active paid subscriptions; that is a Stripe billing cleanup item, not an app entitlement-cache mismatch.
+
 **Files:**
 
 - Create: `scripts/audit/reconcile-stripe-subscriptions.ts`
 
-- [ ] **Step 1: Create a read-only reconciliation script**
+- [x] **Step 1: Create a read-only reconciliation script**
 
 Create `scripts/audit/reconcile-stripe-subscriptions.ts` with behavior:
 
-- Read Stripe live subscriptions using `STRIPE_SECRET_KEY`.
+- Read Stripe live subscriptions using `STRIPE_SECRET_KEY`, or read a reviewed Stripe CLI export with `--stripe-snapshot`.
 - Read Supabase `subscriptions` using `SUPABASE_SERVICE_ROLE_KEY`.
 - Match rows by `stripe_subscription_id` and `stripe_customer_id`.
 - Print aggregate counts.
@@ -677,7 +685,7 @@ The script should report:
 - Stripe active/trialing rows whose Supabase row is `free` or `canceled`.
 - Stripe customers without `metadata.supabaseUUID`.
 
-- [ ] **Step 2: Run in read-only mode**
+- [x] **Step 2: Run in read-only mode**
 
 Run:
 
@@ -691,7 +699,12 @@ Expected:
 - No full emails printed.
 - Summary shows the exact mismatch count.
 
-- [ ] **Step 3: Save the report outside source control**
+Actual:
+
+- This repo does not currently include `tsx`; verified the script through `pnpm exec tsc --noEmit --pretty false`, compiled it to `/tmp/resumelm-audit-js`, and ran it with a live Stripe CLI snapshot.
+- Before repair, the report showed `3` active/trialing Stripe subscriptions missing or wrong in Supabase and `6` stale Supabase `pro:active` rows.
+
+- [x] **Step 3: Save the report outside source control**
 
 Run:
 
@@ -705,7 +718,12 @@ Expected:
 - Report exists locally.
 - Do not commit `tmp/audits`.
 
-- [ ] **Step 4: Manually inspect high-risk mismatches**
+Actual:
+
+- Saved `tmp/audits/stripe-reconciliation-2026-05-03.txt`.
+- Saved post-repair verification as `tmp/audits/stripe-reconciliation-2026-05-03-after-repair.txt`.
+
+- [x] **Step 4: Manually inspect high-risk mismatches**
 
 For each mismatch:
 
@@ -715,13 +733,26 @@ For each mismatch:
 - Check the Supabase `user_id` row.
 - Decide whether the DB should be corrected by replaying Stripe events or by explicit admin repair.
 
-- [ ] **Step 5: Apply corrections only after webhook replay works**
+Actual:
+
+- Confirmed all four active/trialing Stripe subscriptions had `metadata.supabaseUUID`.
+- Confirmed two live Stripe users were under-entitled in Supabase.
+- Confirmed six Supabase `pro:active` rows were stale/manual and not backed by a live active/trialing Stripe subscription.
+- Confirmed one customer has two active paid subscriptions, so the Stripe subscription count is not the same thing as distinct entitled user count.
+
+- [x] **Step 5: Apply corrections only after webhook replay works**
 
 Use replayed Stripe events as the preferred correction path. Use manual repair only for records that cannot be recovered from Stripe events.
 
 Expected:
 
 - Stripe live active/trialing count matches app Pro access count after correction.
+
+Actual:
+
+- Applied explicit Supabase admin repair because the stale rows were historical cache drift and one live user had duplicate Stripe subscriptions that cannot be represented one-to-one in the current `subscriptions` table.
+- After correction, app Pro access count is `3` distinct users, which matches the distinct live Stripe active/trialing users.
+- Stripe still has `4` active/trialing subscriptions because one user has two active subscriptions. Decide whether to cancel and/or refund the duplicate older subscription in Stripe.
 
 - [ ] **Step 6: Commit script only**
 
