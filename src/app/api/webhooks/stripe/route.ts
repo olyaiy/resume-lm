@@ -22,6 +22,38 @@ const relevantEvents = new Set([
 
 type ServiceSupabaseClient = Awaited<ReturnType<typeof createServiceClient>>;
 
+type InvoiceWithSubscription = Stripe.Invoice & {
+  subscription?: string | Stripe.Subscription | null;
+};
+
+function getCustomerId(
+  customer: string | Stripe.Customer | Stripe.DeletedCustomer | null
+): string {
+  if (typeof customer === 'string') {
+    return customer;
+  }
+
+  if (customer?.id) {
+    return customer.id;
+  }
+
+  throw new Error('Stripe object is missing customer id');
+}
+
+function getSubscriptionId(
+  subscription: string | Stripe.Subscription | null | undefined
+): string | null {
+  if (!subscription) {
+    return null;
+  }
+
+  if (typeof subscription === 'string') {
+    return subscription;
+  }
+
+  return subscription.id;
+}
+
 async function reserveWebhookEvent(
   supabase: ServiceSupabaseClient,
   event: Stripe.Event
@@ -80,14 +112,7 @@ async function markWebhookEventProcessed(
 
 async function handleSubscriptionChange(
   stripeCustomerId: string,
-  subscriptionData: {
-    subscriptionId: string | null;
-    planId: string;
-    status: 'active' | 'canceled';
-    currentPeriodEnd: Date | null;
-    trialEnd?: Date | null;
-    cancelAtPeriodEnd?: boolean;
-  }
+  subscriptionId: string
 ) {
   try {
     // Enhanced initial logging
@@ -95,33 +120,19 @@ async function handleSubscriptionChange(
       event: 'subscription_change',
       timestamp: new Date().toISOString(),
       customerId: stripeCustomerId,
-      subscriptionId: subscriptionData.subscriptionId,
-      currentStatus: subscriptionData.status,
-      cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
-      planId: subscriptionData.planId,
-      accessUntil: subscriptionData.currentPeriodEnd ? subscriptionData.currentPeriodEnd.toISOString() : null,
-      trialStatus: subscriptionData.trialEnd ? 'Active' : 'Not Active'
+      subscriptionId,
     });
 
     // Update subscription in database
     await manageSubscriptionStatusChange(
-      subscriptionData.subscriptionId ?? '',
-      stripeCustomerId,
-      subscriptionData.status === 'active' && !subscriptionData.cancelAtPeriodEnd
+      subscriptionId,
+      stripeCustomerId
     );
     
     console.log('✨ Final Subscription State:', {
       result: 'success',
       updatedAt: new Date().toISOString(),
-      subscriptionId: subscriptionData.subscriptionId,
-      status: subscriptionData.status,
-      cancelAtPeriodEnd: subscriptionData.cancelAtPeriodEnd,
-      accessUntil: subscriptionData.currentPeriodEnd ? subscriptionData.currentPeriodEnd.toISOString() : null,
-      note: subscriptionData.cancelAtPeriodEnd 
-        ? 'Subscription is cancelled but remains active until period end'
-        : subscriptionData.status === 'active' 
-          ? 'Subscription is currently active' 
-          : 'Subscription is cancelled'
+      subscriptionId,
     });
   } catch (error) {
     console.error('❌ Subscription Update Failed:', {
@@ -129,9 +140,7 @@ async function handleSubscriptionChange(
       errorObject: error,
       timestamp: new Date().toISOString(),
       customerId: stripeCustomerId,
-      subscriptionId: subscriptionData.subscriptionId,
-      planId: subscriptionData.planId,
-      data: subscriptionData
+      subscriptionId,
     });
     throw error;
   }
@@ -219,56 +228,47 @@ export async function POST(req: Request) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
+        const subscriptionId = getSubscriptionId(session.subscription as string | Stripe.Subscription | null);
         
-        if (session.mode === 'subscription' && session.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string);
-          
+        if (session.mode === 'subscription' && subscriptionId) {
           await handleSubscriptionChange(
-            session.customer as string,
-            {
-              subscriptionId: subscription.id,
-              planId: subscription.items.data[0].price.id,
-              status: 'active',
-              currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
-              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
-            }
+            getCustomerId(session.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
+            subscriptionId
           );
         }
         break;
       }
 
       case 'invoice.paid': {
-        const invoice = event.data.object as Stripe.Invoice & { subscription?: string };
+        const invoice = event.data.object as InvoiceWithSubscription;
+        const subscriptionId = getSubscriptionId(invoice.subscription);
         
-        if (invoice.subscription) {
-          const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
-          
+        if (subscriptionId) {
           await handleSubscriptionChange(
-            invoice.customer as string,
-            {
-              subscriptionId: subscription.id,
-              planId: subscription.items.data[0].price.id,
-              status: 'active',
-              currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
-              trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null
-            }
+            getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
+            subscriptionId
           );
         }
         break;
       }
 
+      case 'customer.subscription.created':
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
-        const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
+        const previousAttributes = (event.data.previous_attributes ?? {}) as Partial<Stripe.Subscription>;
+        const subscriptionItem = subscription.items.data[0];
+        const currentPeriodEnd = subscriptionItem?.current_period_end
+          ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
+          : null;
         
         // Enhanced logging for subscription updates
         console.log('📝 Subscription Update Details:', {
-          event: 'subscription_updated',
+          event: event.type,
           customerId: subscription.customer,
           subscriptionId: subscription.id,
           status: subscription.status,
           cancelAtPeriodEnd: subscription.cancel_at_period_end,
-          currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
+          currentPeriodEnd,
           changes: {
             willCancelAt: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
             previousCancelAtPeriodEnd: previousAttributes.cancel_at_period_end,
@@ -282,21 +282,14 @@ export async function POST(req: Request) {
         if (subscription.cancel_at_period_end) {
           console.log('🚫 Subscription Cancellation Scheduled:', {
             message: 'Subscription will remain active until period end',
-            activeUntil: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
+            activeUntil: currentPeriodEnd,
             willAutoRenew: false
           });
         }
         
         await handleSubscriptionChange(
-          subscription.customer as string,
-          {
-            subscriptionId: subscription.id,
-            planId: subscription.items.data[0].price.id,
-            status: subscription.cancel_at_period_end ? 'canceled' : subscription.status === 'active' ? 'active' : 'canceled',
-            currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000),
-            trialEnd: subscription.trial_end ? new Date(subscription.trial_end * 1000) : null,
-            cancelAtPeriodEnd: subscription.cancel_at_period_end
-          }
+          getCustomerId(subscription.customer),
+          subscription.id
         );
         break;
       }
@@ -313,15 +306,8 @@ export async function POST(req: Request) {
         });
         
         await handleSubscriptionChange(
-          subscription.customer as string,
-          {
-            subscriptionId: subscription.id,
-            planId: 'free',
-            status: 'canceled',
-            currentPeriodEnd: null,
-            trialEnd: null,
-            cancelAtPeriodEnd: false
-          }
+          getCustomerId(subscription.customer),
+          subscription.id
         );
         console.log('✅ Subscription deletion processed successfully');
         break;
@@ -350,7 +336,7 @@ export async function POST(req: Request) {
       }
 
       default: {
-        console.log(`⚠️ Unhandled event type: ${event.type}`);
+        throw new Error(`Unhandled relevant Stripe event type: ${event.type}`);
       }
     }
 

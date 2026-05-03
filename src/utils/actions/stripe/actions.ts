@@ -5,6 +5,7 @@ import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
 import { revalidatePath } from "next/cache";
 import { getSubscriptionAccessState } from '@/lib/subscription-access';
+import { mapStripeSubscriptionToAppSubscription } from '@/lib/stripe/subscription-sync';
 
 // Lazy-initialize Stripe only when needed (allows running without Stripe for local dev)
 let _stripe: Stripe | null = null;
@@ -86,17 +87,20 @@ async function upsertCustomerToSupabase(uuid: string, customerId: string) {
 // Manage subscription status change
 export async function manageSubscriptionStatusChange(
   subscriptionId: string,
-  customerId: string,
-  isSubscriptionNew: boolean
+  customerId: string
 ) {
   console.log('🔄 Starting subscription status change:', {
     subscriptionId,
     customerId,
-    isNew: isSubscriptionNew,
     timestamp: new Date().toISOString()
   });
 
   const supabase = await createServiceClient();
+  const proPriceId = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID;
+
+  if (!proPriceId) {
+    throw new Error('NEXT_PUBLIC_STRIPE_PRO_PRICE_ID is not configured');
+  }
 
   // Get customer's UUID from Stripe metadata
   console.log('🔍 Retrieving customer data from Stripe...');
@@ -106,92 +110,61 @@ export async function manageSubscriptionStatusChange(
     throw new Error('Customer has been deleted');
   }
   const uuid = customerData.metadata.supabaseUUID;
+  if (!uuid) {
+    throw new Error(`Stripe customer ${customerId} is missing metadata.supabaseUUID`);
+  }
   console.log('✅ Retrieved customer UUID:', uuid);
 
   console.log('📦 Retrieving subscription details from Stripe...');
   const subscription = await getStripe().subscriptions.retrieve(subscriptionId, {
     expand: ['default_payment_method', 'items.data.price']
   });
+  const subscriptionItem = subscription.items.data[0];
+  if (!subscriptionItem) {
+    throw new Error(`Stripe subscription ${subscription.id} has no subscription items`);
+  }
+
   console.log('✅ Retrieved subscription details:', {
     id: subscription.id,
     status: subscription.status,
-    currentPeriodEnd: new Date(subscription.items.data[0].current_period_end * 1000).toISOString()
+    currentPeriodEnd: subscriptionItem.current_period_end
+      ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
+      : null
   });
 
-  // Map price ID to plan
-  const priceIdToPlan: Record<string, 'free' | 'pro'> = {
-    [process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID!]: 'pro'
-  };
-  const derivedPlan = priceIdToPlan[subscription.items.data[0].price.id] || 'free';
-
-  // Normalize plan: only count plan as 'pro' while Stripe considers the subscription active-like.
-  // Note: Stripe uses 'trialing' during trials, so treat it as active.
-  const normalizedPlan =
-    subscription.status === 'active' || subscription.status === 'trialing'
-      ? derivedPlan
-      : 'free';
-
   // Prepare subscription data
-  const subscriptionData: Partial<Subscription> = {
-    user_id: uuid,
-    stripe_subscription_id: subscription.id,
-    stripe_customer_id: customerId,
-    subscription_plan: normalizedPlan,
-    // DB constraint only supports 'active' | 'canceled', so treat Stripe 'trialing' as 'active'
-    subscription_status: subscription.cancel_at_period_end
-      ? 'canceled'
-      : subscription.status === 'active' || subscription.status === 'trialing'
-        ? 'active'
-        : 'canceled',
-    current_period_end: new Date(subscription.items.data[0].current_period_end * 1000).toISOString(),
-    trial_end: subscription.trial_end 
-      ? new Date(subscription.trial_end * 1000).toISOString()
+  const subscriptionData: Partial<Subscription> = mapStripeSubscriptionToAppSubscription({
+    userId: uuid,
+    customerId,
+    subscriptionId: subscription.id,
+    priceId: subscriptionItem.price.id,
+    stripeStatus: subscription.status,
+    currentPeriodEnd: subscriptionItem.current_period_end
+      ? new Date(subscriptionItem.current_period_end * 1000)
       : null,
-    updated_at: new Date().toISOString()
-  };
+    trialEnd: subscription.trial_end
+      ? new Date(subscription.trial_end * 1000)
+      : null,
+    cancelAtPeriodEnd: subscription.cancel_at_period_end,
+    proPriceId,
+  });
+
   console.log('\n📋 Prepared subscription data:', subscriptionData);
 
   try {
-    console.log('🔍 Checking for existing subscription in database...');
-    const { data: existingSubscription } = await supabase
+    console.log('🔄 Upserting subscription in database...');
+    const { error } = await supabase
       .from('subscriptions')
-      .select('id')
-      .eq('user_id', uuid)
-      .single();
+      .upsert(subscriptionData, {
+        onConflict: 'user_id',
+        ignoreDuplicates: false
+      });
 
-    if (existingSubscription) {
-      console.log('🔄 Updating existing subscription:', existingSubscription.id);
-      const { error } = await supabase
-        .from('subscriptions')
-        .update(subscriptionData)
-        .eq('user_id', uuid);
-
-      if (error) {
-        console.error('❌ Error updating subscription:', error);
-        throw error;
-      }
-      console.log('✅ Subscription updated successfully');
-    } else {
-      console.log('➕ Creating new subscription record');
-      const { error } = await supabase
-        .from('subscriptions')
-        .upsert(
-          { 
-            ...subscriptionData, 
-            created_at: new Date().toISOString() 
-          },
-          { 
-            onConflict: 'user_id',
-            ignoreDuplicates: false 
-          }
-        );
-
-      if (error) {
-        console.error('❌ Error creating subscription:', error);
-        throw error;
-      }
-      console.log('✅ Subscription created successfully');
+    if (error) {
+      console.error('❌ Error upserting subscription:', error);
+      throw error;
     }
+    console.log('✅ Subscription upserted successfully');
 
     console.log('🎉 Subscription management completed successfully!');
   } catch (error) {

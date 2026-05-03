@@ -63,13 +63,13 @@ export function getSubscriptionAccessState(
   const isWithinAccessWindow = isFutureDate(currentPeriodEnd, now);
 
   const hasManualProAccess = plan === "pro" && status === "active";
-  const hasStripeTimeboxedAccess = hasStripeSubscription && isWithinAccessWindow;
+  const hasTrialingProAccess = plan === "pro" && isTrialing;
   const hasCancelingProAccess = plan === "pro" && status === "canceled" && isWithinAccessWindow;
 
   const hasProAccess =
-    hasManualProAccess || hasStripeTimeboxedAccess || hasCancelingProAccess || isTrialing;
+    hasManualProAccess || hasTrialingProAccess || hasCancelingProAccess;
 
-  const hadPaidAccess = plan === "pro" || hasStripeSubscription || Boolean(currentPeriodEnd);
+  const hadPaidAccess = plan === "pro";
   const isCanceling = status === "canceled" && isWithinAccessWindow;
   const isExpiredProAccess = status === "canceled" && !isWithinAccessWindow && hadPaidAccess;
 

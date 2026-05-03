@@ -78,6 +78,22 @@ Local environment caveat:
 
 ---
 
+## Current Recovery Status
+
+Updated after Task 2 local verification on May 2 PDT / May 3 UTC, 2026.
+
+- **Task 1 persistence repair is deployed and verified.** Production Supabase now has `public.stripe_webhook_events`, RLS is enabled, `anon` and `authenticated` cannot access the table, and `service_role` can insert/update/delete as required by the webhook route.
+- **GitHub production delivery succeeded for the schema repair.** Commit `a4ea80d` added the table and RLS hardening locally, and GitHub Actions reported success for both `Helm Chart Publish` and `Build and Push Docker Image`.
+- **Handled Stripe webhook replay worked.** Replayed unique live `invoice.paid` and `checkout.session.completed` events against `https://resumelm.ca/api/webhooks/stripe`; both wrote rows to `public.stripe_webhook_events` with non-null `processed_at`.
+- **Supabase subscription state changed after replay.** A full paginated production check showed `2,617` subscription rows and `pro:active = 7`; the audit snapshot had `pro:active = 6`.
+- **Task 2 subscription sync repair is locally implemented and verified.** The webhook route now handles `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `checkout.session.completed`, and `invoice.paid` through the same deterministic Stripe-to-Supabase sync path. `manageSubscriptionStatusChange` no longer selects the non-existent `subscriptions.id` column and now upserts by `user_id`.
+- **Subscription access is now stricter.** A row with free plan plus Stripe fields no longer grants Pro access; Pro access now requires `subscription_plan = 'pro'` with active, trialing, or canceling-with-unexpired-period state.
+- **Task 2 verification passed locally.** Focused Node tests passed with `7` tests across subscription mapping and access behavior, and `pnpm lint`, `pnpm exec tsc --noEmit --pretty false`, and `pnpm build` all passed.
+- **Do not replay `customer.subscription.created` in production until this Task 2 code is deployed.** The code now handles that event correctly, but production must be running this commit before replaying the deferred live Stripe deliveries.
+- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`. Local uncommitted changes currently visible in the working tree are unrelated to the replay work: `package.json`, `pnpm-lock.yaml`, `AGENTS.md`, and `pnpm-workspace.yaml`.
+
+---
+
 ## Highest-Risk Findings
 
 ### 1. Stripe webhooks are failing because production schema is missing a table
@@ -202,11 +218,13 @@ Impact:
 
 Planned created files:
 
-- `supabase/migrations/202605030001_create_stripe_webhook_events.sql` - production-safe migration for webhook idempotency storage.
+- `supabase/migrations/20260503022114_create_stripe_webhook_events.sql` - completed production-safe migration for webhook idempotency storage.
+- `supabase/migrations/20260503022343_secure_stripe_webhook_events_rls.sql` - completed production-safe migration for RLS hardening on webhook idempotency storage.
 - `supabase/migrations/202605030002_create_ai_usage_events.sql` - usage ledger for all server-side AI calls.
 - `supabase/migrations/202605030003_create_app_events.sql` - optional server-side operational event ledger for analytics/debugging.
 - `src/lib/stripe/subscription-sync.ts` - pure Stripe-to-Supabase subscription mapping and reconciliation helpers.
-- `src/lib/stripe/subscription-sync.test.ts` - unit tests for subscription mapping and access state behavior.
+- `src/lib/stripe/subscription-sync.test.ts` - completed unit tests for Stripe subscription mapping behavior.
+- `src/lib/subscription-access.test.ts` - completed unit tests for subscription entitlement behavior.
 - `src/lib/ai/access-control.ts` - central model authorization, provider routing, and rate-limit policy.
 - `src/lib/ai/access-control.test.ts` - unit tests for Pro/free/BYOK/server-key behavior.
 - `src/lib/ai/usage-ledger.ts` - records AI attempts and outcomes.
@@ -215,9 +233,9 @@ Planned created files:
 
 Planned modified files:
 
-- `helm/resumelm/templates/db-init-configmap.yaml` - add missing schema objects so deployed DB init matches local schema.
-- `schema.sql` - keep canonical schema aligned.
-- `docker/supabase/volumes/db/init/01-app-schema.sql` - keep local dev schema aligned.
+- `helm/resumelm/templates/db-init-configmap.yaml` - completed for webhook idempotency table and RLS hardening; still update again if later schema tasks add new operational tables.
+- `schema.sql` - completed for webhook idempotency table and RLS hardening; keep canonical schema aligned as later tasks land.
+- `docker/supabase/volumes/db/init/01-app-schema.sql` - completed for webhook idempotency table and RLS hardening; keep local dev schema aligned as later tasks land.
 - `src/app/api/webhooks/stripe/route.ts` - handle all relevant events explicitly and use shared sync helper.
 - `src/utils/actions/stripe/actions.ts` - remove unsafe plan toggle path, remove invalid `select('id')`, and stop using boolean `isSubscriptionNew` as status meaning.
 - `src/lib/subscription-access.ts` - restrict Pro access to verified Pro plan and active/trialing/canceling paid states.
@@ -380,15 +398,18 @@ git commit -m "fix: add Stripe webhook idempotency table"
 
 ## Task 2: Fix Stripe Event Handling and Subscription Sync
 
+> **Progress note, 2026-05-03:** Local implementation is complete and verified. The immediate blocker, `customer.subscription.created`, now has an explicit handler and uses the same sync path as `customer.subscription.updated`, `customer.subscription.deleted`, `checkout.session.completed`, and `invoice.paid`. The shared mapper lives in `src/lib/stripe/subscription-sync.ts`; access-state regression coverage lives in `src/lib/subscription-access.test.ts`. Vitest was not installed in this repo, so dependency-free Node tests were used instead. Focused tests passed with `7` tests, and `pnpm lint`, `pnpm exec tsc --noEmit --pretty false`, and `pnpm build` passed.
+
 **Files:**
 
 - Create: `src/lib/stripe/subscription-sync.ts`
 - Create: `src/lib/stripe/subscription-sync.test.ts`
+- Create: `src/lib/subscription-access.test.ts`
 - Modify: `src/app/api/webhooks/stripe/route.ts`
 - Modify: `src/utils/actions/stripe/actions.ts`
 - Modify: `src/lib/subscription-access.ts`
 
-- [ ] **Step 1: Add unit tests for Stripe status mapping**
+- [x] **Step 1: Add unit tests for Stripe status mapping**
 
 Create `src/lib/stripe/subscription-sync.test.ts`:
 
@@ -470,7 +491,7 @@ describe("mapStripeSubscriptionToAppSubscription", () => {
 });
 ```
 
-- [ ] **Step 2: Add the mapping helper**
+- [x] **Step 2: Add the mapping helper**
 
 Create `src/lib/stripe/subscription-sync.ts`:
 
@@ -521,7 +542,7 @@ export function mapStripeSubscriptionToAppSubscription(
 }
 ```
 
-- [ ] **Step 3: Run tests and confirm the test runner exists**
+- [x] **Step 3: Run tests and confirm the test runner exists**
 
 Run:
 
@@ -534,7 +555,13 @@ Expected:
 - If Vitest is installed, tests pass after Step 2.
 - If Vitest is not installed, install or use the repo's existing test runner before adding more tests. Do not skip subscription mapping tests.
 
-- [ ] **Step 4: Handle `customer.subscription.created` explicitly**
+Actual:
+
+- Vitest was not installed.
+- Used Node's built-in `node:test` runner with a temporary TypeScript compile config.
+- `node --test /tmp/resumelm-node-tests/lib/stripe/subscription-sync.test.js /tmp/resumelm-node-tests/lib/subscription-access.test.js` passed: `7` tests, `0` failures.
+
+- [x] **Step 4: Handle `customer.subscription.created` explicitly**
 
 Modify `src/app/api/webhooks/stripe/route.ts` so `customer.subscription.created` is not merely in `relevantEvents`; it must have its own switch case.
 
@@ -544,7 +571,7 @@ Expected behavior:
 - Map and upsert using the same helper path as `customer.subscription.updated`.
 - Mark the webhook event processed only after the database update succeeds.
 
-- [ ] **Step 5: Stop selecting a non-existent `subscriptions.id` column**
+- [x] **Step 5: Stop selecting a non-existent `subscriptions.id` column**
 
 Modify `src/utils/actions/stripe/actions.ts`.
 
@@ -574,7 +601,7 @@ Expected:
 - The function no longer depends on a column absent from the visible schema.
 - Upsert handles both existing and new subscription rows.
 
-- [ ] **Step 6: Tighten `getSubscriptionAccessState`**
+- [x] **Step 6: Tighten `getSubscriptionAccessState`**
 
 Modify `src/lib/subscription-access.ts` so Pro access requires a Pro plan plus a valid active/trialing/canceling access window.
 
@@ -593,7 +620,7 @@ Expected:
 - A random `stripe_subscription_id` with a future period end does not grant Pro by itself.
 - Free plans never become Pro solely because Stripe fields exist.
 
-- [ ] **Step 7: Run verification**
+- [x] **Step 7: Run verification**
 
 ```bash
 pnpm lint
@@ -605,12 +632,22 @@ Expected:
 
 - All commands pass.
 
-- [ ] **Step 8: Commit**
+Actual:
+
+- `pnpm lint` passed.
+- `pnpm exec tsc --noEmit --pretty false` passed.
+- `pnpm build` passed.
+
+- [x] **Step 8: Commit**
 
 ```bash
 git add src/lib/stripe/subscription-sync.ts src/lib/stripe/subscription-sync.test.ts src/app/api/webhooks/stripe/route.ts src/utils/actions/stripe/actions.ts src/lib/subscription-access.ts
 git commit -m "fix: make Stripe subscription sync deterministic"
 ```
+
+Actual:
+
+- Committed with the intended Task 2 source files plus this plan update.
 
 ---
 
