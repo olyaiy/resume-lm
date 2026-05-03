@@ -94,8 +94,9 @@ Updated after Task 3 production entitlement reconciliation on May 3, 2026.
 - **Duplicate refund is handled by Stripe/Link, not by a normal merchant refund object.** A direct dashboard refund attempt for the intended duplicate April 10, 2026 `$20 USD` charge on invoice `in_1TKYo4Cv6RlaQFiM5Qf00Gmg` / payment intent `pi_3TKZlDCv6RlaQFiM1SPXsRQd` failed with Stripe error `charge_not_refundable` and message code `payment_refund_hidden_link_refunded`: "This payment is not refundable as Stripe has already refunded it. This refund has been executed by Stripe and you have not been charged." This explains why live Stripe CLI still shows `latest_charge.amount_refunded = 0`, `latest_charge.refunded = false`, no merchant refund objects, and no invoice credit notes: the refund is hidden/Stripe-funded rather than debited from the ResumeLM Stripe balance. No additional merchant refund should be attempted for this payment unless Stripe Support says otherwise.
 - **Duplicate Checkout creation prevention is implemented, verified, and committed.** Commit `741b61a` updates the checkout server action to reject arbitrary price IDs, check live Stripe subscriptions for the customer and Pro price before creating Checkout, send users with active/trialing/past_due/unpaid/incomplete Stripe subscriptions to the billing portal, reuse matching open Checkout sessions, and create new Checkout sessions with `client_reference_id`, metadata, subscription metadata, and a stable idempotency key. Verification passed on May 3, 2026: checkout guard tests plus existing subscription tests passed (`22` tests), `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed. Note: `pnpm exec tsx` is not available as a direct package binary in this workspace, so the focused test run used the installed transitive `tsx` CLI path.
 - **Task 4 unsafe manual plan toggle is implemented, verified, and committed.** Commit `414c1ac` removed the self-service `toggleSubscriptionPlan` server action from Stripe actions, deleted the unused customer-facing `TogglePlanButton` component, and added a safety test that checks the Stripe actions source does not reintroduce the unsafe self-service plan toggle. Verification passed on May 3, 2026: focused safety/subscription tests passed (`23` tests), source search outside tests found no remaining `toggleSubscriptionPlan`, `TogglePlanButton`, or `toggle-plan` usage, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed.
+- **Task 5 AI access control and usage logging is locally implemented, verified, and committed but not pushed.** Commit `5888a65` centralizes server-key/BYOK model access in `src/lib/ai/access-control.ts`, removes the unsafe slash-style OpenRouter server-key fallback from `src/utils/ai-tools.ts`, adds `public.ai_usage_events` migration/RLS, and routes `/api/chat` plus the AI server actions through a shared usage ledger/rate-limit guard. Verification passed on May 3, 2026: access-control tests plus focused subscription/checkout safety tests passed (`29` tests), `pnpm lint` passed, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm build` passed, and `pnpm dev` served `http://localhost:3000` successfully in Arc via Computer Use. Production note: the migration file exists locally, but the `ai_usage_events` migration has not been applied to production Supabase in this turn.
 - **Production price note:** The deployed `resumelm.ca` client bundle contains live price id `price_1QckQwCv6RlaQFiMVN24pn3M`, matching the four live Stripe active/trialing subscriptions. Local `.env.local` still contains a stale/test-ish value, so do not use local `.env.local` as evidence for live Stripe pricing.
-- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`; unsafe manual plan toggle removal was committed as `414c1ac`. Local uncommitted changes currently visible in the working tree include unrelated files (`package.json`, `pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts.
+- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`; unsafe manual plan toggle removal was committed as `414c1ac`; Task 5 source was committed locally as `5888a65` and intentionally not pushed. Local uncommitted changes currently visible in the working tree include unrelated files (`package.json`, `pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts.
 
 ---
 
@@ -839,6 +840,8 @@ git commit -m "fix: remove unsafe subscription plan toggle"
 
 ## Task 5: Centralize AI Access Control and Spend Logging
 
+> **Progress note, 2026-05-03:** Implemented locally in commit `5888a65` and intentionally not pushed. The central guard now rejects unknown models, allows server keys for Pro users only through configured provider env keys, allows free server-key usage only for explicit free non-Pro models, and requires BYOK keys to match the requested provider. `/api/chat` and the AI server actions now start an `ai_usage_events` row before model invocation, mark success/failure/rate-limited/blocked outcomes, and apply the existing rate limiter to every server-key AI call. BYOK calls are logged but not rate-limited by this guard. Verification passed: focused tests (`29` tests), `pnpm lint`, `pnpm exec tsc --noEmit --pretty false`, `pnpm build`, and a local `pnpm dev` Arc smoke test at `http://localhost:3000`. Production migration application remains pending.
+
 **Files:**
 
 - Create: `supabase/migrations/202605030002_create_ai_usage_events.sql`
@@ -849,7 +852,7 @@ git commit -m "fix: remove unsafe subscription plan toggle"
 - Modify: `src/app/api/chat/route.ts`
 - Modify: AI server action files
 
-- [ ] **Step 1: Create AI usage table migration**
+- [x] **Step 1: Create AI usage table migration**
 
 Create `supabase/migrations/202605030002_create_ai_usage_events.sql`:
 
@@ -879,7 +882,7 @@ CREATE INDEX IF NOT EXISTS ai_usage_events_route_created_idx
 ON public.ai_usage_events (route, created_at DESC);
 ```
 
-- [ ] **Step 2: Write AI access-control tests**
+- [x] **Step 2: Write AI access-control tests**
 
 Create tests that prove:
 
@@ -890,7 +893,7 @@ Create tests that prove:
 - Unknown models are rejected.
 - Every allowed server-key call reports `usedServerKey = true`.
 
-- [ ] **Step 3: Implement `src/lib/ai/access-control.ts`**
+- [x] **Step 3: Implement `src/lib/ai/access-control.ts`**
 
 The exported function should accept:
 
@@ -922,7 +925,7 @@ Rules:
 - `resolvedModelId.includes("/")` must not be enough to use the server OpenRouter key.
 - User-provided keys are allowed only when the provider matches the requested model.
 
-- [ ] **Step 4: Refactor `initializeAIClient` to consume resolved policy**
+- [x] **Step 4: Refactor `initializeAIClient` to consume resolved policy**
 
 Modify `src/utils/ai-tools.ts` so `initializeAIClient` does not make authorization decisions. It should receive an already-resolved provider/model/key decision or delegate to the access-control helper.
 
@@ -931,7 +934,7 @@ Expected:
 - One place decides whether a server key can be used.
 - One place decides whether a user key is required.
 
-- [ ] **Step 5: Apply rate limiting to every AI route/action**
+- [x] **Step 5: Apply rate limiting to every AI route/action**
 
 Every server path that can call a model must call the same guard before model invocation.
 
@@ -950,7 +953,7 @@ Expected:
 - Pro users are rate-limited according to the existing policy or a stricter Pro policy.
 - BYOK calls are still logged; decide whether to rate-limit BYOK separately.
 
-- [ ] **Step 6: Record AI usage attempts**
+- [x] **Step 6: Record AI usage attempts**
 
 Create `src/lib/ai/usage-ledger.ts` with functions:
 
@@ -984,7 +987,7 @@ Expected:
 - Failed and blocked attempts are visible.
 - No prompts or resume content are stored in this table.
 
-- [ ] **Step 7: Run verification**
+- [x] **Step 7: Run verification**
 
 ```bash
 pnpm lint
@@ -996,7 +999,7 @@ Expected:
 
 - All commands pass.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add supabase/migrations/202605030002_create_ai_usage_events.sql src/lib/ai/access-control.ts src/lib/ai/access-control.test.ts src/lib/ai/usage-ledger.ts src/utils/ai-tools.ts src/app/api/chat/route.ts src/utils/actions/resumes/ai.ts src/utils/actions/profiles/ai.ts src/utils/actions/cover-letter/actions.ts src/utils/actions/jobs/ai.ts src/utils/actions/resumes/actions.ts
