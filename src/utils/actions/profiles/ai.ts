@@ -1,10 +1,43 @@
 'use server';
-import { generateObject, LanguageModelV1 } from 'ai';
+import { generateObject, LanguageModelUsage, LanguageModelV1 } from 'ai';
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
-import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
 import { sanitizeUnknownStrings } from '@/lib/utils';
+import {
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from '@/lib/ai/usage-ledger';
+
+async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
+  input: {
+    route: string;
+    userId: string;
+    isPro: boolean;
+    config?: AIConfig;
+  },
+  task: (model: LanguageModelV1) => Promise<T>
+) {
+  const { model, usageEventId } = await startAIUsageRequest(input);
+
+  try {
+    const result = await task(model);
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'succeeded',
+      usage: result.usage,
+    });
+    return result;
+  } catch (error) {
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'failed',
+      errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+    });
+    throw error;
+  }
+}
 
 // TEXT RESUME -> PROFILE
 export async function formatProfileWithAI(
@@ -12,12 +45,16 @@ export async function formatProfileWithAI(
   config?: AIConfig
 ) {
     try {
-      const subscriptionPlan = await getSubscriptionPlan();
-      const isPro = subscriptionPlan === 'pro';
-      const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+      const { plan, id } = await getSubscriptionPlan(true);
+      const isPro = plan === 'pro';
   
       
-      const { object } = await generateObject({
+      const { object } = await runTrackedAIRequest({
+        route: 'actions.profiles.formatProfileWithAI',
+        userId: id,
+        isPro,
+        config,
+      }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
         schema: z.object({
           content: z.object({
@@ -70,11 +107,8 @@ export async function formatProfileWithAI(
         // Use custom prompt if provided in config, otherwise fall back to default
         system: config?.customPrompts?.resumeFormatter 
           ?? (RESUME_FORMATTER_SYSTEM_MESSAGE.content as string),
-      });
+      }));
 
-  
-    //   console.dir(object.content, { depth: null, colors: true });
-      console.log('USING THE MODEL: ', aiClient);
   
       return sanitizeUnknownStrings(object.content);
     } catch (error) {

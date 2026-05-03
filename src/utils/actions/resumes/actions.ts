@@ -6,11 +6,14 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
-import { generateObject } from "ai";
-import { initializeAIClient } from "@/utils/ai-tools";
+import { generateObject, type LanguageModelUsage, type LanguageModelV1 } from "ai";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
 import { getSubscriptionPlan } from "../stripe/actions";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
+import {
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from "@/lib/ai/usage-ledger";
 import {
   FREE_PLAN_RESUME_LIMITS,
   getResumeLimitExceededMessage,
@@ -51,6 +54,35 @@ async function assertResumeQuota(
   const limit = FREE_PLAN_RESUME_LIMITS[type];
   if ((count ?? 0) >= limit) {
     throw new Error(getResumeLimitExceededMessage(type));
+  }
+}
+
+async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
+  input: {
+    route: string;
+    userId: string;
+    isPro: boolean;
+    config?: AIConfig;
+  },
+  task: (model: LanguageModelV1) => Promise<T>
+) {
+  const { model, usageEventId } = await startAIUsageRequest(input);
+
+  try {
+    const result = await task(model);
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'succeeded',
+      usage: result.usage,
+    });
+    return result;
+  } catch (error) {
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'failed',
+      errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+    });
+    throw error;
   }
 }
 
@@ -463,9 +495,8 @@ export async function generateResumeScore(
 ) {
   
 
-  const subscriptionPlan = await getSubscriptionPlan();
-  const isPro = subscriptionPlan === 'pro';
-  const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+  const { plan, id } = await getSubscriptionPlan(true);
+  const isPro = plan === 'pro';
 
   const isTailoredResume = job && !resume.is_base_resume;
 
@@ -559,11 +590,16 @@ export async function generateResumeScore(
       `;
     }
 
-    const { object } = await generateObject({
+    const { object } = await runTrackedAIRequest({
+      route: 'actions.resumes.generateResumeScore',
+      userId: id,
+      isPro,
+      config,
+    }, (aiClient) => generateObject({
       model: aiClient,
       schema: resumeScoreSchema,
       prompt
-    });
+    }));
 
     // console.log("THE OUTPUTTED object", object);
     return object

@@ -3,22 +3,61 @@
 // import { RESUME_IMPORTER_SYSTEM_MESSAGE, } from "@/lib/prompts";
 import { Resume } from "@/lib/types";
 import { textImportSchema, workExperienceBulletPointsSchema } from "@/lib/zod-schemas";
-import { generateObject, type LanguageModelV1 } from "ai";
+import { generateObject, type LanguageModelUsage, type LanguageModelV1 } from "ai";
 import { z } from "zod";
-import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
 import { PROJECT_GENERATOR_MESSAGE, PROJECT_IMPROVER_MESSAGE, TEXT_ANALYZER_SYSTEM_MESSAGE, WORK_EXPERIENCE_GENERATOR_MESSAGE, WORK_EXPERIENCE_IMPROVER_MESSAGE } from "@/lib/prompts";
 import { projectAnalysisSchema, workExperienceItemsSchema } from "@/lib/zod-schemas";
 import { WorkExperience } from "@/lib/types";
 import { getDefaultModel } from "@/lib/ai-models";
+import {
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from "@/lib/ai/usage-ledger";
 
+async function getAIPlanState() {
+  const { plan, id } = await getSubscriptionPlan(true);
+  return {
+    isPro: plan === 'pro',
+    userId: id,
+  };
+}
 
+async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
+  input: {
+    route: string;
+    userId: string;
+    isPro: boolean;
+    config?: AIConfig;
+    useThinking?: boolean;
+  },
+  task: (model: LanguageModelV1) => Promise<T>
+) {
+  const { model, usageEventId } = await startAIUsageRequest(input);
+
+  try {
+    const result = await task(model);
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'succeeded',
+      usage: result.usage,
+    });
+    return result;
+  } catch (error) {
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'failed',
+      errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+    });
+    throw error;
+  }
+}
 
 // Base Resume Creation
 // TEXT CONTENT -> RESUME
 export async function convertTextToResume(prompt: string, existingResume: Resume, targetRole: string, config?: AIConfig) {
-  const subscriptionPlan = await getSubscriptionPlan();
-  const isPro = subscriptionPlan === 'pro';
+  const { isPro, userId } = await getAIPlanState();
   const fallbackModel = getDefaultModel(isPro);
   const resolvedConfig: AIConfig = {
     model: config?.model || fallbackModel,
@@ -26,28 +65,22 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
     ...(config?.customPrompts ? { customPrompts: config.customPrompts } : {})
   };
 
-  let aiClient: LanguageModelV1;
+  let object: { content: z.infer<typeof textImportSchema> };
   try {
-    aiClient = initializeAIClient(resolvedConfig, isPro, isPro);
-  } catch (error) {
-    if (resolvedConfig.model !== fallbackModel) {
-      console.warn(`Falling back to default model (${fallbackModel}) after failing to init ${resolvedConfig.model}:`, error);
-      aiClient = initializeAIClient(
-        { ...resolvedConfig, model: fallbackModel },
+    const result = await runTrackedAIRequest(
+      {
+        route: 'actions.resumes.convertTextToResume',
+        userId,
         isPro,
-        isPro
-      );
-    } else {
-      throw error;
-    }
-  }
-  
-  const { object } = await generateObject({
-    model: aiClient,
-    schema: z.object({
-      content: textImportSchema
-    }),
-    system: `You are ResumeFormatter, an expert system specialized in analyzing complete resumes and converting them into a structured JSON object tailored for targeted job applications.
+        config: resolvedConfig,
+        useThinking: isPro,
+      },
+      (aiClient) => generateObject({
+        model: aiClient,
+        schema: z.object({
+          content: textImportSchema
+        }),
+        system: `You are ResumeFormatter, an expert system specialized in analyzing complete resumes and converting them into a structured JSON object tailored for targeted job applications.
 
         Your task is to transform the complete resume text into a JSON object according to the provided schema. You will identify and extract the most relevant experiences, skills, projects, and educational background based on the target role. While doing so, you are allowed to make minimal formatting changes only to enhance clarity and highlight relevance—**do not reword, summarize, or alter the core details of any content.**
 
@@ -71,12 +104,64 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           - Include only the most relevant items, optimized for the target role.
           - Do not add any new information or rephrase the provided content—only apply minor formatting (like bolding) to emphasize key points.
         `,
-    prompt: `INPUT:
+        prompt: `INPUT:
     Extract and transform the resume information from the following text:
     ${prompt}
     Now, format this information into the JSON object according to the schema, ensuring it is optimized for the target role: ${targetRole}.`,
-    
-  });
+      })
+    );
+    object = result.object;
+  } catch (error) {
+    if (resolvedConfig.model !== fallbackModel) {
+      console.warn(`Falling back to default model (${fallbackModel}) after failing to init ${resolvedConfig.model}:`, error);
+      const result = await runTrackedAIRequest(
+        {
+          route: 'actions.resumes.convertTextToResume.fallback',
+          userId,
+          isPro,
+          config: { ...resolvedConfig, model: fallbackModel },
+          useThinking: isPro,
+        },
+        (aiClient) => generateObject({
+          model: aiClient,
+          schema: z.object({
+            content: textImportSchema
+          }),
+          system: `You are ResumeFormatter, an expert system specialized in analyzing complete resumes and converting them into a structured JSON object tailored for targeted job applications.
+
+        Your task is to transform the complete resume text into a JSON object according to the provided schema. You will identify and extract the most relevant experiences, skills, projects, and educational background based on the target role. While doing so, you are allowed to make minimal formatting changes only to enhance clarity and highlight relevance—**do not reword, summarize, or alter the core details of any content.**
+
+        CRITICAL DIRECTIVES:
+        1. **Analysis & Selection:**
+          - Analyze the full resume text that includes all user experiences, skills, projects, and education.
+          - Identify the items that best match the target role: ${targetRole}.
+          - Always include the education section:
+            - If only one educational entry exists, include it.
+            - If multiple entries exist, select the one(s) most relevant to the target role.
+
+        2. **Formatting & Emphasis:**
+          - Transform the resume into a JSON object following the schema, with sections such as basic information, professional experience, projects, skills, and education.
+          - Preserve all original details, dates, and descriptions. Only modify the text for formatting purposes.
+          - **Enhance relevance by marking keywords** within work experience descriptions, project details, achievements, and education details with bold formatting (i.e., wrap them with two asterisks like **this**). Apply this only to keywords or phrases that are highly relevant to the target role.
+          - Do not add any formatting to section titles or headers.
+          - Use empty arrays ([]) for any sections that do not contain relevant items.
+
+        3. **Output Requirements:**
+          - The final output must be a valid JSON object that adheres to the specified schema.
+          - Include only the most relevant items, optimized for the target role.
+          - Do not add any new information or rephrase the provided content—only apply minor formatting (like bolding) to emphasize key points.
+        `,
+          prompt: `INPUT:
+    Extract and transform the resume information from the following text:
+    ${prompt}
+    Now, format this information into the JSON object according to the schema, ensuring it is optimized for the target role: ${targetRole}.`,
+        })
+      );
+      object = result.object;
+    } else {
+      throw error;
+    }
+  }
   
   const updatedResume = {
     ...existingResume,
@@ -111,15 +196,18 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       customPrompt: string = '',
       config?: AIConfig
     ) { 
-      const subscriptionPlan = await getSubscriptionPlan();
-      const isPro = subscriptionPlan === 'pro';
-      const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+      const { isPro, userId } = await getAIPlanState();
   
       // Use custom prompt if provided in config, otherwise fall back to default
       const systemPrompt = config?.customPrompts?.workExperienceGenerator 
         ?? (WORK_EXPERIENCE_GENERATOR_MESSAGE.content as string);
 
-      const { object } = await generateObject({
+      const { object } = await runTrackedAIRequest({
+        route: 'actions.resumes.generateWorkExperiencePoints',
+        userId,
+        isPro,
+        config,
+      }, (aiClient) => generateObject({
         model: aiClient,
         schema: z.object({
           content: workExperienceBulletPointsSchema
@@ -130,22 +218,25 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       Target Role: ${targetRole}
       Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
         system: systemPrompt,
-      });
+      }));
 
       return object.content;
       }
     
       // WORK EXPERIENCE BULLET POINTS IMPROVEMENT
       export async function improveWorkExperience(point: string, customPrompt?: string, config?: AIConfig) {
-          const subscriptionPlan = await getSubscriptionPlan();
-          const isPro = subscriptionPlan === 'pro';
-          const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
           
           // Use custom prompt if provided in config, otherwise fall back to default
           const systemPrompt = config?.customPrompts?.workExperienceImprover 
             ?? (WORK_EXPERIENCE_IMPROVER_MESSAGE.content as string);
 
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.improveWorkExperience',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           
           schema: z.object({
@@ -153,7 +244,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           }),
           prompt: `Please improve this work experience bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
           system: systemPrompt,
-          });
+          }));
       
 
           return object.content;
@@ -162,22 +253,25 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       // PROJECT BULLET POINTS IMPROVEMENT
       export async function improveProject(point: string, customPrompt?: string, config?: AIConfig) {
           
-          const subscriptionPlan = await getSubscriptionPlan();
-          const isPro = subscriptionPlan === 'pro';
-          const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
 
           // Use custom prompt if provided in config, otherwise fall back to default
           const systemPrompt = config?.customPrompts?.projectImprover 
             ?? (PROJECT_IMPROVER_MESSAGE.content as string);
   
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.improveProject',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           schema: z.object({
               content: z.string().describe("The improved project bullet point")
           }),
           prompt: `Please improve this project bullet point while maintaining its core message and truthfulness${customPrompt ? `. Additional requirements: ${customPrompt}` : ''}:\n\n"${point}"`,
           system: systemPrompt,
-          });
+          }));
       
           return object.content;
       }
@@ -191,15 +285,18 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           customPrompt: string = '',
           config?: AIConfig
       ) {
-          const subscriptionPlan = await getSubscriptionPlan();
-          const isPro = subscriptionPlan === 'pro';
-          const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
           
           // Use custom prompt if provided in config, otherwise fall back to default
           const systemPrompt = config?.customPrompts?.projectGenerator 
             ?? (PROJECT_GENERATOR_MESSAGE.content as string);
 
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.generateProjectPoints',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           schema: z.object({
               content: projectAnalysisSchema
@@ -209,27 +306,32 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       Target Role: ${targetRole}
       Number of Points: ${numPoints}${customPrompt ? `\nCustom Focus: ${customPrompt}` : ''}`,
           system: systemPrompt,
-          });
+          }));
       
           return object.content;
       }
       
       // Text Import for profile
       export async function processTextImport(text: string, config?: AIConfig) {
-          const aiClient = initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
           
           // Use custom prompt if provided in config, otherwise fall back to default
           const systemPrompt = config?.customPrompts?.textAnalyzer 
             ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
 
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.processTextImport',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           schema: z.object({
               content: textImportSchema
           }),
           prompt: text,
           system: systemPrompt,
-          });
+          }));
       
           return object.content;
       }
@@ -240,11 +342,14 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           prompt: string,
           config?: AIConfig
       ) {
-          const subscriptionPlan = await getSubscriptionPlan();
-          const isPro = subscriptionPlan === 'pro';
-          const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
           
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.modifyWorkExperience',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           schema: z.object({
               content: workExperienceItemsSchema
@@ -254,29 +359,32 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           Maintain professionalism and accuracy while implementing the requested changes. 
           Keep the same company and dates, but modify other fields as requested.
           Use strong action verbs and quantifiable achievements where possible.`,
-          });
+          }));
       
           return object.content;
       }
       
       // ADDING TEXT CONTENT TO RESUME
       export async function addTextToResume(prompt: string, existingResume: Resume, config?: AIConfig) {
-          const subscriptionPlan = await getSubscriptionPlan();
-          const isPro = subscriptionPlan === 'pro';
-          const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+          const { isPro, userId } = await getAIPlanState();
   
           // Use custom prompt if provided in config, otherwise fall back to default
           const systemPrompt = config?.customPrompts?.textAnalyzer 
             ?? (TEXT_ANALYZER_SYSTEM_MESSAGE.content as string);
           
-          const { object } = await generateObject({
+          const { object } = await runTrackedAIRequest({
+          route: 'actions.resumes.addTextToResume',
+          userId,
+          isPro,
+          config,
+          }, (aiClient) => generateObject({
           model: aiClient,
           schema: z.object({
               content: textImportSchema
           }),
           prompt: `Extract relevant resume information from the following text, including basic information (name, contact details, etc) and professional experience. Format them according to the schema:\n\n${prompt}`,
           system: systemPrompt,
-          });
+          }));
           
           // Merge the AI-generated content with existing resume data
           const updatedResume = {

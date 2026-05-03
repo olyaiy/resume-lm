@@ -1,6 +1,6 @@
 'use server';
 
-import { generateObject, LanguageModelV1 } from 'ai';
+import { generateObject, LanguageModelUsage, LanguageModelV1 } from 'ai';
 import { z } from 'zod';
 import { 
   simplifiedJobSchema, 
@@ -8,9 +8,41 @@ import {
 } from "@/lib/zod-schemas";
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
-import { initializeAIClient } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
-import { checkRateLimit } from '@/lib/rateLimiter';
+import {
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from '@/lib/ai/usage-ledger';
+
+async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
+  input: {
+    route: string;
+    userId: string;
+    isPro: boolean;
+    config?: AIConfig;
+    useThinking?: boolean;
+  },
+  task: (model: LanguageModelV1) => Promise<T>
+) {
+  const { model, usageEventId } = await startAIUsageRequest(input);
+
+  try {
+    const result = await task(model);
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'succeeded',
+      usage: result.usage,
+    });
+    return result;
+  } catch (error) {
+    await finishAIUsageRequest({
+      usageEventId,
+      status: 'failed',
+      errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+    });
+    throw error;
+  }
+}
 
 // Build model candidates list - prioritize user's selected model if provided
 function getModelCandidates(config?: AIConfig) {
@@ -39,9 +71,6 @@ export async function tailorResumeToJob(
   const overallStart = Date.now();
   const modelCandidates = getModelCandidates(config);
 
-  // Check rate limit once per tailoring request
-  await checkRateLimit(id);
-
   let lastError: unknown;
 
   for (const candidate of modelCandidates) {
@@ -51,8 +80,13 @@ export async function tailorResumeToJob(
       console.log(
         `[TAILOR][TRY] ${candidate.model} | STEP: Tailoring resume content | Subscription: ${isPro ? 'PRO' : 'FREE'}`
       );
-      const aiClient = isPro ? initializeAIClient(candidate, isPro, true) : initializeAIClient(candidate);
-      const { object } = await generateObject({
+      const { object } = await runTrackedAIRequest({
+        route: 'actions.jobs.tailorResumeToJob',
+        userId: id,
+        isPro,
+        config: candidate,
+        useThinking: isPro,
+      }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
         temperature: 0.5, // reduced for structured output reliability
         schema: z.object({
@@ -81,7 +115,7 @@ Your task: produce a polished, tailored resume that meets the schema exactly and
     This is the Job Description:
     ${JSON.stringify(jobListing, null, 2)}
     `,
-      });
+      }));
 
       console.log(
         `[TAILOR][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Tailoring resume content`
@@ -110,9 +144,6 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const overallStart = Date.now();
   const modelCandidates = getModelCandidates(config);
 
-  // Check rate limit once per formatting request
-  await checkRateLimit(id);
-
   let lastError: unknown;
 
   for (const candidate of modelCandidates) {
@@ -124,8 +155,13 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
           isPro ? 'PRO' : 'FREE'
         }`
       );
-      const aiClient = isPro ? initializeAIClient(candidate, isPro, true) : initializeAIClient(candidate);
-      const { object } = await generateObject({
+      const { object } = await runTrackedAIRequest({
+        route: 'actions.jobs.formatJobListing',
+        userId: id,
+        isPro,
+        config: candidate,
+        useThinking: isPro,
+      }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
         temperature: 0.7, // reduced for better structured output compatibility
         schema: z.object({
@@ -173,7 +209,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
                 - Avoid exposing your internal reasoning.
                 - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
                 - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,
-      });
+      }));
 
       console.log(
         `[FORMAT][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Analyzing job description → Formatting requirements`

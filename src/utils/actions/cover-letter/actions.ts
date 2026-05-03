@@ -2,15 +2,27 @@
 
 import { LanguageModelV1, streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
-import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
+import {
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from '@/lib/ai/usage-ledger';
 
 export async function generate(input: string, config?: AIConfig) {
   try {
     const stream = createStreamableValue('');
-    const subscriptionPlan = await getSubscriptionPlan();
-    const isPro = subscriptionPlan === 'pro';
-    const aiClient = isPro ? initializeAIClient(config, isPro) : initializeAIClient(config);
+    const { plan, id } = await getSubscriptionPlan(true);
+    const isPro = plan === 'pro';
+    const {
+      model: aiClient,
+      usageEventId,
+    } = await startAIUsageRequest({
+      userId: id,
+      route: 'actions.coverLetter.generate',
+      config,
+      isPro,
+    });
 
    const system = `
    
@@ -93,7 +105,7 @@ export async function generate(input: string, config?: AIConfig) {
         model: aiClient as LanguageModelV1,
         system,
         prompt: input,
-        onFinish: ({ usage }) => {
+        onFinish: async ({ usage }) => {
          const { promptTokens, completionTokens, totalTokens } = usage;
   
          // your own logic, e.g. for saving the chat history or recording usage
@@ -101,6 +113,18 @@ export async function generate(input: string, config?: AIConfig) {
          console.log('Prompt tokens:', promptTokens);
          console.log('Completion tokens:', completionTokens);
          console.log('Total tokens:', totalTokens);
+         await finishAIUsageRequest({
+           usageEventId,
+           status: 'succeeded',
+           usage,
+         });
+       },
+       onError: async ({ error }) => {
+         await finishAIUsageRequest({
+           usageEventId,
+           status: 'failed',
+           errorCode: error instanceof Error ? error.message : 'stream_error',
+         });
        },
  
       });
@@ -119,4 +143,3 @@ export async function generate(input: string, config?: AIConfig) {
     throw error;
   }
 }
-

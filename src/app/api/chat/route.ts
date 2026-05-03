@@ -1,10 +1,14 @@
 import { LanguageModelV1, ToolInvocation, smoothStream, streamText } from 'ai';
 import { Resume, Job } from '@/lib/types';
-import { initializeAIClient, type AIConfig } from '@/utils/ai-tools';
+import { type AIConfig } from '@/utils/ai-tools';
 import { tools } from '@/lib/tools';
 import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
-import { checkRateLimit } from '@/lib/rateLimiter';
 import { AI_ASSISTANT_SYSTEM_MESSAGE } from '@/lib/prompts';
+import {
+  AIUsageError,
+  finishAIUsageRequest,
+  startAIUsageRequest,
+} from '@/lib/ai/usage-ledger';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -29,34 +33,16 @@ export async function POST(req: Request) {
     const { plan, id } = await getSubscriptionPlan(true);
     const isPro = plan === 'pro';
 
-    // Apply rate limiting only for Pro users
-    if (isPro) {
-      try {
-        await checkRateLimit(id);
-      } catch (error) {
-        // Add type checking for error
-        const message = error instanceof Error ? error.message : 'Rate limit exceeded';
-        const match = message.match(/(\d+) seconds/);
-        const retryAfter = match ? parseInt(match[1], 10) : 60;
-        
-        return new Response(
-          JSON.stringify({ 
-            error: message, // Use validated message
-            expirationTimestamp: Date.now() + retryAfter * 1000
-          }),
-          {
-            status: 429,
-            headers: {
-              "Content-Type": "application/json",
-              "Retry-After": String(retryAfter),
-            },
-          }
-        );
-      }
-    }
-
     // Initialize the AI client using the provided config and plan.
-    const aiClient = initializeAIClient(config, isPro);
+    const {
+      model: aiClient,
+      usageEventId,
+    } = await startAIUsageRequest({
+      userId: id,
+      route: 'api.chat',
+      config,
+      isPro,
+    });
 
     // Some models (e.g., GPT-5 family / GPT-5 Mini) only support the default temperature (1)
     const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5', 'gpt-5.2', 'gpt-5.2-pro'].includes(config?.model ?? '');
@@ -160,6 +146,20 @@ export async function POST(req: Request) {
         delayInMs: 20, // optional: defaults to 10ms
         chunking: 'word', // optional: defaults to 'word'
       }),
+      onFinish: async ({ usage }) => {
+        await finishAIUsageRequest({
+          usageEventId,
+          status: 'succeeded',
+          usage,
+        });
+      },
+      onError: async ({ error }) => {
+        await finishAIUsageRequest({
+          usageEventId,
+          status: 'failed',
+          errorCode: error instanceof Error ? error.message : 'stream_error',
+        });
+      },
     });
 
     return result.toDataStreamResponse({
@@ -172,6 +172,26 @@ export async function POST(req: Request) {
     });
   } catch (error) {
     console.error('Error in chat route:', error);
+    if (error instanceof AIUsageError) {
+      const retryAfter = error.code === 'rate_limited'
+        ? parseInt(error.message.match(/(\d+) seconds/)?.[1] ?? '60', 10)
+        : undefined;
+
+      return new Response(
+        JSON.stringify({
+          error: error.message,
+          ...(retryAfter ? { expirationTimestamp: Date.now() + retryAfter * 1000 } : {}),
+        }),
+        {
+          status: error.status,
+          headers: {
+            'Content-Type': 'application/json',
+            ...(retryAfter ? { 'Retry-After': String(retryAfter) } : {}),
+          },
+        }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : 'An unknown error occurred' }),
       {
