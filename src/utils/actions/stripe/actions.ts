@@ -4,7 +4,10 @@ import { Stripe } from "stripe";
 import { createClient, createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
 import { getSubscriptionAccessState } from '@/lib/subscription-access';
-import { mapStripeSubscriptionToAppSubscription } from '@/lib/stripe/subscription-sync';
+import {
+  mapStripeSubscriptionToAppSubscription,
+  shouldSkipStaleInactiveSubscriptionUpdate,
+} from '@/lib/stripe/subscription-sync';
 
 // Lazy-initialize Stripe only when needed (allows running without Stripe for local dev)
 let _stripe: Stripe | null = null;
@@ -151,6 +154,41 @@ export async function manageSubscriptionStatusChange(
   console.log('\n📋 Prepared subscription data:', subscriptionData);
 
   try {
+    const { data: currentSubscription, error: currentSubscriptionError } = await supabase
+      .from('subscriptions')
+      .select('user_id, stripe_customer_id, stripe_subscription_id, subscription_plan, subscription_status, current_period_end, trial_end, updated_at')
+      .eq('user_id', uuid)
+      .maybeSingle();
+
+    if (currentSubscriptionError) {
+      console.error('❌ Error reading current subscription before upsert:', currentSubscriptionError);
+      throw currentSubscriptionError;
+    }
+
+    if (
+      shouldSkipStaleInactiveSubscriptionUpdate({
+        currentSubscription,
+        incomingSubscription: subscriptionData,
+      })
+    ) {
+      console.warn('⚠️ Skipping stale inactive subscription update because a different active subscription is current:', {
+        incomingSubscriptionId: subscriptionData.stripe_subscription_id,
+        currentSubscriptionId: currentSubscription?.stripe_subscription_id,
+        userId: uuid,
+      });
+
+      return {
+        user_id: uuid,
+        stripe_customer_id: currentSubscription?.stripe_customer_id ?? customerId,
+        stripe_subscription_id: currentSubscription?.stripe_subscription_id ?? null,
+        subscription_plan: currentSubscription?.subscription_plan ?? 'pro',
+        subscription_status: currentSubscription?.subscription_status ?? 'active',
+        current_period_end: currentSubscription?.current_period_end ?? null,
+        trial_end: currentSubscription?.trial_end ?? null,
+        updated_at: currentSubscription?.updated_at ?? new Date().toISOString(),
+      };
+    }
+
     console.log('🔄 Upserting subscription in database...');
     const { error } = await supabase
       .from('subscriptions')

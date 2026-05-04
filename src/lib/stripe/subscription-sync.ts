@@ -22,6 +22,14 @@ export interface MapStripeSubscriptionInput {
   proPriceId: string;
 }
 
+export interface AppSubscriptionStateForStaleCheck {
+  stripe_subscription_id?: string | null;
+  subscription_plan?: string | null;
+  subscription_status?: string | null;
+  current_period_end?: string | null;
+  trial_end?: string | null;
+}
+
 export function mapStripeSubscriptionToAppSubscription(
   input: MapStripeSubscriptionInput
 ): Partial<Subscription> {
@@ -41,4 +49,56 @@ export function mapStripeSubscriptionToAppSubscription(
     trial_end: input.trialEnd?.toISOString() ?? null,
     updated_at: new Date().toISOString(),
   };
+}
+
+function hasFutureEntitlementDate(
+  subscription: AppSubscriptionStateForStaleCheck,
+  now: Date
+): boolean {
+  const dates = [subscription.current_period_end, subscription.trial_end];
+
+  return dates.some((date) => {
+    if (!date) return false;
+    const timestamp = Date.parse(date);
+    return Number.isFinite(timestamp) && timestamp > now.getTime();
+  });
+}
+
+export function shouldSkipStaleInactiveSubscriptionUpdate(input: {
+  currentSubscription: AppSubscriptionStateForStaleCheck | null;
+  incomingSubscription: AppSubscriptionStateForStaleCheck;
+  now?: Date;
+}): boolean {
+  const { currentSubscription, incomingSubscription } = input;
+  const now = input.now ?? new Date();
+
+  if (!currentSubscription?.stripe_subscription_id) {
+    return false;
+  }
+
+  if (!incomingSubscription.stripe_subscription_id) {
+    return false;
+  }
+
+  if (
+    currentSubscription.stripe_subscription_id ===
+    incomingSubscription.stripe_subscription_id
+  ) {
+    return false;
+  }
+
+  const currentIsActivePro =
+    currentSubscription.subscription_plan === "pro" &&
+    currentSubscription.subscription_status === "active" &&
+    hasFutureEntitlementDate(currentSubscription, now);
+
+  if (!currentIsActivePro) {
+    return false;
+  }
+
+  const incomingIsInactive =
+    incomingSubscription.subscription_plan !== "pro" ||
+    incomingSubscription.subscription_status !== "active";
+
+  return incomingIsInactive;
 }
