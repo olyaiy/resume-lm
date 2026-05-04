@@ -6,6 +6,8 @@ import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/
 import { deleteCustomerAndData } from "@/utils/actions/stripe/actions";
 import { loginSchema, signupSchema } from "@/lib/auth-schemas";
 import type { AuthFormState } from "@/components/auth/auth-form-state";
+import { AnalyticsEvents } from "@/lib/analytics/events";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 
 // Auto-create Pro subscription for new users (for local development)
 const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
@@ -93,6 +95,16 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       console.warn('Failed to create pro subscription:', subscriptionError.message);
       // Don't fail signup if subscription creation fails
     }
+  }
+
+  if (signupData.user) {
+    await captureServerAnalyticsEvent({
+      distinctId: signupData.user.id,
+      event: AnalyticsEvents.SignupCompleted,
+      properties: {
+        signup_provider: "email",
+      },
+    });
   }
 
   return { success: true }

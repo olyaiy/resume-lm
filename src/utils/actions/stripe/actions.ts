@@ -87,7 +87,7 @@ async function upsertCustomerToSupabase(uuid: string, customerId: string) {
 export async function manageSubscriptionStatusChange(
   subscriptionId: string,
   customerId: string
-) {
+): Promise<Partial<Subscription>> {
   console.log('🔄 Starting subscription status change:', {
     subscriptionId,
     customerId,
@@ -166,6 +166,7 @@ export async function manageSubscriptionStatusChange(
     console.log('✅ Subscription upserted successfully');
 
     console.log('🎉 Subscription management completed successfully!');
+    return subscriptionData;
   } catch (error) {
     console.error('💥 Error managing subscription:', {
       error: error instanceof Error ? error.message : 'Unknown error',

@@ -19,6 +19,11 @@ import {
   getResumeLimitExceededMessage,
   type ResumeLimitType,
 } from "@/lib/resume-limits";
+import { AnalyticsEvents } from "@/lib/analytics/events";
+import {
+  captureServerAnalyticsEvent,
+  getSubscriptionAnalyticsProperties,
+} from "@/lib/analytics/server";
 
 async function assertResumeQuota(
   supabase: Awaited<ReturnType<typeof createClient>>,
@@ -350,6 +355,16 @@ export async function createBaseResume(
     throw new Error('Resume creation failed: No data returned');
   }
 
+  await captureServerAnalyticsEvent({
+    distinctId: user.id,
+    event: AnalyticsEvents.ResumeCreated,
+    properties: {
+      ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
+      resume_type: "base",
+      has_job: false,
+    },
+  });
+
   return resume;
 }
 
@@ -402,6 +417,16 @@ export async function createTailoredResume(
     .single();
 
   if (error) throw error;
+  await captureServerAnalyticsEvent({
+    distinctId: user.id,
+    event: AnalyticsEvents.ResumeTailored,
+    properties: {
+      ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
+      resume_type: "tailored",
+      has_job: Boolean(jobId),
+    },
+  });
+
   return data;
 }
 

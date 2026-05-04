@@ -9,11 +9,13 @@ import { Analytics } from "@vercel/analytics/react";
 import Link from "next/link";
 import { cookies } from "next/headers";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
+import { PostHogPageView } from "@/components/analytics/posthog-pageview";
 import {
   IMPERSONATION_STATE_COOKIE_NAME,
   parseImpersonationStateCookieValue,
 } from "@/lib/impersonation";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
+import { Suspense } from "react";
 
 // Only enable Vercel Analytics when running on Vercel platform
 const isVercel = process.env.VERCEL === '1';
@@ -98,6 +100,8 @@ export default async function RootLayout({
   
   let showUpgradeButton = false;
   let isProPlan = false;
+  let subscriptionPlan = "free";
+  let subscriptionStatus: string | null = null;
   let upgradeButtonVariant: 'trial' | 'upgrade' = 'upgrade';
   if (user) {
     try {
@@ -112,12 +116,16 @@ export default async function RootLayout({
       const needsTrial = subscriptionState.needsTrial;
 
       isProPlan = hasProAccess;
+      subscriptionPlan = subscriptionState.effectivePlan || subscription?.subscription_plan || "free";
+      subscriptionStatus = subscription?.subscription_status ?? null;
       showUpgradeButton = !hasProAccess;
       upgradeButtonVariant = needsTrial ? 'trial' : 'upgrade';
     } catch {
       // If there's an error, we'll show the upgrade button by default
       showUpgradeButton = true;
       isProPlan = false;
+      subscriptionPlan = "free";
+      subscriptionStatus = null;
       upgradeButtonVariant = 'upgrade';
     }
   }
@@ -125,7 +133,17 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <PostHogProvider>
+        <PostHogProvider
+          user={user ? {
+            id: user.id,
+            subscriptionPlan,
+            subscriptionStatus,
+            isPro: isProPlan,
+          } : null}
+        >
+          <Suspense fallback={null}>
+            <PostHogPageView />
+          </Suspense>
           {isImpersonating && user && (
             <div className="bg-amber-500 text-white text-center text-sm py-2">
               Impersonating&nbsp;<span className="font-semibold">{user.email ?? user.id}</span>.&nbsp;

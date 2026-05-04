@@ -3,6 +3,15 @@
 import { Profile } from "@/lib/types";
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
+import { AnalyticsEvents } from "@/lib/analytics/events";
+import {
+  captureServerAnalyticsEvent,
+  getSubscriptionAnalyticsProperties,
+} from "@/lib/analytics/server";
+
+function isProfileComplete(profile: Partial<Profile> | null | undefined) {
+  return Boolean(profile?.first_name && profile?.last_name && profile?.email);
+}
 
 export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
@@ -11,6 +20,12 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   if (userError || !user) {
     throw new Error('User not authenticated');
   }
+
+  const { data: currentProfile } = await supabase
+    .from('profiles')
+    .select('first_name, last_name, email')
+    .eq('user_id', user.id)
+    .maybeSingle();
 
   const { data: profile, error } = await supabase
     .from('profiles')
@@ -21,6 +36,14 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
 
   if (error) {
     throw new Error(`Failed to update profile: ${error.message}`);
+  }
+
+  if (!isProfileComplete(currentProfile) && isProfileComplete(profile)) {
+    await captureServerAnalyticsEvent({
+      distinctId: user.id,
+      event: AnalyticsEvents.ProfileCreated,
+      properties: await getSubscriptionAnalyticsProperties(supabase, user.id),
+    });
   }
 
   // Revalidate all routes that might display profile data

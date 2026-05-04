@@ -94,14 +94,18 @@ Updated after Task 3 production entitlement reconciliation on May 3, 2026.
 - **Duplicate refund is handled by Stripe/Link, not by a normal merchant refund object.** A direct dashboard refund attempt for the intended duplicate April 10, 2026 `$20 USD` charge on invoice `in_1TKYo4Cv6RlaQFiM5Qf00Gmg` / payment intent `pi_3TKZlDCv6RlaQFiM1SPXsRQd` failed with Stripe error `charge_not_refundable` and message code `payment_refund_hidden_link_refunded`: "This payment is not refundable as Stripe has already refunded it. This refund has been executed by Stripe and you have not been charged." This explains why live Stripe CLI still shows `latest_charge.amount_refunded = 0`, `latest_charge.refunded = false`, no merchant refund objects, and no invoice credit notes: the refund is hidden/Stripe-funded rather than debited from the ResumeLM Stripe balance. No additional merchant refund should be attempted for this payment unless Stripe Support says otherwise.
 - **Duplicate Checkout creation prevention is implemented, verified, and committed.** Commit `741b61a` updates the checkout server action to reject arbitrary price IDs, check live Stripe subscriptions for the customer and Pro price before creating Checkout, send users with active/trialing/past_due/unpaid/incomplete Stripe subscriptions to the billing portal, reuse matching open Checkout sessions, and create new Checkout sessions with `client_reference_id`, metadata, subscription metadata, and a stable idempotency key. Verification passed on May 3, 2026: checkout guard tests plus existing subscription tests passed (`22` tests), `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed. Note: `pnpm exec tsx` is not available as a direct package binary in this workspace, so the focused test run used the installed transitive `tsx` CLI path.
 - **Task 4 unsafe manual plan toggle is implemented, verified, and committed.** Commit `414c1ac` removed the self-service `toggleSubscriptionPlan` server action from Stripe actions, deleted the unused customer-facing `TogglePlanButton` component, and added a safety test that checks the Stripe actions source does not reintroduce the unsafe self-service plan toggle. Verification passed on May 3, 2026: focused safety/subscription tests passed (`23` tests), source search outside tests found no remaining `toggleSubscriptionPlan`, `TogglePlanButton`, or `toggle-plan` usage, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm lint` passed, and `pnpm build` passed.
-- **Task 5 AI access control and usage logging is locally implemented, verified, committed, and production-migrated but not pushed.** Commit `5888a65` centralizes server-key/BYOK model access in `src/lib/ai/access-control.ts`, removes the unsafe slash-style OpenRouter server-key fallback from `src/utils/ai-tools.ts`, adds `public.ai_usage_events` migration/RLS, and routes `/api/chat` plus the AI server actions through a shared usage ledger/rate-limit guard. Verification passed on May 3, 2026: access-control tests plus focused subscription/checkout safety tests passed (`29` tests), `pnpm lint` passed, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm build` passed, and `pnpm dev` served `http://localhost:3000` successfully in Arc via Computer Use. On May 3, 2026, the `create_ai_usage_events` migration was applied to production Supabase project `gspglrtjrmjymcmabtpq`; verification showed `public.ai_usage_events` exists with RLS enabled and no starting rows.
+- **Task 5 AI access control and usage logging is implemented, verified, committed, production-migrated, and pushed.** Commit `5888a65` centralizes server-key/BYOK model access in `src/lib/ai/access-control.ts`, removes the unsafe slash-style OpenRouter server-key fallback from `src/utils/ai-tools.ts`, adds `public.ai_usage_events` migration/RLS, and routes `/api/chat` plus the AI server actions through a shared usage ledger/rate-limit guard. Verification passed on May 3, 2026: access-control tests plus focused subscription/checkout safety tests passed (`29` tests), `pnpm lint` passed, `pnpm exec tsc --noEmit --pretty false` passed, `pnpm build` passed, and `pnpm dev` served `http://localhost:3000` successfully in Arc via Computer Use. On May 3, 2026, the `create_ai_usage_events` migration was applied to production Supabase project `gspglrtjrmjymcmabtpq`; verification showed `public.ai_usage_events` exists with RLS enabled and no starting rows. Task 5 and its follow-up test/documentation commits were pushed to `origin/main` on May 3, 2026.
 - **Task 5 local end-to-end smoke test passed with real Supabase and Stripe test-mode state.** A temporary account `codex-e2e-1777859221900@example.com` was created and email-confirmed in production Supabase for local testing. The browser verified signup/login, authenticated `/home`, generated base resume visibility, resume editor load, resume save persistence (`first_name = Codex` persisted in Supabase), AI chat response generation, and usage-ledger persistence. Supabase showed two successful `api.chat` rows for user `e461b2a7-096a-4d6a-8a4c-7eecd11674ab` with provider `openrouter`, model `deepseek/deepseek-v3.2:nitro`, `used_server_key = true`, and recorded token totals.
 - **Task 5 Stripe checkout smoke test passed in local test mode without a real charge.** Local `.env.local` uses Stripe test keys and test price `price_1R8mGNCv6RlaQFiMjDGCLQky`. The browser reached embedded Stripe Checkout for a 7-day trial, and Stripe test API verification showed one customer `cus_US5s36l83oC7jG` with exactly one open subscription-mode Checkout Session. Reopening the checkout route reused that same open session instead of creating a duplicate, and the session carried the expected metadata: `supabaseUUID`, `price_id`, `include_trial`, and `source = resumelm_checkout`.
 - **Task 5 temporary test artifacts were cleaned up.** The Stripe test Checkout Session `cs_test_b1NuIL75KOzR9tmTse03S0rkHkEyJol0iTYhObkBRhahEQcBxEWqo4ZqZW` was expired, Stripe test customer `cus_US5s36l83oC7jG` was deleted, and production Supabase cleanup removed the test user's `ai_usage_events` (`2`), `resumes` (`1`), `profiles` (`1`), `subscriptions` (`1`), and auth user. Follow-up checks showed `0` remaining Supabase app rows for user `e461b2a7-096a-4d6a-8a4c-7eecd11674ab`, auth returned `User not found`, Stripe had `0` remaining customers for `codex-e2e-1777859221900@example.com`, and the test Checkout Session status was `expired`.
 - **Testing setup is now explicit.** `package.json` has `pnpm test` for all `src/**/*.test.ts` Node tests and `pnpm typecheck` for TypeScript checking. `src/lib/ai/usage-ledger.test.ts` adds direct coverage for token mapping and `AIUsageError` status/code preservation. `pnpm test` passed with `32` tests across `11` suites. Note: the test script uses the already-installed transitive `tsx@4.19.4` CLI path rather than installing a new package in this turn.
 - **Supabase security advisor was checked after the Task 5 production migration.** The advisor reports `public.ai_usage_events` and `public.stripe_webhook_events` as "RLS enabled no policy" informational findings; this is expected for these service-role-only operational tables because table access is revoked from `anon` and `authenticated`. Remaining unrelated warnings include mutable `search_path` on existing public functions, executable `SECURITY DEFINER` `handle_new_user`, long OTP expiry, leaked password protection disabled, and available Postgres security patches.
 - **Production price note:** The deployed `resumelm.ca` client bundle contains live price id `price_1QckQwCv6RlaQFiMVN24pn3M`, matching the four live Stripe active/trialing subscriptions. Local `.env.local` still contains a stale/test-ish value, so do not use local `.env.local` as evidence for live Stripe pricing.
-- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`; unsafe manual plan toggle removal was committed as `414c1ac`; Task 5 source was committed locally as `5888a65` and intentionally not pushed. The latest local Task 5 follow-up commit records the explicit test script, usage-ledger unit test, production migration note, and end-to-end smoke evidence, and is intentionally not pushed. Local uncommitted changes currently visible in the working tree include unrelated files (`pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts; package changes also include unrelated pre-existing `eslint-plugin-react-hooks` dependency drift, so stage package hunks carefully.
+- **Task 6 product and billing analytics is implemented, verified, and committed.** This commit adds a shared analytics event taxonomy and property sanitizer in `src/lib/analytics/events.ts`, server-side PostHog capture in `src/lib/analytics/server.ts`, stable non-email user identification in the PostHog provider, App Router pageview capture mounted from the root layout, checkout start capture, signup/profile/resume/AI lifecycle capture, and Stripe webhook billing lifecycle capture after subscription DB sync succeeds. Analytics properties intentionally omit raw emails, resume text, job descriptions, API keys, card/payment method details, and billing addresses.
+- **Task 6 PostHog dashboard is created.** PostHog project `311922` now has dashboard `ResumeLM Operations` at dashboard id `1540573`. It includes trend cards for signups, profile completions, resume creation, tailored resume creation, checkout starts, checkout completions, subscription activations, subscription cancellations, AI requests by provider, AI requests by model, and AI failures by route. It also includes funnel cards for profile completion rate, resume created per signup, tailored resume per signup, and checkout-to-subscription activation, plus a retention note card for adding the true week-1 resume-creator retention insight once `resume_created` has production volume.
+- **Task 6 analytics validation passed without sending sensitive content.** A PostHog smoke event for `checkout_started` appeared in Activity Explore under synthetic distinct id `codex-task6-smoke-1777868459195`, and the expanded event did not contain the sensitive probe fields `resume_content`, `job_description`, or `SHOULD_NOT_BE_SENT`. A full synthetic lifecycle sequence was then sent under distinct id `codex-task6-sequence-1777870358287` covering `signup_completed`, `profile_created`, `resume_created`, `ai_request_started`, `ai_request_succeeded`, `checkout_started`, `checkout_completed`, and `subscription_activated`; each event went through the same server sanitizer and PostHog capture helper.
+- **Task 6 verification passed locally.** `pnpm test` passed with `36` tests across `14` suites, `pnpm lint` passed with no warnings/errors, `pnpm typecheck` passed, and `pnpm build` completed successfully. `pnpm dev` served `http://localhost:3000`, and an HTTP smoke check of `http://localhost:3000/auth/login` returned `200` with expected ResumeLM page markers and the mounted PostHog provider. The in-app Browser automation timed out when waiting for localhost navigation, so the local UI smoke evidence is the dev server plus HTTP-rendered page check rather than a completed in-app Browser screenshot.
+- **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`; unsafe manual plan toggle removal was committed as `414c1ac`; Task 5 source was committed as `5888a65` and pushed with its follow-up test/documentation commits. Local uncommitted changes currently visible in the working tree include unrelated files (`pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts; package changes also include unrelated pre-existing `eslint-plugin-react-hooks` dependency drift, so stage package hunks carefully.
 
 ---
 
@@ -1021,7 +1025,7 @@ git commit -m "fix: centralize AI access control and usage logging"
 - Modify: `src/components/analytics/posthog-provider.tsx`
 - Modify: dashboard/auth/subscription flows where events occur
 
-- [ ] **Step 1: Define event names**
+- [x] **Step 1: Define event names**
 
 Create `src/lib/analytics/events.ts`:
 
@@ -1044,7 +1048,7 @@ export type AnalyticsEventName =
   (typeof AnalyticsEvents)[keyof typeof AnalyticsEvents];
 ```
 
-- [ ] **Step 2: Identify users in PostHog after auth**
+- [x] **Step 2: Identify users in PostHog after auth**
 
 Use a stable non-email user id:
 
@@ -1056,7 +1060,7 @@ posthog.identify(user.id, {
 
 Do not send full resume text, job descriptions, API keys, or raw customer emails to PostHog.
 
-- [ ] **Step 3: Capture client-side events**
+- [x] **Step 3: Capture client-side events**
 
 Capture:
 
@@ -1074,7 +1078,7 @@ Expected event properties:
 
 Do not include resume content or job description content.
 
-- [ ] **Step 4: Capture server-side billing events after webhook success**
+- [x] **Step 4: Capture server-side billing events after webhook success**
 
 After webhook DB update succeeds, capture:
 
@@ -1091,7 +1095,7 @@ Expected event properties:
 
 Do not include card details, full email, or billing address.
 
-- [ ] **Step 5: Build a PostHog dashboard**
+- [x] **Step 5: Build a PostHog dashboard**
 
 Create cards for:
 
@@ -1106,7 +1110,7 @@ Create cards for:
 - AI failures by route
 - Week 1 retention for users who created a resume
 
-- [ ] **Step 6: Validate analytics manually**
+- [x] **Step 6: Validate analytics manually**
 
 Use a test account and confirm the event sequence:
 
@@ -1126,7 +1130,7 @@ Expected:
 - Events appear under one PostHog distinct id.
 - No sensitive content appears in event properties.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add src/lib/analytics/events.ts src/components/analytics/posthog-provider.tsx

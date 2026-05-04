@@ -4,6 +4,9 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { manageSubscriptionStatusChange } from '@/utils/actions/stripe/actions'
 import { createServiceClient } from '@/utils/supabase/server'
+import { AnalyticsEvents } from '@/lib/analytics/events'
+import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
+import type { Subscription } from '@/lib/types'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2025-04-30.basil'
@@ -113,7 +116,7 @@ async function markWebhookEventProcessed(
 async function handleSubscriptionChange(
   stripeCustomerId: string,
   subscriptionId: string
-) {
+): Promise<Partial<Subscription>> {
   try {
     // Enhanced initial logging
     console.log('🔔 Subscription Status Update:', {
@@ -124,7 +127,7 @@ async function handleSubscriptionChange(
     });
 
     // Update subscription in database
-    await manageSubscriptionStatusChange(
+    const subscriptionData = await manageSubscriptionStatusChange(
       subscriptionId,
       stripeCustomerId
     );
@@ -134,6 +137,8 @@ async function handleSubscriptionChange(
       updatedAt: new Date().toISOString(),
       subscriptionId,
     });
+
+    return subscriptionData;
   } catch (error) {
     console.error('❌ Subscription Update Failed:', {
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -143,6 +148,47 @@ async function handleSubscriptionChange(
       subscriptionId,
     });
     throw error;
+  }
+}
+
+function getSubscriptionEventProperties(
+  subscriptionData: Partial<Subscription>,
+  eventType: string
+) {
+  return {
+    stripe_subscription_id: subscriptionData.stripe_subscription_id ?? null,
+    subscription_status: subscriptionData.subscription_status ?? null,
+    subscription_plan: subscriptionData.subscription_plan ?? null,
+    current_period_end: subscriptionData.current_period_end ?? null,
+    event_type: eventType,
+  };
+}
+
+async function captureSubscriptionLifecycleEvent(input: {
+  eventType: string;
+  subscriptionData: Partial<Subscription>;
+}) {
+  const userId = input.subscriptionData.user_id;
+  if (!userId) return;
+
+  if (
+    ['checkout.session.completed', 'customer.subscription.created'].includes(input.eventType) &&
+    input.subscriptionData.subscription_plan === 'pro' &&
+    input.subscriptionData.subscription_status === 'active'
+  ) {
+    await captureServerAnalyticsEvent({
+      distinctId: userId,
+      event: AnalyticsEvents.SubscriptionActivated,
+      properties: getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+    });
+  }
+
+  if (input.subscriptionData.subscription_status === 'canceled') {
+    await captureServerAnalyticsEvent({
+      distinctId: userId,
+      event: AnalyticsEvents.SubscriptionCanceled,
+      properties: getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+    });
   }
 }
 
@@ -231,10 +277,21 @@ export async function POST(req: Request) {
         const subscriptionId = getSubscriptionId(session.subscription as string | Stripe.Subscription | null);
         
         if (session.mode === 'subscription' && subscriptionId) {
-          await handleSubscriptionChange(
+          const subscriptionData = await handleSubscriptionChange(
             getCustomerId(session.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
+          if (subscriptionData.user_id) {
+            await captureServerAnalyticsEvent({
+              distinctId: subscriptionData.user_id,
+              event: AnalyticsEvents.CheckoutCompleted,
+              properties: getSubscriptionEventProperties(subscriptionData, event.type),
+            });
+          }
+          await captureSubscriptionLifecycleEvent({
+            eventType: event.type,
+            subscriptionData,
+          });
         }
         break;
       }
@@ -244,10 +301,14 @@ export async function POST(req: Request) {
         const subscriptionId = getSubscriptionId(invoice.subscription);
         
         if (subscriptionId) {
-          await handleSubscriptionChange(
+          const subscriptionData = await handleSubscriptionChange(
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
+          await captureSubscriptionLifecycleEvent({
+            eventType: event.type,
+            subscriptionData,
+          });
         }
         break;
       }
@@ -287,10 +348,14 @@ export async function POST(req: Request) {
           });
         }
         
-        await handleSubscriptionChange(
+        const subscriptionData = await handleSubscriptionChange(
           getCustomerId(subscription.customer),
           subscription.id
         );
+        await captureSubscriptionLifecycleEvent({
+          eventType: event.type,
+          subscriptionData,
+        });
         break;
       }
 
@@ -305,10 +370,14 @@ export async function POST(req: Request) {
           status: subscription.status
         });
         
-        await handleSubscriptionChange(
+        const subscriptionData = await handleSubscriptionChange(
           getCustomerId(subscription.customer),
           subscription.id
         );
+        await captureSubscriptionLifecycleEvent({
+          eventType: event.type,
+          subscriptionData,
+        });
         console.log('✅ Subscription deletion processed successfully');
         break;
       }
@@ -327,6 +396,17 @@ export async function POST(req: Request) {
           console.log('🗑️ Deleted subscription record for customer:', {
             customerId: customer.id,
             supabaseUUID: customer.metadata.supabaseUUID
+          });
+          await captureServerAnalyticsEvent({
+            distinctId: customer.metadata.supabaseUUID,
+            event: AnalyticsEvents.SubscriptionCanceled,
+            properties: {
+              stripe_subscription_id: null,
+              subscription_status: 'canceled',
+              subscription_plan: null,
+              current_period_end: null,
+              event_type: event.type,
+            },
           });
         } catch (error) {
           console.error('❌ Failed to clear Stripe customer data:', error);

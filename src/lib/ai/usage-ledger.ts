@@ -1,6 +1,8 @@
 import type { LanguageModelUsage, LanguageModelV1 } from "ai";
 
 import { checkRateLimit } from "@/lib/rateLimiter";
+import { AnalyticsEvents } from "@/lib/analytics/events";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 import { getDefaultModel } from "@/lib/ai-models";
 import {
   resolveAIRequest,
@@ -49,6 +51,18 @@ export async function recordAIUsageStarted(input: {
     throw error;
   }
 
+  await captureServerAnalyticsEvent({
+    distinctId: input.userId,
+    event: AnalyticsEvents.AIRequestStarted,
+    properties: {
+      route: input.route,
+      provider: input.provider,
+      model: input.model,
+      is_pro: input.isPro,
+      used_server_key: input.usedServerKey,
+    },
+  });
+
   return data.id;
 }
 
@@ -61,7 +75,7 @@ export async function recordAIUsageFinished(input: {
   totalTokens?: number;
 }): Promise<void> {
   const supabase = await createServiceClient();
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("ai_usage_events")
     .update({
       status: input.status,
@@ -70,11 +84,32 @@ export async function recordAIUsageFinished(input: {
       output_tokens: input.outputTokens ?? null,
       total_tokens: input.totalTokens ?? null,
     })
-    .eq("id", input.id);
+    .eq("id", input.id)
+    .select("user_id, route, provider, model, is_pro, used_server_key, status, input_tokens, output_tokens, total_tokens, error_code")
+    .single();
 
   if (error) {
     throw error;
   }
+
+  await captureServerAnalyticsEvent({
+    distinctId: data.user_id,
+    event: input.status === "succeeded"
+      ? AnalyticsEvents.AIRequestSucceeded
+      : AnalyticsEvents.AIRequestFailed,
+    properties: {
+      route: data.route,
+      provider: data.provider,
+      model: data.model,
+      is_pro: data.is_pro,
+      used_server_key: data.used_server_key,
+      status: data.status,
+      input_tokens: data.input_tokens,
+      output_tokens: data.output_tokens,
+      total_tokens: data.total_tokens,
+      error_code: data.error_code,
+    },
+  });
 }
 
 export function usageFromLanguageModelUsage(usage?: LanguageModelUsage) {

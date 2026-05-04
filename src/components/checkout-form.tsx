@@ -4,8 +4,10 @@ import React from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import { EmbeddedCheckoutProvider, EmbeddedCheckout } from "@stripe/react-stripe-js";
 import { useSearchParams } from 'next/navigation'
+import { usePostHog } from "posthog-js/react";
 
 import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
+import { AnalyticsEvents, sanitizeAnalyticsProperties } from "@/lib/analytics/events";
 
 const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
@@ -13,6 +15,7 @@ const stripePromise = loadStripe(
 
 export function CheckoutForm() {
     const searchParams = useSearchParams()
+    const posthog = usePostHog()
     const priceId = searchParams.get('price_id')!
     const includeTrial = searchParams.get('trial') === 'true'
     const [clientSecret, setClientSecret] = React.useState<string | null>(null);
@@ -38,6 +41,11 @@ export function CheckoutForm() {
                 }
 
                 setClientSecret(stripeResponse.clientSecret);
+                posthog?.capture(AnalyticsEvents.CheckoutStarted, sanitizeAnalyticsProperties({
+                    $geoip_disable: true,
+                    price_id: priceId,
+                    include_trial: includeTrial,
+                }));
             } catch (error) {
                 if (!isMounted) return;
 
@@ -54,7 +62,7 @@ export function CheckoutForm() {
         return () => {
             isMounted = false;
         };
-    }, [priceId, includeTrial]);
+    }, [priceId, includeTrial, posthog]);
 
     if (errorMessage) {
         return (
