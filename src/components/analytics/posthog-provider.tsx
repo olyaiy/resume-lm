@@ -7,6 +7,7 @@ import { sanitizeAnalyticsProperties } from '@/lib/analytics/events';
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
+const posthogUiHost = process.env.NEXT_PUBLIC_POSTHOG_UI_HOST ?? 'https://us.posthog.com';
 let hasInitialized = false;
 
 interface AnalyticsUser {
@@ -28,6 +29,7 @@ export function PostHogProvider({
 
     posthog.init(posthogKey, {
       api_host: posthogHost,
+      ui_host: posthogUiHost,
       defaults: '2026-01-30',
       capture_pageview: false,
       capture_pageleave: true,
