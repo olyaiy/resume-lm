@@ -7,6 +7,7 @@ import { getSubscriptionAccessState } from '@/lib/subscription-access';
 import {
   mapStripeSubscriptionToAppSubscription,
   shouldSkipStaleInactiveSubscriptionUpdate,
+  type SupportedStripeStatus,
 } from '@/lib/stripe/subscription-sync';
 
 // Lazy-initialize Stripe only when needed (allows running without Stripe for local dev)
@@ -104,19 +105,6 @@ export async function manageSubscriptionStatusChange(
     throw new Error('NEXT_PUBLIC_STRIPE_PRO_PRICE_ID is not configured');
   }
 
-  // Get customer's UUID from Stripe metadata
-  console.log('🔍 Retrieving customer data from Stripe...');
-  const customerData = await getStripe().customers.retrieve(customerId);
-  if ('deleted' in customerData) {
-    console.error('❌ Customer has been deleted');
-    throw new Error('Customer has been deleted');
-  }
-  const uuid = customerData.metadata.supabaseUUID;
-  if (!uuid) {
-    throw new Error(`Stripe customer ${customerId} is missing metadata.supabaseUUID`);
-  }
-  console.log('✅ Retrieved customer UUID:', uuid);
-
   console.log('📦 Retrieving subscription details from Stripe...');
   const subscription = await getStripe().subscriptions.retrieve(subscriptionId, {
     expand: ['default_payment_method', 'items.data.price']
@@ -134,13 +122,80 @@ export async function manageSubscriptionStatusChange(
       : null
   });
 
+  console.log('🔍 Retrieving customer data from Stripe...');
+  const customerData = await getStripe().customers.retrieve(customerId);
+  let uuid: string | null = null;
+
+  if ('deleted' in customerData) {
+    console.warn('⚠️ Stripe customer has been deleted, falling back to Supabase subscription mapping:', {
+      customerId,
+      subscriptionId,
+    });
+  } else {
+    uuid = customerData.metadata.supabaseUUID || null;
+  }
+
+  if (!uuid) {
+    const { data: existingBySubscription, error: existingBySubscriptionError } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle();
+
+    if (existingBySubscriptionError) {
+      console.error('❌ Error looking up subscription by Stripe subscription id:', existingBySubscriptionError);
+      throw existingBySubscriptionError;
+    }
+
+    uuid = existingBySubscription?.user_id ?? null;
+  }
+
+  if (!uuid) {
+    const { data: existingByCustomer, error: existingByCustomerError } = await supabase
+      .from('subscriptions')
+      .select('user_id')
+      .eq('stripe_customer_id', customerId)
+      .maybeSingle();
+
+    if (existingByCustomerError) {
+      console.error('❌ Error looking up subscription by Stripe customer id:', existingByCustomerError);
+      throw existingByCustomerError;
+    }
+
+    uuid = existingByCustomer?.user_id ?? null;
+  }
+
+  if (!uuid) {
+    console.warn('⚠️ No Supabase user mapping found for Stripe subscription event; acknowledging without entitlement update:', {
+      customerId,
+      subscriptionId,
+      status: subscription.status,
+    });
+
+    return {
+      stripe_customer_id: customerId,
+      stripe_subscription_id: subscription.id,
+      subscription_plan: 'free',
+      subscription_status: 'canceled',
+      current_period_end: subscriptionItem.current_period_end
+        ? new Date(subscriptionItem.current_period_end * 1000).toISOString()
+        : null,
+      trial_end: subscription.trial_end
+        ? new Date(subscription.trial_end * 1000).toISOString()
+        : null,
+      updated_at: new Date().toISOString(),
+    };
+  }
+
+  console.log('✅ Resolved customer UUID:', uuid);
+
   // Prepare subscription data
   const subscriptionData: Partial<Subscription> = mapStripeSubscriptionToAppSubscription({
     userId: uuid,
     customerId,
     subscriptionId: subscription.id,
     priceId: subscriptionItem.price.id,
-    stripeStatus: subscription.status,
+    stripeStatus: subscription.status as SupportedStripeStatus,
     currentPeriodEnd: subscriptionItem.current_period_end
       ? new Date(subscriptionItem.current_period_end * 1000)
       : null,
