@@ -80,7 +80,7 @@ Local environment caveat:
 
 ## Current Recovery Status
 
-Updated after Task 3 production entitlement reconciliation on May 3, 2026.
+Updated after Task 7 waitlist cleanup on May 4, 2026.
 
 - **Task 1 persistence repair is deployed and verified.** Production Supabase now has `public.stripe_webhook_events`, RLS is enabled, `anon` and `authenticated` cannot access the table, and `service_role` can insert/update/delete as required by the webhook route.
 - **GitHub production delivery succeeded for the schema repair.** Commit `a4ea80d` added the table and RLS hardening locally, and GitHub Actions reported success for both `Helm Chart Publish` and `Build and Push Docker Image`.
@@ -105,6 +105,9 @@ Updated after Task 3 production entitlement reconciliation on May 3, 2026.
 - **Task 6 PostHog dashboard is created.** PostHog project `311922` now has dashboard `ResumeLM Operations` at dashboard id `1540573`. It includes trend cards for signups, profile completions, resume creation, tailored resume creation, checkout starts, checkout completions, subscription activations, subscription cancellations, AI requests by provider, AI requests by model, and AI failures by route. It also includes funnel cards for profile completion rate, resume created per signup, tailored resume per signup, and checkout-to-subscription activation, plus a retention note card for adding the true week-1 resume-creator retention insight once `resume_created` has production volume.
 - **Task 6 analytics validation passed without sending sensitive content.** A PostHog smoke event for `checkout_started` appeared in Activity Explore under synthetic distinct id `codex-task6-smoke-1777868459195`, and the expanded event did not contain the sensitive probe fields `resume_content`, `job_description`, or `SHOULD_NOT_BE_SENT`. A full synthetic lifecycle sequence was then sent under distinct id `codex-task6-sequence-1777870358287` covering `signup_completed`, `profile_created`, `resume_created`, `ai_request_started`, `ai_request_succeeded`, `checkout_started`, `checkout_completed`, and `subscription_activated`; each event went through the same server sanitizer and PostHog capture helper.
 - **Task 6 verification passed locally.** `pnpm test` passed with `36` tests across `14` suites, `pnpm lint` passed with no warnings/errors, `pnpm typecheck` passed, and `pnpm build` completed successfully. `pnpm dev` served `http://localhost:3000`, and an HTTP smoke check of `http://localhost:3000/auth/login` returned `200` with expected ResumeLM page markers and the mounted PostHog provider. The in-app Browser automation timed out when waiting for localhost navigation, so the local UI smoke evidence is the dev server plus HTTP-rendered page check rather than a completed in-app Browser screenshot.
+- **Task 1/3 billing recovery loop is closed by current-state reconciliation, not exhaustive historical replay.** On May 4, 2026, subscription lifecycle replay exposed two real webhook hardening issues: stale inactive duplicate subscription events could overwrite a different active Pro subscription, and deleted Stripe customers could make old subscription events fail before acknowledgement. Commits `b92a7c8` and `b17fabd` fixed those cases and both were pushed to `origin/main`; GitHub Actions `Build and Push Docker Image` succeeded for both. Production Supabase was repaired for the affected customer to the current live subscription `sub_1TI1ZbCv6RlaQFiMQHIZVzZI`, and the read-only reconciliation script then reported `stripe active/trialing = 2`, `supabase pro:active = 2`, `0` missing/wrong active subscriptions, `0` stale Pro rows, and `0` duplicate active/trialing subscriptions. Stripe CLI resend remains blocked by restricted live-key permissions, and older events beyond Stripe's dashboard delivery window should not be chased unless reconciliation shows current drift.
+- **Task 3 reconciliation script preservation is complete.** `scripts/audit/reconcile-stripe-subscriptions.ts` is tracked in source and was committed earlier as `e2b58cc`; audit snapshots remain in `tmp/audits` and should stay uncommitted.
+- **Task 7 waitlist dead path is removed and verified.** The waitlist is not mounted from the current login/landing UI, so no new production Supabase table was created. The stale `joinWaitlist` server action and all `mailing-list` writes were removed, and the dormant waitlist section no longer imports or calls the action. Verification passed on May 4, 2026: source search found no `joinWaitlist` or `mailing-list` references under `src`, `pnpm test` passed with `40` tests across `15` suites, `pnpm typecheck` passed, `pnpm lint` passed, and `pnpm build` completed successfully.
 - **Current git note.** The replay documentation update was committed and pushed as `a3cb14e` with `[skip ci]`; Task 2 source was committed and pushed as `9678719`; duplicate Checkout prevention was committed as `741b61a`; unsafe manual plan toggle removal was committed as `414c1ac`; Task 5 source was committed as `5888a65` and pushed with its follow-up test/documentation commits. Local uncommitted changes currently visible in the working tree include unrelated files (`pnpm-lock.yaml`, `AGENTS.md`, `pnpm-workspace.yaml`, `.claude/settings.local.json`) plus `tmp/` audit artifacts; package changes also include unrelated pre-existing `eslint-plugin-react-hooks` dependency drift, so stage package hunks carefully.
 
 ---
@@ -383,7 +386,7 @@ Observed:
 - `evt_1TRt5bCv6RlaQFiMxCrcER9D` (`invoice.paid`) processed at `2026-05-03T03:51:32.983+00:00`.
 - Older red rows in Stripe were repeated delivery attempts for these same event IDs and showed as recovered after replay.
 
-- [ ] **Step 6b: Replay subscription lifecycle events only after Task 2 fixes explicit handling**
+- [x] **Step 6b: Replay subscription lifecycle events only after Task 2 fixes explicit handling**
 
 Deferred event types:
 
@@ -401,6 +404,13 @@ Important:
 
 - Do not replay `customer.subscription.created` before `src/app/api/webhooks/stripe/route.ts` handles it explicitly.
 - The current route includes `customer.subscription.created` in `relevantEvents`, but the switch has no case for it, so replaying it now would store the event as processed without syncing subscription state.
+
+Actual:
+
+- After Task 2 was deployed, replayed the bounded lifecycle events that were still actionable from Stripe's dashboard delivery window and verified successful rows in `public.stripe_webhook_events` for `evt_1TQb3xCv6RlaQFiMmbF1L0Eo` (`customer.subscription.created`), `evt_1TOfxKCv6RlaQFiMwqccr5NM` (`customer.subscription.deleted`), and `evt_1TOfjgCv6RlaQFiMucfeYEyb` (`customer.subscription.deleted`).
+- Stripe dashboard showed `evt_1TT4z1Cv6RlaQFiMDjY7xapy` (`customer.subscription.deleted` for the canceled duplicate subscription) had already delivered `200 OK`; that earlier successful delivery is what exposed the stale inactive overwrite bug.
+- `evt_1TQ3gsCv6RlaQFiMifqUgJvZ` exposed a deleted-customer edge case and was left as a reserved, unprocessed row before commit `b17fabd` fixed the handler. Do not chase this historical event further unless the reconciliation script shows current drift.
+- Current-state reconciliation is the closure signal: after fixing the replay hazards and repairing the affected live entitlement row, read-only reconciliation reported `0` missing/wrong active subscriptions, `0` stale Pro rows, and `0` duplicate active/trialing subscriptions.
 
 - [x] ~~**Step 7: Commit**~~
 
@@ -767,12 +777,17 @@ Actual:
 - After correction, app Pro access count is `3` distinct users, which matches the distinct live Stripe active/trialing users.
 - Stripe still has `4` active/trialing subscriptions because one user has two active subscriptions. Decide whether to cancel and/or refund the duplicate older subscription in Stripe.
 
-- [ ] **Step 6: Commit script only**
+- [x] **Step 6: Commit script only**
 
 ```bash
 git add scripts/audit/reconcile-stripe-subscriptions.ts
 git commit -m "chore: add Stripe subscription reconciliation script"
 ```
+
+Actual:
+
+- `scripts/audit/reconcile-stripe-subscriptions.ts` is already tracked and was committed as `e2b58cc chore: add Stripe subscription reconciliation script`.
+- Keep generated reports in `tmp/audits` uncommitted.
 
 ---
 
@@ -1141,12 +1156,14 @@ git commit -m "feat: add product and billing analytics events"
 
 ## Task 7: Fix Waitlist Schema or Remove Waitlist Path
 
+> **Progress note, 2026-05-04:** The waitlist is not currently product-facing: `WaitlistSection` and `WaitlistDialog` are not mounted from the login/landing entry points. The broken `joinWaitlist` server action was removed instead of creating a new public table for a disabled feature, and the stale waitlist section no longer imports or calls a database write path. Source search now finds no remaining `mailing-list` writes or `joinWaitlist` references.
+
 **Files:**
 
 - Modify: `src/app/auth/login/actions.ts`
 - Optional create: `supabase/migrations/202605030004_create_mailing_list.sql`
 
-- [ ] **Step 1: Decide whether waitlist is still a real feature**
+- [x] **Step 1: Decide whether waitlist is still a real feature**
 
 Search for all uses:
 
@@ -1158,7 +1175,9 @@ Expected:
 
 - Either the waitlist is still visible to users, or the dead path can be removed.
 
-- [ ] **Step 2A: If waitlist is real, create the missing table**
+- [x] **Step 2A: If waitlist is real, create the missing table**
+
+Skipped: the waitlist is not currently real/product-facing, so no new `public."mailing-list"` table is needed.
 
 Create `supabase/migrations/202605030004_create_mailing_list.sql`:
 
@@ -1187,7 +1206,7 @@ table_exists
 "mailing-list"
 ```
 
-- [ ] **Step 2B: If waitlist is not real, remove the action and UI**
+- [x] **Step 2B: If waitlist is not real, remove the action and UI**
 
 Remove `joinWaitlist` and any UI that calls it.
 
@@ -1195,7 +1214,7 @@ Expected:
 
 - No code writes to a missing table.
 
-- [ ] **Step 3: Run verification**
+- [x] **Step 3: Run verification**
 
 ```bash
 pnpm lint
@@ -1207,12 +1226,24 @@ Expected:
 
 - All commands pass.
 
-- [ ] **Step 4: Commit**
+Actual:
+
+- `rg -n "joinWaitlist|mailing-list|\\.from\\('mailing-list'\\)|\\.from\\(\"mailing-list\"\\)" src` returned no matches.
+- `pnpm test` passed with `40` tests across `15` suites.
+- `pnpm typecheck` passed.
+- `pnpm lint` passed with no warnings or errors.
+- `pnpm build` completed successfully.
+
+- [x] **Step 4: Commit**
 
 ```bash
 git add src/app/auth/login/actions.ts supabase/migrations/202605030004_create_mailing_list.sql
 git commit -m "fix: align waitlist storage with production schema"
 ```
+
+Actual:
+
+- Committed the no-table path: `src/app/auth/login/actions.ts`, `src/components/waitlist/waitlist-section.tsx`, and this recovery plan update.
 
 ---
 

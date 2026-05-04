@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowRight, Sparkles, Mail, User, CheckCircle2, XCircle } from "lucide-react";
-import { joinWaitlist } from "@/app/auth/login/actions";
 import { useState } from "react";
 
 const gradientClasses = {
@@ -23,28 +22,8 @@ export function WaitlistSection() {
     setErrorMessage('');
 
     try {
-      const formData = new FormData(e.currentTarget);
-      
-      // Log form data
-      const formDataObj = {
-        email: formData.get('email'),
-        firstName: formData.get('firstName'),
-        lastName: formData.get('lastName'),
-      };
-      console.log('Submitting form with data:', formDataObj);
-
-      const result = await joinWaitlist(formData);
-      console.log('Received result from server:', result);
-
-      if (result.success) {
-        console.log('Successfully joined waitlist');
-        setStatus('success');
-        (e.target as HTMLFormElement).reset();
-      } else {
-        console.error('Failed to join waitlist:', result.error);
-        setStatus('error');
-        setErrorMessage(result.error || 'Something went wrong. Please try again.');
-      }
+      setStatus('error');
+      setErrorMessage('The waitlist is not currently accepting signups.');
     } catch (error) {
       console.error('Error in form submission:', error);
       setStatus('error');
@@ -171,4 +150,4 @@ export function WaitlistSection() {
       </div>
     </section>
   );
-} 
+}
