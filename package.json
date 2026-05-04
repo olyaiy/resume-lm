@@ -7,7 +7,9 @@
     "dev:turbo": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "node node_modules/.pnpm/tsx@4.19.4/node_modules/tsx/dist/cli.mjs --test \"src/**/*.test.ts\"",
+    "typecheck": "tsc --noEmit --pretty false"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^1.0.6",
