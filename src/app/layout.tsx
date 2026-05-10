@@ -1,4 +1,3 @@
-import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Footer } from "@/components/layout/footer";
@@ -19,8 +18,6 @@ import { Suspense } from "react";
 
 // Only enable Vercel Analytics when running on Vercel platform
 const isVercel = process.env.VERCEL === '1';
-
-const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://resumelm.com"),
@@ -132,7 +129,7 @@ export default async function RootLayout({
 
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className="font-sans">
         <PostHogProvider
           user={user ? {
             id: user.id,
