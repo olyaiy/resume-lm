@@ -20,16 +20,18 @@ interface ErrorDialogProps {
 export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const searchParams = useSearchParams();
+  const error = searchParams.get('error');
 
   useEffect(() => {
     setIsOpen(initialIsOpen);
   }, [initialIsOpen]);
 
-  const errorMessage = isOpen ? (
-    searchParams.get('error') === 'auth_code_missing' 
-      ? 'We couldn\'t complete your sign-in. Please try again.' 
+  const isSignInError = error === 'auth_code_missing' || error === 'auth_callback_failed';
+  const errorMessage = isOpen
+    ? isSignInError
+      ? 'We could not complete your sign-in. Please try again.'
       : 'There was an issue with your email confirmation. Please check your inbox and try again.'
-  ) : null;
+    : null;
 
   return (
     <Dialog 
@@ -49,12 +51,24 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
         
         <div className="pt-4 space-y-4">
           <p className="text-center text-muted-foreground">
-            There was an error confirming your email address. This could be because:
+            {isSignInError
+              ? 'There was an error completing the authentication flow. This could be because:'
+              : 'There was an error confirming your email address. This could be because:'}
           </p>
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
-            <li>The confirmation link has expired</li>
-            <li>The link was already used</li>
-            <li>The link is invalid</li>
+            {isSignInError ? (
+              <>
+                <li>The sign-in session expired</li>
+                <li>The browser returned without an authorization code</li>
+                <li>The OAuth provider configuration needs another look</li>
+              </>
+            ) : (
+              <>
+                <li>The confirmation link has expired</li>
+                <li>The link was already used</li>
+                <li>The link is invalid</li>
+              </>
+            )}
           </ul>
           <div className="pt-4 space-y-2">
             <Link href="/">

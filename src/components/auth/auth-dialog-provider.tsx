@@ -1,12 +1,10 @@
 'use client';
 
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import { toast } from "sonner";
-import { Github, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 
-import { signInWithGithub } from "@/app/auth/login/actions";
+import { signInWithGoogle } from "@/app/auth/login/actions";
 import { LoginForm } from "@/components/auth/login-form";
-import { SignupForm } from "@/components/auth/signup-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -40,19 +38,19 @@ function TabButton({ value, children }: { value: AuthTab; children: React.ReactN
   );
 }
 
-function SocialAuth() {
+function SocialAuth({ showDivider = true }: { showDivider?: boolean }) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
-  const handleGithubSignIn = async () => {
+  const handleGoogleSignIn = async () => {
     setErrorMessage(undefined);
 
     try {
       setIsLoading(true);
-      const result = await signInWithGithub();
+      const result = await signInWithGoogle();
 
       if (!result.success) {
-        const message = result.error || "Failed to sign in with GitHub.";
+        const message = result.error || "Failed to sign in with Google.";
         setErrorMessage(message);
         return;
       }
@@ -62,10 +60,10 @@ function SocialAuth() {
         return;
       }
 
-      setErrorMessage("Failed to start GitHub sign in.");
+      setErrorMessage("Failed to start Google sign in.");
     } catch (error) {
-      console.error("Failed to sign in with GitHub:", error);
-      setErrorMessage("Failed to start GitHub sign in.");
+      console.error("Failed to sign in with Google:", error);
+      setErrorMessage("Failed to start Google sign in.");
     } finally {
       setIsLoading(false);
     }
@@ -73,14 +71,16 @@ function SocialAuth() {
 
   return (
     <div className="space-y-3 mt-4">
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <Separator className="bg-slate-200" />
+      {showDivider && (
+        <div className="relative">
+          <div className="absolute inset-0 flex items-center">
+            <Separator className="bg-slate-200" />
+          </div>
+          <div className="relative flex justify-center text-xs">
+            <span className="bg-white px-3 text-slate-500">or</span>
+          </div>
         </div>
-        <div className="relative flex justify-center text-xs">
-          <span className="bg-white px-3 text-slate-500">or</span>
-        </div>
-      </div>
+      )}
 
       <Button
         variant="outline"
@@ -90,7 +90,7 @@ function SocialAuth() {
           focus:ring-2 focus:ring-slate-500 focus:ring-offset-1
           rounded-lg
         "
-        onClick={handleGithubSignIn}
+        onClick={handleGoogleSignIn}
         disabled={isLoading}
       >
         {isLoading ? (
@@ -100,8 +100,10 @@ function SocialAuth() {
           </>
         ) : (
           <>
-            <Github className="mr-2 h-4 w-4" />
-            Continue with GitHub
+            <span className="mr-2 inline-flex h-4 w-4 items-center justify-center rounded-full text-sm font-semibold text-slate-700">
+              G
+            </span>
+            Continue with Google
           </>
         )}
       </Button>
@@ -146,11 +148,6 @@ export function AuthDialogProvider({ children }: { children: React.ReactNode }) 
     },
     [closeDialog]
   );
-
-  const handleSignupSuccess = useCallback(() => {
-    toast.success("Account created. Check your email to confirm your account.");
-    closeDialog();
-  }, [closeDialog]);
 
   const contextValue = useMemo(
     () => ({
@@ -199,10 +196,9 @@ export function AuthDialogProvider({ children }: { children: React.ReactNode }) 
                 <TabsContent value="signup" className="mt-0 space-y-4">
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-semibold text-slate-900">Get started</h3>
-                    <p className="text-sm text-slate-600 mt-1">Create your free account</p>
+                    <p className="text-sm text-slate-600 mt-1">Create your free account with Google</p>
                   </div>
-                  <SignupForm key={`signup-${formVersion}`} onSuccess={handleSignupSuccess} />
-                  <SocialAuth />
+                  <SocialAuth showDivider={false} />
                 </TabsContent>
               </div>
             </Tabs>
