@@ -21,6 +21,10 @@ export function SecurityForm({ user }: SecurityFormProps) {
   const [emailCurrentPassword, setEmailCurrentPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const providers = user?.identities?.map((identity) => identity.provider) ?? [];
+  const hasPasswordIdentity = providers.length === 0 || providers.includes("email");
+  const hasGoogleIdentity = providers.includes("google");
+  const isGoogleOnlyUser = hasGoogleIdentity && !hasPasswordIdentity;
 
   const handleEmailUpdate = async () => {
     try {
@@ -74,73 +78,86 @@ export function SecurityForm({ user }: SecurityFormProps) {
     
     <div className="space-y-8">
     {/* <Button onClick={handleTestApiKey}>Test API Key</Button> */}
+
+      {isGoogleOnlyUser && (
+        <div className="rounded-lg border border-teal-200 bg-teal-50/70 p-4 text-sm text-teal-900">
+          <p className="font-medium">Your account uses Google sign-in.</p>
+          <p className="mt-1 text-teal-800">
+            Email and password changes are managed by your Google account, so ResumeLM does not require a separate password here.
+          </p>
+        </div>
+      )}
     
-      {/* Email Change Section */}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Email Address</Label>
-          <p className="text-sm text-muted-foreground">Current email: {user?.email}</p>
+      {hasPasswordIdentity && (
+        <>
+          {/* Email Change Section */}
           <div className="space-y-4">
-            <div className="flex gap-4">
-              <Input
-                type="email"
-                placeholder="Enter new email address"
-                value={newEmail}
-                onChange={(e) => setNewEmail(e.target.value)}
-                className="bg-white/50 flex-1"
-              />
-              <Input
-                type="password"
-                placeholder="Current password"
-                value={emailCurrentPassword}
-                onChange={(e) => setEmailCurrentPassword(e.target.value)}
-                className="bg-white/50 flex-1"
-              />
-              <Button 
-                variant="outline"
-                className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800"
-                onClick={handleEmailUpdate}
-                disabled={isUpdatingEmail || !newEmail || !emailCurrentPassword}
-              >
-                <Loader2 className={`mr-2 h-4 w-4 animate-spin ${!isUpdatingEmail && "opacity-0"}`} />
-                {isUpdatingEmail ? "Updating..." : "Change Email"}
-              </Button>
+            <div className="space-y-2">
+              <Label>Email Address</Label>
+              <p className="text-sm text-muted-foreground">Current email: {user?.email}</p>
+              <div className="space-y-4">
+                <div className="flex gap-4">
+                  <Input
+                    type="email"
+                    placeholder="Enter new email address"
+                    value={newEmail}
+                    onChange={(e) => setNewEmail(e.target.value)}
+                    className="bg-white/50 flex-1"
+                  />
+                  <Input
+                    type="password"
+                    placeholder="Current password"
+                    value={emailCurrentPassword}
+                    onChange={(e) => setEmailCurrentPassword(e.target.value)}
+                    className="bg-white/50 flex-1"
+                  />
+                  <Button 
+                    variant="outline"
+                    className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800"
+                    onClick={handleEmailUpdate}
+                    disabled={isUpdatingEmail || !newEmail || !emailCurrentPassword}
+                  >
+                    <Loader2 className={`mr-2 h-4 w-4 animate-spin ${!isUpdatingEmail && "opacity-0"}`} />
+                    {isUpdatingEmail ? "Updating..." : "Change Email"}
+                  </Button>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Password Reset Section */}
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Password</Label>
-          <div className="flex gap-4">
-            <Input
-              type="password"
-              placeholder="Enter current password"
-              value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
-              className="bg-white/50"
-            />
-            <Input
-              type="password"
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              className="bg-white/50"
-            />
-            <Button 
-              variant="outline"
-              className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800 whitespace-nowrap"
-              onClick={handlePasswordUpdate}
-              disabled={isUpdatingPassword || !currentPassword || !newPassword}
-            >
-              <Loader2 className={`mr-2 h-4 w-4 animate-spin ${!isUpdatingPassword && "opacity-0"}`} />
-              {isUpdatingPassword ? "Updating..." : "Change Password"}
-            </Button>
+          {/* Password Reset Section */}
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label>Password</Label>
+              <div className="flex gap-4">
+                <Input
+                  type="password"
+                  placeholder="Enter current password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  className="bg-white/50"
+                />
+                <Input
+                  type="password"
+                  placeholder="Enter new password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  className="bg-white/50"
+                />
+                <Button 
+                  variant="outline"
+                  className="bg-white/50 border-teal-200 text-teal-700 hover:bg-teal-50 hover:text-teal-800 whitespace-nowrap"
+                  onClick={handlePasswordUpdate}
+                  disabled={isUpdatingPassword || !currentPassword || !newPassword}
+                >
+                  <Loader2 className={`mr-2 h-4 w-4 animate-spin ${!isUpdatingPassword && "opacity-0"}`} />
+                  {isUpdatingPassword ? "Updating..." : "Change Password"}
+                </Button>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      )}
     </div>
   )
 } 

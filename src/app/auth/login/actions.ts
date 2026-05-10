@@ -8,6 +8,7 @@ import { loginSchema, signupSchema } from "@/lib/auth-schemas";
 import type { AuthFormState } from "@/components/auth/auth-form-state";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
+import { getEmailSignupBlockedMessage, isEmailSignupAllowed } from "@/lib/auth-policy";
 
 // Auto-create Pro subscription for new users (for local development)
 const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
@@ -17,7 +18,7 @@ interface AuthResult {
   error?: string;
 }
 
-interface GithubAuthResult extends AuthResult {
+interface OAuthAuthResult extends AuthResult {
   url?: string;
 }
 
@@ -56,6 +57,10 @@ export async function login(formData: FormData): Promise<AuthResult> {
 
 // Signup
 export async function signup(formData: FormData): Promise<AuthResult> {
+  if (!isEmailSignupAllowed()) {
+    return { success: false, error: getEmailSignupBlockedMessage() };
+  }
+
   const supabase = await createServiceClient();
 
   const data = {
@@ -142,6 +147,13 @@ export async function signupWithState(
   _previousState: AuthFormState,
   formData: FormData
 ): Promise<AuthFormState> {
+  if (!isEmailSignupAllowed()) {
+    return {
+      status: "error",
+      message: getEmailSignupBlockedMessage(),
+    };
+  }
+
   const parsedData = signupSchema.safeParse({
     name: formData.get('name'),
     email: formData.get('email'),
@@ -193,17 +205,19 @@ export async function resetPasswordForEmail(formData: FormData): Promise<AuthRes
   return { success: true };
 } 
 
-// GitHub Sign In
-export async function signInWithGithub(): Promise<GithubAuthResult> {
+// Google Sign In
+export async function signInWithGoogle(): Promise<OAuthAuthResult> {
   const supabase = await createClient();
 
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'github',
+      provider: 'google',
       options: {
         redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
         queryParams: {
-          next: '/'
+          next: '/',
+          access_type: 'offline',
+          prompt: 'consent',
         }
       }
     });

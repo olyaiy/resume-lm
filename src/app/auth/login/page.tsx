@@ -67,7 +67,10 @@ export default async function LoginPage({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const params = await searchParams;
-  const showErrorDialog = params?.error === 'email_confirmation' || params?.error === 'auth_code_missing';
+  const showErrorDialog =
+    params?.error === 'email_confirmation' ||
+    params?.error === 'auth_code_missing' ||
+    params?.error === 'auth_callback_failed';
 
   return (
     <>
