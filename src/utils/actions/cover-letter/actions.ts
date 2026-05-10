@@ -4,6 +4,7 @@ import { LanguageModelV1, streamText } from 'ai';
 import { createStreamableValue } from 'ai/rsc';
 import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
+import { withTaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
   startAIUsageRequest,
@@ -20,7 +21,7 @@ export async function generate(input: string, config?: AIConfig) {
     } = await startAIUsageRequest({
       userId: id,
       route: 'actions.coverLetter.generate',
-      config,
+      config: withTaskModel({ task: "coverLetter", isPro, config }),
       isPro,
     });
 

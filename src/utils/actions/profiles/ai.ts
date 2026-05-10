@@ -5,6 +5,7 @@ import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '@/utils/actions/stripe/actions';
 import { sanitizeUnknownStrings } from '@/lib/utils';
+import { withTaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
   startAIUsageRequest,
@@ -53,7 +54,7 @@ export async function formatProfileWithAI(
         route: 'actions.profiles.formatProfileWithAI',
         userId: id,
         isPro,
-        config,
+        config: withTaskModel({ task: "structuredExtraction", isPro, config }),
       }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
         schema: z.object({

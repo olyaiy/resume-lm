@@ -9,6 +9,7 @@ import {
   finishAIUsageRequest,
   startAIUsageRequest,
 } from '@/lib/ai/usage-ledger';
+import { withTaskModel } from '@/lib/ai/task-models';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -32,6 +33,7 @@ export async function POST(req: Request) {
     // Get subscription plan and user ID
     const { plan, id } = await getSubscriptionPlan(true);
     const isPro = plan === 'pro';
+    const routedConfig = withTaskModel({ task: "chatAssistant", isPro, config });
 
     // Initialize the AI client using the provided config and plan.
     const {
@@ -40,17 +42,25 @@ export async function POST(req: Request) {
     } = await startAIUsageRequest({
       userId: id,
       route: 'api.chat',
-      config,
+      config: routedConfig,
       isPro,
     });
 
     // Some models (e.g., GPT-5 family / GPT-5 Mini) only support the default temperature (1)
-    const requiresDefaultTemp = ['gpt-5-mini-2025-08-07', 'gpt-5', 'gpt-5.2', 'gpt-5.2-pro'].includes(config?.model ?? '');
+    const requiresDefaultTemp = [
+      'gpt-5',
+      'gpt-5.4',
+      'gpt-5.4-mini',
+      'gpt-5.4-nano',
+      'gpt-5.4-pro',
+      'gpt-5.5',
+      'gpt-5.5-pro',
+    ].includes(routedConfig.model);
     
     // Gemini models support a thinking phase—explicitly disable it to avoid added latency/cost
     // For OpenRouter models, use the unified 'reasoning' parameter via providerOptions.openrouter
-    const isGeminiModel = (config?.model ?? '').toLowerCase().includes('gemini-3');
-    const isOpenRouterModel = (config?.model ?? '').includes('/');
+    const isGeminiModel = routedConfig.model.toLowerCase().includes('gemini-3');
+    const isOpenRouterModel = routedConfig.model.includes('/');
     
     // Configure provider options based on model type
     type ProviderOptions = 

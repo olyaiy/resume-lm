@@ -9,6 +9,7 @@ import {
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from '../stripe/actions';
+import { dedupeAIConfigs, withTaskModel, type AITaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
   startAIUsageRequest,
@@ -44,21 +45,27 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
   }
 }
 
-// Build model candidates list - prioritize user's selected model if provided
-function getModelCandidates(config?: AIConfig) {
+function getFallbackConfig(config: AIConfig | undefined, model: string): AIConfig {
+  return {
+    apiKeys: config?.apiKeys || [],
+    ...(config?.customPrompts ? { customPrompts: config.customPrompts } : {}),
+    model,
+  };
+}
+
+// Build model candidates list - prioritize the task model, then cheaper fallbacks.
+function getModelCandidates(config: AIConfig | undefined, isPro: boolean, task: AITaskModel) {
+  const primaryModel = withTaskModel({ task, isPro, config });
   const fallbackModels: AIConfig[] = [
-    { model: 'z-ai/glm-4.6:exacto', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-5-nano', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-120b', apiKeys: config?.apiKeys || [] },
-    { model: 'openai/gpt-oss-20b', apiKeys: config?.apiKeys || [] },
-    { model: 'deepseek/deepseek-v3.2:nitro', apiKeys: config?.apiKeys || [] },
+    getFallbackConfig(config, 'gpt-5.4-mini'),
+    getFallbackConfig(config, 'gpt-5.4-nano'),
+    getFallbackConfig(config, 'z-ai/glm-4.6:exacto'),
+    getFallbackConfig(config, 'openai/gpt-oss-120b'),
+    getFallbackConfig(config, 'openai/gpt-oss-20b'),
+    getFallbackConfig(config, 'deepseek/deepseek-v3.2:nitro'),
   ];
 
-  // If user has a model selected, try it first before fallbacks
-  const modelCandidates: AIConfig[] = config?.model
-    ? [{ model: config.model, apiKeys: config.apiKeys || [] }, ...fallbackModels]
-    : fallbackModels;
-  return modelCandidates;
+  return dedupeAIConfigs([primaryModel, ...fallbackModels]);
 }
 
 export async function tailorResumeToJob(
@@ -69,7 +76,7 @@ export async function tailorResumeToJob(
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
   const overallStart = Date.now();
-  const modelCandidates = getModelCandidates(config);
+  const modelCandidates = getModelCandidates(config, isPro, "jobTailoring");
 
   let lastError: unknown;
 
@@ -88,7 +95,6 @@ export async function tailorResumeToJob(
         useThinking: isPro,
       }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
-        temperature: 0.5, // reduced for structured output reliability
         schema: z.object({
           content: simplifiedResumeSchema,
         }),
@@ -142,7 +148,7 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
   const overallStart = Date.now();
-  const modelCandidates = getModelCandidates(config);
+  const modelCandidates = getModelCandidates(config, isPro, "structuredExtraction");
 
   let lastError: unknown;
 
@@ -163,7 +169,6 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
         useThinking: isPro,
       }, (aiClient) => generateObject({
         model: aiClient as LanguageModelV1,
-        temperature: 0.7, // reduced for better structured output compatibility
         schema: z.object({
           content: simplifiedJobSchema
         }),

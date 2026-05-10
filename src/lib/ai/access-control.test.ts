@@ -17,17 +17,17 @@ afterEach(() => {
 
 describe("resolveAIRequest", () => {
   it("allows free users to use explicitly free server-key models", () => {
-    process.env.OPENROUTER_API_KEY = "server-openrouter";
+    process.env.OPENAI_API_KEY = "server-openai";
 
     const result = resolveAIRequest({
-      requestedModel: "deepseek/deepseek-v3.2:nitro",
+      requestedModel: "gpt-5.4-nano",
       apiKeys: [],
       isPro: false,
     });
 
-    assert.equal(result.providerId, "openrouter");
-    assert.equal(result.modelId, "deepseek/deepseek-v3.2:nitro");
-    assert.equal(result.apiKey, "server-openrouter");
+    assert.equal(result.providerId, "openai");
+    assert.equal(result.modelId, "gpt-5.4-nano");
+    assert.equal(result.apiKey, "server-openai");
     assert.equal(result.usedServerKey, true);
     assert.equal(result.requiresRateLimit, true);
   });
@@ -50,13 +50,13 @@ describe("resolveAIRequest", () => {
     process.env.OPENAI_API_KEY = "server-openai";
 
     const result = resolveAIRequest({
-      requestedModel: "gpt-5.2-pro",
+      requestedModel: "gpt-5.5",
       apiKeys: [],
       isPro: true,
     });
 
     assert.equal(result.providerId, "openai");
-    assert.equal(result.modelId, "gpt-5.2-pro");
+    assert.equal(result.modelId, "gpt-5.5");
     assert.equal(result.apiKey, "server-openai");
     assert.equal(result.usedServerKey, true);
     assert.equal(result.requiresRateLimit, true);
@@ -64,7 +64,7 @@ describe("resolveAIRequest", () => {
 
   it("allows BYOK users only when their key matches the requested model provider", () => {
     const result = resolveAIRequest({
-      requestedModel: "claude-sonnet-4-20250514",
+      requestedModel: "claude-sonnet-4-6",
       apiKeys: [
         { service: "anthropic", key: "user-anthropic", addedAt: "2026-05-03" },
       ],
@@ -79,7 +79,7 @@ describe("resolveAIRequest", () => {
     assert.throws(
       () =>
         resolveAIRequest({
-          requestedModel: "claude-sonnet-4-20250514",
+          requestedModel: "claude-sonnet-4-6",
           apiKeys: [
             { service: "openai", key: "user-openai", addedAt: "2026-05-03" },
           ],
@@ -102,10 +102,10 @@ describe("resolveAIRequest", () => {
   });
 
   it("reports server-key usage for every allowed server-key call", () => {
-    process.env.OPENROUTER_API_KEY = "server-openrouter";
+    process.env.OPENAI_API_KEY = "server-openai";
 
     const result = resolveAIRequest({
-      requestedModel: "openai/gpt-5-nano",
+      requestedModel: "gpt-5.4-nano",
       apiKeys: [],
       isPro: false,
     });

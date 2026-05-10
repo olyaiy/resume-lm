@@ -14,6 +14,7 @@ import {
   finishAIUsageRequest,
   startAIUsageRequest,
 } from "@/lib/ai/usage-ledger";
+import { withTaskModel } from "@/lib/ai/task-models";
 import {
   FREE_PLAN_RESUME_LIMITS,
   getResumeLimitExceededMessage,
@@ -619,7 +620,7 @@ export async function generateResumeScore(
       route: 'actions.resumes.generateResumeScore',
       userId: id,
       isPro,
-      config,
+      config: withTaskModel({ task: "resumeScoring", isPro, config }),
     }, (aiClient) => generateObject({
       model: aiClient,
       schema: resumeScoreSchema,

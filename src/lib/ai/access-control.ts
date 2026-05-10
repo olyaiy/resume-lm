@@ -27,24 +27,7 @@ export interface ResolvedAIRequest {
 
 type HiddenModel = Pick<AIModel, "id" | "name" | "provider" | "features" | "availability">;
 
-const HIDDEN_MODELS: Record<string, HiddenModel> = {
-  "openai/gpt-5-nano": {
-    id: "openai/gpt-5-nano",
-    name: "GPT-5 Nano",
-    provider: "openrouter",
-    features: {
-      isFree: true,
-      isUnstable: false,
-      maxTokens: 400000,
-      supportsVision: false,
-      supportsTools: true,
-    },
-    availability: {
-      requiresApiKey: false,
-      requiresPro: false,
-    },
-  },
-};
+const HIDDEN_MODELS: Record<string, HiddenModel> = {};
 
 function getKnownModel(modelId: string): HiddenModel | undefined {
   return getModelById(modelId) ?? HIDDEN_MODELS[modelId];
