@@ -68,6 +68,17 @@ stripe:
   proPriceId: "price_placeholder"
 
 # =============================================================================
+# PostHog Configuration
+# =============================================================================
+posthog:
+  # Project API key used for product analytics and LLM analytics.
+  key: ""
+  # Optional server-side alias for LLM analytics. Falls back to key when empty.
+  projectApiKey: ""
+  host: "https://us.i.posthog.com"
+  llmAnalyticsDisabled: false
+
+# =============================================================================
 # Ingress Configuration
 # =============================================================================
 ingress:

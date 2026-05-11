@@ -1,6 +1,6 @@
 'use server';
 
-import { generateObject, LanguageModelUsage, LanguageModelV1 } from 'ai';
+import { generateObject, LanguageModelUsage, LanguageModelV1, type TelemetrySettings } from 'ai';
 import { z } from 'zod';
 import { 
   simplifiedJobSchema, 
@@ -23,12 +23,12 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
     config?: AIConfig;
     useThinking?: boolean;
   },
-  task: (model: LanguageModelV1) => Promise<T>
+  task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
 ) {
-  const { model, usageEventId } = await startAIUsageRequest(input);
+  const { model, usageEventId, telemetry } = await startAIUsageRequest(input);
 
   try {
-    const result = await task(model);
+    const result = await task(model, telemetry);
     await finishAIUsageRequest({
       usageEventId,
       status: 'succeeded',
@@ -93,8 +93,9 @@ export async function tailorResumeToJob(
         isPro,
         config: candidate,
         useThinking: isPro,
-      }, (aiClient) => generateObject({
+      }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
+        experimental_telemetry: telemetry,
         schema: z.object({
           content: simplifiedResumeSchema,
         }),
@@ -167,8 +168,9 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
         isPro,
         config: candidate,
         useThinking: isPro,
-      }, (aiClient) => generateObject({
+      }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
+        experimental_telemetry: telemetry,
         schema: z.object({
           content: simplifiedJobSchema
         }),

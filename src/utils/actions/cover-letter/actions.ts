@@ -18,6 +18,7 @@ export async function generate(input: string, config?: AIConfig) {
     const {
       model: aiClient,
       usageEventId,
+      telemetry,
     } = await startAIUsageRequest({
       userId: id,
       route: 'actions.coverLetter.generate',
@@ -106,6 +107,7 @@ export async function generate(input: string, config?: AIConfig) {
         model: aiClient as LanguageModelV1,
         system,
         prompt: input,
+        experimental_telemetry: telemetry,
         onFinish: async ({ usage }) => {
          const { promptTokens, completionTokens, totalTokens } = usage;
   

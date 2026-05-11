@@ -1,9 +1,10 @@
-import type { LanguageModelUsage, LanguageModelV1 } from "ai";
+import type { LanguageModelUsage, LanguageModelV1, TelemetrySettings } from "ai";
 
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 import { getDefaultModel } from "@/lib/ai-models";
+import { buildPostHogAITelemetry } from "@/lib/ai/posthog-telemetry";
 import {
   resolveAIRequest,
   type ResolvedAIRequest,
@@ -148,6 +149,7 @@ export async function startAIUsageRequest(input: {
   model: LanguageModelV1;
   usageEventId: string;
   resolved: ResolvedAIRequest;
+  telemetry: TelemetrySettings;
 }> {
   const requestedModel = input.config?.model ?? getDefaultModel(input.isPro);
 
@@ -212,5 +214,12 @@ export async function startAIUsageRequest(input: {
     model: createAIClientFromResolvedRequest(resolved, input.useThinking),
     usageEventId,
     resolved,
+    telemetry: buildPostHogAITelemetry({
+      route: input.route,
+      userId: input.userId,
+      usageEventId,
+      isPro: input.isPro,
+      resolved,
+    }),
   };
 }

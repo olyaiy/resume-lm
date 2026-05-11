@@ -76,6 +76,25 @@ spec:
                 secretKeyRef:
                   name: {{ include "resumelm.secretName" . }}
                   key: NEXT_PUBLIC_STRIPE_PRO_PRICE_ID
+            # PostHog
+            {{- if .Values.posthog.key }}
+            - name: NEXT_PUBLIC_POSTHOG_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: NEXT_PUBLIC_POSTHOG_KEY
+            {{- end }}
+            {{- if .Values.posthog.projectApiKey }}
+            - name: POSTHOG_PROJECT_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "resumelm.secretName" . }}
+                  key: POSTHOG_PROJECT_API_KEY
+            {{- end }}
+            - name: NEXT_PUBLIC_POSTHOG_HOST
+              value: {{ .Values.posthog.host | quote }}
+            - name: POSTHOG_LLM_ANALYTICS_DISABLED
+              value: {{ .Values.posthog.llmAnalyticsDisabled | quote }}
             # AI Provider Keys
             {{- if .Values.ai.openaiApiKey }}
             - name: OPENAI_API_KEY

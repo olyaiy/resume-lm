@@ -39,6 +39,7 @@ export async function POST(req: Request) {
     const {
       model: aiClient,
       usageEventId,
+      telemetry,
     } = await startAIUsageRequest({
       userId: id,
       route: 'api.chat',
@@ -152,6 +153,7 @@ export async function POST(req: Request) {
       messages,
       maxSteps: 5,
       tools,
+      experimental_telemetry: telemetry,
       experimental_transform: smoothStream({
         delayInMs: 20, // optional: defaults to 10ms
         chunking: 'word', // optional: defaults to 'word'

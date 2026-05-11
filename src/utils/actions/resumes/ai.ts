@@ -3,7 +3,7 @@
 // import { RESUME_IMPORTER_SYSTEM_MESSAGE, } from "@/lib/prompts";
 import { Resume } from "@/lib/types";
 import { textImportSchema, workExperienceBulletPointsSchema } from "@/lib/zod-schemas";
-import { generateObject, type LanguageModelUsage, type LanguageModelV1 } from "ai";
+import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
 import { z } from "zod";
 import { type AIConfig } from '@/utils/ai-tools';
 import { getSubscriptionPlan } from "@/utils/actions/stripe/actions";
@@ -32,12 +32,12 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
     config?: AIConfig;
     useThinking?: boolean;
   },
-  task: (model: LanguageModelV1) => Promise<T>
+  task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
 ) {
-  const { model, usageEventId } = await startAIUsageRequest(input);
+  const { model, usageEventId, telemetry } = await startAIUsageRequest(input);
 
   try {
-    const result = await task(model);
+    const result = await task(model, telemetry);
     await finishAIUsageRequest({
       usageEventId,
       status: 'succeeded',
@@ -74,8 +74,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
         config: resolvedConfig,
         useThinking: isPro,
       },
-      (aiClient) => generateObject({
+      (aiClient, telemetry) => generateObject({
         model: aiClient,
+        experimental_telemetry: telemetry,
         schema: z.object({
           content: textImportSchema
         }),
@@ -158,8 +159,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
         userId,
         isPro,
         config: withTaskModel({ task: "contentGeneration", isPro, config }),
-      }, (aiClient) => generateObject({
+      }, (aiClient, telemetry) => generateObject({
         model: aiClient,
+        experimental_telemetry: telemetry,
         schema: z.object({
           content: workExperienceBulletPointsSchema
         }),
@@ -187,8 +189,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           
           schema: z.object({
               content: z.string().describe("The improved work experience bullet point")
@@ -215,8 +218,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           schema: z.object({
               content: z.string().describe("The improved project bullet point")
           }),
@@ -247,8 +251,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "contentGeneration", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           schema: z.object({
               content: projectAnalysisSchema
           }),
@@ -275,8 +280,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "structuredExtraction", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           schema: z.object({
               content: textImportSchema
           }),
@@ -300,8 +306,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           schema: z.object({
               content: workExperienceItemsSchema
           }),
@@ -328,8 +335,9 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           userId,
           isPro,
           config: withTaskModel({ task: "structuredExtraction", isPro, config }),
-          }, (aiClient) => generateObject({
+          }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          experimental_telemetry: telemetry,
           schema: z.object({
               content: textImportSchema
           }),

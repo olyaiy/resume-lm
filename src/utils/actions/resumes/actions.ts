@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
-import { generateObject, type LanguageModelUsage, type LanguageModelV1 } from "ai";
+import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
 import { getSubscriptionPlan } from "../stripe/actions";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
@@ -70,12 +70,12 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
     isPro: boolean;
     config?: AIConfig;
   },
-  task: (model: LanguageModelV1) => Promise<T>
+  task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
 ) {
-  const { model, usageEventId } = await startAIUsageRequest(input);
+  const { model, usageEventId, telemetry } = await startAIUsageRequest(input);
 
   try {
-    const result = await task(model);
+    const result = await task(model, telemetry);
     await finishAIUsageRequest({
       usageEventId,
       status: 'succeeded',
@@ -621,8 +621,9 @@ export async function generateResumeScore(
       userId: id,
       isPro,
       config: withTaskModel({ task: "resumeScoring", isPro, config }),
-    }, (aiClient) => generateObject({
+    }, (aiClient, telemetry) => generateObject({
       model: aiClient,
+      experimental_telemetry: telemetry,
       schema: resumeScoreSchema,
       prompt
     }));

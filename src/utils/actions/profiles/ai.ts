@@ -1,5 +1,5 @@
 'use server';
-import { generateObject, LanguageModelUsage, LanguageModelV1 } from 'ai';
+import { generateObject, LanguageModelUsage, LanguageModelV1, type TelemetrySettings } from 'ai';
 import { z } from 'zod';
 import { RESUME_FORMATTER_SYSTEM_MESSAGE } from "@/lib/prompts";
 import { type AIConfig } from '@/utils/ai-tools';
@@ -18,12 +18,12 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
     isPro: boolean;
     config?: AIConfig;
   },
-  task: (model: LanguageModelV1) => Promise<T>
+  task: (model: LanguageModelV1, telemetry: TelemetrySettings) => Promise<T>
 ) {
-  const { model, usageEventId } = await startAIUsageRequest(input);
+  const { model, usageEventId, telemetry } = await startAIUsageRequest(input);
 
   try {
-    const result = await task(model);
+    const result = await task(model, telemetry);
     await finishAIUsageRequest({
       usageEventId,
       status: 'succeeded',
@@ -55,8 +55,9 @@ export async function formatProfileWithAI(
         userId: id,
         isPro,
         config: withTaskModel({ task: "structuredExtraction", isPro, config }),
-      }, (aiClient) => generateObject({
+      }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
+        experimental_telemetry: telemetry,
         schema: z.object({
           content: z.object({
             first_name: z.string().optional(),
