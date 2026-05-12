@@ -400,7 +400,7 @@ export const MODEL_DESIGNATIONS = {
   JOB_TAILORING_FREE: 'gpt-5.4-nano',
   JOB_TAILORING_PRO: 'gpt-5.5',
   // Interactive assistant by plan
-  CHAT_ASSISTANT_FREE: 'gpt-5.4-mini',
+  CHAT_ASSISTANT_FREE: 'gpt-5.4-nano',
   CHAT_ASSISTANT_PRO: 'gpt-5.5',
   // Frontier model for complex tasks, deep analysis, best quality
   FRONTIER: 'gpt-5.5',
