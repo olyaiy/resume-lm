@@ -24,6 +24,11 @@ describe("task model routing", () => {
     assert.equal(getTaskModel("coverLetter", true), "gpt-5.4-mini");
   });
 
+  it("routes free chat assistant to GPT-5.4 Nano", () => {
+    assert.equal(getTaskModel("chatAssistant", false), "gpt-5.4-nano");
+    assert.equal(getTaskModel("chatAssistant", true), "gpt-5.5");
+  });
+
   it("preserves API keys and custom prompts while replacing the model", () => {
     const config: AIConfig = {
       model: "claude-sonnet-4-6",
