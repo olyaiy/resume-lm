@@ -1,11 +1,19 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
+/** Server-side Supabase API URL. Prefer SUPABASE_INTERNAL_URL in Docker or split host/network setups. */
+function getSupabaseUrl(): string {
+  return (
+    process.env.SUPABASE_INTERNAL_URL?.trim() ||
+    process.env.NEXT_PUBLIC_SUPABASE_URL!
+  )
+}
+
 export async function createClient() {
   const cookieStore = await cookies()
 
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    getSupabaseUrl(),
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       
@@ -32,7 +40,7 @@ export async function createClient() {
 
 export async function createServiceClient() {
   return createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    getSupabaseUrl(),
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       cookies: {
