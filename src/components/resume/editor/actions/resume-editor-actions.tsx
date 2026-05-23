@@ -141,7 +141,7 @@ export function ResumeEditorActions({
                         filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
                         image: { type: 'jpeg', quality: 0.98 },
                         html2canvas: {
-                          backgroundColor: 'red',
+                          backgroundColor: '#ffffff',
                           useCORS: true,
                           letterRendering: true,
                           // width: 700,
@@ -246,4 +246,4 @@ export function ResumeEditorActions({
       </div>
     </div>
   );
-} 
+}  
