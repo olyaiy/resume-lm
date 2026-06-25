@@ -7,6 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { pdf } from '@react-pdf/renderer';
 import { TextImport } from "../../text-import";
 import { ResumePDFDocument } from "../preview/resume-pdf-document";
+import { CoverLetterPDFDocument } from "@/components/cover-letter/cover-letter-pdf-document";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
 
@@ -128,36 +129,26 @@ export function ResumeEditorActions({
 
                     // Download Cover Letter if selected and exists
                     if (downloadOptions.coverLetter && resume.has_cover_letter) {
-                      // Dynamically import html2pdf only when needed
-                      const html2pdf = (await import('html2pdf.js')).default;
-                      
+                      // Read the rendered HTML from the off-screen print element
+                      // (always reflects the current cover letter), then build the
+                      // PDF with @react-pdf — same engine as the resume, immune to
+                      // the html2canvas tainted-canvas failure on this page.
                       const coverLetterElement = document.getElementById('cover-letter-content');
-                      if (!coverLetterElement) {
-                        throw new Error('Cover letter content not found');
-                      }
+                      const coverLetterHtml =
+                        (coverLetterElement?.firstElementChild as HTMLElement | null)?.innerHTML
+                        ?? coverLetterElement?.innerHTML
+                        ?? (resume.cover_letter?.content as string | undefined)
+                        ?? '';
 
-                      const opt = {
-                        margin: [0, 0, -0.5, 0],
-                        filename: `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`,
-                        image: { type: 'jpeg', quality: 0.98 },
-                        html2canvas: {
-                          backgroundColor: 'red',
-                          useCORS: true,
-                          letterRendering: true,
-                          // width: 700,
-                          // height: 1000,
-                          // windowWidth: 700,
-                          logging: true,
-                          // windowHeight: 2000
-                        },
-                        jsPDF: { 
-                          unit: 'in', 
-                          format: 'letter', 
-                          orientation: 'portrait' 
-                        }
-                      };
-
-                      await html2pdf().set(opt).from(coverLetterElement).save();
+                      const blob = await pdf(<CoverLetterPDFDocument html={coverLetterHtml} />).toBlob();
+                      const url = URL.createObjectURL(blob);
+                      const link = document.createElement('a');
+                      link.href = url;
+                      link.download = `${resume.first_name}_${resume.last_name}_Cover_Letter.pdf`;
+                      document.body.appendChild(link);
+                      link.click();
+                      document.body.removeChild(link);
+                      URL.revokeObjectURL(url);
                     }
 
                     toast({
