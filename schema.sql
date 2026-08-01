@@ -39,7 +39,9 @@ CREATE TABLE IF NOT EXISTS public.subscriptions (
     (
       (subscription_status IS NULL)
       OR (
-        subscription_status = ANY (ARRAY['active'::text, 'canceled'::text])
+        subscription_status = ANY (
+          ARRAY['active'::text, 'past_due'::text, 'canceled'::text]
+        )
       )
     )
   )
