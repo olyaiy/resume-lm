@@ -6,7 +6,7 @@ import { LogOut } from "lucide-react";
 import { useState } from "react";
 import { toast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { logout } from "@/app/auth/login/actions";
+import { logout } from "@/app/(auth)/auth/login/actions";
 
 interface LogoutButtonProps {
   className?: string;
@@ -46,4 +46,4 @@ export function LogoutButton({ className }: LogoutButtonProps) {
       <span className="hidden sm:inline">{isLoading ? 'Signing out...' : 'Logout'}</span>
     </Button>
   );
-} 
+}

@@ -8,8 +8,6 @@ import { FAQ } from "@/components/landing/FAQ";
 import { Footer } from "@/components/layout/footer";
 import { NavLinks } from "@/components/layout/nav-links";
 import { Logo } from "@/components/ui/logo";
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import Script from "next/script";
 import { toSafeJsonScript } from "@/lib/html-safety";
@@ -31,16 +29,7 @@ export const metadata: Metadata = {
   },
 };
 
-export default async function Page() {
-  // Check if user is authenticated
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  
-  // If user is authenticated, redirect to home page
-  if (user) {
-    redirect("/home");
-  }
-
+export default function Page() {
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",

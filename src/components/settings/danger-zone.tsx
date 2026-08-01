@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label"
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog"
 import { Loader2 } from "lucide-react"
 import { useFormStatus } from 'react-dom'
-import { deleteUserAccount } from "@/app/auth/login/actions"
+import { deleteUserAccount } from "@/app/(auth)/auth/login/actions"
 
 interface DangerZoneProps {
   subscriptionStatus?: string;
@@ -93,4 +93,4 @@ export function DangerZone({ subscriptionStatus }: DangerZoneProps) {
       </div>
     </div>
   )
-} 
+}

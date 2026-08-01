@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Mail, Loader2, CheckCircle2 } from "lucide-react";
-import { resetPasswordForEmail } from "@/app/auth/login/actions";
+import { resetPasswordForEmail } from "@/app/(auth)/auth/login/actions";
 import Link from "next/link";
 
 interface FormState {
@@ -105,4 +105,4 @@ export function ResetPasswordForm() {
       )}
     </div>
   );
-} 
+}

@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 
-import { signupWithState } from "@/app/auth/login/actions";
+import { signupWithState } from "@/app/(auth)/auth/login/actions";
 import { initialAuthFormState } from "@/components/auth/auth-form-state";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
