@@ -10,11 +10,12 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import type { AuthIntent } from "@/lib/auth-intent";
 
 export type AuthTab = "login" | "signup";
 
 interface AuthDialogContextValue {
-  openDialog: (tab?: AuthTab) => void;
+  openDialog: (tab?: AuthTab, intent?: AuthIntent) => void;
 }
 
 const AuthDialogContext = createContext<AuthDialogContextValue | undefined>(undefined);
@@ -38,7 +39,7 @@ function TabButton({ value, children }: { value: AuthTab; children: React.ReactN
   );
 }
 
-function SocialAuth({ showDivider = true }: { showDivider?: boolean }) {
+function SocialAuth({ showDivider = true, intent }: { showDivider?: boolean; intent?: AuthIntent }) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
 
@@ -47,7 +48,7 @@ function SocialAuth({ showDivider = true }: { showDivider?: boolean }) {
 
     try {
       setIsLoading(true);
-      const result = await signInWithGoogle();
+      const result = await signInWithGoogle(intent);
 
       if (!result.success) {
         const message = result.error || "Failed to sign in with Google.";
@@ -117,25 +118,34 @@ function SocialAuth({ showDivider = true }: { showDivider?: boolean }) {
   );
 }
 
-export function AuthDialogProvider({ children }: { children: React.ReactNode }) {
+export function AuthDialogProvider({
+  children,
+  initialIntent,
+}: {
+  children: React.ReactNode;
+  initialIntent?: AuthIntent;
+}) {
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AuthTab>("signup");
   const [formVersion, setFormVersion] = useState(0);
+  const [intent, setIntent] = useState<AuthIntent | undefined>(initialIntent);
 
   const resetDialog = useCallback(() => {
     setActiveTab("signup");
+    setIntent(initialIntent);
     setFormVersion((version) => version + 1);
-  }, []);
+  }, [initialIntent]);
 
   const closeDialog = useCallback(() => {
     setOpen(false);
     resetDialog();
   }, [resetDialog]);
 
-  const openDialog = useCallback((tab: AuthTab = "signup") => {
+  const openDialog = useCallback((tab: AuthTab = "signup", nextIntent?: AuthIntent) => {
     setActiveTab(tab);
+    setIntent(nextIntent ?? initialIntent);
     setOpen(true);
-  }, []);
+  }, [initialIntent]);
 
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
@@ -189,8 +199,8 @@ export function AuthDialogProvider({ children }: { children: React.ReactNode }) 
                     <h3 className="text-lg font-semibold text-slate-900">Welcome back</h3>
                     <p className="text-sm text-slate-600 mt-1">Sign in to continue</p>
                   </div>
-                  <LoginForm key={`login-${formVersion}`} />
-                  <SocialAuth />
+                  <LoginForm key={`login-${formVersion}`} next={intent?.next} />
+                  <SocialAuth intent={intent} />
                 </TabsContent>
 
                 <TabsContent value="signup" className="mt-0 space-y-4">
@@ -198,7 +208,7 @@ export function AuthDialogProvider({ children }: { children: React.ReactNode }) 
                     <h3 className="text-lg font-semibold text-slate-900">Get started</h3>
                     <p className="text-sm text-slate-600 mt-1">Create your free account with Google</p>
                   </div>
-                  <SocialAuth showDivider={false} />
+                  <SocialAuth showDivider={false} intent={intent} />
                 </TabsContent>
               </div>
             </Tabs>

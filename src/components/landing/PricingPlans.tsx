@@ -11,6 +11,7 @@ interface PlanFeature {
 }
 
 interface PricingPlan {
+  plan: "free" | "pro";
   name: string;
   price: string;
   period?: string;
@@ -31,6 +32,7 @@ export function PricingPlans() {
   // Define pricing plans data for easier maintenance
   const plans = useMemo<PricingPlan[]>(() => [
     {
+      plan: "free",
       name: "Free",
       price: "$0",
       description: "Self-host or use with your own API keys",
@@ -45,6 +47,7 @@ export function PricingPlans() {
       ctaSecondary: true,
     },
     {
+      plan: "pro",
       name: "Pro",
       price: "$20",
       period: "/month",
@@ -179,7 +182,7 @@ export function PricingPlans() {
             <p className="text-muted-foreground mt-2 mb-6">{plan.description}</p>
             
             {/* CTA button */}
-            <AuthDialog>
+            <AuthDialog next={plan.plan === "pro" ? "/subscription" : "/home"} plan={plan.plan}>
               <button 
                 className={`
                   block w-full py-3 rounded-lg font-medium text-center transition-all duration-300 hover:-translate-y-1 mb-8
@@ -211,4 +214,4 @@ export function PricingPlans() {
   );
 }
 
-export default PricingPlans; 
+export default PricingPlans;
