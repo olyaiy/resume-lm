@@ -1,343 +1,396 @@
 /**
- * Resume Preview Component
- * 
- * This component generates a PDF resume using @react-pdf/renderer and displays it using react-pdf.
- * It supports two variants: base and tailored resumes, with consistent styling and layout.
- * The PDF is generated client-side and updates whenever the resume data changes.
+ * Fast live resume preview.
+ *
+ * Editing uses normal HTML/CSS so typing never waits for PDF generation or
+ * PDF.js page layout. The high-fidelity PDF renderer remains available from
+ * the explicit download/print-preview actions.
  */
 
 "use client";
 
-import { Resume } from "@/lib/types";
-import { Document, Page, pdfjs } from 'react-pdf';
-import { useState, useEffect, memo, useMemo, useCallback } from 'react';
-import { pdf } from '@react-pdf/renderer';
-import { ResumePDFDocument } from './resume-pdf-document';
-import { useDebouncedValue } from '@/hooks/use-debounced-value';
+import Image from "next/image";
+import { memo, type ReactNode } from "react";
+import {
+  DocumentSettings,
+  Education,
+  Project,
+  Resume,
+  Skill,
+  WorkExperience,
+} from "@/lib/types";
 
-// Import required CSS for react-pdf
-import 'react-pdf/dist/Page/TextLayer.css';
-import 'react-pdf/dist/Page/AnnotationLayer.css';
+const DEFAULT_DOCUMENT_SETTINGS: DocumentSettings = {
+  document_font_size: 10,
+  document_line_height: 1.5,
+  document_margin_vertical: 36,
+  document_margin_horizontal: 36,
+  header_name_size: 24,
+  header_name_bottom_spacing: 24,
+  skills_margin_top: 2,
+  skills_margin_bottom: 2,
+  skills_margin_horizontal: 0,
+  skills_item_spacing: 2,
+  experience_margin_top: 2,
+  experience_margin_bottom: 2,
+  experience_margin_horizontal: 0,
+  experience_item_spacing: 4,
+  projects_margin_top: 2,
+  projects_margin_bottom: 2,
+  projects_margin_horizontal: 0,
+  projects_item_spacing: 4,
+  education_margin_top: 2,
+  education_margin_bottom: 2,
+  education_margin_horizontal: 0,
+  education_item_spacing: 4,
+  footer_width: 95,
+};
 
-// Configure PDF.js worker
-pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-  'pdfjs-dist/build/pdf.worker.min.mjs',
-  import.meta.url,
-).toString();
+type SectionName = "skills" | "experience" | "projects" | "education";
 
-// Cache for storing generated PDFs
-const pdfCache = new Map<string, { url: string; timestamp: number }>();
+const DEFAULT_SECTION_ORDER: SectionName[] = [
+  "skills",
+  "experience",
+  "projects",
+  "education",
+];
 
-// Cache cleanup interval (5 minutes)
-const CACHE_CLEANUP_INTERVAL = 5 * 60 * 1000;
-
-// Cache expiration time (30 minutes)
-const CACHE_EXPIRATION_TIME = 30 * 60 * 1000;
-
-/**
- * Generate a simple hash from the resume content
- * This is used as a cache key for PDF generation
- */
-function generateResumeHash(resume: Resume): string {
-  const content = JSON.stringify({
-    basic: {
-      name: `${resume.first_name} ${resume.last_name}`,
-      contact: [resume.email, resume.phone_number, resume.location, resume.website, resume.linkedin_url, resume.github_url],
-    },
-    sections: {
-      skills: resume.skills,
-      experience: resume.work_experience,
-      projects: resume.projects,
-      education: resume.education,
-    },
-    settings: resume.document_settings,
-  });
-  
-  // Simple hash function
-  let hash = 0;
-  for (let i = 0; i < content.length; i++) {
-    const char = content.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
-    hash = hash & hash;
-  }
-  return hash.toString(36);
+function normalizeUrl(value: string): string {
+  return value.startsWith("http://") || value.startsWith("https://")
+    ? value
+    : `https://${value}`;
 }
 
-/**
- * Cleanup expired cache entries
- */
-function cleanupCache() {
-  const now = Date.now();
-  for (const [hash, { url, timestamp }] of pdfCache.entries()) {
-    if (now - timestamp > CACHE_EXPIRATION_TIME) {
-      URL.revokeObjectURL(url);
-      pdfCache.delete(hash);
-    }
-  }
+function RichText({ value }: { value: string }) {
+  const parts = value.split(/(\*\*.*?\*\*)/g);
+
+  return (
+    <>
+      {parts.map((part, index) =>
+        part.startsWith("**") && part.endsWith("**") ? (
+          <strong key={`${part}-${index}`}>{part.slice(2, -2)}</strong>
+        ) : (
+          <span key={`${part}-${index}`}>{part}</span>
+        ),
+      )}
+    </>
+  );
 }
 
-// Setup cache cleanup interval
-if (typeof window !== 'undefined') {
-  setInterval(cleanupCache, CACHE_CLEANUP_INTERVAL);
+function ResumeLink({ href, children }: { href: string; children: ReactNode }) {
+  const normalizedHref = href.includes(":") ? href : normalizeUrl(href);
+
+  return (
+    <a
+      href={normalizedHref}
+      target="_blank"
+      rel="noreferrer"
+      className="text-blue-700 no-underline hover:underline"
+    >
+      {children}
+    </a>
+  );
 }
 
-// Add custom styles for PDF annotations to ensure links are clickable
-const customStyles = `
-  .react-pdf__Page__annotations {
-    pointer-events: auto !important;
-    z-index: 10 !important;
-  }
-  .react-pdf__Page__annotations.annotationLayer {
-    position: absolute;
-    left: 0;
-    top: 0;
-    right: 0;
-    bottom: 0;
-  }
-`;
-
-interface ResumePreviewProps {
-  resume: Resume;
-  variant?: 'base' | 'tailored';
-  containerWidth: number;  // This is now expected to be a percentage (0-100)
+function SectionTitle({ children }: { children: ReactNode }) {
+  return (
+    <h2 className="mb-1 border-b border-gray-200 pb-0 text-[1em] font-bold uppercase text-gray-950">
+      {children}
+    </h2>
+  );
 }
 
-/**
- * ResumePreview Component
- * 
- * Displays a PDF preview of the resume using react-pdf.
- * Handles PDF generation and responsive display.
- */
-export const ResumePreview = memo(function ResumePreview({ resume, variant = 'base', containerWidth }: ResumePreviewProps) {
-  const [url, setUrl] = useState<string | null>(null);
-  const [numPages, setNumPages] = useState<number>(0);
-  const debouncedWidth = useDebouncedValue(containerWidth, 100);
-  
+function ContactInfo({ resume }: { resume: Resume }) {
+  const contacts: ReactNode[] = [];
 
-  // Convert percentage to pixels based on parent container
-  const getPixelWidth = useCallback(() => {
-    if (typeof window === 'undefined') return 0;
-    // console.log('debouncedWidth (INSIDE)'+containerWidth);
-    // console.log('debouncedWidth * 10 (INSIDE)'+debouncedWidth * 10);
-    return ((debouncedWidth));
-  }, [debouncedWidth]);
-
-  // Generate resume hash for caching
-  const resumeHash = useMemo(() => generateResumeHash(resume), [resume]);
-
-  // Add styles to document head
-  useEffect(() => {
-    const styleElement = document.createElement('style');
-    styleElement.innerHTML = customStyles;
-    document.head.appendChild(styleElement);
-    return () => {
-      document.head.removeChild(styleElement);
-    };
-  }, []);
-
-  // Generate or retrieve PDF from cache
-  useEffect(() => {
-    let currentUrl: string | null = null;
-
-    async function generatePDF() {
-      // Check cache first
-      const cached = pdfCache.get(resumeHash);
-      if (cached) {
-        currentUrl = cached.url;
-        setUrl(cached.url);
-        return;
-      }
-
-      // Generate new PDF if not in cache
-      const blob = await pdf(<ResumePDFDocument resume={resume} variant={variant} />).toBlob();
-      const newUrl = URL.createObjectURL(blob);
-      currentUrl = newUrl;
-      
-      // Store in cache with timestamp
-      pdfCache.set(resumeHash, { url: newUrl, timestamp: Date.now() });
-      setUrl(newUrl);
-    }
-
-    generatePDF();
-
-    // Cleanup function
-    return () => {
-      if (currentUrl && !pdfCache.has(resumeHash)) {
-        URL.revokeObjectURL(currentUrl);
-      }
-    };
-  }, [resumeHash, variant, resume]);
-
-  // Cleanup on component unmount
-  useEffect(() => {
-    return () => {
-      // Final cleanup of this component's URL if not in cache
-      if (url && !pdfCache.has(resumeHash)) {
-        URL.revokeObjectURL(url);
-      }
-    };
-  }, [resumeHash, url]);
-
-  // Add state for text layer visibility
-  const [shouldRenderTextLayer, setShouldRenderTextLayer] = useState(false);
-
-  // Modify Page component to conditionally render text layer
-  function onDocumentLoadSuccess({ numPages }: { numPages: number }): void {
-    setNumPages(numPages);
-    // Enable text layer after document is stable
-    setTimeout(() => setShouldRenderTextLayer(true), 1000);
+  if (resume.location) contacts.push(<span key="location">{resume.location}</span>);
+  if (resume.email) {
+    contacts.push(
+      <ResumeLink key="email" href={`mailto:${resume.email}`}>
+        {resume.email}
+      </ResumeLink>,
+    );
   }
-
-  // Disable text layer during updates
-  useEffect(() => {
-    setShouldRenderTextLayer(false);
-  }, [resumeHash, variant]);
-
-  // Show loading state while PDF is being generated
-  if (!url) {
-    return (
-      <div className="w-full aspect-[8.5/11] bg-white shadow-lg p-8">
-        <div className="space-y-0 animate-pulse">
-          {/* Header skeleton */}
-          <div className="space-y-4">
-            <div className="h-8 bg-gray-200  w-1/3 mx-auto" />
-            <div className="flex justify-center gap-4">
-              <div className="h-3 bg-gray-200 rounded w-24" />
-              <div className="h-3 bg-gray-200 rounded w-24" />
-              <div className="h-3 bg-gray-200 rounded w-24" />
-            </div>
-          </div>
-
-          {/* Summary skeleton */}
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-24" />
-            <div className="space-y-2">
-              <div className="h-3 bg-gray-200 rounded w-full" />
-              <div className="h-3 bg-gray-200 rounded w-5/6" />
-            </div>
-          </div>
-
-          {/* Experience skeleton */}
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-32" />
-            <div className="space-y-4">
-              {[...Array(3)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="h-3 bg-gray-200 rounded w-48" />
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                  </div>
-                  <div className="h-3 bg-gray-200 rounded w-full" />
-                  <div className="h-3 bg-gray-200 rounded w-5/6" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Education skeleton */}
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-28" />
-            <div className="space-y-4">
-              {[...Array(2)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="flex justify-between items-center">
-                    <div className="h-3 bg-gray-200 rounded w-40" />
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                  </div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
+  if (resume.phone_number) contacts.push(<span key="phone">{resume.phone_number}</span>);
+  if (resume.website) {
+    contacts.push(
+      <ResumeLink key="website" href={normalizeUrl(resume.website)}>
+        {resume.website}
+      </ResumeLink>,
+    );
+  }
+  if (resume.linkedin_url) {
+    contacts.push(
+      <ResumeLink key="linkedin" href={normalizeUrl(resume.linkedin_url)}>
+        {resume.linkedin_url}
+      </ResumeLink>,
+    );
+  }
+  if (resume.github_url) {
+    contacts.push(
+      <ResumeLink key="github" href={normalizeUrl(resume.github_url)}>
+        {resume.github_url}
+      </ResumeLink>,
     );
   }
 
-  // Display the generated PDF using react-pdf
   return (
-    <div className=" h-full relative bg-black/15">
-        <Document
-          file={url}
-          onLoadSuccess={onDocumentLoadSuccess}
-          className="relative h-full   "
-          externalLinkTarget="_blank"
-          loading={
-            <div className="w-full aspect-[8.5/11] bg-white  p-8">
-              <div className="space-y-24 animate-pulse">
-                {/* Header skeleton */}
-                <div className="space-y-4">
-                  <div className="h-8 bg-gray-200 rounded-md w-1/3 mx-auto" />
-                  <div className="flex justify-center gap-4">
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                    <div className="h-3 bg-gray-200 rounded w-24" />
-                  </div>
-                </div>
-
-                {/* Summary skeleton */}
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-24" />
-                  <div className="space-y-2">
-                    <div className="h-3 bg-gray-200 rounded w-full" />
-                    <div className="h-3 bg-gray-200 rounded w-5/6" />
-                  </div>
-                </div>
-
-                {/* Experience skeleton */}
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-32" />
-                  <div className="space-y-4">
-                    {[...Array(3)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div className="h-3 bg-gray-200 rounded w-48" />
-                          <div className="h-3 bg-gray-200 rounded w-24" />
-                        </div>
-                        <div className="h-3 bg-gray-200 rounded w-full" />
-                        <div className="h-3 bg-gray-200 rounded w-5/6" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Education skeleton */}
-                <div className="space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-28" />
-                  <div className="space-y-4">
-                    {[...Array(2)].map((_, i) => (
-                      <div key={i} className="space-y-2">
-                        <div className="flex justify-between items-center">
-                          <div className="h-3 bg-gray-200 rounded w-40" />
-                          <div className="h-3 bg-gray-200 rounded w-24" />
-                        </div>
-                        <div className="h-3 bg-gray-200 rounded w-3/4" />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        >
-          {Array.from(new Array(numPages), (_, index) => (
-            <Page
-              key={`page_${index + 1}`}
-              pageNumber={index + 1}
-              className="mb-4 shadow-xl "
-              width={getPixelWidth()}
-              renderAnnotationLayer={true}
-              renderTextLayer={shouldRenderTextLayer}
-            />
-          ))}
-        </Document>
+    <div className="flex flex-wrap justify-center gap-x-1 gap-y-0.5 text-gray-700">
+      {contacts.map((contact, index) => (
+        <span key={index} className="inline-flex items-center">
+          {index > 0 && <span className="mr-1 text-gray-500">•</span>}
+          {contact}
+        </span>
+      ))}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Custom comparison function to determine if re-render is needed
+}
+
+function SkillsSection({ skills, settings }: { skills: Skill[]; settings: DocumentSettings }) {
+  if (!skills.length) return null;
+
   return (
-    prevProps.resume === nextProps.resume &&
-    prevProps.variant === nextProps.variant &&
-    prevProps.containerWidth === nextProps.containerWidth
+    <section
+      style={{
+        marginTop: settings.skills_margin_top,
+        marginBottom: settings.skills_margin_bottom,
+        marginLeft: settings.skills_margin_horizontal,
+        marginRight: settings.skills_margin_horizontal,
+      }}
+    >
+      <SectionTitle>Skills</SectionTitle>
+      <div style={{ display: "flex", flexDirection: "column", gap: settings.skills_item_spacing }}>
+        {skills.map((skill, index) => (
+          <div key={`${skill.category}-${index}`} className="flex flex-wrap">
+            <strong className="mr-1 shrink-0">{skill.category}:</strong>
+            <span className="min-w-0 flex-1 text-gray-700">{skill.items.join(", ")}</span>
+          </div>
+        ))}
+      </div>
+    </section>
   );
-}); 
+}
+
+function BulletList({ items, itemSpacing }: { items?: string[]; itemSpacing: number }) {
+  if (!items?.length) return null;
+
+  return (
+    <ul className="m-0 list-none p-0">
+      {items.map((item, index) => (
+        <li
+          key={`${item}-${index}`}
+          className="grid grid-cols-[12px_minmax(0,1fr)]"
+          style={{ marginBottom: itemSpacing }}
+        >
+          <span aria-hidden="true">•</span>
+          <span className="min-w-0"><RichText value={item} /></span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+function ExperienceSection({ experiences, settings }: { experiences: WorkExperience[]; settings: DocumentSettings }) {
+  if (!experiences.length) return null;
+
+  return (
+    <section
+      style={{
+        marginTop: settings.experience_margin_top,
+        marginBottom: settings.experience_margin_bottom,
+        marginLeft: settings.experience_margin_horizontal,
+        marginRight: settings.experience_margin_horizontal,
+      }}
+    >
+      <SectionTitle>Experience</SectionTitle>
+      {experiences.map((experience, index) => (
+        <article
+          key={`${experience.company}-${experience.position}-${index}`}
+          style={{ marginBottom: settings.experience_item_spacing }}
+        >
+          <div className="mb-1 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+            <div className="min-w-0">
+              <div className="font-bold text-gray-950"><RichText value={experience.position} /></div>
+              <div className="flex flex-wrap items-center gap-x-1 text-gray-950">
+                <span><RichText value={experience.company} /></span>
+                {experience.location && <><span className="text-gray-500">•</span><span className="text-gray-700">{experience.location}</span></>}
+              </div>
+            </div>
+            <span className="text-right text-gray-950">{experience.date}</span>
+          </div>
+          <BulletList items={experience.description} itemSpacing={settings.experience_item_spacing} />
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function ProjectsSection({ projects, settings }: { projects: Project[]; settings: DocumentSettings }) {
+  if (!projects.length) return null;
+
+  return (
+    <section
+      style={{
+        marginTop: settings.projects_margin_top,
+        marginBottom: settings.projects_margin_bottom,
+        marginLeft: settings.projects_margin_horizontal,
+        marginRight: settings.projects_margin_horizontal,
+      }}
+    >
+      <SectionTitle>Projects</SectionTitle>
+      {projects.map((project, index) => (
+        <article key={`${project.name}-${index}`} style={{ marginBottom: settings.projects_item_spacing }}>
+          <div className="mb-1">
+            <div className="grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+              <strong className="min-w-0 text-gray-950"><RichText value={project.name} /></strong>
+              <div className="flex flex-wrap justify-end gap-x-2 text-right text-gray-700">
+                {project.date && <span>{project.date}</span>}
+                {project.url && <ResumeLink href={normalizeUrl(project.url)}>{project.url}</ResumeLink>}
+                {project.github_url && <ResumeLink href={normalizeUrl(project.github_url)}>{project.github_url}</ResumeLink>}
+              </div>
+            </div>
+            {project.technologies?.length ? (
+              <div className="font-bold text-gray-700">{project.technologies.map((technology) => technology.replace(/\*\*/g, "")).join(", ")}</div>
+            ) : null}
+          </div>
+          <BulletList items={project.description} itemSpacing={settings.projects_item_spacing} />
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function EducationSection({ education, settings }: { education: Education[]; settings: DocumentSettings }) {
+  if (!education.length) return null;
+
+  return (
+    <section
+      style={{
+        marginTop: settings.education_margin_top,
+        marginBottom: settings.education_margin_bottom,
+        marginLeft: settings.education_margin_horizontal,
+        marginRight: settings.education_margin_horizontal,
+      }}
+    >
+      <SectionTitle>Education</SectionTitle>
+      {education.map((item, index) => (
+        <article key={`${item.school}-${item.degree}-${index}`} style={{ marginBottom: settings.education_item_spacing }}>
+          <div className="mb-1 grid grid-cols-[minmax(0,1fr)_auto] items-start gap-2">
+            <div className="min-w-0">
+              <div className="font-bold text-gray-950"><RichText value={item.school} /></div>
+              <div className="text-gray-950"><RichText value={`${item.degree} ${item.field}`} /></div>
+            </div>
+            <span className="text-right text-gray-950">{item.date}</span>
+          </div>
+          <BulletList items={item.achievements} itemSpacing={settings.education_item_spacing} />
+        </article>
+      ))}
+    </section>
+  );
+}
+
+function isSectionVisible(resume: Resume, section: SectionName): boolean {
+  return resume.section_configs?.[section]?.visible !== false;
+}
+
+function getSectionOrder(resume: Resume): SectionName[] {
+  const requested = resume.section_order?.filter((section): section is SectionName =>
+    DEFAULT_SECTION_ORDER.includes(section as SectionName),
+  );
+
+  if (!requested?.length) return DEFAULT_SECTION_ORDER;
+
+  return [
+    ...requested,
+    ...DEFAULT_SECTION_ORDER.filter((section) => !requested.includes(section)),
+  ];
+}
+
+function ResumeSections({ resume, settings }: { resume: Resume; settings: DocumentSettings }) {
+  return (
+    <>
+      {getSectionOrder(resume).map((section) => {
+        if (!isSectionVisible(resume, section)) return null;
+
+        switch (section) {
+          case "skills":
+            return <SkillsSection key={section} skills={resume.skills} settings={settings} />;
+          case "experience":
+            return <ExperienceSection key={section} experiences={resume.work_experience} settings={settings} />;
+          case "projects":
+            return <ProjectsSection key={section} projects={resume.projects} settings={settings} />;
+          case "education":
+            return <EducationSection key={section} education={resume.education} settings={settings} />;
+        }
+      })}
+    </>
+  );
+}
+
+interface ResumePreviewProps {
+  resume: Resume;
+  variant?: "base" | "tailored";
+  containerWidth: number;
+}
+
+export const ResumePreview = memo(function ResumePreview({
+  resume,
+  variant = "base",
+  containerWidth,
+}: ResumePreviewProps) {
+  const settings = { ...DEFAULT_DOCUMENT_SETTINGS, ...resume.document_settings };
+
+  return (
+    <div
+      className="relative min-h-full w-full bg-black/15 px-3 py-4 sm:px-6"
+      data-preview-variant={variant}
+      data-preview-width={Math.round(containerWidth)}
+    >
+      <article
+        aria-label="Live resume preview"
+        className="relative mx-auto box-border min-h-[1056px] w-full max-w-[816px] overflow-hidden bg-white text-gray-950 shadow-xl"
+        style={{
+          paddingTop: `${settings.document_margin_vertical}pt`,
+          paddingBottom: `${settings.document_margin_vertical + (settings.show_ubc_footer ? 48 : 0)}pt`,
+          paddingLeft: `${settings.document_margin_horizontal}pt`,
+          paddingRight: `${settings.document_margin_horizontal}pt`,
+          fontFamily: "Arial, Helvetica, sans-serif",
+          fontSize: `${settings.document_font_size}pt`,
+          lineHeight: settings.document_line_height,
+        }}
+      >
+        <header className="mb-1 text-center">
+          <h1
+            className="font-bold text-gray-950"
+            style={{
+              margin: 0,
+              marginBottom: `${settings.header_name_bottom_spacing}pt`,
+              fontSize: `${settings.header_name_size}pt`,
+              lineHeight: 1,
+            }}
+          >
+            {resume.first_name} {resume.last_name}
+          </h1>
+          <ContactInfo resume={resume} />
+        </header>
+
+        <ResumeSections resume={resume} settings={settings} />
+
+        {settings.show_ubc_footer && (
+          <div className="mt-8 flex justify-center">
+            <Image
+              src="/images/ubc-science-footer.png"
+              alt="UBC Science"
+              width={612}
+              height={72}
+              style={{ width: `${settings.footer_width ?? 95}%`, height: "auto" }}
+            />
+          </div>
+        )}
+      </article>
+    </div>
+  );
+}, (previous, next) => (
+  previous.resume === next.resume &&
+  previous.variant === next.variant &&
+  previous.containerWidth === next.containerWidth
+));

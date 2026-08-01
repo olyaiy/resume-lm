@@ -4,7 +4,6 @@ import React from 'react';
 import { Resume, Profile, Job } from "@/lib/types";
 import { useState, useEffect, useReducer } from "react";
 import { useRouter } from "next/navigation";
-import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { createClient } from "@/utils/supabase/client";
 import { EditorLayout } from "./layout/EditorLayout";
@@ -33,7 +32,6 @@ export function ResumeEditorClient({
 
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
-  const debouncedResume = useDebouncedValue(state.resume, 100);
   const [job, setJob] = useState<Job | null>(initialJob ?? null);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
 
@@ -140,7 +138,7 @@ export function ResumeEditorClient({
   // Preview Panel
   const previewPanel = (width: number) => (
     <PreviewPanel
-      resume={debouncedResume}
+      resume={state.resume}
       onResumeChange={updateField}
       width={width}
     />
