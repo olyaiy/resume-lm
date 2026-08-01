@@ -72,7 +72,11 @@ export async function updateSession(request: NextRequest) {
     const isPublicRoute =
       pathname === '/' ||
       pathname.startsWith('/auth') ||
-      pathname.startsWith('/blog')
+      pathname.startsWith('/blog') ||
+      pathname === '/privacy' ||
+      pathname === '/terms' ||
+      pathname === '/refund' ||
+      pathname === '/security'
 
     if (isPublicRoute) {
       console.log('✅ Allowing unauthenticated access to public route:', pathname)
