@@ -18,8 +18,11 @@ describe("AnalyticsEvents", () => {
     assert.equal(AnalyticsEvents.AIRequestFailed, "ai_request_failed");
     assert.equal(AnalyticsEvents.CheckoutStarted, "checkout_started");
     assert.equal(AnalyticsEvents.CheckoutCompleted, "checkout_completed");
-    assert.equal(AnalyticsEvents.SubscriptionActivated, "subscription_activated");
+    assert.equal(AnalyticsEvents.TrialStarted, "trial_started");
+    assert.equal(AnalyticsEvents.FirstInvoicePaid, "first_invoice_paid");
+    assert.equal(AnalyticsEvents.InvoicePaymentFailed, "invoice_payment_failed");
     assert.equal(AnalyticsEvents.SubscriptionCanceled, "subscription_canceled");
+    assert.equal(Object.hasOwn(AnalyticsEvents, "SubscriptionActivated"), false);
   });
 });
 
@@ -82,6 +85,18 @@ describe("buildAnalyticsPayload", () => {
           resume_type: "base",
         },
       }
+    );
+  });
+
+  it("passes a stable insert id when server events need logical deduplication", () => {
+    assert.equal(
+      buildAnalyticsPayload({
+        apiKey: "ph_key",
+        distinctId: "user_123",
+        event: AnalyticsEvents.FirstInvoicePaid,
+        insertId: "in_123:first_invoice_paid",
+      }).properties.$insert_id,
+      "in_123:first_invoice_paid"
     );
   });
 });
