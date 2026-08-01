@@ -2,8 +2,10 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import OpenAI from "openai";
+import { generateText } from "ai";
 import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
+import { createAIClientFromResolvedRequest } from '@/utils/ai-tools';
+import { assertProviderCircuitClosed } from '@/lib/ai/reliability';
 
 interface SecurityResult {
   success: boolean;
@@ -17,7 +19,7 @@ export async function updateEmail(formData: FormData): Promise<SecurityResult> {
 
   // First verify the current user
   const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
+
   if (userError || !user?.email) {
     return { success: false, error: 'Unable to verify current user' };
   }
@@ -93,37 +95,46 @@ interface ApiTestResult {
     try {
       const supabase = await createClient()
       
-      // Get the API key from vault
+      // Get the OpenRouter API key from the server-side vault. The old
+      // implementation queried OpenAI and sent an OpenRouter model ID to the
+      // direct OpenAI SDK, which created legacy traffic and guaranteed failure.
       const { data: apiKey, error: keyError } = await supabase
         .rpc('get_api_key', {
-          p_service_name: 'openai'
+          p_service_name: 'openrouter'
         })
   
-      if (keyError || !apiKey) {
+      if (keyError || !apiKey?.trim()) {
         return { 
           success: false, 
-          error: 'No API key found for OpenAI' 
+          error: 'No API key found for OpenRouter'
         }
       }
-  
-      const openai = new OpenAI({
-        apiKey: apiKey.trim(),
+
+      const normalizedApiKey = apiKey.trim();
+      await assertProviderCircuitClosed({
+        providerId: 'openrouter',
+        modelId: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
+        apiKey: normalizedApiKey,
+        usedServerKey: false,
       });
-  
-      const response = await openai.chat.completions.create({
-        model: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
-        messages: [{ role: 'user', content: 'Say this is a test!' }],
-        response_format: { type: "text" },
-        temperature: 1,
-        max_tokens: 8000,
-        top_p: 1,
-        frequency_penalty: 0,
-        presence_penalty: 0
+
+      const model = createAIClientFromResolvedRequest({
+        providerId: 'openrouter',
+        modelId: MODEL_DESIGNATIONS.FAST_CHEAP_FREE,
+        apiKey: normalizedApiKey,
+        usedServerKey: false,
+        requiresRateLimit: false,
+      });
+
+      const response = await generateText({
+        model,
+        prompt: 'Say this is a test!',
+        maxRetries: 0,
       });
   
       return {
         success: true,
-        message: response.choices[0]?.message?.content || 'API connection successful'
+        message: response.text || 'API connection successful'
       }
   
     } catch (error) {
@@ -134,5 +145,3 @@ interface ApiTestResult {
       }
     }
   }
-  
-  

@@ -75,11 +75,12 @@ export function withTaskModel(input: TaskModelInput): AIConfig {
 export function dedupeAIConfigs(configs: AIConfig[]): AIConfig[] {
   const seen = new Set<string>();
   return configs.filter((config) => {
-    if (seen.has(config.model)) {
+    const canonicalModel = getCanonicalModelId(config.model);
+    if (seen.has(canonicalModel)) {
       return false;
     }
 
-    seen.add(config.model);
+    seen.add(canonicalModel);
     return true;
   });
 }

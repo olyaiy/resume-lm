@@ -105,6 +105,7 @@ export async function generate(input: string, config?: AIConfig) {
     (async () => {
       const { textStream } = streamText({
         model: aiClient as LanguageModelV1,
+        maxRetries: 0,
         system,
         prompt: input,
         experimental_telemetry: telemetry,

@@ -10,6 +10,7 @@ import { generate } from "@/utils/actions/cover-letter/actions";
 import { useResumeContext } from "../resume-editor-context";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 import { CreateTailoredResumeDialog } from "@/components/resume/management/dialogs/create-tailored-resume-dialog";
+import { getStoredModelSelection } from "@/lib/ai-models";
 
 
 interface CoverLetterPanelProps {
@@ -44,10 +45,9 @@ export function CoverLetterPanel({
     
     try {
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 
@@ -257,4 +257,4 @@ export function CoverLetterPanel({
       />
     </div>
   );
-} 
+}

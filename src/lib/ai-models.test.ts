@@ -40,6 +40,7 @@ describe("AI model configuration", () => {
       modelId: "openai/gpt-5.6-luna",
     });
     assert.equal(getCanonicalModelId("openai/gpt-5.5"), "openai/gpt-5.6-terra");
+    assert.equal(getCanonicalModelId("  GPT-5.4-NANO  "), "openai/gpt-5.6-luna");
   });
 
   it("exposes the curated visible catalog", () => {

@@ -76,6 +76,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
       },
       (aiClient, telemetry) => generateObject({
         model: aiClient,
+        maxRetries: 0,
         experimental_telemetry: telemetry,
         schema: z.object({
           content: textImportSchema
@@ -161,6 +162,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
         config: withTaskModel({ task: "contentGeneration", isPro, config }),
       }, (aiClient, telemetry) => generateObject({
         model: aiClient,
+        maxRetries: 0,
         experimental_telemetry: telemetry,
         schema: z.object({
           content: workExperienceBulletPointsSchema
@@ -191,6 +193,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           
           schema: z.object({
@@ -220,6 +223,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           schema: z.object({
               content: z.string().describe("The improved project bullet point")
@@ -253,6 +257,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "contentGeneration", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           schema: z.object({
               content: projectAnalysisSchema
@@ -282,6 +287,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "structuredExtraction", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           schema: z.object({
               content: textImportSchema
@@ -308,6 +314,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "simpleRewrite", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           schema: z.object({
               content: workExperienceItemsSchema
@@ -337,6 +344,7 @@ export async function convertTextToResume(prompt: string, existingResume: Resume
           config: withTaskModel({ task: "structuredExtraction", isPro, config }),
           }, (aiClient, telemetry) => generateObject({
           model: aiClient,
+          maxRetries: 0,
           experimental_telemetry: telemetry,
           schema: z.object({
               content: textImportSchema

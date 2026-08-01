@@ -20,6 +20,7 @@ import {
 import Tiptap from "@/components/ui/lazy-tiptap";
 import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/actions/resumes/ai";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
+import { getStoredModelSelection } from "@/lib/ai-models";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 import { AISuggestions } from "../../shared/ai-suggestions";
 
@@ -162,10 +163,9 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
     
     try {
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 
@@ -251,10 +251,9 @@ export const WorkExperienceForm = memo(function WorkExperienceFormComponent({
     
     try {
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 

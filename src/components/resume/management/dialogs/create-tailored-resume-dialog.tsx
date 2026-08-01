@@ -19,6 +19,7 @@ import { ImportMethodRadioGroup } from "../import-method-radio-group";
 import { JobDescriptionInput } from "../job-description-input";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
 import { cn, withBasePath } from "@/lib/utils";
+import { getStoredModelSelection } from "@/lib/ai-models";
 
 interface CreateTailoredResumeDialogProps {
   children: React.ReactNode;
@@ -123,10 +124,9 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
 
         if (jobDescription.trim()) {
           // Get model and API key from local storage
-          const MODEL_STORAGE_KEY = 'resumelm-default-model';
           const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-          const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+          const selectedModel = getStoredModelSelection();
           const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
           let apiKeys = [];
 
@@ -203,10 +203,9 @@ export function CreateTailoredResumeDialog({ children, baseResumes, profile }: C
       }
 
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 

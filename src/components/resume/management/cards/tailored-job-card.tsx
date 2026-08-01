@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
+import { getStoredModelSelection } from "@/lib/ai-models";
 import { useResumeContext } from "../../editor/resume-editor-context";
 import { AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 import { BriefcaseIcon } from "lucide-react";
@@ -131,10 +132,9 @@ export function TailoredJobCard({
       setIsFormatting(true);
 
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 
@@ -563,4 +563,4 @@ export function TailoredJobAccordion({
       </AccordionContent>
     </AccordionItem>
   );
-} 
+}

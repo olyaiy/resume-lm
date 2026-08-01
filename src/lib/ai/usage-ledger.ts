@@ -3,10 +3,17 @@ import type { LanguageModelUsage, LanguageModelV1, TelemetrySettings } from "ai"
 import { checkRateLimit } from "@/lib/rateLimiter";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
+import {
+  FAST_DEFAULT_MODEL,
+  AIProviderError,
+  MODEL_UNAVAILABLE_MESSAGE,
+  assertProviderCircuitClosed,
+} from "@/lib/ai/reliability";
 import { getDefaultModel } from "@/lib/ai-models";
 import { buildPostHogAITelemetry } from "@/lib/ai/posthog-telemetry";
 import {
   resolveAIRequest,
+  AIRequestAccessError,
   type ResolvedAIRequest,
 } from "@/lib/ai/access-control";
 import { createAIClientFromResolvedRequest, type AIConfig } from "@/utils/ai-tools";
@@ -18,7 +25,8 @@ export class AIUsageError extends Error {
   constructor(
     message: string,
     public readonly code: "blocked" | "rate_limited" | "failed",
-    public readonly status: number = 500
+    public readonly status: number = 500,
+    public readonly fallbackModelId?: string,
   ) {
     super(message);
     this.name = "AIUsageError";
@@ -179,7 +187,41 @@ export async function startAIUsageRequest(input: {
     throw new AIUsageError(
       error instanceof Error ? error.message : "AI request blocked",
       "blocked",
-      403
+      error instanceof AIRequestAccessError && error.code === "invalid_model" ? 503 : 403,
+      error instanceof AIRequestAccessError && error.code === "invalid_model"
+        ? FAST_DEFAULT_MODEL
+        : undefined,
+    );
+  }
+
+  try {
+    await assertProviderCircuitClosed({
+      providerId: resolved.providerId,
+      modelId: resolved.modelId,
+      apiKey: resolved.apiKey,
+      usedServerKey: resolved.usedServerKey,
+    });
+  } catch (error) {
+    const usageEventId = await recordAIUsageStarted({
+      userId: input.userId,
+      route: input.route,
+      provider: resolved.providerId,
+      model: resolved.modelId,
+      isPro: input.isPro,
+      usedServerKey: resolved.usedServerKey,
+    });
+
+    await recordAIUsageFinished({
+      id: usageEventId,
+      status: "blocked",
+      errorCode: error instanceof Error ? error.message : "provider_circuit_open",
+    });
+
+    throw new AIUsageError(
+      error instanceof AIProviderError ? error.message : MODEL_UNAVAILABLE_MESSAGE,
+      "blocked",
+      503,
+      FAST_DEFAULT_MODEL,
     );
   }
 
