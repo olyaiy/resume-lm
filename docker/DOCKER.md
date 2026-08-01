@@ -7,7 +7,7 @@ Run the complete ResumeLM stack locally using Docker Compose.
 ```bash
 # 1. Copy environment file and add your AI API key
 cp .env.example .env.local
-# Edit .env.local and add at least one: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY
+# Edit .env.local and add OPENROUTER_API_KEY for ResumeLM's default models
 
 # 2. Start Docker services
 cd docker

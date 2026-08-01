@@ -96,11 +96,13 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
 // ========================
 
 export const AI_MODELS: AIModel[] = [
-  // OpenAI Models
+  // OpenAI models served through OpenRouter. Keeping app-funded models on one
+  // provider gives us a single billing surface and avoids direct OpenAI key
+  // exhaustion taking down the product.
   {
-    id: 'gpt-5.5',
+    id: 'openai/gpt-5.5',
     name: 'GPT-5.5',
-    provider: 'openai',
+    provider: 'openrouter',
     features: {
       isRecommended: true,
       isUnstable: false,
@@ -110,14 +112,14 @@ export const AI_MODELS: AIModel[] = [
       isPro: true
     },
     availability: {
-      requiresApiKey: true,
+      requiresApiKey: false,
       requiresPro: true
     }
   },
   {
-    id: 'gpt-5.5-pro',
+    id: 'openai/gpt-5.5-pro',
     name: 'GPT-5.5 Pro',
-    provider: 'openai',
+    provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
@@ -127,69 +129,20 @@ export const AI_MODELS: AIModel[] = [
       isPro: true
     },
     availability: {
-      requiresApiKey: true,
+      requiresApiKey: false,
       requiresPro: true
     }
   },
   {
-    id: 'gpt-5.4',
-    name: 'GPT-5.4',
-    provider: 'openai',
+    id: 'openai/gpt-5.6-luna',
+    name: 'GPT-5.6 Luna',
+    provider: 'openrouter',
     features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.4-pro',
-    name: 'GPT-5.4 Pro',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'gpt-5.4-mini',
-    name: 'GPT-5.4 Mini',
-    provider: 'openai',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 400000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'gpt-5.4-nano',
-    name: 'GPT-5.4 Nano',
-    provider: 'openai',
-    features: {
+      // "Free" means app-funded for ResumeLM users, not zero provider cost.
       isFree: true,
       isRecommended: true,
       isUnstable: false,
-      maxTokens: 400000,
+      maxTokens: 1050000,
       supportsVision: true,
       supportsTools: true
     },
@@ -348,16 +301,24 @@ const MODEL_ALIASES: Record<string, string> = {
   'claude-sonnet-4-5-20250929': 'claude-sonnet-4-6',
   'claude-opus-4.5': 'claude-opus-4-7',
   'claude-opus-4-5-20251101': 'claude-opus-4-7',
-  // Older GPT IDs → current app defaults/equivalents
-  'gpt-5': 'gpt-5.5',
-  'gpt-5.2': 'gpt-5.5',
-  'gpt-5.2-2025-12-11': 'gpt-5.5',
-  'gpt-5.2-pro': 'gpt-5.5-pro',
-  'gpt-5.2-pro-2025-12-11': 'gpt-5.5-pro',
-  'gpt-5.1-chat': 'gpt-5.4-mini',
-  'gpt-5-mini-2025-08-07': 'gpt-5.4-mini',
-  'gpt-5-mini': 'gpt-5.4-mini',
-  'gpt-5-nano': 'gpt-5.4-nano',
+  // Direct OpenAI and older GPT IDs → OpenRouter-managed equivalents.
+  // This also migrates existing localStorage selections away from the
+  // exhausted direct OpenAI server key.
+  'gpt-5': 'openai/gpt-5.5',
+  'gpt-5.2': 'openai/gpt-5.5',
+  'gpt-5.2-2025-12-11': 'openai/gpt-5.5',
+  'gpt-5.2-pro': 'openai/gpt-5.5-pro',
+  'gpt-5.2-pro-2025-12-11': 'openai/gpt-5.5-pro',
+  'gpt-5.4': 'openai/gpt-5.5',
+  'gpt-5.4-pro': 'openai/gpt-5.5-pro',
+  'gpt-5.5': 'openai/gpt-5.5',
+  'gpt-5.5-pro': 'openai/gpt-5.5-pro',
+  'gpt-5.1-chat': 'openai/gpt-5.6-luna',
+  'gpt-5.4-mini': 'openai/gpt-5.6-luna',
+  'gpt-5.4-nano': 'openai/gpt-5.6-luna',
+  'gpt-5-mini-2025-08-07': 'openai/gpt-5.6-luna',
+  'gpt-5-mini': 'openai/gpt-5.6-luna',
+  'gpt-5-nano': 'openai/gpt-5.6-luna',
   // Allow DeepSeek without the nitro suffix
   'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
   // Legacy Gemini 3 model ID without provider prefix
@@ -369,8 +330,8 @@ const MODEL_ALIASES: Record<string, string> = {
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: 'gpt-5.5',
-  FREE_USER: 'gpt-5.4-nano'
+  PRO_USER: 'openai/gpt-5.5',
+  FREE_USER: 'openai/gpt-5.6-luna'
 } as const
 
 // ========================
@@ -383,40 +344,44 @@ export const DEFAULT_MODELS = {
  */
 export const MODEL_DESIGNATIONS = {
   // Fast & cheap model for parsing, simple tasks, quick analysis
-  FAST_CHEAP: 'gpt-5.4-nano',
+  FAST_CHEAP: 'openai/gpt-5.6-luna',
   // Alternative fast & cheap option (free for all users)
-  FAST_CHEAP_FREE: 'gpt-5.4-nano',
+  FAST_CHEAP_FREE: 'openai/gpt-5.6-luna',
   // Structured extraction, parsing, and data normalization
-  STRUCTURED_EXTRACTION: 'gpt-5.4-nano',
+  STRUCTURED_EXTRACTION: 'openai/gpt-5.6-luna',
   // Resume scoring and analysis
-  RESUME_SCORING: 'gpt-5.4-nano',
+  RESUME_SCORING: 'openai/gpt-5.6-luna',
   // Single-item rewrites and lightweight editing
-  SIMPLE_REWRITE: 'gpt-5.4-nano',
+  SIMPLE_REWRITE: 'openai/gpt-5.6-luna',
   // Multi-bullet and polished content generation
-  CONTENT_GENERATION: 'gpt-5.4-mini',
+  CONTENT_GENERATION: 'openai/gpt-5.6-luna',
   // Cover letter generation
-  COVER_LETTER: 'gpt-5.4-mini',
+  COVER_LETTER: 'openai/gpt-5.6-luna',
   // Full resume tailoring by plan
-  JOB_TAILORING_FREE: 'gpt-5.4-nano',
-  JOB_TAILORING_PRO: 'gpt-5.5',
+  JOB_TAILORING_FREE: 'openai/gpt-5.6-luna',
+  JOB_TAILORING_PRO: 'openai/gpt-5.5',
   // Interactive assistant by plan
-  CHAT_ASSISTANT_FREE: 'gpt-5.4-nano',
-  CHAT_ASSISTANT_PRO: 'gpt-5.5',
+  CHAT_ASSISTANT_FREE: 'openai/gpt-5.6-luna',
+  CHAT_ASSISTANT_PRO: 'openai/gpt-5.5',
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: 'gpt-5.5',
+  FRONTIER: 'openai/gpt-5.5',
   // Alternative frontier model
   FRONTIER_ALT: 'claude-opus-4-7',
   // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: 'gpt-5.4-mini',
+  BALANCED: 'openai/gpt-5.6-luna',
   // Vision-capable model for image analysis
-  VISION: 'gpt-5.4-mini',
+  VISION: 'openai/gpt-5.6-luna',
   // Default models by user type
-  DEFAULT_PRO: 'gpt-5.5',
-  DEFAULT_FREE: 'gpt-5.4-nano'
+  DEFAULT_PRO: 'openai/gpt-5.5',
+  DEFAULT_FREE: 'openai/gpt-5.6-luna'
 } as const
 
 // Type for model designations
 export type ModelDesignation = keyof typeof MODEL_DESIGNATIONS
+
+export function getCanonicalModelId(modelId: string): string {
+  return MODEL_ALIASES[modelId] || modelId
+}
 
 // ========================
 // Utility Functions
@@ -426,14 +391,15 @@ export type ModelDesignation = keyof typeof MODEL_DESIGNATIONS
  * Get all providers as an array
  */
 export function getProvidersArray(): AIProvider[] {
-  return Object.values(PROVIDERS)
+  const selectableProviders = new Set(AI_MODELS.map(model => model.provider))
+  return Object.values(PROVIDERS).filter(provider => selectableProviders.has(provider.id))
 }
 
 /**
  * Get a model by its ID
  */
 export function getModelById(id: string): AIModel | undefined {
-  const resolvedId = MODEL_ALIASES[id] || id
+  const resolvedId = getCanonicalModelId(id)
   return AI_MODELS.find(model => model.id === resolvedId)
 }
 
@@ -459,7 +425,7 @@ export function isModelAvailable(
   isPro: boolean,
   apiKeys: ApiKey[]
 ): boolean {
-  modelId = MODEL_ALIASES[modelId] || modelId
+  modelId = getCanonicalModelId(modelId)
   // Pro users have access to all models
   if (isPro) return true
 
@@ -535,11 +501,12 @@ export function getSelectableModels(isPro: boolean, apiKeys: ApiKey[]): AIModel[
  * Determine which SDK to use for a model
  */
 export function getModelSDKConfig(modelId: string): { provider: AIProvider; modelId: string } | undefined {
-  const model = getModelById(modelId)
+  const canonicalModelId = getCanonicalModelId(modelId)
+  const model = getModelById(canonicalModelId)
   if (!model) return undefined
   
   const provider = getProviderById(model.provider)
   if (!provider) return undefined
   
-  return { provider, modelId }
+  return { provider, modelId: canonicalModelId }
 }

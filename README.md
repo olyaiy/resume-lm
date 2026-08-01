@@ -149,7 +149,7 @@ SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 
 # AI Services
-OPENAI_API_KEY=your_openai_key
+OPENROUTER_API_KEY=your_openrouter_key
 ANTHROPIC_API_KEY=your_claude_key
 GOOGLE_AI_API_KEY=your_gemini_key
 
@@ -183,7 +183,7 @@ Run the complete stack locally with Docker Compose - includes Supabase, PostgreS
 ```bash
 # 1. Copy environment file and add your AI API key
 cp .env.example .env.local
-# Edit .env.local and add at least one: OPENAI_API_KEY, ANTHROPIC_API_KEY, or OPENROUTER_API_KEY
+# Edit .env.local and add OPENROUTER_API_KEY for ResumeLM's default models
 
 # 2. Start Docker services
 cd docker

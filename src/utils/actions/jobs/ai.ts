@@ -8,6 +8,7 @@ import {
 } from "@/lib/zod-schemas";
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
+import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import { getSubscriptionPlan } from '../stripe/actions';
 import { dedupeAIConfigs, withTaskModel, type AITaskModel } from '@/lib/ai/task-models';
 import {
@@ -57,9 +58,7 @@ function getFallbackConfig(config: AIConfig | undefined, model: string): AIConfi
 function getModelCandidates(config: AIConfig | undefined, isPro: boolean, task: AITaskModel) {
   const primaryModel = withTaskModel({ task, isPro, config });
   const fallbackModels: AIConfig[] = [
-    getFallbackConfig(config, 'gpt-5.4-mini'),
-    getFallbackConfig(config, 'gpt-5.4-nano'),
-    getFallbackConfig(config, 'z-ai/glm-4.6:exacto'),
+    getFallbackConfig(config, MODEL_DESIGNATIONS.FAST_CHEAP),
     getFallbackConfig(config, 'openai/gpt-oss-120b'),
     getFallbackConfig(config, 'openai/gpt-oss-20b'),
     getFallbackConfig(config, 'deepseek/deepseek-v3.2:nitro'),
