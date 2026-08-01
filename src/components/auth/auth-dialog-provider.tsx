@@ -5,6 +5,7 @@ import { Loader2 } from "lucide-react";
 
 import { signInWithGoogle } from "@/app/auth/login/actions";
 import { LoginForm } from "@/components/auth/login-form";
+import { SignupForm } from "@/components/auth/signup-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
@@ -199,16 +200,25 @@ export function AuthDialogProvider({
                     <h3 className="text-lg font-semibold text-slate-900">Welcome back</h3>
                     <p className="text-sm text-slate-600 mt-1">Sign in to continue</p>
                   </div>
-                  <LoginForm key={`login-${formVersion}`} next={intent?.next} />
+                  <LoginForm
+                    key={`login-${formVersion}`}
+                    next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
+                    plan={intent?.plan}
+                  />
                   <SocialAuth intent={intent} />
                 </TabsContent>
 
                 <TabsContent value="signup" className="mt-0 space-y-4">
                   <div className="text-center mb-4">
                     <h3 className="text-lg font-semibold text-slate-900">Get started</h3>
-                    <p className="text-sm text-slate-600 mt-1">Create your free account with Google</p>
+                    <p className="text-sm text-slate-600 mt-1">Create an account with email or Google</p>
                   </div>
-                  <SocialAuth showDivider={false} intent={intent} />
+                  <SignupForm
+                    key={`signup-${formVersion}`}
+                    next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
+                    plan={intent?.plan}
+                  />
+                  <SocialAuth intent={intent} />
                 </TabsContent>
               </div>
             </Tabs>

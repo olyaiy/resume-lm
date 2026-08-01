@@ -56,13 +56,13 @@ export function ApiKeyAlert({ variant = 'upgrade' }: { variant?: ApiKeyAlertVari
                 </div>
                 
                 <div className="flex items-center gap-4 text-xs text-gray-600 mb-2">
-                  <span className="flex items-center gap-1">🚀 Unlimited resumes</span>
-                  <span className="flex items-center gap-1">🤖 Latest AI models</span>
+                  <span className="flex items-center gap-1">🚀 Unlimited resume versions</span>
+                  <span className="flex items-center gap-1">🤖 App-funded models</span>
                   <span className="flex items-center gap-1">⚡ Instant access</span>
                 </div>
 
                 <p className="text-xs text-gray-500">
-                  {variant === 'trial' ? 'Join 1,800+ users building with ResumeLM' : 'Join 1,800+ users building with ResumeLM'}
+                  Pro is $20/month after the 7-day trial; a payment method is required to start.
                 </p>
               </div>
 

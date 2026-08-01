@@ -15,12 +15,16 @@ import {
 } from "@/lib/impersonation";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import { Suspense } from "react";
+import { SITE_URL } from "@/lib/site-config";
 
 // Only enable Vercel Analytics when running on Vercel platform
 const isVercel = process.env.VERCEL === '1';
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://resumelm.com"),
+  metadataBase: new URL(SITE_URL),
+  alternates: {
+    canonical: SITE_URL,
+  },
   title: {
     default: "ResumeLM - AI-Powered Resume Builder",
     template: "%s | ResumeLM"

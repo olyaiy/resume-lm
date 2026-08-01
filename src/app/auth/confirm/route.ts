@@ -3,13 +3,7 @@ import { type NextRequest } from 'next/server'
 
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-
-function getSafeRedirectPath(path: string | null, fallback: string = '/') {
-  if (!path) return fallback
-  if (!path.startsWith('/')) return fallback
-  if (path.startsWith('//')) return fallback
-  return path
-}
+import { getSafeRedirectPath } from '@/lib/auth-intent'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url)

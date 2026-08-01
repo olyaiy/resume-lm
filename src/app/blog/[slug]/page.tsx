@@ -2,6 +2,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getAllPosts, getPostBySlug } from "@/lib/blog";
+import { siteUrl } from "@/lib/site-config";
 import { toSafeJsonScript } from "@/lib/html-safety";
 import { mdxComponents } from "@/components/blog/mdx-components";
 import { Calendar, ArrowLeft, Clock } from "lucide-react";
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   const post = getPostBySlug(slug);
   if (!post) return {};
   
-  const url = `https://resumelm.com/blog/${slug}`;
+  const url = siteUrl(`/blog/${slug}`);
   const publishedTime = new Date(post.frontMatter.date).toISOString();
   
   return {
@@ -96,26 +97,26 @@ export default async function BlogPostPage({ params }: BlogPostPageProps) {
     '@type': 'Article',
     headline: post.frontMatter.title,
     description: post.frontMatter.description,
-    image: 'https://resumelm.com/og.webp',
+    image: siteUrl('/og.webp'),
     datePublished: new Date(post.frontMatter.date).toISOString(),
     dateModified: new Date(post.frontMatter.date).toISOString(),
     author: {
       '@type': 'Organization',
       name: 'ResumeLM Team',
-      url: 'https://resumelm.com',
+      url: siteUrl(),
     },
     publisher: {
       '@type': 'Organization',
       name: 'ResumeLM',
       logo: {
         '@type': 'ImageObject',
-        url: 'https://resumelm.com/og.webp',
+          url: siteUrl('/og.webp'),
       },
-      url: 'https://resumelm.com',
+      url: siteUrl(),
     },
     mainEntityOfPage: {
       '@type': 'WebPage',
-      '@id': `https://resumelm.com/blog/${slug}`,
+      '@id': siteUrl(`/blog/${slug}`),
     },
     articleSection: 'Career Advice',
     keywords: 'resume builder, tech jobs, Vancouver tech, career advice, AI resume, job search',

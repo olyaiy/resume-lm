@@ -1,6 +1,5 @@
 "use client"
 import React from 'react';
-import Image from "next/image";
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
@@ -11,21 +10,11 @@ const FeatureHighlights = () => {
   // Enhanced features with metrics, testimonials, and benefit-focused language
 
 
-  // Trusted by logos
-  const companies = [
-    { name: "Google", logo: "/logos/google.png" },
-    { name: "Microsoft", logo: "/logos/microsoft.webp" },
-    { name: "Amazon", logo: "/logos/amazon.png" },
-    { name: "Meta", logo: "/logos/meta.png" },
-    { name: "Netflix", logo: "/logos/netflix.png" },
-  ];
-
-  // Statistics counters
   const stats = [
-    { value: "500+", label: "Resumes Created" },
-    { value: "89%", label: "Interview Rate" },
-    { value: "4.9/5", label: "User Rating" },
-    { value: "15 min", label: "Average Setup Time" },
+    { value: "Open source", label: "Self-hostable" },
+    { value: "BYOK", label: "Free plan" },
+    { value: "PDF", label: "Export format" },
+    { value: "$20", label: "Pro per month" },
   ];
 
   // Animation variants for scroll reveal
@@ -79,7 +68,7 @@ const FeatureHighlights = () => {
             ATS-Optimized
           </span>
           <span className="px-3 py-1 rounded-full bg-gradient-to-r from-emerald-600/10 to-green-600/10 border border-emerald-200/40 text-sm text-emerald-700">
-            100% Free
+            Free plan available
           </span>
         </motion.div>
         
@@ -111,7 +100,7 @@ const FeatureHighlights = () => {
             transition={{ duration: 0.6, delay: 0.7 }}
             className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mt-3"
           >
-            Smart AI tools that optimize your resume for each job, increasing your interview chances by up to <span className="font-semibold text-teal-700">3x</span>
+            Smart AI tools that help you build a base resume and tailor it to each job.
           </motion.p>
         </motion.div>
 
@@ -181,7 +170,7 @@ const FeatureHighlights = () => {
               description="Get real-time feedback and suggestions from our advanced AI assistant. Optimize your resume content, improve your bullet points, and ensure your skills stand out to recruiters and ATS systems."
               imageOnLeft={false}
               imageOverflowRight={true}
-              badgeText="90% more effective bullets"
+              badgeText="AI-assisted editing"
               badgeGradient="from-purple-600/10 to-indigo-600/10"
               bulletPoints={[
                 "Smart content suggestions based on your experience",
@@ -210,7 +199,7 @@ const FeatureHighlights = () => {
               description="Get detailed insights into your resume's effectiveness with our comprehensive scoring system. Track key metrics, identify areas for improvement, and optimize your resume to stand out to employers and ATS systems."
               imageOnLeft={false}
               imageOverflowRight={true}
-              badgeText="3x higher response rates"
+              badgeText="ATS-aware feedback"
               badgeGradient="from-pink-600/10 to-rose-600/10"
               bulletPoints={[
                 "ATS compatibility scoring",
@@ -234,30 +223,6 @@ const FeatureHighlights = () => {
             />
       </div>
       
-      {/* Social proof section - Trusted by companies */}
-      <motion.div 
-        className="mt-24 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true, margin: "-100px" }}
-        transition={{ duration: 0.8 }}
-      >
-        <h3 className="text-xl text-muted-foreground mb-8">Trusted by professionals from companies like</h3>
-        <div className="flex flex-wrap justify-center items-center gap-8 md:gap-12 max-w-4xl mx-auto opacity-80">
-          {companies.map((company, index) => (
-            <div key={index} className="w-24 h-12 relative transition-all duration-300">
-              <Image 
-                src={company.logo} 
-                alt={company.name} 
-                fill
-                className="object-contain" 
-                sizes="100px"
-              />
-            </div>
-          ))}
-        </div>
-      </motion.div>
-      
       {/* Enhanced CTA section */}
       <motion.div 
         className="mt-28 text-center"
@@ -273,7 +238,7 @@ const FeatureHighlights = () => {
             </span>
           </h2>
           <p className="text-lg text-muted-foreground mb-8">
-            Join 50,000+ professionals who are getting more interviews with ResumeLM
+            Start with the free plan, bring your own API keys, and upgrade to Pro when you want app-funded models.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -298,7 +263,7 @@ const FeatureHighlights = () => {
           
           <p className="text-sm text-muted-foreground mt-6 flex items-center justify-center gap-2">
             <CheckCircle2 className="w-4 h-4 text-green-500" />
-            No credit card required • 100% free
+            Free plan available • Pro is $20/month • Trial requires a payment method
           </p>
         </div>
       </motion.div>

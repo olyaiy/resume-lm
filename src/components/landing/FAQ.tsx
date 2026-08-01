@@ -31,11 +31,11 @@ export function FAQ() {
     },
     {
       question: "How long does it take to create a resume with ResumeLM?",
-      answer: "Most users create their first resume in under 15 minutes. Once you have a base resume, generating tailored versions for specific jobs takes just 2-3 minutes with our AI assistant."
+      answer: "The time varies with the amount of information you provide. Once you have a base resume, you can generate tailored versions for specific jobs with the AI assistant."
     },
     {
       question: "Will my resume pass ATS (Applicant Tracking Systems)?",
-      answer: "Absolutely! ResumeLM is specifically designed to create ATS-optimized resumes. Our templates use proper formatting, keyword optimization, and structure that ATS systems can easily parse and rank highly."
+      answer: "ResumeLM uses ATS-aware formatting, structure, and keyword suggestions. ATS behavior varies by employer, so no resume tool can guarantee a particular screening outcome."
     },
     {
       question: "Can I use my own AI API keys?",
@@ -43,7 +43,7 @@ export function FAQ() {
     },
     {
       question: "Is my data secure and private?",
-      answer: "Your privacy is our priority. All data is encrypted, and you can even self-host ResumeLM for complete control. We never share your personal information or resume data with third parties."
+      answer: "Resume data is stored in the configured Supabase project, payments are handled by Stripe, and product analytics are handled by PostHog. API keys entered in the free plan stay in this browser's local storage. Review the Privacy and Security pages for details."
     },
     {
       question: "Do you offer support for students or career changers?",
@@ -153,4 +153,4 @@ export function FAQ() {
       </motion.div>
     </section>
   );
-} 
+}

@@ -12,9 +12,12 @@ import { getEmailSignupBlockedMessage, isEmailSignupAllowed } from "@/lib/auth-p
 import {
   AUTH_ERROR_CODES,
   buildAuthCallbackUrl,
+  getAuthRedirectPath,
+  getAuthIntentFromParams,
   getSafeRedirectPath,
   type AuthIntent,
 } from "@/lib/auth-intent";
+import { siteUrl } from "@/lib/site-config";
 
 // Auto-create Pro subscription for new users (for local development)
 const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
@@ -39,6 +42,9 @@ function mapLoginErrorMessage(message?: string): string {
   if (normalized.includes("email not confirmed")) {
     return "Please confirm your email before signing in.";
   }
+  if (normalized.includes("too many requests")) {
+    return "Too many sign-in attempts. Please wait a moment and try again.";
+  }
 
   return message;
 }
@@ -55,10 +61,19 @@ export async function login(formData: FormData): Promise<AuthResult> {
   const { error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
-    return { success: false, error: error.message }
+    console.error('Password sign-in failed:', {
+      code: error.code ?? null,
+      message: error.message,
+      status: error.status ?? null,
+      name: error.name,
+    });
+    return { success: false, error: mapLoginErrorMessage(error.message), errorCode: error.code };
   }
 
-  const next = getSafeRedirectPath(formData.get('next') as string | null);
+  const next = getAuthRedirectPath(getAuthIntentFromParams({
+    next: formData.get('next') as string | null,
+    plan: formData.get('plan') as string | null,
+  }));
   redirect(next)
   return { success: true }
 }
@@ -71,6 +86,10 @@ export async function signup(formData: FormData): Promise<AuthResult> {
 
   const supabase = await createServiceClient();
 
+  const callbackUrl = new URL('/auth/confirm', siteUrl());
+  const safeNext = getSafeRedirectPath(formData.get('next') as string | null, '');
+  if (safeNext) callbackUrl.searchParams.set('next', safeNext);
+
   const data = {
     email: formData.get('email') as string,
     password: formData.get('password') as string,
@@ -78,7 +97,7 @@ export async function signup(formData: FormData): Promise<AuthResult> {
       data: {
         full_name: formData.get('name') as string,
       },
-      emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/confirm`
+      emailRedirectTo: callbackUrl.toString()
     }
   }
   const { data: signupData, error: signupError } = await supabase.auth.signUp(data);

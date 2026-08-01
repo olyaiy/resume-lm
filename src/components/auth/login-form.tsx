@@ -33,7 +33,7 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, plan }: { next?: string; plan?: "free" | "pro" }) {
   const [state, formAction] = useActionState(loginWithState, initialAuthFormState);
   const [showPassword, setShowPassword] = useState(false);
 
@@ -43,6 +43,7 @@ export function LoginForm({ next }: { next?: string }) {
   return (
     <form action={formAction} className="space-y-5">
       {next && <input type="hidden" name="next" value={next} />}
+      {plan && <input type="hidden" name="plan" value={plan} />}
       <div className="space-y-2">
         <Label htmlFor="login-email" className="text-sm font-medium">
           Email

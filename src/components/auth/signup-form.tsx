@@ -13,6 +13,8 @@ import { Label } from "@/components/ui/label";
 
 interface SignupFormProps {
   onSuccess?: () => void;
+  next?: string;
+  plan?: "free" | "pro";
 }
 
 function SubmitButton() {
@@ -36,7 +38,7 @@ function SubmitButton() {
   );
 }
 
-export function SignupForm({ onSuccess }: SignupFormProps) {
+export function SignupForm({ onSuccess, next, plan }: SignupFormProps) {
   const [state, formAction] = useActionState(signupWithState, initialAuthFormState);
   const [showPassword, setShowPassword] = useState(false);
   const hasHandledSuccess = useRef(false);
@@ -71,6 +73,8 @@ export function SignupForm({ onSuccess }: SignupFormProps) {
 
   return (
     <form action={formAction} className="space-y-4">
+      {next && <input type="hidden" name="next" value={next} />}
+      {plan && <input type="hidden" name="plan" value={plan} />}
       <div className="space-y-2">
         <Label htmlFor="signup-name" className="text-sm font-medium">
           Full Name

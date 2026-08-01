@@ -1,7 +1,21 @@
-import { type NextRequest } from 'next/server'
+import { NextResponse, type NextRequest } from 'next/server'
 import { updateSession } from '@/utils/supabase/middleware'
+import { SITE_URL } from '@/lib/site-config'
 
 export async function middleware(request: NextRequest) {
+  const hostname = request.nextUrl.hostname.toLowerCase()
+  const canonicalHostname = new URL(SITE_URL).hostname.toLowerCase()
+
+  if (
+    hostname !== canonicalHostname &&
+    (hostname === 'resumelm.com' || hostname === 'www.resumelm.com')
+  ) {
+    const canonicalUrl = request.nextUrl.clone()
+    canonicalUrl.protocol = 'https:'
+    canonicalUrl.hostname = canonicalHostname
+    return NextResponse.redirect(canonicalUrl, 308)
+  }
+
   console.log('🧩 Root middleware invoked for:', request.nextUrl.pathname)
   return await updateSession(request)
 }
@@ -15,9 +29,9 @@ export const config = {
      * - favicon.ico (favicon file)
      * - api/webhooks (webhook endpoints)
      * - blog (blog section)
-     * - image files (svg, png, jpg, etc.)
+     * - public metadata and media files
      * Run on all other routes to protect them
      */
-    '/((?!_next/static|_next/image|favicon.ico|api/webhooks|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/webhooks|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|mov|m4v|ogv)$).*)',
   ],
 }
