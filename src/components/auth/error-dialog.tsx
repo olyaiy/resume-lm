@@ -12,6 +12,7 @@ import { AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
+import { AUTH_ERROR_CODES } from "@/lib/auth-intent";
 
 interface ErrorDialogProps {
   isOpen: boolean;
@@ -26,12 +27,27 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
     setIsOpen(initialIsOpen);
   }, [initialIsOpen]);
 
-  const isSignInError = error === 'auth_code_missing' || error === 'auth_callback_failed';
+  const isSignInError = error !== AUTH_ERROR_CODES.emailConfirmation;
   const errorMessage = isOpen
-    ? isSignInError
-      ? 'We could not complete your sign-in. Please try again.'
-      : 'There was an issue with your email confirmation. Please check your inbox and try again.'
+    ? error === AUTH_ERROR_CODES.oauthMissingCode
+      ? 'Google did not return an authorization code. Please start sign-in again.'
+      : error === AUTH_ERROR_CODES.oauthProviderDenied
+        ? 'Google sign-in was cancelled. You can try again whenever you are ready.'
+        : error === AUTH_ERROR_CODES.oauthStateMismatch
+          ? 'This sign-in session expired or was already used. Please start again.'
+          : error === AUTH_ERROR_CODES.oauthProviderError
+            ? 'Google could not complete the sign-in request. Please try again.'
+            : error === AUTH_ERROR_CODES.oauthExchangeFailed
+              ? 'We could not finish your sign-in. Please try again.'
+              : 'There was an issue with your email confirmation. Please check your inbox and try again.'
     : null;
+
+  const retryParams = new URLSearchParams();
+  const next = searchParams.get('next');
+  const plan = searchParams.get('plan');
+  if (next) retryParams.set('next', next);
+  if (plan) retryParams.set('plan', plan);
+  const retryHref = `/auth/login${retryParams.toString() ? `?${retryParams.toString()}` : ''}`;
 
   return (
     <Dialog 
@@ -58,9 +74,9 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
           <ul className="list-disc list-inside space-y-2 text-muted-foreground">
             {isSignInError ? (
               <>
-                <li>The sign-in session expired</li>
-                <li>The browser returned without an authorization code</li>
-                <li>The OAuth provider configuration needs another look</li>
+                <li>The sign-in session expired or was already used</li>
+                <li>Google sign-in was cancelled or returned an error</li>
+                <li>The authorization exchange could not be completed</li>
               </>
             ) : (
               <>
@@ -71,7 +87,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
             )}
           </ul>
           <div className="pt-4 space-y-2">
-            <Link href="/">
+            <Link href={retryHref}>
               <Button className="w-full bg-gradient-to-r from-red-600 to-rose-600 text-white">
                 Try Logging In Again
               </Button>

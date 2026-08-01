@@ -14,6 +14,7 @@ import { SplitContent } from "@/components/ui/split-content";
 import { NavLinks } from "@/components/layout/nav-links";
 import { ModelShowcase } from "@/components/landing/model-showcase";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
+import { AUTH_ERROR_CODES, getAuthIntentFromParams } from "@/lib/auth-intent";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -67,14 +68,18 @@ export default async function LoginPage({
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
   const params = await searchParams;
+  const initialIntent = getAuthIntentFromParams(params);
   const showErrorDialog =
-    params?.error === 'email_confirmation' ||
-    params?.error === 'auth_code_missing' ||
-    params?.error === 'auth_callback_failed';
+    params?.error === AUTH_ERROR_CODES.emailConfirmation ||
+    params?.error === AUTH_ERROR_CODES.oauthMissingCode ||
+    params?.error === AUTH_ERROR_CODES.oauthProviderDenied ||
+    params?.error === AUTH_ERROR_CODES.oauthProviderError ||
+    params?.error === AUTH_ERROR_CODES.oauthStateMismatch ||
+    params?.error === AUTH_ERROR_CODES.oauthExchangeFailed;
 
   return (
     <>
-      <AuthDialogProvider>
+      <AuthDialogProvider initialIntent={initialIntent}>
         <main className="relative overflow-x-hidden selection:bg-violet-200/50 ">
           {/* Error Dialog */}
           <ErrorDialog isOpen={!!showErrorDialog} />

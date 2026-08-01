@@ -9,16 +9,23 @@ import type { AuthFormState } from "@/components/auth/auth-form-state";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 import { getEmailSignupBlockedMessage, isEmailSignupAllowed } from "@/lib/auth-policy";
+import {
+  AUTH_ERROR_CODES,
+  buildAuthCallbackUrl,
+  getSafeRedirectPath,
+  type AuthIntent,
+} from "@/lib/auth-intent";
 
 // Auto-create Pro subscription for new users (for local development)
 const AUTO_PRO_SUBSCRIPTION = process.env.AUTO_PRO_SUBSCRIPTION === 'true';
 
-interface AuthResult {
+export interface AuthResult {
   success: boolean;
   error?: string;
+  errorCode?: string;
 }
 
-interface OAuthAuthResult extends AuthResult {
+export interface OAuthAuthResult extends AuthResult {
   url?: string;
 }
 
@@ -51,7 +58,8 @@ export async function login(formData: FormData): Promise<AuthResult> {
     return { success: false, error: error.message }
   }
 
-  redirect('/')
+  const next = getSafeRedirectPath(formData.get('next') as string | null);
+  redirect(next)
   return { success: true }
 }
 
@@ -206,35 +214,50 @@ export async function resetPasswordForEmail(formData: FormData): Promise<AuthRes
 } 
 
 // Google Sign In
-export async function signInWithGoogle(): Promise<OAuthAuthResult> {
+export async function signInWithGoogle(intent?: AuthIntent): Promise<OAuthAuthResult> {
   const supabase = await createClient();
 
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
-        queryParams: {
-          next: '/',
-          access_type: 'offline',
-          prompt: 'consent',
-        }
+        redirectTo: buildAuthCallbackUrl(process.env.NEXT_PUBLIC_SITE_URL!, intent),
       }
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      console.error('Google OAuth start failed:', {
+        code: error.code ?? null,
+        message: error.message,
+        status: error.status ?? null,
+        name: error.name,
+      });
+      return {
+        success: false,
+        error: 'Unable to start Google sign-in. Please try again.',
+        errorCode: AUTH_ERROR_CODES.oauthStartFailed,
+      };
     }
 
     if (data?.url) {
       return { success: true, url: data.url };
     }
 
-    return { success: false, error: 'Failed to get OAuth URL' };
+    console.error('Google OAuth start returned no URL');
+    return {
+      success: false,
+      error: 'Unable to start Google sign-in. Please try again.',
+      errorCode: AUTH_ERROR_CODES.oauthStartFailed,
+    };
   } catch (error) {
+    console.error('Google OAuth start threw:', {
+      message: error instanceof Error ? error.message : String(error),
+      name: error instanceof Error ? error.name : undefined,
+    });
     return { 
       success: false, 
-      error: error instanceof Error ? error.message : 'An unexpected error occurred' 
+      error: 'Unable to start Google sign-in. Please try again.',
+      errorCode: AUTH_ERROR_CODES.oauthStartFailed,
     };
   }
 } 

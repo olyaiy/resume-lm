@@ -63,19 +63,6 @@ export async function updateSession(request: NextRequest) {
   // Debug logging
   console.log('👤 User authenticated:', !!user, 'user_id:', user?.id)
 
-  // Create a new headers object with the existing headers
-  // Given an incoming request...
-  const requestHeaders = new Headers(request.headers)
-
-
-  // Create new response with enriched headers
-  supabaseResponse = NextResponse.next({
-    request: {
-      ...request,
-      headers: requestHeaders,
-    },
-  })
-
   supabaseResponse.cookies.set('show-banner', 'false')
 
   // Check if user is authenticated and redirect if needed
@@ -95,7 +82,9 @@ export async function updateSession(request: NextRequest) {
     console.log('🚫 Redirecting unauthenticated user to landing page')
     const url = request.nextUrl.clone()
     url.pathname = '/'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie))
+    return redirectResponse
   }
 
   // Check if route requires subscription
@@ -131,7 +120,9 @@ export async function updateSession(request: NextRequest) {
       console.log('🚫 User subscription access expired or invalid, redirecting to home')
       const url = request.nextUrl.clone()
       url.pathname = '/home'
-      return NextResponse.redirect(url)
+      const redirectResponse = NextResponse.redirect(url)
+      supabaseResponse.cookies.getAll().forEach((cookie) => redirectResponse.cookies.set(cookie))
+      return redirectResponse
     }
   }
 

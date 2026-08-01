@@ -9,6 +9,7 @@ interface PricingFeature {
 }
 
 interface PricingTier {
+  plan: "free" | "pro";
   name: string;
   price: string;
   description: string;
@@ -20,6 +21,7 @@ interface PricingTier {
 
 const tiers: PricingTier[] = [
   {
+    plan: "free",
     name: "Free",
     price: "$0",
     description: "Self-host or use with your own API keys",
@@ -33,6 +35,7 @@ const tiers: PricingTier[] = [
     buttonText: "Get Started",
   },
   {
+    plan: "pro",
     name: "Pro",
     price: "$20",
     description: "Enhanced features for serious job seekers",
@@ -137,7 +140,7 @@ export function PricingSection() {
                   ))}
                 </ul>
 
-                <AuthDialog>
+                <AuthDialog next={tier.plan === "pro" ? "/subscription" : "/home"} plan={tier.plan}>
                   <Button
                     className={cn(
                       "w-full bg-gradient-to-r text-white shadow-lg hover:shadow-xl transition-all duration-500 h-12 text-base",
@@ -154,4 +157,4 @@ export function PricingSection() {
       </div>
     </section>
   );
-} 
+}

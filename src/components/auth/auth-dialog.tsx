@@ -5,6 +5,7 @@ import { ArrowRight } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { AuthTab, useAuthDialog } from "@/components/auth/auth-dialog-provider";
+import type { AuthPlan } from "@/lib/auth-intent";
 
 const gradientClasses = {
   base: "bg-gradient-to-r from-violet-600 via-blue-600 to-violet-600",
@@ -15,13 +16,20 @@ const gradientClasses = {
 interface AuthDialogProps {
   children?: React.ReactNode;
   defaultTab?: AuthTab;
+  next?: string;
+  plan?: AuthPlan;
 }
 
-export function AuthDialog({ children, defaultTab = "signup" }: AuthDialogProps) {
+export function AuthDialog({
+  children,
+  defaultTab = "signup",
+  next = "/home",
+  plan,
+}: AuthDialogProps) {
   const { openDialog } = useAuthDialog();
 
   const handleOpen = () => {
-    openDialog(defaultTab);
+    openDialog(defaultTab, { next, plan });
   };
 
   if (!children) {
