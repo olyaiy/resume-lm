@@ -36,15 +36,19 @@ export function mapStripeSubscriptionToAppSubscription(
   const isKnownProPrice = input.priceId === input.proPriceId;
   const isActiveLike =
     input.stripeStatus === "active" || input.stripeStatus === "trialing";
-  const shouldHaveProPlan = isKnownProPrice && isActiveLike;
+  const isPastDue = input.stripeStatus === "past_due";
+  const shouldHaveProPlan = isKnownProPrice && (isActiveLike || isPastDue);
 
   return {
     user_id: input.userId,
     stripe_customer_id: input.customerId,
     stripe_subscription_id: input.subscriptionId,
     subscription_plan: shouldHaveProPlan ? "pro" : "free",
-    subscription_status:
-      shouldHaveProPlan && !input.cancelAtPeriodEnd ? "active" : "canceled",
+    subscription_status: isPastDue
+      ? "past_due"
+      : shouldHaveProPlan && !input.cancelAtPeriodEnd
+        ? "active"
+        : "canceled",
     current_period_end: input.currentPeriodEnd?.toISOString() ?? null,
     trial_end: input.trialEnd?.toISOString() ?? null,
     updated_at: new Date().toISOString(),
@@ -87,12 +91,13 @@ export function shouldSkipStaleInactiveSubscriptionUpdate(input: {
     return false;
   }
 
-  const currentIsActivePro =
+  const currentHasRecoverableProAccess =
     currentSubscription.subscription_plan === "pro" &&
-    currentSubscription.subscription_status === "active" &&
+    (currentSubscription.subscription_status === "active" ||
+      currentSubscription.subscription_status === "past_due") &&
     hasFutureEntitlementDate(currentSubscription, now);
 
-  if (!currentIsActivePro) {
+  if (!currentHasRecoverableProAccess) {
     return false;
   }
 

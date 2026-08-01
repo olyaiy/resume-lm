@@ -13,7 +13,8 @@ import {
   Crown,
   Star,
   Zap,
-  ArrowRight
+  ArrowRight,
+  AlertCircle,
 } from 'lucide-react';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { motion } from 'framer-motion';
@@ -61,11 +62,19 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
   const subscriptionAccessState = getSubscriptionAccessState(initialProfile);
   const {
     hasProAccess,
+    isPastDue,
     isCanceling,
     isExpiredProAccess,
     daysRemaining,
     currentPeriodEndLabel,
   } = subscriptionAccessState;
+  const paymentFailureCount = initialProfile?.payment_failure_count ?? 0;
+  const nextPaymentAttemptLabel = initialProfile?.next_payment_attempt_at
+    ? new Date(initialProfile.next_payment_attempt_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : null;
 
   const handleUpgrade = async () => {
     if (hasProAccess) {
@@ -141,6 +150,21 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                   : "Your previous Pro access has ended. Upgrade to unlock premium features again."}
               </p>
             </>
+          ) : isPastDue ? (
+            <>
+              <div className="flex items-center justify-center mb-4">
+                <AlertCircle className="h-8 w-8 text-amber-500 mr-3" />
+                <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
+                  Payment needs attention
+                </Badge>
+              </div>
+              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+                Keep your Pro access active
+              </h1>
+              <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+                We couldn&apos;t collect your latest payment. Stripe will retry automatically, and you can update your payment method now.
+              </p>
+            </>
           ) : hasProAccess ? (
             <>
               <div className="flex items-center justify-center mb-4">
@@ -173,6 +197,27 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
             </>
           )}
         </motion.div>
+
+        {isPastDue && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mb-8 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-950"
+            role="alert"
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+              <div className="flex-1">
+                <h2 className="font-semibold">Payment recovery is in progress</h2>
+                <p className="mt-1 text-sm text-amber-800">
+                  Your Pro features remain available while Stripe retries the payment. Update your payment method to avoid an interruption.
+                  {paymentFailureCount > 0 && ` Attempt ${paymentFailureCount} has failed.`}
+                  {nextPaymentAttemptLabel && ` The next retry is scheduled for ${nextPaymentAttemptLabel}.`}
+                </p>
+              </div>
+            </div>
+          </motion.div>
+        )}
 
         {/* Social Proof Bar */}
         <motion.div 
@@ -353,7 +398,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
                     <span>Processing...</span>
                   </div>
                 ) : hasProAccess ? (
-                  "Manage Subscription"
+                  isPastDue ? "Fix payment method" : "Manage Subscription"
                 ) : (
                   <div className="flex items-center justify-center space-x-2">
                     <span>Start Landing More Interviews</span>

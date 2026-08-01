@@ -172,9 +172,12 @@ export interface Subscription {
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
   subscription_plan: 'free' | 'pro';
-  subscription_status: 'active' | 'canceled';
+  subscription_status: 'active' | 'past_due' | 'unpaid' | 'incomplete' | 'paused' | 'canceled' | null;
   current_period_end: string | null;
   trial_end: string | null;
+  payment_failure_count?: number;
+  last_payment_failed_at?: string | null;
+  next_payment_attempt_at?: string | null;
   created_at: string;
   updated_at: string;
 }

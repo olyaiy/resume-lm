@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, TrendingUp } from "lucide-react"
+import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, TrendingUp, AlertCircle } from "lucide-react"
 import { cn } from '@/lib/utils';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { getSubscriptionAccessState, type SubscriptionSnapshot } from '@/lib/subscription-access';
@@ -20,6 +20,7 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
   const subscriptionAccessState = getSubscriptionAccessState(initialProfile);
   const {
     hasProAccess,
+    isPastDue,
     isCanceling,
     isExpiredProAccess,
     isTrialing,
@@ -28,6 +29,13 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
     trialDaysRemaining,
     trialEndLabel,
   } = subscriptionAccessState;
+  const paymentFailureCount = initialProfile?.payment_failure_count ?? 0;
+  const nextPaymentAttemptLabel = initialProfile?.next_payment_attempt_at
+    ? new Date(initialProfile.next_payment_attempt_at).toLocaleString(undefined, {
+        dateStyle: 'medium',
+        timeStyle: 'short',
+      })
+    : null;
 
   const handleSubscriptionAction = async () => {
     if (!hasProAccess) {
@@ -98,6 +106,21 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
                 : "Your previous Pro access has ended. Upgrade to regain premium features."}
             </p>
           </>
+        ) : isPastDue ? (
+          <>
+            <div className="flex items-center justify-center mb-2">
+              <AlertCircle className="h-6 w-6 text-amber-500 mr-2" />
+              <Badge variant="outline" className="text-amber-700 border-amber-300 bg-amber-50">
+                Payment needs attention
+              </Badge>
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900">
+              Keep your Pro access active
+            </h2>
+            <p className="text-gray-600 max-w-lg mx-auto">
+              We couldn&apos;t collect your latest payment. Stripe will retry automatically; update your payment method to avoid an interruption.
+            </p>
+          </>
         ) : isTrialing ? (
           <>
             <div className="flex items-center justify-center mb-2">
@@ -144,6 +167,22 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
           </>
         )}
       </div>
+
+      {isPastDue && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-950" role="alert">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="mt-0.5 h-5 w-5 flex-shrink-0 text-amber-600" />
+            <div>
+              <h3 className="font-semibold">Payment recovery is in progress</h3>
+              <p className="mt-1 text-sm text-amber-800">
+                Your Pro features remain available while Stripe retries the payment.
+                {paymentFailureCount > 0 && ` Attempt ${paymentFailureCount} has failed.`}
+                {nextPaymentAttemptLabel && ` The next retry is scheduled for ${nextPaymentAttemptLabel}.`}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Social Proof */}
       <div className="flex items-center justify-center text-sm text-gray-600">
@@ -286,7 +325,7 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
                   <span>Loading...</span>
                 </div>
               ) : hasProAccess ? (
-                isTrialing ? "Manage trial / billing" : "Manage Subscription"
+                isPastDue ? "Fix payment method" : isTrialing ? "Manage trial / billing" : "Manage Subscription"
               ) : (
                 <div className="flex items-center justify-center space-x-2">
                   <span>Upgrade to Pro</span>

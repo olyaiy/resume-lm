@@ -7,6 +7,8 @@ import { createServiceClient } from '@/utils/supabase/server'
 import { AnalyticsEvents } from '@/lib/analytics/events'
 import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
 import {
+  getPaymentFailureRecoveryFields,
+  getPaymentRecoveryClearedFields,
   getInvoiceSubscriptionId,
   isFirstPaidInvoice,
   shouldCaptureTrialStarted,
@@ -23,6 +25,7 @@ const relevantEvents = new Set([
   'checkout.session.completed',
   'invoice.paid',
   'invoice.payment_failed',
+  'invoice.updated',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -235,11 +238,25 @@ async function captureInvoicePaymentFailedEvent(input: {
   eventType: string;
   invoice: Stripe.Invoice;
   subscriptionData: Partial<Subscription>;
+  supabase: ServiceSupabaseClient;
 }) {
   if (input.eventType !== 'invoice.payment_failed') return;
 
   const userId = input.subscriptionData.user_id;
   if (!userId) return;
+
+  const recoveryFields = getPaymentFailureRecoveryFields(input.invoice);
+  const { error: recoveryUpdateError } = await input.supabase
+    .from('subscriptions')
+    .update({
+      ...recoveryFields,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (recoveryUpdateError) {
+    throw recoveryUpdateError;
+  }
 
   await captureServerAnalyticsEvent({
     distinctId: userId,
@@ -253,11 +270,46 @@ async function captureInvoicePaymentFailedEvent(input: {
       currency: input.invoice.currency,
       billing_reason: input.invoice.billing_reason,
       attempt_count: input.invoice.attempt_count,
-      next_payment_attempt: input.invoice.next_payment_attempt
-        ? new Date(input.invoice.next_payment_attempt * 1000).toISOString()
-        : null,
+      next_payment_attempt: recoveryFields.next_payment_attempt_at,
     },
   });
+}
+
+async function clearInvoicePaymentRecovery(
+  supabase: ServiceSupabaseClient,
+  subscriptionData: Partial<Subscription>
+) {
+  const userId = subscriptionData.user_id;
+  if (!userId) return;
+
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({
+      ...getPaymentRecoveryClearedFields(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (error) throw error;
+}
+
+async function updateNextPaymentAttempt(
+  supabase: ServiceSupabaseClient,
+  invoice: Stripe.Invoice,
+  subscriptionData: Partial<Subscription>
+) {
+  const userId = subscriptionData.user_id;
+  if (!userId || !invoice.next_payment_attempt) return;
+
+  const { error } = await supabase
+    .from('subscriptions')
+    .update({
+      next_payment_attempt_at: new Date(invoice.next_payment_attempt * 1000).toISOString(),
+      updated_at: new Date().toISOString(),
+    })
+    .eq('user_id', userId);
+
+  if (error) throw error;
 }
 
 async function captureFirstInvoicePaidEvent(input: {
@@ -420,6 +472,7 @@ export async function POST(req: Request) {
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
+          await clearInvoicePaymentRecovery(supabase, subscriptionData);
           await captureFirstInvoicePaidEvent({
             invoice,
             subscriptionId,
@@ -442,7 +495,29 @@ export async function POST(req: Request) {
             eventType: event.type,
             invoice,
             subscriptionData,
+            supabase,
           });
+        }
+        break;
+      }
+
+      case 'invoice.updated': {
+        const invoice = event.data.object as InvoiceWithSubscription;
+        const subscriptionId = getInvoiceSubscriptionId(invoice);
+
+        // Stripe may publish the next retry time on invoice.updated rather
+        // than invoice.payment_failed when Automations are enabled.
+        if (
+          subscriptionId &&
+          invoice.status === 'open' &&
+          (invoice.attempt_count ?? 0) > 0 &&
+          invoice.next_payment_attempt
+        ) {
+          const subscriptionData = await handleSubscriptionChange(
+            getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
+            subscriptionId
+          );
+          await updateNextPaymentAttempt(supabase, invoice, subscriptionData);
         }
         break;
       }
