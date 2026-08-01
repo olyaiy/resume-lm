@@ -1,4 +1,5 @@
 import {
+  getCanonicalModelId,
   MODEL_DESIGNATIONS,
   type AIConfig,
   type ApiKey,
@@ -18,7 +19,6 @@ interface TaskModelInput {
   config?: AIConfig;
   isPro: boolean;
   task: AITaskModel;
-  respectSelectedModel?: boolean;
 }
 
 interface TaskModelConfigParts {
@@ -57,10 +57,12 @@ export function getTaskModel(task: AITaskModel, isPro: boolean): string {
 }
 
 export function withTaskModel(input: TaskModelInput): AIConfig {
-  if (input.respectSelectedModel && input.config?.model) {
+  const selectedModel = input.config?.model?.trim();
+
+  if (selectedModel) {
     return {
       ...getConfigParts(input.config),
-      model: input.config.model,
+      model: getCanonicalModelId(selectedModel),
     };
   }
 

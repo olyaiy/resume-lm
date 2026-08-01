@@ -144,7 +144,7 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
           Default AI Model
         </Label>
         <p className="text-sm text-muted-foreground mt-2 mb-3">
-          This model will be used for all AI operations throughout the application. All models require their respective API keys.
+          This model will be used for all AI operations throughout the application. App-funded models work without a personal API key.
         </p>
         <ModelSelector
           value={defaultModel}

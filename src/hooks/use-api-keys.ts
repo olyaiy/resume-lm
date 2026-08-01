@@ -1,7 +1,7 @@
 'use client'
 
 import { useSyncExternalStore, useCallback } from 'react'
-import type { ApiKey } from '@/lib/ai-models'
+import { getCanonicalModelId, type ApiKey } from '@/lib/ai-models'
 
 // Storage keys - must match existing keys for backwards compatibility
 const API_KEYS_STORAGE_KEY = 'resumelm-api-keys'
@@ -57,7 +57,7 @@ function handleStorageChange(event: StorageEvent) {
   }
 
   if (event.key === MODEL_STORAGE_KEY) {
-    const nextModel = event.newValue ?? EMPTY_MODEL
+    const nextModel = normalizeModelId(event.newValue ?? EMPTY_MODEL)
     if (nextModel !== currentDefaultModel) {
       currentDefaultModel = nextModel
       emitModelChange()
@@ -73,7 +73,18 @@ function readStoredApiKeys(): ApiKey[] {
 
 function readStoredModel(): string {
   if (typeof window === 'undefined') return EMPTY_MODEL
-  return localStorage.getItem(MODEL_STORAGE_KEY) ?? EMPTY_MODEL
+  const storedModel = localStorage.getItem(MODEL_STORAGE_KEY) ?? EMPTY_MODEL
+  const normalizedModel = normalizeModelId(storedModel)
+
+  if (normalizedModel !== storedModel) {
+    localStorage.setItem(MODEL_STORAGE_KEY, normalizedModel)
+  }
+
+  return normalizedModel
+}
+
+function normalizeModelId(modelId: string): string {
+  return modelId ? getCanonicalModelId(modelId) : EMPTY_MODEL
 }
 
 function parseApiKeys(raw: string | null): ApiKey[] {
@@ -226,7 +237,7 @@ export function useDefaultModel() {
   const setDefaultModel = useCallback((model: string) => {
     ensureClientStoresInitialized()
 
-    const nextModel = model ?? EMPTY_MODEL
+    const nextModel = normalizeModelId(model ?? EMPTY_MODEL)
     if (nextModel === currentDefaultModel) {
       return
     }
