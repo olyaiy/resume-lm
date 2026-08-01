@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { ReactNode, useRef, useState, useEffect } from "react";
+import { ReactNode, useCallback, useRef, useState, useEffect } from "react";
 
 interface ResizablePanelsProps {
   isBaseResume: boolean;
@@ -16,25 +16,42 @@ export function ResizablePanels({
   const [previewSize, setPreviewSize] = useState(60);
   const containerRef = useRef<HTMLDivElement>(null);
   const lastPercentageRef = useRef(60); // Store last percentage
+  const resizeFrameRef = useRef<number | null>(null);
 
   // Add function to calculate pixel width
-  const updatePixelWidth = () => {
+  const updatePixelWidth = useCallback(() => {
     const containerWidth = containerRef.current?.clientWidth || 0;
     const pixelWidth = Math.floor((containerWidth * lastPercentageRef.current) / 100);
     setPreviewSize(pixelWidth);
-  };
+  }, []);
+
+  const schedulePixelWidthUpdate = useCallback(() => {
+    if (resizeFrameRef.current !== null) {
+      cancelAnimationFrame(resizeFrameRef.current);
+    }
+
+    resizeFrameRef.current = requestAnimationFrame(() => {
+      resizeFrameRef.current = null;
+      updatePixelWidth();
+    });
+  }, [updatePixelWidth]);
 
   useEffect(() => {
     // Handle window resize
-    const handleResize = () => updatePixelWidth();
+    const handleResize = () => schedulePixelWidthUpdate();
     window.addEventListener('resize', handleResize);
 
     // Initial calculation
     updatePixelWidth();
 
     // Cleanup
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (resizeFrameRef.current !== null) {
+        cancelAnimationFrame(resizeFrameRef.current);
+      }
+    };
+  }, [schedulePixelWidthUpdate, updatePixelWidth]);
 
   return (
     <div ref={containerRef} className="h-full relative">
@@ -69,7 +86,7 @@ export function ResizablePanels({
           maxSize={70}
           onResize={(size) => {
             lastPercentageRef.current = size; // Store current percentage
-            updatePixelWidth();
+            schedulePixelWidthUpdate();
           }}
           className={cn(
             "shadow-[0_0_30px_-5px_rgba(0,0,0,0.3)] overflow-y-scroll",

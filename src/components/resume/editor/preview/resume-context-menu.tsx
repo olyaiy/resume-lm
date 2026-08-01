@@ -6,11 +6,10 @@ import {
   ContextMenuItem,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { Download, Copy } from "lucide-react";
+import { Copy, Download, Printer } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import { Resume, WorkExperience, Education, Project } from "@/lib/types";
-import { pdf } from '@react-pdf/renderer';
-import { ResumePDFDocument } from "../preview/resume-pdf-document";
+import { createResumePdfBlob } from "./create-resume-pdf";
 
 interface ResumeContextMenuProps {
   children: React.ReactNode;
@@ -20,7 +19,7 @@ interface ResumeContextMenuProps {
 export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) {
   const handleDownloadPDF = async () => {
     try {
-      const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+      const blob = await createResumePdfBlob(resume);
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
@@ -38,6 +37,37 @@ export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) 
       toast({
         title: "Download failed",
         description: "Unable to download your resume. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handlePrintPreview = async () => {
+    const previewWindow = window.open("about:blank", "_blank");
+
+    if (!previewWindow) {
+      toast({
+        title: "Print preview blocked",
+        description: "Allow pop-ups for ResumeLM and try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    previewWindow.document.title = "ResumeLM PDF preview";
+    previewWindow.document.body.innerHTML = "<p style=\"font-family: sans-serif; padding: 2rem\">Preparing PDF preview…</p>";
+
+    try {
+      const blob = await createResumePdfBlob(resume);
+      const url = URL.createObjectURL(blob);
+      previewWindow.location.href = url;
+      window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+    } catch (error) {
+      previewWindow.close();
+      console.error(error);
+      toast({
+        title: "Print preview failed",
+        description: "Unable to generate a PDF preview. Please try again.",
         variant: "destructive",
       });
     }
@@ -169,6 +199,13 @@ export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) 
           <span>Download as PDF</span>
         </ContextMenuItem>
         <ContextMenuItem
+          onClick={handlePrintPreview}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <Printer className="w-4 h-4" />
+          <span>Open print preview</span>
+        </ContextMenuItem>
+        <ContextMenuItem
           onClick={handleCopyToClipboard}
           className="flex items-center gap-2 cursor-pointer"
         >
@@ -178,4 +215,4 @@ export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) 
       </ContextMenuContent>
     </ContextMenu>
   );
-} 
+}

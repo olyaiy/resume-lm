@@ -4,9 +4,8 @@ import { Resume } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { Download, Loader2, Save } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
-import { pdf } from '@react-pdf/renderer';
 import { TextImport } from "../../text-import";
-import { ResumePDFDocument } from "../preview/resume-pdf-document";
+import { createResumePdfBlob } from "../preview/create-resume-pdf";
 import { cn } from "@/lib/utils";
 import { useResumeContext } from "../resume-editor-context";
 
@@ -115,7 +114,7 @@ export function ResumeEditorActions({
                   try {
                     // Download Resume if selected
                     if (downloadOptions.resume) {
-                      const blob = await pdf(<ResumePDFDocument resume={resume} />).toBlob();
+                      const blob = await createResumePdfBlob(resume);
                       const url = URL.createObjectURL(blob);
                       const link = document.createElement('a');
                       link.href = url;
@@ -246,4 +245,4 @@ export function ResumeEditorActions({
       </div>
     </div>
   );
-} 
+}
