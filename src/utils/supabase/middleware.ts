@@ -10,6 +10,7 @@ const SUBSCRIPTION_EXEMPT_ROUTES = [
   '/settings',
   '/subscription',
   '/start-trial',
+  '/jobs',
   '/subscription/checkout',
   '/subscription/checkout-return',
   '/auth',

@@ -15,9 +15,10 @@ import {
 interface LogoProps {
   className?: string;
   asLink?: boolean;
+  href?: string;
 }
 
-export function Logo({ className, asLink = true }: LogoProps) {
+export function Logo({ className, asLink = true, href = "/home" }: LogoProps) {
   const logoRef = useRef<HTMLDivElement>(null);
 
   async function exportAsPNG() {
@@ -119,11 +120,11 @@ export function Logo({ className, asLink = true }: LogoProps) {
 
   if (asLink) {
     return (
-      <Link href="/home">
+      <Link href={href}>
         {logoContent}
       </Link>
     );
   }
 
   return logoContent;
-} 
+}

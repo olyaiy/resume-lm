@@ -2,6 +2,7 @@ import { Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { AuthDialog } from "@/components/auth/auth-dialog";
+import { PLAN_CONFIG } from "@/lib/plans";
 
 interface PricingFeature {
   text: string;
@@ -22,30 +23,24 @@ interface PricingTier {
 const tiers: PricingTier[] = [
   {
     plan: "free",
-    name: "Free",
-    price: "$0",
-    description: "Self-host or use with your own API keys",
+    name: PLAN_CONFIG.free.name,
+    price: PLAN_CONFIG.free.price,
+    description: PLAN_CONFIG.free.description,
     gradient: "from-violet-600/80 to-indigo-600/80",
     features: [
-      { text: "Use your own API keys", included: true },
-      { text: "2 base resumes", included: true },
-      { text: "5 tailored resumes", included: true },
-      { text: "Self-host option available", included: true },
+      ...PLAN_CONFIG.free.features.map((text) => ({ text, included: true })),
     ],
     buttonText: "Get Started",
   },
   {
     plan: "pro",
-    name: "Pro",
-    price: "$20",
-    description: "Enhanced features for serious job seekers",
+    name: PLAN_CONFIG.pro.name,
+    price: PLAN_CONFIG.pro.price,
+    description: PLAN_CONFIG.pro.description,
     gradient: "from-pink-600/80 to-rose-600/80",
     popular: true,
     features: [
-      { text: "Access to all premium AI models", included: true },
-      { text: "Unlimited base resumes", included: true },
-      { text: "Unlimited tailored resumes", included: true },
-      { text: "Support an independent student developer ❤️", included: true },
+      ...PLAN_CONFIG.pro.features.map((text) => ({ text, included: true })),
     ],
     buttonText: "Get Started",
   },
@@ -73,7 +68,7 @@ export function PricingSection() {
               </span>
             </div>
             <p className="text-sm text-muted-foreground hover:text-violet-600 transition-colors duration-300">
-              ResumeLM is open source and free to use. Pro version with managed API keys coming soon!
+              ResumeLM is open source. The free plan uses your own API keys; Pro includes app-funded premium models for $20/month.
             </p>
           </div>
         </div>
@@ -90,7 +85,7 @@ export function PricingSection() {
             >
               {tier.popular && (
                 <div className="absolute -top-6 left-0 right-0 mx-auto w-36 rounded-full bg-gradient-to-r from-pink-600 to-rose-600 px-4 py-1.5 text-sm text-white text-center font-medium shadow-lg">
-                  Coming Soon
+                  Most Popular
                 </div>
               )}
 

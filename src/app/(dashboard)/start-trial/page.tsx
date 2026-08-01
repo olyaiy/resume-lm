@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { 
   Check, 
   CreditCard,
-  Shield, 
+  Shield,
   Crown,
   Zap,
   ArrowRight,
@@ -25,9 +25,8 @@ const features = [
   "Unlimited base resumes",
   "Unlimited AI-tailored resumes",
   "Advanced AI assistance with multiple models",
-  "Premium ATS-optimized templates",
-  "Cover letter generation",
-  "Priority customer support"
+  "Unlimited resume versions",
+  "App-funded premium models"
 ];
 
 export default function StartTrialPage() {
@@ -117,8 +116,8 @@ export default function StartTrialPage() {
                     <Users className="h-4 w-4 text-purple-700" />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">1,800+ users</p>
-                    <p className="text-xs text-gray-600">Growing every week</p>
+                    <p className="text-sm font-medium text-gray-900">Open source</p>
+                    <p className="text-xs text-gray-600">Self-hostable project</p>
                   </div>
                 </div>
               </div>
@@ -215,7 +214,7 @@ export default function StartTrialPage() {
               </Button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
-                By starting your trial, you agree to our Terms of Service
+                By starting your trial, you agree to our <a href="/terms" className="underline">Terms of Service</a>. A payment method is required; cancel before the trial ends to avoid the recurring charge.
               </p>
             </div>
           </motion.div>

@@ -4,10 +4,11 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { Sparkles, Star, Clock, Zap, ArrowRight, Crown, Shield, Check, Users, TrendingUp, AlertCircle } from "lucide-react"
+import { Sparkles, Clock, Zap, ArrowRight, Crown, Check, TrendingUp, AlertCircle } from "lucide-react"
 import { cn } from '@/lib/utils';
 import { createPortalSession } from '@/app/(dashboard)/subscription/stripe-session';
 import { getSubscriptionAccessState, type SubscriptionSnapshot } from '@/lib/subscription-access';
+import { PLAN_CONFIG } from '@/lib/plans';
 
 interface SubscriptionSectionProps {
   initialProfile: SubscriptionSnapshot | null;
@@ -147,7 +148,7 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
               You&apos;re on the Pro plan
             </h2>
             <p className="text-gray-600 max-w-lg mx-auto">
-              Enjoying unlimited access to all premium features and priority support.
+              Enjoying unlimited resume versions and app-funded premium AI models.
             </p>
           </>
         ) : (
@@ -155,14 +156,14 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
             <div className="flex items-center justify-center mb-2">
               <TrendingUp className="h-6 w-6 text-blue-500 mr-2" />
               <Badge variant="outline" className="text-blue-700 border-blue-300 bg-blue-50">
-                3x Higher Interview Rate
+                Pro plan features
               </Badge>
             </div>
             <h2 className="text-2xl font-bold text-gray-900">
               Upgrade to ResumeLM Pro
             </h2>
             <p className="text-gray-600 max-w-lg mx-auto">
-              Join thousands of professionals landing more interviews with premium AI assistance.
+              Get unlimited resume versions and app-funded premium AI assistance for $20/month.
             </p>
           </>
         )}
@@ -184,16 +185,9 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
         </div>
       )}
 
-      {/* Social Proof */}
+      {/* Product facts */}
       <div className="flex items-center justify-center text-sm text-gray-600">
-        <Users className="h-4 w-4 mr-2" />
-        <span>Trusted by 12,000+ professionals</span>
-        <div className="flex ml-3">
-          {[...Array(5)].map((_, i) => (
-            <Star key={i} className="h-3 w-3 text-yellow-400 fill-current" />
-          ))}
-        </div>
-        <span className="ml-1">4.9/5</span>
+        <span>Open source • $20/month • App-funded premium AI models</span>
       </div>
 
       {/* Main Content */}
@@ -208,25 +202,25 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
             {[
               {
                 icon: Zap,
-                title: "3x faster applications",
-                description: "AI-powered tailoring saves hours",
+                title: "App-funded premium models",
+                description: "Use Pro models without entering your own provider key",
                 highlight: true
               },
               {
                 icon: TrendingUp, 
-                title: "Higher response rates",
-                description: "300% increase in interviews",
+                title: "Unlimited resume versions",
+                description: "Create and tailor as many versions as you need",
                 highlight: true
               },
               {
                 icon: Crown,
-                title: "Unlimited everything",
-                description: "No limits on resumes or AI"
+                title: "Advanced AI assistance",
+                description: "Get contextual suggestions while you edit"
               },
               {
                 icon: Sparkles,
-                title: "Premium templates",
-                description: "ATS-optimized designs"
+                title: "Free plan available",
+                description: "Bring your own API keys when Pro is not needed"
               }
             ].map((benefit, index) => (
               <div 
@@ -276,37 +270,21 @@ export function SubscriptionSection({ initialProfile }: SubscriptionSectionProps
               
               {!hasProAccess && (
                 <div className="space-y-1 text-xs text-gray-600">
-                  <p>💰 Pays for itself with one interview</p>
-                  <p>💼 Compare: Resume writers charge $260+</p>
+                  <p>✓ Seven-day trial</p>
+                  <p>✓ Cancel before the trial ends to avoid the recurring charge</p>
                 </div>
               )}
             </div>
 
             {/* Feature List */}
             <div className="space-y-2 mb-6">
-              {[
-                "Unlimited base resumes",
-                "Unlimited AI-tailored resumes", 
-                "Advanced AI assistance",
-                "Premium ATS templates",
-                "Priority support"
-              ].map((feature, index) => (
+              {PLAN_CONFIG.pro.features.map((feature, index) => (
                 <div key={index} className="flex items-center space-x-2">
                   <Check className="h-4 w-4 text-green-500 flex-shrink-0" />
                   <span className="text-sm text-gray-700">{feature}</span>
                 </div>
               ))}
             </div>
-
-            {/* Risk Reduction */}
-            {!hasProAccess && (
-              <div className="flex items-center justify-center space-x-2 mb-4 p-2 bg-green-50 rounded-lg border border-green-200">
-                <Shield className="h-4 w-4 text-green-600" />
-                <span className="text-xs text-green-700 font-medium">
-                  30-day money-back guarantee
-                </span>
-              </div>
-            )}
 
             {/* CTA Button */}
             <Button

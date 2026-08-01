@@ -1,8 +1,8 @@
 export const EMAIL_SIGNUP_BLOCKED_MESSAGE =
-  "New accounts must be created with Google. Existing users can still sign in with email and password.";
+  "Email signup is currently unavailable. You can still continue with Google.";
 
 export function isEmailSignupAllowed() {
-  return false;
+  return true;
 }
 
 export function getEmailSignupBlockedMessage() {

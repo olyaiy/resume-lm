@@ -14,19 +14,20 @@ import { Metadata } from "next";
 import Script from "next/script";
 import { toSafeJsonScript } from "@/lib/html-safety";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
+import { siteUrl } from "@/lib/site-config";
 
 // Page-specific metadata that extends the base metadata from layout.tsx
 export const metadata: Metadata = {
   title: "ResumeLM - AI Resume Builder for Tech Jobs",
-  description: "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
+  description: "Create and tailor tech resumes with an open-source AI resume builder.",
   openGraph: {
     title: "ResumeLM - AI Resume Builder for Tech Jobs",
-    description: "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
-    url: "https://resumelm.com",
+    description: "Create and tailor tech resumes with an open-source AI resume builder.",
+    url: siteUrl(),
   },
   twitter: {
     title: "ResumeLM - AI Resume Builder for Tech Jobs",
-    description: "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
+    description: "Create and tailor tech resumes with an open-source AI resume builder.",
   },
 };
 
@@ -45,18 +46,28 @@ export default async function Page() {
     "@type": "SoftwareApplication",
     "name": "ResumeLM",
     "applicationCategory": "BusinessApplication",
-    "offers": {
-      "@type": "Offer",
-      "price": "0",
-      "priceCurrency": "USD"
-    },
-    "description": "Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.",
+    "offers": [
+      {
+        "@type": "Offer",
+        "name": "Free plan",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      {
+        "@type": "Offer",
+        "name": "Pro plan",
+        "price": "20",
+        "priceCurrency": "USD",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "20",
+          "priceCurrency": "USD",
+          "unitText": "MONTH"
+        }
+      }
+    ],
+    "description": "Create and tailor tech resumes with an open-source AI resume builder.",
     "operatingSystem": "Web",
-    "aggregateRating": {
-      "@type": "AggregateRating",
-      "ratingValue": "4.8",
-      "ratingCount": "500"
-    }
   };
   
   return (
@@ -76,7 +87,7 @@ export default async function Page() {
           <nav aria-label="Main navigation" className="border-b border-gray-200 fixed top-0 w-full bg-white/95 z-[1000] transition-all duration-300 shadow-sm">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
               <div className="flex items-center justify-between h-16">
-                <Logo />
+            <Logo href="/" />
                 <NavLinks />
               </div>
             </div>

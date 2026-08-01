@@ -4,6 +4,7 @@ import { useMemo, useRef } from "react";
 import { Check, Sparkles } from "lucide-react";
 import { motion, useInView } from "framer-motion";
 import { AuthDialog } from "@/components/auth/auth-dialog";
+import { PLAN_CONFIG } from "@/lib/plans";
 
 interface PlanFeature {
   text: string;
@@ -33,35 +34,23 @@ export function PricingPlans() {
   const plans = useMemo<PricingPlan[]>(() => [
     {
       plan: "free",
-      name: "Free",
-      price: "$0",
-      description: "Self-host or use with your own API keys",
-      features: [
-        { text: "Use your own API keys" },
-        { text: "2 base resumes" },
-        { text: "5 tailored resumes" },
-        { text: "Self-host option available" },
-      ],
+      ...PLAN_CONFIG.free,
+      features: PLAN_CONFIG.free.features.map((text) => ({ text })),
       ctaText: "Get Started",
-      ctaLink: "/auth/register",
+      ctaLink: "/auth/login",
       ctaSecondary: true,
     },
     {
       plan: "pro",
-      name: "Pro",
-      price: "$20",
-      period: "/month",
-      description: "Enhanced features for serious job seekers",
+      ...PLAN_CONFIG.pro,
       badge: "Most Popular",
       popular: true,
-      features: [
-        { text: "Access to all premium AI models", highlight: true },
-        { text: "Unlimited base resumes", highlight: true },
-        { text: "Unlimited tailored resumes", highlight: true },
-        { text: "Support an independent student developer ❤️" },
-      ],
+      features: PLAN_CONFIG.pro.features.map((text) => ({
+        text,
+        highlight: text.includes("premium") || text.includes("Unlimited"),
+      })),
       ctaText: "Get Started",
-      ctaLink: "/auth/register",
+      ctaLink: "/auth/login",
     }
   ], []);
 

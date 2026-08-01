@@ -138,7 +138,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
   };
 
   const handleLinkedInImport = () => {
-    toast.info("LinkedIn import feature coming soon!", {
+    toast.info("LinkedIn import is not available yet. Upload a resume or enter your details manually.", {
       position: "bottom-right",
       className: "bg-gradient-to-r from-blue-500 to-indigo-500 text-white border-none",
     });
@@ -423,6 +423,7 @@ export function ProfileEditForm({ profile: initialProfile }: ProfileEditFormProp
                 <Button
                   variant="outline"
                   onClick={handleLinkedInImport}
+                  aria-disabled="true"
                   className="group relative bg-[#0077b5]/5 hover:bg-[#0077b5]/10 border-[#0077b5]/20 hover:border-[#0077b5]/30 text-[#0077b5] transition-all duration-500 hover:scale-[1.02] h-auto py-4"
                 >
                   <div className="absolute inset-0 bg-gradient-to-r from-[#0077b5]/0 via-[#0077b5]/5 to-[#0077b5]/0 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />

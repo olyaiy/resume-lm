@@ -1,7 +1,6 @@
-export const FREE_PLAN_RESUME_LIMITS = {
-  base: 2,
-  tailored: 4,
-} as const;
+import { PLAN_CONFIG } from "@/lib/plans";
+
+export const FREE_PLAN_RESUME_LIMITS = PLAN_CONFIG.free.limits;
 
 export type ResumeLimitType = keyof typeof FREE_PLAN_RESUME_LIMITS;
 

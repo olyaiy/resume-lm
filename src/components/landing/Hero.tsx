@@ -1,6 +1,4 @@
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import Link from "next/link";
-import Image from "next/image";
 import { AuthDialog } from "@/components/auth/auth-dialog";
 
 export function Hero() {
@@ -8,23 +6,6 @@ export function Hero() {
     <section className="flex flex-col lg:flex-row items-center gap-8 lg:gap-16 py-12 md:py-16 lg:py-20">
       {/* Left Content */}
       <div className="w-full lg:w-1/2 space-y-8">
-        {/* Product Hunt Badge */}
-        <div className="flex justify-start">
-          <a 
-            href="https://www.producthunt.com/products/resumelm?embed=true&utm_source=badge-featured&utm_medium=badge&utm_source=badge-resumelm" 
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-block transition-transform duration-300 hover:-translate-y-1"
-          >
-            <Image 
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=982199&theme=light&t=1750633039421" 
-              alt="ResumeLM - Open Source AI Resume Builder for Tech Jobs | Product Hunt" 
-              width={250} 
-              height={54} 
-            />
-          </a>
-        </div>
-        
         {/* Tagline with simplified gradient text */}
         <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight">
           <span className="block">Open source</span>
@@ -34,7 +15,7 @@ export function Hero() {
         
         {/* Description with quantifiable benefits */}
         <p className="text-lg md:text-xl text-muted-foreground max-w-md">
-          Create ATS-optimized tech resumes in under 10 minutes. 3x your interview chances with AI-powered resume tailoring.
+          Create ATS-aware tech resumes with AI-powered resume tailoring.
         </p>
         
         {/* CTAs with simplified effects */}
@@ -65,48 +46,24 @@ export function Hero() {
         <div className="flex flex-wrap gap-3 mt-6">
           <span className="px-3 py-1 rounded-full bg-indigo-50 text-sm border border-indigo-200 text-indigo-700">AI-Powered</span>
           <span className="px-3 py-1 rounded-full bg-teal-50 text-sm border border-teal-200 text-teal-700">ATS-Optimized</span>
-          <span className="px-3 py-1 rounded-full bg-emerald-50 text-sm border border-emerald-200 text-emerald-700">100% Free</span>
+          <span className="px-3 py-1 rounded-full bg-emerald-50 text-sm border border-emerald-200 text-emerald-700">Free plan</span>
           <span className="px-3 py-1 rounded-full bg-blue-50 text-sm border border-blue-200 text-blue-700">Privacy-First</span>
         </div>
         
-        {/* Simplified social proof section */}
+        {/* Factual product summary */}
         <div className="mt-8">
           <div className="flex items-center p-4 rounded-xl bg-white border border-gray-200 shadow-sm transition-all duration-300 hover:-translate-y-1">
             {/* Stats highlight with simplified styling */}
             <div className="flex-shrink-0 mr-5">
               <div className="flex items-center justify-center h-16 w-16 rounded-full bg-indigo-50 border border-indigo-100">
-                <span className="text-2xl font-bold text-indigo-600">500+</span>
+                <span className="text-2xl font-bold text-indigo-600">BYOK</span>
               </div>
             </div>
             
             {/* Text content with testimonial */}
             <div className="flex-1">
               <h3 className="font-semibold text-base">Join our growing community</h3>
-              <p className="text-sm text-muted-foreground">Trusted by over 500 tech professionals</p>
-              
-              <p className="text-xs italic mt-1 text-indigo-600">&ldquo;Landed 3 interviews in my first week using ResumeLM&rdquo; — Sarah K.</p>
-              
-              {/* Shadcn Avatar stack */}
-              <div className="flex items-center mt-3">
-                <div className="flex -space-x-2 mr-3">
-                  <Avatar className="h-7 w-7 border-2 border-background">
-                    <AvatarFallback className="bg-indigo-500 text-white text-xs">JD</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-7 w-7 border-2 border-background">
-                    <AvatarFallback className="bg-pink-500 text-white text-xs">SR</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-7 w-7 border-2 border-background">
-                    <AvatarFallback className="bg-teal-500 text-white text-xs">KL</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-7 w-7 border-2 border-background">
-                    <AvatarFallback className="bg-amber-500 text-white text-xs">MP</AvatarFallback>
-                  </Avatar>
-                  <Avatar className="h-7 w-7 border-2 border-background">
-                    <AvatarFallback className="bg-white text-xs text-indigo-600 font-medium">496+</AvatarFallback>
-                  </Avatar>
-                </div>
-                <span className="text-xs text-muted-foreground">Active this month</span>
-              </div>
+              <p className="text-sm text-muted-foreground">Use your own API keys on the free plan, or choose Pro for app-funded models.</p>
             </div>
           </div>
         </div>
@@ -191,4 +148,4 @@ export function Hero() {
       </div>
     </section>
   );
-} 
+}

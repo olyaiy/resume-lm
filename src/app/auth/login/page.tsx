@@ -15,6 +15,7 @@ import { NavLinks } from "@/components/layout/nav-links";
 import { ModelShowcase } from "@/components/landing/model-showcase";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 import { AUTH_ERROR_CODES, getAuthIntentFromParams } from "@/lib/auth-intent";
+import { GITHUB_REPO_URL, siteUrl } from "@/lib/site-config";
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -26,7 +27,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "ResumeLM - AI-Powered Resume Builder",
     description: "Create tailored, ATS-optimized resumes powered by AI. Land your dream tech job with personalized resume optimization.",
-    url: "https://resumelm.com//",
+    url: siteUrl("auth/login"),
     siteName: "ResumeLM",
     images: [
       {
@@ -46,17 +47,7 @@ export const metadata: Metadata = {
     images: ["/og.webp"],
     creator: "@resumelm",
   },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      "max-video-preview": -1,
-      "max-image-preview": "large",
-      "max-snippet": -1,
-    },
-  },
+  robots: { index: false, follow: false },
   // verification: {
   //   google: "google-site-verification-code", // Replace with actual verification code
   // },
@@ -90,7 +81,7 @@ export default async function LoginPage({
         <nav className="border-b border-white/50 backdrop-blur-xl shadow-md fixed top-0 w-full bg-white/20 z-[1000] transition-all duration-500">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <Logo />
+              <Logo href="/" />
               <NavLinks />
             </div>
           </div>
@@ -107,7 +98,7 @@ export default async function LoginPage({
                 <div className="space-y-8">
                   {/* GitHub Badge */}
                   <a
-                    href="https://github.com/olyaiy/resume-ai"
+                    href={GITHUB_REPO_URL}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full 

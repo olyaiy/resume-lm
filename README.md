@@ -4,35 +4,29 @@
 
 ![ResumeLM Logo](public/og.webp)
 
-**🚀 The AI-Powered Resume Builder That Gets You Hired**
+**🚀 An open-source AI resume builder for tech job applications**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-resumelm.com-blue?style=for-the-badge)](https://resumelm.com)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-resumelm.ca-blue?style=for-the-badge)](https://resumelm.ca)
 [![GitHub Stars](https://img.shields.io/github/stars/olyaiy/resume-lm?style=for-the-badge)](https://github.com/olyaiy/resume-lm/stargazers)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/agpl-3.0)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
 </div>
 
-## 📊 Proven Results That Matter
+## 📊 Product facts
 
-<div align="center">
-
-| 📈 **500+ Resumes Created** | 🎯 **89% Interview Rate** | ⭐ **4.9/5 User Rating** | ⏱️ **15 min Setup Time** |
-|:---------------------------:|:-------------------------:|:------------------------:|:-------------------------:|
-| Professional resumes built | Higher interview success  | Excellent user satisfaction | Quick and easy setup |
-
-</div>
+ResumeLM is open source, self-hostable, and has a free plan that supports your own AI provider keys. Pro is $20/month and provides app-funded premium model access.
 
 ## 🎯 Why Choose ResumeLM?
 
-**ResumeLM** is a free, open-source AI resume builder that helps job seekers create professional, ATS-optimized resumes that increase interview chances by up to **3x**. Our intelligent platform combines cutting-edge AI technology with proven resume best practices to help you land your dream job.
+**ResumeLM** is an open-source AI resume builder that helps job seekers create professional, ATS-aware resumes and tailored versions for specific applications.
 
 ## ✨ Key Features & Screenshots
 
 ### 🤖 AI-Powered Resume Assistant
 ![AI Resume Assistant](public/SS%20Chat.png)
 
-**90% More Effective Bullet Points**
+**AI-assisted bullet editing**
 - Smart content suggestions based on your experience
 - Real-time feedback on your resume content
 - Industry-specific optimization for better results
@@ -48,7 +42,7 @@
 ### 📈 Resume Performance Scoring
 ![Resume Scoring](public/SS%20Score.png)
 
-**3x Higher Response Rates**
+**Resume performance feedback**
 - ATS compatibility scoring and analysis
 - Keyword optimization insights
 - Detailed improvement recommendations
@@ -65,9 +59,9 @@
 
 ## 🚀 Live Demo & Getting Started
 
-**[Try ResumeLM Now - 100% Free](https://resumelm.com)**
+**[Try ResumeLM](https://resumelm.ca)**
 
-No credit card required • No signup fees • Open source
+Free plan available • Pro is $20/month • A payment method is required for the optional trial
 
 ## 🛠️ Complete Tech Stack
 
@@ -197,7 +191,7 @@ cd ..
 pnpm dev
 ```
 
-**Login:** http://localhost:3000 with `admin@admin.com` / `Admin123` (Pro subscription auto-granted)
+**Login:** http://localhost:3000 and create a local account with credentials you control. Do not reuse example credentials in development or production.
 
 | Service | URL | Description |
 |---------|-----|-------------|
@@ -262,17 +256,10 @@ pnpm dev
 
 ## 📈 Performance & Analytics
 
-### Core Metrics
-- **Page Load Speed** - Under 2 seconds average
-- **Mobile Performance** - 95+ Lighthouse score
-- **SEO Optimization** - Structured data and meta tags
-- **Accessibility** - WCAG 2.1 AA compliant
-
-### User Success Stories
-- 89% of users report getting more interview calls
-- Average setup time reduced to just 15 minutes
-- 4.9/5 star rating from active users
-- 500+ professional resumes created monthly
+### Current product notes
+- Public pages include structured metadata and a sitemap.
+- The free plan stores entered provider keys in the browser's local storage.
+- ATS behavior and interview outcomes vary by employer; the product does not guarantee a hiring result.
 
 ## 🔮 Roadmap & Future Features
 
@@ -344,7 +331,7 @@ For businesses requiring proprietary licenses or commercial support, please cont
 
 **Ready to land your dream job?**
 
-[![Get Started Free](https://img.shields.io/badge/🚀_Get_Started_Free-resumelm.com-blue?style=for-the-badge&color=6366f1)](https://resumelm.com)
+[![Get Started](https://img.shields.io/badge/🚀_Get_Started-resumelm.ca-blue?style=for-the-badge&color=6366f1)](https://resumelm.ca)
 [![View Source Code](https://img.shields.io/badge/📚_View_Source-GitHub-black?style=for-the-badge&logo=github)](https://github.com/olyaiy/resume-lm)
 
 **Built with ❤️ using Next.js**

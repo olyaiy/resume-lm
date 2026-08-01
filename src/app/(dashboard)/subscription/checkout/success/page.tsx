@@ -16,8 +16,8 @@ const SuccessPage = () => {
                 <h3 className="text-lg font-semibold mb-4">Next Steps</h3>
                 <div className="space-y-2 text-sm">
                     <p>✓ Access to AI-powered resume tailoring</p>
-                    <p>✓ Priority job matching algorithm</p>
-                    <p>✓ Advanced analytics dashboard</p>
+                    <p>✓ Unlimited resume versions</p>
+                    <p>✓ App-funded premium AI models</p>
                 </div>
             </div>
         </div>

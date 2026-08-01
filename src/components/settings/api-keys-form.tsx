@@ -163,18 +163,18 @@ export function ApiKeysForm({ isProPlan }: { isProPlan: boolean }) {
         </Label>
         <div className="mt-2 mb-4 space-y-2">
           <p className="text-sm text-muted-foreground">
-            Add your API keys to use premium AI models. Your keys are stored securely in your browser.
+            Add your API keys to use provider models. Keys are stored in this browser&apos;s local storage.
           </p>
           <div className="p-3 rounded-lg bg-amber-50/50 border border-amber-200/50 text-amber-900 text-sm">
             {isProPlan ? (
               <>
-                <p><strong>Pro Account Active:</strong> You have full access to all AI models without needing to manage API keys.</p>
+                <p><strong>Pro Account Active:</strong> Eligible Pro requests can use app-funded models without a personal API key.</p>
                 <p className="mt-1">You can still add personal API keys below if you prefer to use your own credentials.</p>
               </>
             ) : (
               <>
-                <p><strong>Security Note:</strong> API keys are stored locally in your browser. While convenient, this means anyone with access to this device could potentially view your keys.</p>
-                <p className="mt-1">For enhanced security, consider <a href="/subscription" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">upgrading to a Pro account</a> where we securely manage API access for you.</p>
+                <p><strong>Security note:</strong> API keys are stored locally in your browser and are not encrypted by ResumeLM. Anyone with access to this device or browser profile could potentially view them.</p>
+                <p className="mt-1">For app-funded model access, <a href="/subscription" className="text-amber-700 hover:text-amber-800 underline underline-offset-2">use Pro</a> instead of entering a personal key.</p>
               </>
             )}
           </div>
