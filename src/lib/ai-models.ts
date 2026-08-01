@@ -23,6 +23,8 @@ export interface AIModel {
   id: string
   name: string
   provider: ServiceName
+  /** Hidden compatibility models remain resolvable but are not shown in the selector. */
+  isVisible?: boolean
   features: {
     isFree?: boolean
     isRecommended?: boolean
@@ -96,49 +98,14 @@ export const PROVIDERS: Partial<Record<ServiceName, AIProvider>> = {
 // ========================
 
 export const AI_MODELS: AIModel[] = [
-  // OpenAI models served through OpenRouter. Keeping app-funded models on one
-  // provider gives us a single billing surface and avoids direct OpenAI key
-  // exhaustion taking down the product.
-  {
-    id: 'openai/gpt-5.5',
-    name: 'GPT-5.5',
-    provider: 'openrouter',
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: false,
-      requiresPro: true
-    }
-  },
-  {
-    id: 'openai/gpt-5.5-pro',
-    name: 'GPT-5.5 Pro',
-    provider: 'openrouter',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      maxTokens: 1050000,
-      supportsVision: true,
-      supportsTools: true,
-      isPro: true
-    },
-    availability: {
-      requiresApiKey: false,
-      requiresPro: true
-    }
-  },
+  // The visible catalog is intentionally curated. These models are all routed
+  // through OpenRouter so app-funded free and Pro requests share one reliable
+  // billing surface. Legacy IDs remain aliases below for saved selections.
   {
     id: 'openai/gpt-5.6-luna',
     name: 'GPT-5.6 Luna',
     provider: 'openrouter',
     features: {
-      // "Free" means app-funded for ResumeLM users, not zero provider cost.
       isFree: true,
       isRecommended: true,
       isUnstable: false,
@@ -152,79 +119,49 @@ export const AI_MODELS: AIModel[] = [
     }
   },
   {
-    id: 'google/gemini-3-pro-preview',
-    name: 'Gemini 3 Pro Preview',
+    id: 'openai/gpt-5.6-terra',
+    name: 'GPT-5.6 Terra',
+    provider: 'openrouter',
+    features: {
+      isRecommended: true,
+      isUnstable: false,
+      maxTokens: 1050000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: false,
+      requiresPro: true
+    }
+  },
+  {
+    id: 'anthropic/claude-sonnet-5',
+    name: 'Claude Sonnet 5',
     provider: 'openrouter',
     features: {
       isRecommended: true,
       isUnstable: false,
       maxTokens: 1000000,
-      supportsVision: false,
-      supportsTools: true
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
     },
     availability: {
-      requiresApiKey: true,
-      requiresPro: false
+      requiresApiKey: false,
+      requiresPro: true
     }
   },
   {
-    id: 'openai/gpt-oss-120b',
-    name: 'GPT-OSS 120B',
+    id: 'deepseek/deepseek-v4-flash',
+    name: 'DeepSeek V4 Flash',
     provider: 'openrouter',
     features: {
+      // "Free" means app-funded for ResumeLM users, not zero provider cost.
+      isFree: true,
       isRecommended: false,
       isUnstable: false,
-      isFree: true,
-      maxTokens: 131072,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'openai/gpt-oss-20b',
-    name: 'GPT-OSS 20B',
-    provider: 'openrouter',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      isFree: true,
-      maxTokens: 131072,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'z-ai/glm-4.6:exacto',
-    name: 'GLM-4.6 Exacto',
-    provider: 'openrouter',
-    features: {
-      isRecommended: false,
-      isUnstable: false,
-      supportsVision: false,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'deepseek/deepseek-v3.2:nitro',
-    name: 'DeepSeek V3.2',
-    provider: 'openrouter',
-    features: {
-      isFree: true,
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 163840,
+      maxTokens: 1048576,
       supportsVision: false,
       supportsTools: true
     },
@@ -233,44 +170,60 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: false
     }
   },
-
-  // Anthropic Models
   {
-    id: 'claude-sonnet-4-6',
-    name: 'Claude Sonnet 4.6',
-    provider: 'anthropic',
-    features: {
-      isRecommended: true,
-      isUnstable: false,
-      maxTokens: 1000000,
-      supportsVision: true,
-      supportsTools: true
-    },
-    availability: {
-      requiresApiKey: true,
-      requiresPro: false
-    }
-  },
-  {
-    id: 'claude-haiku-4-5-20251001',
-    name: 'Claude Haiku 4.5',
-    provider: 'anthropic',
+    id: 'openai/gpt-5.6-sol',
+    name: 'GPT-5.6 Sol',
+    provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
-      maxTokens: 200000,
+      maxTokens: 1050000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: false,
+      requiresPro: true
+    }
+  },
+  {
+    id: 'anthropic/claude-opus-5',
+    name: 'Claude Opus 5',
+    provider: 'openrouter',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 1000000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: false,
+      requiresPro: true
+    }
+  },
+  {
+    id: 'moonshotai/kimi-k3',
+    name: 'Kimi K3',
+    provider: 'openrouter',
+    features: {
+      isRecommended: false,
+      isUnstable: false,
+      maxTokens: 1048576,
       supportsVision: true,
       supportsTools: true
     },
     availability: {
-      requiresApiKey: true,
-      requiresPro: false
+      requiresApiKey: false,
+      requiresPro: true
     }
   },
   {
-    id: 'claude-opus-4-7',
-    name: 'Claude Opus 4.7',
-    provider: 'anthropic',
+    id: 'google/gemini-3.6-flash',
+    name: 'Gemini 3.6 Flash',
+    provider: 'openrouter',
     features: {
       isRecommended: false,
       isUnstable: false,
@@ -284,7 +237,42 @@ export const AI_MODELS: AIModel[] = [
       requiresPro: true
     }
   },
-
+  // Direct Anthropic models remain hidden compatibility targets for users who
+  // previously configured an Anthropic BYOK key. New users see the OpenRouter
+  // versions above, which keep app-funded routing consistent across plans.
+  {
+    id: 'claude-sonnet-5',
+    name: 'Claude Sonnet 5 (Anthropic key)',
+    provider: 'anthropic',
+    isVisible: false,
+    features: {
+      isUnstable: false,
+      maxTokens: 1000000,
+      supportsVision: true,
+      supportsTools: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: false
+    }
+  },
+  {
+    id: 'claude-opus-5',
+    name: 'Claude Opus 5 (Anthropic key)',
+    provider: 'anthropic',
+    isVisible: false,
+    features: {
+      isUnstable: false,
+      maxTokens: 1000000,
+      supportsVision: true,
+      supportsTools: true,
+      isPro: true
+    },
+    availability: {
+      requiresApiKey: true,
+      requiresPro: true
+    }
+  },
 ]
 
 // ========================
@@ -294,35 +282,42 @@ export const AI_MODELS: AIModel[] = [
 // Map legacy or shorthand model IDs to current canonical IDs
 const MODEL_ALIASES: Record<string, string> = {
   // Older Claude IDs → current best equivalents
-  'claude-4-sonnet': 'claude-sonnet-4-6',
-  'claude-3-sonnet-20240229': 'claude-sonnet-4-6',
-  'claude-sonnet-4-20250514': 'claude-sonnet-4-6',
-  'claude-sonnet-4.5': 'claude-sonnet-4-6',
-  'claude-sonnet-4-5-20250929': 'claude-sonnet-4-6',
-  'claude-opus-4.5': 'claude-opus-4-7',
-  'claude-opus-4-5-20251101': 'claude-opus-4-7',
+  'claude-4-sonnet': 'claude-sonnet-5',
+  'claude-3-sonnet-20240229': 'claude-sonnet-5',
+  'claude-sonnet-4-20250514': 'claude-sonnet-5',
+  'claude-sonnet-4.5': 'claude-sonnet-5',
+  'claude-sonnet-4-5-20250929': 'claude-sonnet-5',
+  'claude-sonnet-4-6': 'claude-sonnet-5',
+  'claude-opus-4.5': 'claude-opus-5',
+  'claude-opus-4-5-20251101': 'claude-opus-5',
+  'claude-opus-4-7': 'claude-opus-5',
   // Direct OpenAI and older GPT IDs → OpenRouter-managed equivalents.
   // This also migrates existing localStorage selections away from the
   // exhausted direct OpenAI server key.
-  'gpt-5': 'openai/gpt-5.5',
-  'gpt-5.2': 'openai/gpt-5.5',
-  'gpt-5.2-2025-12-11': 'openai/gpt-5.5',
-  'gpt-5.2-pro': 'openai/gpt-5.5-pro',
-  'gpt-5.2-pro-2025-12-11': 'openai/gpt-5.5-pro',
-  'gpt-5.4': 'openai/gpt-5.5',
-  'gpt-5.4-pro': 'openai/gpt-5.5-pro',
-  'gpt-5.5': 'openai/gpt-5.5',
-  'gpt-5.5-pro': 'openai/gpt-5.5-pro',
+  'gpt-5': 'openai/gpt-5.6-terra',
+  'gpt-5.2': 'openai/gpt-5.6-terra',
+  'gpt-5.2-2025-12-11': 'openai/gpt-5.6-terra',
+  'gpt-5.2-pro': 'openai/gpt-5.6-sol',
+  'gpt-5.2-pro-2025-12-11': 'openai/gpt-5.6-sol',
+  'gpt-5.4': 'openai/gpt-5.6-terra',
+  'gpt-5.4-pro': 'openai/gpt-5.6-sol',
+  'gpt-5.5': 'openai/gpt-5.6-terra',
+  'gpt-5.5-pro': 'openai/gpt-5.6-sol',
+  'openai/gpt-5.5': 'openai/gpt-5.6-terra',
+  'openai/gpt-5.5-pro': 'openai/gpt-5.6-sol',
   'gpt-5.1-chat': 'openai/gpt-5.6-luna',
   'gpt-5.4-mini': 'openai/gpt-5.6-luna',
   'gpt-5.4-nano': 'openai/gpt-5.6-luna',
   'gpt-5-mini-2025-08-07': 'openai/gpt-5.6-luna',
   'gpt-5-mini': 'openai/gpt-5.6-luna',
   'gpt-5-nano': 'openai/gpt-5.6-luna',
-  // Allow DeepSeek without the nitro suffix
-  'deepseek/deepseek-v3.2': 'deepseek/deepseek-v3.2:nitro',
-  // Legacy Gemini 3 model ID without provider prefix
-  'gemini-3-pro-preview': 'google/gemini-3-pro-preview',
+  // DeepSeek model migrations
+  'deepseek/deepseek-v3.2': 'deepseek/deepseek-v4-flash',
+  'deepseek/deepseek-v3.2:nitro': 'deepseek/deepseek-v4-flash',
+  'deepseek-chat': 'deepseek/deepseek-v4-flash',
+  'deepseek-reasoner': 'deepseek/deepseek-v4-pro',
+  // Legacy Gemini model ID without provider prefix
+  'gemini-3-pro-preview': 'google/gemini-3.6-flash',
 }
 
 // ========================
@@ -330,7 +325,7 @@ const MODEL_ALIASES: Record<string, string> = {
 // ========================
 
 export const DEFAULT_MODELS = {
-  PRO_USER: 'openai/gpt-5.5',
+  PRO_USER: 'openai/gpt-5.6-terra',
   FREE_USER: 'openai/gpt-5.6-luna'
 } as const
 
@@ -359,20 +354,20 @@ export const MODEL_DESIGNATIONS = {
   COVER_LETTER: 'openai/gpt-5.6-luna',
   // Full resume tailoring by plan
   JOB_TAILORING_FREE: 'openai/gpt-5.6-luna',
-  JOB_TAILORING_PRO: 'openai/gpt-5.5',
+  JOB_TAILORING_PRO: 'openai/gpt-5.6-terra',
   // Interactive assistant by plan
   CHAT_ASSISTANT_FREE: 'openai/gpt-5.6-luna',
-  CHAT_ASSISTANT_PRO: 'openai/gpt-5.5',
+  CHAT_ASSISTANT_PRO: 'openai/gpt-5.6-terra',
   // Frontier model for complex tasks, deep analysis, best quality
-  FRONTIER: 'openai/gpt-5.5',
+  FRONTIER: 'openai/gpt-5.6-sol',
   // Alternative frontier model
-  FRONTIER_ALT: 'claude-opus-4-7',
+  FRONTIER_ALT: 'anthropic/claude-opus-5',
   // Balanced model - good quality but faster/cheaper than frontier
-  BALANCED: 'openai/gpt-5.6-luna',
+  BALANCED: 'openai/gpt-5.6-terra',
   // Vision-capable model for image analysis
   VISION: 'openai/gpt-5.6-luna',
   // Default models by user type
-  DEFAULT_PRO: 'openai/gpt-5.5',
+  DEFAULT_PRO: 'openai/gpt-5.6-terra',
   DEFAULT_FREE: 'openai/gpt-5.6-luna'
 } as const
 
@@ -391,6 +386,8 @@ export function getCanonicalModelId(modelId: string): string {
  * Get all providers as an array
  */
 export function getProvidersArray(): AIProvider[] {
+  // Include providers that still have hidden compatibility models so existing
+  // BYOK users can continue to manage their keys in Settings.
   const selectableProviders = new Set(AI_MODELS.map(model => model.provider))
   return Object.values(PROVIDERS).filter(provider => selectableProviders.has(provider.id))
 }
@@ -414,7 +411,7 @@ export function getProviderById(id: ServiceName): AIProvider | undefined {
  * Get all models for a specific provider
  */
 export function getModelsByProvider(provider: ServiceName): AIModel[] {
-  return AI_MODELS.filter(model => model.provider === provider)
+  return AI_MODELS.filter(model => model.provider === provider && model.isVisible !== false)
 }
 
 /**
@@ -468,7 +465,7 @@ export function groupModelsByProvider(): GroupedModels[] {
   const grouped = new Map<ServiceName, AIModel[]>()
 
   // Group models by provider
-  AI_MODELS.forEach(model => {
+  AI_MODELS.filter(model => model.isVisible !== false).forEach(model => {
     if (!grouped.has(model.provider)) {
       grouped.set(model.provider, [])
     }
@@ -494,7 +491,9 @@ export function groupModelsByProvider(): GroupedModels[] {
  * Get selectable models for a user
  */
 export function getSelectableModels(isPro: boolean, apiKeys: ApiKey[]): AIModel[] {
-  return AI_MODELS.filter(model => isModelAvailable(model.id, isPro, apiKeys))
+  return AI_MODELS.filter(
+    model => model.isVisible !== false && isModelAvailable(model.id, isPro, apiKeys)
+  )
 }
 
 /**

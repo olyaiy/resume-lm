@@ -38,7 +38,7 @@ describe("resolveAIRequest", () => {
     assert.throws(
       () =>
         resolveAIRequest({
-          requestedModel: "z-ai/glm-4.6:exacto",
+          requestedModel: "anthropic/claude-sonnet-5",
           apiKeys: [],
           isPro: false,
         }),
@@ -50,13 +50,13 @@ describe("resolveAIRequest", () => {
     process.env.OPENROUTER_API_KEY = "server-openrouter";
 
     const result = resolveAIRequest({
-      requestedModel: "openai/gpt-5.5",
+      requestedModel: "openai/gpt-5.6-terra",
       apiKeys: [],
       isPro: true,
     });
 
     assert.equal(result.providerId, "openrouter");
-    assert.equal(result.modelId, "openai/gpt-5.5");
+    assert.equal(result.modelId, "openai/gpt-5.6-terra");
     assert.equal(result.apiKey, "server-openrouter");
     assert.equal(result.usedServerKey, true);
     assert.equal(result.requiresRateLimit, true);

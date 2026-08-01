@@ -59,9 +59,7 @@ function getModelCandidates(config: AIConfig | undefined, isPro: boolean, task: 
   const primaryModel = withTaskModel({ task, isPro, config });
   const fallbackModels: AIConfig[] = [
     getFallbackConfig(config, MODEL_DESIGNATIONS.FAST_CHEAP),
-    getFallbackConfig(config, 'openai/gpt-oss-120b'),
-    getFallbackConfig(config, 'openai/gpt-oss-20b'),
-    getFallbackConfig(config, 'deepseek/deepseek-v3.2:nitro'),
+    getFallbackConfig(config, 'deepseek/deepseek-v4-flash'),
   ];
 
   return dedupeAIConfigs([primaryModel, ...fallbackModels]);

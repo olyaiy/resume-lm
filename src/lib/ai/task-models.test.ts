@@ -7,7 +7,7 @@ import type { AIConfig } from "@/lib/ai-models";
 describe("task model routing", () => {
   it("routes full resume tailoring by plan", () => {
     assert.equal(getTaskModel("jobTailoring", false), "openai/gpt-5.6-luna");
-    assert.equal(getTaskModel("jobTailoring", true), "openai/gpt-5.5");
+    assert.equal(getTaskModel("jobTailoring", true), "openai/gpt-5.6-terra");
   });
 
   it("routes extraction and scoring to GPT-5.6 Luna through OpenRouter", () => {
@@ -26,7 +26,7 @@ describe("task model routing", () => {
 
   it("routes chat assistants through OpenRouter", () => {
     assert.equal(getTaskModel("chatAssistant", false), "openai/gpt-5.6-luna");
-    assert.equal(getTaskModel("chatAssistant", true), "openai/gpt-5.5");
+    assert.equal(getTaskModel("chatAssistant", true), "openai/gpt-5.6-terra");
   });
 
   it("honors a selected model while preserving API keys and custom prompts", () => {
@@ -46,7 +46,7 @@ describe("task model routing", () => {
       config,
     });
 
-    assert.equal(resolved.model, "claude-sonnet-4-6");
+    assert.equal(resolved.model, "claude-sonnet-5");
     assert.deepEqual(resolved.apiKeys, config.apiKeys);
     assert.deepEqual(resolved.customPrompts, config.customPrompts);
   });
