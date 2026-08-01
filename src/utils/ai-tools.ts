@@ -1,12 +1,13 @@
 import { createOpenAI } from '@ai-sdk/openai';
 import { createAnthropic } from '@ai-sdk/anthropic';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
-import { LanguageModelV1 } from 'ai';
+import { LanguageModelV1, wrapLanguageModel } from 'ai';
 import { type AIConfig } from '@/lib/ai-models';
 import {
   resolveAIRequest,
   type ResolvedAIRequest,
 } from '@/lib/ai/access-control';
+import { createAIModelReliabilityMiddleware } from '@/lib/ai/reliability';
 
 // Re-export types for backward compatibility
 export type { ApiKey, AIConfig } from '@/lib/ai-models';
@@ -17,18 +18,22 @@ export function createAIClientFromResolvedRequest(
 ) {
   void useThinking; // Keep for future use
 
+  let baseModel: LanguageModelV1;
+
   switch (resolved.providerId) {
     case 'anthropic':
-      return createAnthropic({ apiKey: resolved.apiKey })(resolved.modelId) as LanguageModelV1;
+      baseModel = createAnthropic({ apiKey: resolved.apiKey })(resolved.modelId) as LanguageModelV1;
+      break;
     
     case 'openai':
-      return createOpenAI({ 
+      baseModel = createOpenAI({
         apiKey: resolved.apiKey,
         compatibility: 'strict'
       })(resolved.modelId) as LanguageModelV1;
+      break;
     
     case 'openrouter':
-      return createOpenRouter({
+      baseModel = createOpenRouter({
         apiKey: resolved.apiKey,
         baseURL: 'https://openrouter.ai/api/v1',
         headers: {
@@ -36,10 +41,21 @@ export function createAIClientFromResolvedRequest(
           'X-Title': 'ResumeLM'
         }
       })(resolved.modelId) as LanguageModelV1;
+      break;
     
     default:
       throw new Error(`Unsupported provider: ${resolved.providerId}`);
   }
+
+  return wrapLanguageModel({
+    model: baseModel,
+    middleware: createAIModelReliabilityMiddleware({
+      providerId: resolved.providerId,
+      modelId: resolved.modelId,
+      apiKey: resolved.apiKey,
+      usedServerKey: resolved.usedServerKey,
+    }),
+  });
 }
 
 export function resolveAIClient(config?: AIConfig, isPro?: boolean, useThinking?: boolean) {

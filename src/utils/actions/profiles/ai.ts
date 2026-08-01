@@ -57,6 +57,7 @@ export async function formatProfileWithAI(
         config: withTaskModel({ task: "structuredExtraction", isPro, config }),
       }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
+        maxRetries: 0,
         experimental_telemetry: telemetry,
         schema: z.object({
           content: z.object({

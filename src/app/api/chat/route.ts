@@ -136,6 +136,7 @@ export async function POST(req: Request) {
     // Build and send the AI call.
     const result = streamText({
       model: aiClient as LanguageModelV1,
+      maxRetries: 0,
       ...(providerOptions ? { providerOptions } : {}),
       system: systemPrompt,
       messages,
@@ -180,6 +181,7 @@ export async function POST(req: Request) {
       return new Response(
         JSON.stringify({
           error: error.message,
+          ...(error.fallbackModelId ? { fallbackModelId: error.fallbackModelId } : {}),
           ...(retryAfter ? { expirationTimestamp: Date.now() + retryAfter * 1000 } : {}),
         }),
         {

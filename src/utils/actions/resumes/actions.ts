@@ -623,6 +623,7 @@ export async function generateResumeScore(
       config: withTaskModel({ task: "resumeScoring", isPro, config }),
     }, (aiClient, telemetry) => generateObject({
       model: aiClient,
+      maxRetries: 0,
       experimental_telemetry: telemetry,
       schema: resumeScoreSchema,
       prompt

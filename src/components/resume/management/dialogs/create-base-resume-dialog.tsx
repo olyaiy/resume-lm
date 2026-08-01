@@ -19,6 +19,7 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { convertTextToResume } from "@/utils/actions/resumes/ai";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
+import { getStoredModelSelection } from "@/lib/ai-models";
 
 interface CreateBaseResumeDialogProps {
   children: React.ReactNode;
@@ -159,9 +160,8 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
         };
 
         // Get model and API key from local storage
-        const MODEL_STORAGE_KEY = 'resumelm-default-model';
         const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
-        const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+        const selectedModel = getStoredModelSelection();
         const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
         let apiKeys = [];
         try {

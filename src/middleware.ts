@@ -27,10 +27,11 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - api/webhooks (webhook endpoints)
+     * - api/ai/model-health (public, read-only health snapshot)
      * - blog (blog section)
      * - public metadata and media files
      * Run on all other routes to protect them
      */
-    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/webhooks|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|mov|m4v|ogv)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml|api/webhooks|api/ai/model-health|blog(?:/.*)?|.*\\.(?:svg|png|jpg|jpeg|gif|webp|mp4|webm|mov|m4v|ogv)$).*)',
   ],
 }

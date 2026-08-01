@@ -8,9 +8,8 @@ import {
 } from "@/lib/zod-schemas";
 import { Job, Resume } from "@/lib/types";
 import { AIConfig } from '@/utils/ai-tools';
-import { MODEL_DESIGNATIONS } from '@/lib/ai-models';
 import { getSubscriptionPlan } from '../stripe/actions';
-import { dedupeAIConfigs, withTaskModel, type AITaskModel } from '@/lib/ai/task-models';
+import { withTaskModel } from '@/lib/ai/task-models';
 import {
   finishAIUsageRequest,
   startAIUsageRequest,
@@ -46,25 +45,6 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
   }
 }
 
-function getFallbackConfig(config: AIConfig | undefined, model: string): AIConfig {
-  return {
-    apiKeys: config?.apiKeys || [],
-    ...(config?.customPrompts ? { customPrompts: config.customPrompts } : {}),
-    model,
-  };
-}
-
-// Build model candidates list - prioritize the task model, then cheaper fallbacks.
-function getModelCandidates(config: AIConfig | undefined, isPro: boolean, task: AITaskModel) {
-  const primaryModel = withTaskModel({ task, isPro, config });
-  const fallbackModels: AIConfig[] = [
-    getFallbackConfig(config, MODEL_DESIGNATIONS.FAST_CHEAP),
-    getFallbackConfig(config, 'deepseek/deepseek-v4-flash'),
-  ];
-
-  return dedupeAIConfigs([primaryModel, ...fallbackModels]);
-}
-
 export async function tailorResumeToJob(
   resume: Resume,
   jobListing: z.infer<typeof simplifiedJobSchema>,
@@ -72,23 +52,17 @@ export async function tailorResumeToJob(
 ) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  const overallStart = Date.now();
-  const modelCandidates = getModelCandidates(config, isPro, "jobTailoring");
-
-  let lastError: unknown;
-
-  for (const candidate of modelCandidates) {
-    let start = Date.now();
-    try {
-      start = Date.now();
-      console.log(
-        `[TAILOR][TRY] ${candidate.model} | STEP: Tailoring resume content | Subscription: ${isPro ? 'PRO' : 'FREE'}`
-      );
+  const selectedConfig = withTaskModel({ task: "jobTailoring", isPro, config });
+  const start = Date.now();
+  console.log(
+    `[TAILOR][TRY] ${selectedConfig.model} | STEP: Tailoring resume content | Subscription: ${isPro ? 'PRO' : 'FREE'}`
+  );
+  try {
       const { object } = await runTrackedAIRequest({
         route: 'actions.jobs.tailorResumeToJob',
         userId: id,
         isPro,
-        config: candidate,
+        config: selectedConfig,
         useThinking: isPro,
       }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
@@ -96,7 +70,7 @@ export async function tailorResumeToJob(
         schema: z.object({
           content: simplifiedResumeSchema,
         }),
-        maxRetries: 2, // retry on failure
+        maxRetries: 0,
         system: `
 
 You are ResumeLM, an advanced AI resume transformer. Rewrite the resume so it is ATS-friendly and tightly aligned to the job description—without adding new facts or inventing experience.
@@ -122,48 +96,34 @@ Your task: produce a polished, tailored resume that meets the schema exactly and
       }));
 
       console.log(
-        `[TAILOR][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Tailoring resume content`
+        `[TAILOR][SUCCESS ✅] ${selectedConfig.model} | Duration: ${Date.now() - start}ms | STEP: Tailoring resume content`
       );
       return object.content satisfies z.infer<typeof simplifiedResumeSchema>;
-    } catch (error) {
-      lastError = error;
-      console.error(
-        `[TAILOR][FAILED ❌] ${candidate.model} | STEP: Tailoring resume content | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
-        error
-      );
-    }
+  } catch (error) {
+    console.error(
+      `[TAILOR][FAILED ❌] ${selectedConfig.model} | STEP: Tailoring resume content | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
+      error
+    );
+    throw error;
   }
-
-  console.error(
-    `[TAILOR][ABORT 🚨] All models failed | Tried: ${modelCandidates.map(m => m.model).join(', ')} | Total Duration: ${
-      Date.now() - overallStart
-    }ms`
-  );
-  throw lastError ?? new Error('Failed to tailor resume');
 }
 
 export async function formatJobListing(jobListing: string, config?: AIConfig) {
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
-  const overallStart = Date.now();
-  const modelCandidates = getModelCandidates(config, isPro, "structuredExtraction");
-
-  let lastError: unknown;
-
-  for (const candidate of modelCandidates) {
-    let start = Date.now();
-    try {
-      start = Date.now();
-      console.log(
-        `[FORMAT][TRY] ${candidate.model} | STEP: Analyzing job description → Formatting requirements | Subscription: ${
-          isPro ? 'PRO' : 'FREE'
-        }`
-      );
+  const selectedConfig = withTaskModel({ task: "structuredExtraction", isPro, config });
+  const start = Date.now();
+  console.log(
+    `[FORMAT][TRY] ${selectedConfig.model} | STEP: Analyzing job description → Formatting requirements | Subscription: ${
+      isPro ? 'PRO' : 'FREE'
+    }`
+  );
+  try {
       const { object } = await runTrackedAIRequest({
         route: 'actions.jobs.formatJobListing',
         userId: id,
         isPro,
-        config: candidate,
+        config: selectedConfig,
         useThinking: isPro,
       }, (aiClient, telemetry) => generateObject({
         model: aiClient as LanguageModelV1,
@@ -213,25 +173,18 @@ export async function formatJobListing(jobListing: string, config?: AIConfig) {
                 - Avoid exposing your internal reasoning.
                 - DO NOT RETURN "<UNKNOWN>", if you are unsure of a piece of data, return an empty string.
                 - FORMAT THE FOLLOWING JOB LISTING AS A JSON OBJECT: ${jobListing}`,
+        maxRetries: 0,
       }));
 
       console.log(
-        `[FORMAT][SUCCESS ✅] ${candidate.model} | Duration: ${Date.now() - start}ms | STEP: Analyzing job description → Formatting requirements`
+        `[FORMAT][SUCCESS ✅] ${selectedConfig.model} | Duration: ${Date.now() - start}ms | STEP: Analyzing job description → Formatting requirements`
       );
       return object.content satisfies Partial<Job>;
-    } catch (error) {
-      lastError = error;
-      console.error(
-        `[FORMAT][FAILED ❌] ${candidate.model} | STEP: Analyzing job description → Formatting requirements | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
-        error
-      );
-    }
+  } catch (error) {
+    console.error(
+      `[FORMAT][FAILED ❌] ${selectedConfig.model} | STEP: Analyzing job description → Formatting requirements | Duration: ${Date.now() - start}ms | Reason: ${(error as Error)?.message ?? 'Unknown error'}`,
+      error
+    );
+    throw error;
   }
-
-  console.error(
-    `[FORMAT][ABORT 🚨] All models failed | Tried: ${modelCandidates.map(m => m.model).join(', ')} | Total Duration: ${
-      Date.now() - overallStart
-    }ms`
-  );
-  throw lastError ?? new Error('Failed to format job listing');
 }

@@ -375,7 +375,36 @@ export const MODEL_DESIGNATIONS = {
 export type ModelDesignation = keyof typeof MODEL_DESIGNATIONS
 
 export function getCanonicalModelId(modelId: string): string {
-  return MODEL_ALIASES[modelId] || modelId
+  let canonical = modelId.trim()
+
+  // Resolve aliases repeatedly so future migrations can point at another
+  // legacy alias without leaving a stale ID in localStorage or telemetry.
+  for (let i = 0; i < 5; i += 1) {
+    const next = MODEL_ALIASES[canonical] ?? MODEL_ALIASES[canonical.toLowerCase()]
+    if (!next || next === canonical) break
+    canonical = next
+  }
+
+  return canonical
+}
+
+/**
+ * Read and migrate the browser's saved model selection in one place. This is
+ * intentionally safe to call from server-rendered modules: it is a no-op
+ * until a browser is available.
+ */
+export function getStoredModelSelection(fallback = ""): string {
+  if (typeof window === "undefined") return fallback
+
+  const storageKey = "resumelm-default-model"
+  const stored = window.localStorage.getItem(storageKey) ?? ""
+  const normalized = getCanonicalModelId(stored || fallback)
+
+  if (normalized !== stored) {
+    window.localStorage.setItem(storageKey, normalized)
+  }
+
+  return normalized
 }
 
 // ========================
@@ -422,23 +451,25 @@ export function isModelAvailable(
   isPro: boolean,
   apiKeys: ApiKey[]
 ): boolean {
-  modelId = getCanonicalModelId(modelId)
-  // Pro users have access to all models
-  if (isPro) return true
-
   const model = getModelById(modelId)
   if (!model) return false
+
+  if (model.availability.requiresPro && !isPro) return false
+
+  // Models marked requiresApiKey cannot use ResumeLM's app-funded key, even
+  // for Pro users. This keeps the selector aligned with server-side access.
+  if (model.availability.requiresApiKey) {
+    return apiKeys.some(
+      key => key.service === model.provider && key.key.trim().length > 0,
+    )
+  }
 
   // Free model allowance
   if (model.features.isFree) return true
 
-  // Check if this is an OpenRouter model (contains forward slash)
-  if (modelId.includes('/')) {
-    return apiKeys.some(key => key.service === 'openrouter')
-  }
-
-  // Check if user has the required API key
-  return apiKeys.some(key => key.service === model.provider)
+  // App-funded OpenRouter models are available to Pro users without a BYOK
+  // key. Other providers require a matching user key.
+  return isPro && model.provider === 'openrouter'
 }
 
 /**

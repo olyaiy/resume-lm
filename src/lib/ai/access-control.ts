@@ -25,6 +25,22 @@ export interface ResolvedAIRequest {
   requiresRateLimit: boolean;
 }
 
+export type AIRequestAccessCode =
+  | "invalid_model"
+  | "unsupported_provider"
+  | "missing_api_key";
+
+export class AIRequestAccessError extends Error {
+  constructor(
+    message: string,
+    public readonly code: AIRequestAccessCode,
+    public readonly modelId?: string,
+  ) {
+    super(message);
+    this.name = "AIRequestAccessError";
+  }
+}
+
 type HiddenModel = Pick<AIModel, "id" | "name" | "provider" | "features" | "availability">;
 
 const HIDDEN_MODELS: Record<string, HiddenModel> = {};
@@ -34,18 +50,24 @@ function getKnownModel(modelId: string): HiddenModel | undefined {
 }
 
 function findUserKey(apiKeys: ResolveAIRequestInput["apiKeys"], providerId: ServiceName) {
-  return apiKeys.find((apiKey) => apiKey.service === providerId)?.key;
+  return apiKeys.find(
+    (apiKey) => apiKey.service === providerId && apiKey.key.trim().length > 0,
+  )?.key.trim();
 }
 
 function getServerKey(providerId: ServiceName) {
   const provider = getProviderById(providerId);
   if (!provider) {
-    throw new Error(`Unsupported provider: ${providerId}`);
+    throw new AIRequestAccessError(
+      `Unsupported provider: ${providerId}`,
+      "unsupported_provider",
+      providerId,
+    );
   }
 
   return {
     provider,
-    apiKey: process.env[provider.envKey],
+    apiKey: process.env[provider.envKey]?.trim(),
   };
 }
 
@@ -53,12 +75,20 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
   const model = getKnownModel(input.requestedModel);
 
   if (!model) {
-    throw new Error(`Unknown model: ${input.requestedModel}`);
+    throw new AIRequestAccessError(
+      `Unknown model: ${input.requestedModel}`,
+      "invalid_model",
+      input.requestedModel,
+    );
   }
 
   const provider = getProviderById(model.provider);
   if (!provider) {
-    throw new Error(`Unsupported provider: ${model.provider}`);
+    throw new AIRequestAccessError(
+      `Unsupported provider: ${model.provider}`,
+      "unsupported_provider",
+      model.id,
+    );
   }
 
   const freeServerModel =
@@ -67,7 +97,7 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
   if (input.isPro || freeServerModel) {
     const { apiKey } = getServerKey(model.provider);
 
-    if (apiKey) {
+    if (apiKey?.length) {
       return {
         providerId: model.provider,
         modelId: model.id,
@@ -80,7 +110,11 @@ export function resolveAIRequest(input: ResolveAIRequestInput): ResolvedAIReques
 
   const userApiKey = findUserKey(input.apiKeys, model.provider);
   if (!userApiKey) {
-    throw new Error(`${provider.name} API key not found in user configuration`);
+    throw new AIRequestAccessError(
+      `${provider.name} API key not found in user configuration`,
+      "missing_api_key",
+      model.id,
+    );
   }
 
   return {

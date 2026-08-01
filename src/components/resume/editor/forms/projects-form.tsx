@@ -20,6 +20,7 @@ import { generateProjectPoints, improveProject } from "@/utils/actions/resumes/a
 import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
 import Tiptap from "@/components/ui/lazy-tiptap";
+import { getStoredModelSelection } from "@/lib/ai-models";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
@@ -159,10 +160,9 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
     
     try {
       // Get model and API key from local storage
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 
@@ -246,10 +246,9 @@ export const ProjectsForm = memo(function ProjectsFormComponent({
     }));
     
     try {
-      const MODEL_STORAGE_KEY = 'resumelm-default-model';
       const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
 
-      const selectedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+      const selectedModel = getStoredModelSelection();
       const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
       let apiKeys = [];
 

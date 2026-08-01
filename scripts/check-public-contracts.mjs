@@ -5,7 +5,7 @@ import { join } from "node:path";
 const root = process.cwd();
 const publicSources = [
   "README.md",
-  "src/app/page.tsx",
+  "src/app/(marketing)/page.tsx",
   "src/components/landing/Hero.tsx",
   "src/components/landing/FeatureHighlights.tsx",
   "src/components/landing/PricingPlans.tsx",
@@ -39,7 +39,14 @@ for (const relativePath of publicSources) {
 
 assert.equal(existsSync(join(root, "public/ResumeLM.mp4")), true);
 assert.equal(existsSync(join(root, "public/logos/deepseek-logo-full.png")), true);
-for (const route of ["privacy", "terms", "refund", "security", "robots.ts", "sitemap.ts"]) {
+for (const route of [
+  "(marketing)/privacy",
+  "(marketing)/terms",
+  "(marketing)/refund",
+  "(marketing)/security",
+  "robots.ts",
+  "sitemap.ts",
+]) {
   assert.equal(existsSync(join(root, `src/app/${route}`)), true, `missing public route ${route}`);
 }
 
