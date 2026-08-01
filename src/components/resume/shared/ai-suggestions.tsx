@@ -3,7 +3,7 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Check, Sparkles, X } from "lucide-react";
-import Tiptap from "@/components/ui/tiptap";
+import Tiptap from "@/components/ui/lazy-tiptap";
 
 interface AISuggestion {
   id: string;
@@ -118,4 +118,4 @@ export function AISuggestions({ suggestions, onApprove, onDelete }: AISuggestion
       </div>
     </div>
   );
-} 
+}

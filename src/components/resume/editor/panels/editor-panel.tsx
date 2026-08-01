@@ -2,15 +2,11 @@
 
 import { Resume, Profile, Job, DocumentSettings } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Accordion } from "@/components/ui/accordion";
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { Suspense, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { ResumeEditorActions } from "../actions/resume-editor-actions";
-import { TailoredJobAccordion } from "../../management/cards/tailored-job-card";
 import { BasicInfoForm } from "../forms/basic-info-form";
-import ChatBot from "../../assistant/chatbot";
-import { CoverLetterPanel } from "./cover-letter-panel";
 import {
   WorkExperienceForm,
   EducationForm,
@@ -19,7 +15,12 @@ import {
   DocumentSettingsForm
 } from '../dynamic-components';
 import { ResumeEditorTabs } from "../header/resume-editor-tabs";
-import ResumeScorePanel from "./resume-score-panel";
+import {
+  ChatAssistantSlot,
+  LazyCoverLetterPanel,
+  LazyResumeScorePanel,
+  LazyTailoredJobAccordion,
+} from "./lazy-editor-features";
 
 
 
@@ -60,13 +61,11 @@ export function EditorPanel({
 
 
             {/* Tailored Job Accordion */}
-            <Accordion type="single" collapsible defaultValue="basic" className="mt-6">
-              <TailoredJobAccordion
-                resume={resume}
-                job={job}
-                isLoading={isLoadingJob}
-              />
-            </Accordion>
+            <LazyTailoredJobAccordion
+              resume={resume}
+              job={job}
+              isLoading={isLoadingJob}
+            />
 
             {/* Tabs */}  
             <Tabs defaultValue="basic" className="mb-4">
@@ -164,7 +163,7 @@ export function EditorPanel({
 
               {/* Cover Letter Form */}
               <TabsContent value="cover-letter">
-                <CoverLetterPanel
+                <LazyCoverLetterPanel
                   resume={resume}
                   job={job}
                 />
@@ -173,7 +172,7 @@ export function EditorPanel({
 
               {/* Resume Score Form */}
               <TabsContent value="resume-score">
-                <ResumeScorePanel
+                <LazyResumeScorePanel
                   resume={resume}
                   job={job}
                 />
@@ -189,7 +188,7 @@ export function EditorPanel({
           ? "bg-purple-50/50 border-purple-200/40"
           : "bg-pink-50/80 border-pink-300/50 shadow-sm shadow-pink-200/20"
       )}>
-        <ChatBot 
+        <ChatAssistantSlot
           resume={resume} 
           onResumeChange={onResumeChange}
           job={job}

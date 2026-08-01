@@ -16,19 +16,31 @@ import { ProUpgradeButton } from "@/components/settings/pro-upgrade-button";
 interface TextImportDialogProps {
   resume: Resume;
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
-  trigger: React.ReactNode;
+  trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
 export function TextImportDialog({
   resume,
   onResumeChange,
-  trigger
+  trigger,
+  open: controlledOpen,
+  onOpenChange: controlledOnOpenChange,
 }: TextImportDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const open = controlledOpen ?? internalOpen;
   const [content, setContent] = useState("");
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [apiKeyError, setApiKeyError] = useState("");
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (controlledOpen === undefined) {
+      setInternalOpen(nextOpen);
+    }
+    controlledOnOpenChange?.(nextOpen);
+  };
 
   useEffect(() => {
     if (!open) {
@@ -116,7 +128,7 @@ export function TextImportDialog({
         title: "Import successful",
         description: "Your resume has been updated with the imported content.",
       });
-      setOpen(false);
+      handleOpenChange(false);
       setContent("");
     } catch (error) {
       console.error('Import error:', error);
@@ -138,10 +150,8 @@ export function TextImportDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent className="sm:max-w-[600px] bg-white/95 backdrop-blur-xl border-white/40 shadow-2xl">
         <DialogHeader>
           <DialogTitle className="text-2xl bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
@@ -226,7 +236,7 @@ export function TextImportDialog({
         <DialogFooter>
           <Button
             variant="outline"
-            onClick={() => setOpen(false)}
+            onClick={() => handleOpenChange(false)}
             className="border-gray-200"
           >
             Cancel
@@ -249,4 +259,4 @@ export function TextImportDialog({
       </DialogContent>
     </Dialog>
   );
-} 
+}
