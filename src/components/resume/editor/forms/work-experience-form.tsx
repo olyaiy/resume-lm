@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
-import Tiptap from "@/components/ui/tiptap";
+import Tiptap from "@/components/ui/lazy-tiptap";
 import { generateWorkExperiencePoints, improveWorkExperience } from "@/utils/actions/resumes/ai";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";

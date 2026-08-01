@@ -1,6 +1,6 @@
 'use client';
 
-import Tiptap from "@/components/ui/tiptap";
+import Tiptap from "@/components/ui/lazy-tiptap";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Sparkles, Loader2, Trash2, Check, X } from "lucide-react";
@@ -180,4 +180,4 @@ export function DescriptionPoint({
       </div>
     </div>
   );
-} 
+}

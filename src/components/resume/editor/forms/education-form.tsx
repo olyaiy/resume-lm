@@ -9,7 +9,7 @@ import { Plus, Trash2, ChevronUp, ChevronDown } from "lucide-react";
 import { ImportFromProfileDialog } from "../../management/dialogs/import-from-profile-dialog";
 import { memo } from 'react';
 import { cn } from "@/lib/utils";
-import Tiptap from "@/components/ui/tiptap";
+import Tiptap from "@/components/ui/lazy-tiptap";
 
 
 interface EducationFormProps {
@@ -316,4 +316,4 @@ export const EducationForm = memo(function EducationFormComponent({
       ))}
     </div>
   );
-}, areEducationPropsEqual); 
+}, areEducationPropsEqual);

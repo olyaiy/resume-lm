@@ -1,11 +1,19 @@
 'use client';
 
+import dynamic from "next/dynamic";
 import { Resume } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { ResumePreview } from "../preview/resume-preview";
-import CoverLetter from "@/components/cover-letter/cover-letter";
 import { ResumeContextMenu } from "../preview/resume-context-menu";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
+import { LoadingFallback } from "../shared/LoadingFallback";
+
+const LazyCoverLetter = dynamic(() => import("@/components/cover-letter/cover-letter"), {
+  ssr: false,
+  loading: () => <LoadingFallback lines={3} />,
+});
 
 interface PreviewPanelProps {
   resume: Resume;
@@ -16,7 +24,7 @@ interface PreviewPanelProps {
 
 export function PreviewPanel({
   resume,
-  // onResumeChange,
+  onResumeChange,
   width
 }: PreviewPanelProps) {
   return (
@@ -32,20 +40,21 @@ export function PreviewPanel({
         </ResumeContextMenu>
       </div>
 
-      <CoverLetter 
-        // resumeId={resume.id} 
-        // hasCoverLetter={resume.has_cover_letter}
-        // coverLetterData={resume.cover_letter}
-        containerWidth={width}
-        // onCoverLetterChange={(data: Record<string, unknown>) => {
-        //   if ('has_cover_letter' in data) {
-        //     onResumeChange('has_cover_letter', data.has_cover_letter as boolean);
-        //   }
-        //   if ('cover_letter' in data) {    
-        //     onResumeChange('cover_letter', data.cover_letter as Record<string, unknown>);
-        //   }
-        // }}
-      />
+      {resume.has_cover_letter ? (
+        <LazyCoverLetter containerWidth={width} />
+      ) : (
+        <div className="p-4">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-full border-emerald-600/50 text-emerald-700 hover:bg-emerald-50"
+            onClick={() => onResumeChange("has_cover_letter", true)}
+          >
+            <Plus className="mr-2 h-4 w-4" />
+            Create Cover Letter
+          </Button>
+        </div>
+      )}
     </ScrollArea>
   );
 } 

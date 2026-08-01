@@ -19,7 +19,7 @@ import { AISuggestions } from "../../shared/ai-suggestions";
 import { generateProjectPoints, improveProject } from "@/utils/actions/resumes/ai";
 import { Badge } from "@/components/ui/badge";
 import { KeyboardEvent } from "react";
-import Tiptap from "@/components/ui/tiptap";
+import Tiptap from "@/components/ui/lazy-tiptap";
 import { AIImprovementPrompt } from "../../shared/ai-improvement-prompt";
 import { AIGenerationSettingsTooltip } from "../components/ai-generation-tooltip";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";

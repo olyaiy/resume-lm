@@ -11,7 +11,7 @@ import History from '@tiptap/extension-history'
 import { memo } from 'react'
 import { cn } from '@/lib/utils'
 
-interface TiptapProps {
+export interface TiptapProps {
   content: string;
   onChange: (content: string) => void;
   className?: string;
