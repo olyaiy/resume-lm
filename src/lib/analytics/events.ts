@@ -8,7 +8,9 @@ export const AnalyticsEvents = {
   AIRequestFailed: "ai_request_failed",
   CheckoutStarted: "checkout_started",
   CheckoutCompleted: "checkout_completed",
-  SubscriptionActivated: "subscription_activated",
+  TrialStarted: "trial_started",
+  FirstInvoicePaid: "first_invoice_paid",
+  InvoicePaymentFailed: "invoice_payment_failed",
   SubscriptionCanceled: "subscription_canceled",
 } as const;
 
@@ -50,6 +52,7 @@ export function buildAnalyticsPayload(input: {
   apiKey: string;
   distinctId: string;
   event: AnalyticsEventName;
+  insertId?: string;
   properties?: AnalyticsProperties;
 }) {
   return {
@@ -59,6 +62,7 @@ export function buildAnalyticsPayload(input: {
     properties: {
       ...sanitizeAnalyticsProperties(input.properties),
       $geoip_disable: true,
+      ...(input.insertId ? { $insert_id: input.insertId } : {}),
     },
   };
 }

@@ -17,6 +17,7 @@ function getCaptureUrl() {
 export async function captureServerAnalyticsEvent(input: {
   distinctId: string | null | undefined;
   event: AnalyticsEventName;
+  insertId?: string;
   properties?: AnalyticsProperties;
 }) {
   if (!posthogKey || !input.distinctId) return;
@@ -32,6 +33,7 @@ export async function captureServerAnalyticsEvent(input: {
           apiKey: posthogKey,
           distinctId: input.distinctId,
           event: input.event,
+          insertId: input.insertId,
           properties: input.properties,
         })
       ),

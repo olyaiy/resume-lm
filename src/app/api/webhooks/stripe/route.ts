@@ -6,6 +6,11 @@ import { manageSubscriptionStatusChange } from '@/utils/actions/stripe/actions'
 import { createServiceClient } from '@/utils/supabase/server'
 import { AnalyticsEvents } from '@/lib/analytics/events'
 import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
+import {
+  getInvoiceSubscriptionId,
+  isFirstPaidInvoice,
+  shouldCaptureTrialStarted,
+} from '@/lib/stripe/billing-events'
 import type { Subscription } from '@/lib/types'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
@@ -17,6 +22,7 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 const relevantEvents = new Set([
   'checkout.session.completed',
   'invoice.paid',
+  'invoice.payment_failed',
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
@@ -164,32 +170,145 @@ function getSubscriptionEventProperties(
   };
 }
 
-async function captureSubscriptionLifecycleEvent(input: {
+async function captureTrialStartedEvent(input: {
   eventType: string;
+  subscription: Stripe.Subscription;
+  previousStatus?: Stripe.Subscription.Status;
+  subscriptionData: Partial<Subscription>;
+}) {
+  if (
+    !shouldCaptureTrialStarted({
+      eventType: input.eventType,
+      status: input.subscription.status,
+      previousStatus: input.previousStatus,
+    })
+  ) {
+    return;
+  }
+
+  const userId = input.subscriptionData.user_id;
+  if (!userId) return;
+
+  await captureServerAnalyticsEvent({
+    distinctId: userId,
+    event: AnalyticsEvents.TrialStarted,
+    insertId: `${input.subscription.id}:trial_started`,
+    properties: {
+      ...getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+      trial_start: input.subscription.trial_start
+        ? new Date(input.subscription.trial_start * 1000).toISOString()
+        : null,
+      trial_end: input.subscription.trial_end
+        ? new Date(input.subscription.trial_end * 1000).toISOString()
+        : null,
+    },
+  });
+}
+
+async function captureSubscriptionCanceledEvent(input: {
+  eventType: string;
+  subscription: Stripe.Subscription;
+  subscriptionData: Partial<Subscription>;
+}) {
+  if (input.eventType !== 'customer.subscription.deleted') return;
+
+  const userId = input.subscriptionData.user_id;
+  if (!userId) return;
+
+  await captureServerAnalyticsEvent({
+    distinctId: userId,
+    event: AnalyticsEvents.SubscriptionCanceled,
+    insertId: `${input.subscription.id}:subscription_canceled`,
+    properties: {
+      ...getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+      canceled_at: input.subscription.canceled_at
+        ? new Date(input.subscription.canceled_at * 1000).toISOString()
+        : null,
+      ended_at: input.subscription.ended_at
+        ? new Date(input.subscription.ended_at * 1000).toISOString()
+        : null,
+    },
+  });
+}
+
+async function captureInvoicePaymentFailedEvent(input: {
+  eventType: string;
+  invoice: Stripe.Invoice;
+  subscriptionData: Partial<Subscription>;
+}) {
+  if (input.eventType !== 'invoice.payment_failed') return;
+
+  const userId = input.subscriptionData.user_id;
+  if (!userId) return;
+
+  await captureServerAnalyticsEvent({
+    distinctId: userId,
+    event: AnalyticsEvents.InvoicePaymentFailed,
+    insertId: `${input.invoice.id}:invoice_payment_failed:${input.invoice.attempt_count ?? 'unknown'}`,
+    properties: {
+      ...getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+      stripe_invoice_id: input.invoice.id,
+      amount_due: input.invoice.amount_due,
+      amount_remaining: input.invoice.amount_remaining,
+      currency: input.invoice.currency,
+      billing_reason: input.invoice.billing_reason,
+      attempt_count: input.invoice.attempt_count,
+      next_payment_attempt: input.invoice.next_payment_attempt
+        ? new Date(input.invoice.next_payment_attempt * 1000).toISOString()
+        : null,
+    },
+  });
+}
+
+async function captureFirstInvoicePaidEvent(input: {
+  invoice: InvoiceWithSubscription;
+  subscriptionId: string;
   subscriptionData: Partial<Subscription>;
 }) {
   const userId = input.subscriptionData.user_id;
   if (!userId) return;
 
-  if (
-    ['checkout.session.completed', 'customer.subscription.created'].includes(input.eventType) &&
-    input.subscriptionData.subscription_plan === 'pro' &&
-    input.subscriptionData.subscription_status === 'active'
-  ) {
-    await captureServerAnalyticsEvent({
-      distinctId: userId,
-      event: AnalyticsEvents.SubscriptionActivated,
-      properties: getSubscriptionEventProperties(input.subscriptionData, input.eventType),
+  let paidSubscriptionInvoices: Stripe.Invoice[];
+  try {
+    const invoices = await stripe.invoices.list({
+      subscription: input.subscriptionId,
+      status: 'paid',
+      limit: 100,
     });
+    paidSubscriptionInvoices = invoices.data;
+  } catch (error) {
+    // Leave this webhook unprocessed so Stripe retries if the history query is
+    // temporarily unavailable. The stable PostHog insert id keeps a retry
+    // from creating a duplicate lifecycle event.
+    console.warn('Unable to determine first paid invoice', {
+      invoiceId: input.invoice.id,
+      subscriptionId: input.subscriptionId,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
+    throw error;
   }
 
-  if (input.subscriptionData.subscription_status === 'canceled') {
-    await captureServerAnalyticsEvent({
-      distinctId: userId,
-      event: AnalyticsEvents.SubscriptionCanceled,
-      properties: getSubscriptionEventProperties(input.subscriptionData, input.eventType),
-    });
+  if (
+    !isFirstPaidInvoice({
+      invoice: input.invoice,
+      paidSubscriptionInvoices,
+    })
+  ) {
+    return;
   }
+
+  await captureServerAnalyticsEvent({
+    distinctId: userId,
+    event: AnalyticsEvents.FirstInvoicePaid,
+    insertId: `${input.invoice.id}:first_invoice_paid`,
+    properties: {
+      ...getSubscriptionEventProperties(input.subscriptionData, 'invoice.paid'),
+      stripe_invoice_id: input.invoice.id,
+      amount_paid: input.invoice.amount_paid,
+      currency: input.invoice.currency,
+      billing_reason: input.invoice.billing_reason,
+    },
+  });
 }
 
 export async function POST(req: Request) {
@@ -288,25 +407,40 @@ export async function POST(req: Request) {
               properties: getSubscriptionEventProperties(subscriptionData, event.type),
             });
           }
-          await captureSubscriptionLifecycleEvent({
-            eventType: event.type,
-            subscriptionData,
-          });
         }
         break;
       }
 
       case 'invoice.paid': {
         const invoice = event.data.object as InvoiceWithSubscription;
-        const subscriptionId = getSubscriptionId(invoice.subscription);
+        const subscriptionId = getInvoiceSubscriptionId(invoice);
         
         if (subscriptionId) {
           const subscriptionData = await handleSubscriptionChange(
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
-          await captureSubscriptionLifecycleEvent({
+          await captureFirstInvoicePaidEvent({
+            invoice,
+            subscriptionId,
+            subscriptionData,
+          });
+        }
+        break;
+      }
+
+      case 'invoice.payment_failed': {
+        const invoice = event.data.object as InvoiceWithSubscription;
+        const subscriptionId = getInvoiceSubscriptionId(invoice);
+
+        if (subscriptionId) {
+          const subscriptionData = await handleSubscriptionChange(
+            getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
+            subscriptionId
+          );
+          await captureInvoicePaymentFailedEvent({
             eventType: event.type,
+            invoice,
             subscriptionData,
           });
         }
@@ -352,8 +486,10 @@ export async function POST(req: Request) {
           getCustomerId(subscription.customer),
           subscription.id
         );
-        await captureSubscriptionLifecycleEvent({
+        await captureTrialStartedEvent({
           eventType: event.type,
+          subscription,
+          previousStatus: previousAttributes.status,
           subscriptionData,
         });
         break;
@@ -374,8 +510,9 @@ export async function POST(req: Request) {
           getCustomerId(subscription.customer),
           subscription.id
         );
-        await captureSubscriptionLifecycleEvent({
+        await captureSubscriptionCanceledEvent({
           eventType: event.type,
+          subscription,
           subscriptionData,
         });
         console.log('✅ Subscription deletion processed successfully');
@@ -396,17 +533,6 @@ export async function POST(req: Request) {
           console.log('🗑️ Deleted subscription record for customer:', {
             customerId: customer.id,
             supabaseUUID: customer.metadata.supabaseUUID
-          });
-          await captureServerAnalyticsEvent({
-            distinctId: customer.metadata.supabaseUUID,
-            event: AnalyticsEvents.SubscriptionCanceled,
-            properties: {
-              stripe_subscription_id: null,
-              subscription_status: 'canceled',
-              subscription_plan: null,
-              current_period_end: null,
-              event_type: event.type,
-            },
           });
         } catch (error) {
           console.error('❌ Failed to clear Stripe customer data:', error);
