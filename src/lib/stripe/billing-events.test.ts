@@ -2,6 +2,8 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 
 import {
+  getPaymentFailureRecoveryFields,
+  getPaymentRecoveryClearedFields,
   getInvoiceSubscriptionId,
   isFirstPaidInvoice,
   shouldCaptureTrialStarted,
@@ -111,5 +113,28 @@ describe("Stripe billing lifecycle event classification", () => {
       ),
       "sub_current"
     );
+  });
+
+  it("records the Stripe retry attempt and next scheduled attempt", () => {
+    assert.deepEqual(
+      getPaymentFailureRecoveryFields({
+        attempt_count: 2,
+        created: 1770000000,
+        next_payment_attempt: 1770086400,
+      }),
+      {
+        payment_failure_count: 2,
+        last_payment_failed_at: "2026-02-02T02:40:00.000Z",
+        next_payment_attempt_at: "2026-02-03T02:40:00.000Z",
+      },
+    );
+  });
+
+  it("clears recovery metadata after a paid invoice", () => {
+    assert.deepEqual(getPaymentRecoveryClearedFields(), {
+      payment_failure_count: 0,
+      last_payment_failed_at: null,
+      next_payment_attempt_at: null,
+    });
   });
 });

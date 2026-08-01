@@ -323,7 +323,10 @@ export async function getSubscriptionStatus() {
       current_period_end,
       trial_end,
       stripe_customer_id,
-      stripe_subscription_id
+      stripe_subscription_id,
+      payment_failure_count,
+      last_payment_failed_at,
+      next_payment_attempt_at
     `)
     .eq('user_id', user.id)
     .single();
@@ -338,7 +341,10 @@ export async function getSubscriptionStatus() {
         current_period_end: null,
         trial_end: null,
         stripe_customer_id: null,
-        stripe_subscription_id: null
+        stripe_subscription_id: null,
+        payment_failure_count: 0,
+        last_payment_failed_at: null,
+        next_payment_attempt_at: null
       };
     }
     throw new Error('Failed to fetch subscription status');

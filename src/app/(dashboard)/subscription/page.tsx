@@ -12,6 +12,9 @@ interface Profile {
   trial_end: string | null;
   stripe_customer_id: string | null;
   stripe_subscription_id: string | null;
+  payment_failure_count?: number | null;
+  last_payment_failed_at?: string | null;
+  next_payment_attempt_at?: string | null;
 }
 
 export default async function PlansPage() {

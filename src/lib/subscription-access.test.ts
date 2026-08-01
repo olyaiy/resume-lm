@@ -55,4 +55,38 @@ describe("getSubscriptionAccessState", () => {
     assert.equal(result.effectivePlan, "pro");
     assert.equal(result.isCanceling, true);
   });
+
+  it("keeps Pro access during Stripe's past-due retry window", () => {
+    const result = getSubscriptionAccessState(
+      {
+        subscription_plan: "pro",
+        subscription_status: "past_due",
+        stripe_subscription_id: "sub_1",
+        current_period_end: "2026-06-01T00:00:00.000Z",
+        trial_end: null,
+      },
+      now
+    );
+
+    assert.equal(result.isPastDue, true);
+    assert.equal(result.hasProAccess, true);
+    assert.equal(result.effectivePlan, "pro");
+  });
+
+  it("does not keep expired past-due access open forever", () => {
+    const result = getSubscriptionAccessState(
+      {
+        subscription_plan: "pro",
+        subscription_status: "past_due",
+        stripe_subscription_id: "sub_1",
+        current_period_end: "2026-05-01T00:00:00.000Z",
+        trial_end: null,
+      },
+      now
+    );
+
+    assert.equal(result.hasProAccess, false);
+    assert.equal(result.isExpiredProAccess, true);
+    assert.equal(result.effectivePlan, "free");
+  });
 });

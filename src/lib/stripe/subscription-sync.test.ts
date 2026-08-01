@@ -43,6 +43,23 @@ describe("mapStripeSubscriptionToAppSubscription", () => {
     assert.equal(result.subscription_status, "active");
   });
 
+  it("preserves a past-due Pro subscription while Stripe retries payment", () => {
+    const result = mapStripeSubscriptionToAppSubscription({
+      userId: "user_1",
+      customerId: "cus_1",
+      subscriptionId: "sub_1",
+      priceId: proPriceId,
+      stripeStatus: "past_due",
+      currentPeriodEnd: new Date("2026-06-01T00:00:00Z"),
+      trialEnd: null,
+      cancelAtPeriodEnd: false,
+      proPriceId,
+    });
+
+    assert.equal(result.subscription_plan, "pro");
+    assert.equal(result.subscription_status, "past_due");
+  });
+
   it("maps non-Pro prices to free even when Stripe is active", () => {
     const result = mapStripeSubscriptionToAppSubscription({
       userId: "user_1",
@@ -146,6 +163,28 @@ describe("shouldSkipStaleInactiveSubscriptionUpdate", () => {
     });
 
     assert.equal(shouldSkip, false);
+  });
+
+  it("protects a current past-due recovery cycle from stale inactive events", () => {
+    const shouldSkip = shouldSkipStaleInactiveSubscriptionUpdate({
+      now,
+      currentSubscription: {
+        stripe_subscription_id: "sub_current",
+        subscription_plan: "pro",
+        subscription_status: "past_due",
+        current_period_end: "2026-06-01T00:00:00.000Z",
+        trial_end: null,
+      },
+      incomingSubscription: {
+        stripe_subscription_id: "sub_old",
+        subscription_plan: "free",
+        subscription_status: "canceled",
+        current_period_end: "2026-05-01T00:00:00.000Z",
+        trial_end: null,
+      },
+    });
+
+    assert.equal(shouldSkip, true);
   });
 
   it("does not skip stale updates when the current entitlement has expired", () => {

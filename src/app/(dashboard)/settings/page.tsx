@@ -14,7 +14,7 @@ export default async function SettingsPage() {
   const { data: subscription } = user
     ? await supabase
         .from('subscriptions')
-        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id')
+        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id, payment_failure_count, last_payment_failed_at, next_payment_attempt_at')
         .eq('user_id', user.id)
         .maybeSingle()
     : { data: null };

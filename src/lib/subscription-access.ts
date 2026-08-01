@@ -4,10 +4,14 @@ export interface SubscriptionSnapshot {
   current_period_end?: string | null;
   trial_end?: string | null;
   stripe_subscription_id?: string | null;
+  payment_failure_count?: number | null;
+  last_payment_failed_at?: string | null;
+  next_payment_attempt_at?: string | null;
 }
 
 export interface SubscriptionAccessState {
   isTrialing: boolean;
+  isPastDue: boolean;
   isWithinAccessWindow: boolean;
   hasStripeSubscription: boolean;
   hasProAccess: boolean;
@@ -59,25 +63,31 @@ export function getSubscriptionAccessState(
   const trialEnd = parseDate(subscription?.trial_end);
 
   const isTrialing = isFutureDate(trialEnd, now);
+  const isPastDue = status === "past_due";
   const hasStripeSubscription = Boolean(subscription?.stripe_subscription_id);
   const isWithinAccessWindow = isFutureDate(currentPeriodEnd, now);
 
   const hasManualProAccess = plan === "pro" && status === "active";
   const hasTrialingProAccess = plan === "pro" && isTrialing;
+  const hasPastDueProAccess = plan === "pro" && isPastDue && isWithinAccessWindow;
   const hasCancelingProAccess = plan === "pro" && status === "canceled" && isWithinAccessWindow;
 
   const hasProAccess =
-    hasManualProAccess || hasTrialingProAccess || hasCancelingProAccess;
+    hasManualProAccess || hasTrialingProAccess || hasPastDueProAccess || hasCancelingProAccess;
 
   const hadPaidAccess = plan === "pro";
   const isCanceling = status === "canceled" && isWithinAccessWindow;
-  const isExpiredProAccess = status === "canceled" && !isWithinAccessWindow && hadPaidAccess;
+  const isExpiredProAccess =
+    (status === "canceled" || status === "past_due") &&
+    !isWithinAccessWindow &&
+    hadPaidAccess;
 
   const hasSubscriptionRecord = Boolean(subscription);
   const effectivePlan = hasSubscriptionRecord ? (hasProAccess ? "pro" : "free") : "";
 
   return {
     isTrialing,
+    isPastDue,
     isWithinAccessWindow,
     hasStripeSubscription,
     hasProAccess,

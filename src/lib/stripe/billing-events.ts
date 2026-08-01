@@ -77,3 +77,30 @@ export function isFirstPaidInvoice(input: {
       candidate.amount_paid > 0
   );
 }
+
+export interface PaymentRecoveryFields {
+  payment_failure_count: number;
+  last_payment_failed_at: string | null;
+  next_payment_attempt_at: string | null;
+}
+
+export function getPaymentFailureRecoveryFields(input: Pick<
+  Stripe.Invoice,
+  "attempt_count" | "created" | "next_payment_attempt"
+>): PaymentRecoveryFields {
+  return {
+    payment_failure_count: Math.max(1, input.attempt_count ?? 1),
+    last_payment_failed_at: new Date(input.created * 1000).toISOString(),
+    next_payment_attempt_at: input.next_payment_attempt
+      ? new Date(input.next_payment_attempt * 1000).toISOString()
+      : null,
+  };
+}
+
+export function getPaymentRecoveryClearedFields(): PaymentRecoveryFields {
+  return {
+    payment_failure_count: 0,
+    last_payment_failed_at: null,
+    next_payment_attempt_at: null,
+  };
+}
