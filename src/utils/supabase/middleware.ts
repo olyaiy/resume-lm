@@ -17,14 +17,34 @@ const SUBSCRIPTION_EXEMPT_ROUTES = [
   '/api',
 ]
 
+const PUBLIC_ROUTE_PREFIXES = [
+  '/auth',
+  '/blog',
+  '/privacy',
+  '/terms',
+  '/refund',
+  '/security',
+]
+
+export function isPublicRoute(pathname: string): boolean {
+  return pathname === '/' || PUBLIC_ROUTE_PREFIXES.some((route) =>
+    pathname === route || pathname.startsWith(`${route}/`)
+  )
+}
+
 function isSubscriptionExemptRoute(pathname: string): boolean {
   return SUBSCRIPTION_EXEMPT_ROUTES.some(route => pathname.startsWith(route))
 }
 
 export async function updateSession(request: NextRequest) {
-  // Debug logging
-  console.log('🔍 updateSession running on:', request.nextUrl.pathname)
   const pathname = request.nextUrl.pathname
+
+  // Marketing and auth routes must remain cacheable and must not pay for a
+  // Supabase session lookup. OAuth/email callback handlers manage their own
+  // Supabase exchange when they are invoked.
+  if (isPublicRoute(pathname)) {
+    return NextResponse.next({ request })
+  }
   
   let supabaseResponse = NextResponse.next({
     request,
@@ -61,30 +81,11 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
   
-  // Debug logging
-  console.log('👤 User authenticated:', !!user, 'user_id:', user?.id)
-
   supabaseResponse.cookies.set('show-banner', 'false')
 
   // Check if user is authenticated and redirect if needed
   if (!user) {
-    // Allow access to public routes without a session (avoid redirect loops on '/')
-    const isPublicRoute =
-      pathname === '/' ||
-      pathname.startsWith('/auth') ||
-      pathname.startsWith('/blog') ||
-      pathname === '/privacy' ||
-      pathname === '/terms' ||
-      pathname === '/refund' ||
-      pathname === '/security'
-
-    if (isPublicRoute) {
-      console.log('✅ Allowing unauthenticated access to public route:', pathname)
-      return supabaseResponse
-    }
-
     // If no user is authenticated, redirect to the landing page
-    console.log('🚫 Redirecting unauthenticated user to landing page')
     const url = request.nextUrl.clone()
     url.pathname = '/'
     const redirectResponse = NextResponse.redirect(url)
@@ -92,37 +93,18 @@ export async function updateSession(request: NextRequest) {
     return redirectResponse
   }
 
-  // Check if route requires subscription
-  console.log('🛡️ Route check:', { pathname, isExempt: isSubscriptionExemptRoute(pathname) })
-
   if (!isSubscriptionExemptRoute(pathname)) {
     // Check if user has an active subscription or trial
-    console.log('🧭 Subscription check for path:', pathname)
     const { data: subscription } = await supabase
       .from('subscriptions')
       .select('subscription_plan, stripe_subscription_id, subscription_status, current_period_end, trial_end')
       .eq('user_id', user.id)
       .maybeSingle()
 
-    console.log('📦 Subscription record:', {
-      stripe_subscription_id: subscription?.stripe_subscription_id,
-      subscription_status: subscription?.subscription_status,
-      current_period_end: subscription?.current_period_end,
-      trial_end: subscription?.trial_end,
-    })
-
     const subscriptionState = getSubscriptionAccessState(subscription)
     const hasProtectedRouteAccess = subscriptionState.hasProAccess
 
-    console.log('✅ accessCheck:', {
-      status: subscription?.subscription_status,
-      isTrialing: subscriptionState.isTrialing,
-      isWithinAccessWindow: subscriptionState.isWithinAccessWindow,
-      hasProtectedRouteAccess,
-    })
-
     if (!hasProtectedRouteAccess) {
-      console.log('🚫 User subscription access expired or invalid, redirecting to home')
       const url = request.nextUrl.clone()
       url.pathname = '/home'
       const redirectResponse = NextResponse.redirect(url)
@@ -130,8 +112,6 @@ export async function updateSession(request: NextRequest) {
       return redirectResponse
     }
   }
-
-  console.log('✅ User authenticated, allowing access')
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:

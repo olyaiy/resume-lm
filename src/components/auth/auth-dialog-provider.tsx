@@ -3,7 +3,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import { Loader2 } from "lucide-react";
 
-import { signInWithGoogle } from "@/app/auth/login/actions";
+import { signInWithGoogle } from "@/app/(auth)/auth/login/actions";
 import { LoginForm } from "@/components/auth/login-form";
 import { SignupForm } from "@/components/auth/signup-form";
 import { Alert, AlertDescription } from "@/components/ui/alert";

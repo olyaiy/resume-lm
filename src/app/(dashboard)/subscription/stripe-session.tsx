@@ -1,7 +1,7 @@
 "use server";
 
 import { Stripe } from "stripe";
-import { checkAuth } from "@/app/auth/login/actions";
+import { checkAuth } from "@/app/(auth)/auth/login/actions";
 import { createOrRetrieveCustomer } from "@/utils/actions/stripe/actions";
 import {
     buildCheckoutIdempotencyKey,

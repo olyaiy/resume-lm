@@ -16,7 +16,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(canonicalUrl, 308)
   }
 
-  console.log('🧩 Root middleware invoked for:', request.nextUrl.pathname)
   return await updateSession(request)
 }
 
