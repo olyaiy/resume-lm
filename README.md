@@ -6,7 +6,7 @@
 
 **🚀 An open-source AI resume builder for tech job applications**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-resumelm.ca-blue?style=for-the-badge)](https://resumelm.ca)
+[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-resumelm.ca-blue?style=for-the-badge)](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)
 [![GitHub Stars](https://img.shields.io/github/stars/olyaiy/resume-lm?style=for-the-badge)](https://github.com/olyaiy/resume-lm/stargazers)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/agpl-3.0)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
@@ -59,7 +59,7 @@ ResumeLM is open source, self-hostable, and has a free plan that supports your o
 
 ## 🚀 Live Demo & Getting Started
 
-**[Try ResumeLM](https://resumelm.ca)**
+**[Try ResumeLM](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)**
 
 Free plan available • Pro is $20/month • A payment method is required for the optional trial
 
@@ -331,7 +331,7 @@ For businesses requiring proprietary licenses or commercial support, please cont
 
 **Ready to land your dream job?**
 
-[![Get Started](https://img.shields.io/badge/🚀_Get_Started-resumelm.ca-blue?style=for-the-badge&color=6366f1)](https://resumelm.ca)
+[![Get Started](https://img.shields.io/badge/🚀_Get_Started-resumelm.ca-blue?style=for-the-badge&color=6366f1)](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)
 [![View Source Code](https://img.shields.io/badge/📚_View_Source-GitHub-black?style=for-the-badge&logo=github)](https://github.com/olyaiy/resume-lm)
 
 **Built with ❤️ using Next.js**

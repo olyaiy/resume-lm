@@ -16,6 +16,13 @@ import { ModelShowcase } from "@/components/landing/model-showcase";
 import { AuthDialogProvider } from "@/components/auth/auth-dialog-provider";
 import { AUTH_ERROR_CODES, getAuthIntentFromParams } from "@/lib/auth-intent";
 import { GITHUB_REPO_URL, siteUrl } from "@/lib/site-config";
+import { withUtmParameters } from "@/lib/analytics/attribution";
+
+const trackedGitHubUrl = withUtmParameters(GITHUB_REPO_URL, {
+  utm_source: "resumelm",
+  utm_medium: "referral",
+  utm_campaign: "auth",
+});
 
 // import { WaitlistSection } from "@/components/waitlist/waitlist-section";
 
@@ -98,7 +105,8 @@ export default async function LoginPage({
                 <div className="space-y-8">
                   {/* GitHub Badge */}
                   <a
-                    href={GITHUB_REPO_URL}
+                    href={trackedGitHubUrl}
+                    data-analytics-id="outbound-github-repo"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full 

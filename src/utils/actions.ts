@@ -2,12 +2,30 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { Profile, ResumeSummary } from "@/lib/types";
+import { getSubscriptionAccessState } from "@/lib/subscription-access";
 
 interface DashboardData {
   profile: Profile | null;
   baseResumes: ResumeSummary[];
   tailoredResumes: ResumeSummary[];
+  subscription: {
+    plan: string;
+    status: string;
+    currentPeriodEnd: string;
+    trialEnd: string;
+    isTrialing: boolean;
+    hasProAccess: boolean;
+  };
 }
+
+const FALLBACK_SUBSCRIPTION: DashboardData["subscription"] = {
+  plan: "",
+  status: "",
+  currentPeriodEnd: "",
+  trialEnd: "",
+  isTrialing: false,
+  hasProAccess: false,
+};
 
 export async function getDashboardData(): Promise<DashboardData> {
   const supabase = await createClient();
@@ -18,15 +36,27 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 
   try {
-    // Fetch profile data
-    let profile;
-    const { data, error: profileError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('user_id', user.id)
-      .single();
-    
-    profile = data;
+    // These reads are independent. Running them together removes a full
+    // database round-trip from the dashboard critical path.
+    const [profileResult, resumesResult, subscriptionResult] = await Promise.all([
+      supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', user.id)
+        .single(),
+      supabase
+        .from('resumes')
+        .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at')
+        .eq('user_id', user.id),
+      supabase
+        .from('subscriptions')
+        .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
+        .eq('user_id', user.id)
+        .maybeSingle(),
+    ]);
+
+    const { data, error: profileError } = profileResult;
+    let profile = data;
 
     // If profile doesn't exist, create one
     if (profileError?.code === 'PGRST116') {
@@ -61,12 +91,8 @@ export async function getDashboardData(): Promise<DashboardData> {
       throw new Error('Error fetching dashboard data');
     }
 
-    // Fetch resumes data
-    const { data: resumes, error: resumesError } = await supabase
-      .from('resumes')
-      .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at')
-      .eq('user_id', user.id);
-
+    // The resumes request was started in parallel with the profile request.
+    const { data: resumes, error: resumesError } = resumesResult;
     if (resumesError) {
       console.error('Error fetching resumes:', resumesError);
       throw new Error('Error fetching dashboard data');
@@ -81,22 +107,35 @@ export async function getDashboardData(): Promise<DashboardData> {
     const baseResumes = sanitizedResumes.filter((resume) => resume.is_base_resume);
     const tailoredResumes = sanitizedResumes.filter((resume) => !resume.is_base_resume);
 
+    const subscriptionState = getSubscriptionAccessState(subscriptionResult.data);
+    const subscription = subscriptionResult.error
+      ? FALLBACK_SUBSCRIPTION
+      : {
+          plan: subscriptionState.effectivePlan,
+          status: subscriptionResult.data?.subscription_status ?? '',
+          currentPeriodEnd: subscriptionResult.data?.current_period_end ?? '',
+          trialEnd: subscriptionResult.data?.trial_end ?? '',
+          isTrialing: subscriptionState.isTrialing,
+          hasProAccess: subscriptionState.hasProAccess,
+        };
+
     return {
       profile,
       baseResumes,
       tailoredResumes,
+      subscription,
     };
   } catch (error) {
     if (error instanceof Error && error.message === 'User not authenticated') {
       return {
         profile: null,
         baseResumes: [],
-        tailoredResumes: []
+        tailoredResumes: [],
+        subscription: FALLBACK_SUBSCRIPTION,
       };
     }
     throw error;
   }
 }
-
 
 

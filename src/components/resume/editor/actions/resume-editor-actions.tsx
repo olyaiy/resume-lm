@@ -13,6 +13,8 @@ import { updateResume } from "@/utils/actions/resumes/actions";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { AnalyticsEvents, sanitizeAnalyticsProperties } from "@/lib/analytics/events";
 
 interface ResumeEditorActionsProps {
   onResumeChange: (field: keyof Resume, value: Resume[keyof Resume]) => void;
@@ -22,6 +24,7 @@ export function ResumeEditorActions({
   onResumeChange
 }: ResumeEditorActionsProps) {
   const { state, dispatch } = useResumeContext();
+  const posthog = usePostHog();
   const { resume, isSaving } = state;
   const [downloadOptions, setDownloadOptions] = useState({
     resume: true,
@@ -38,6 +41,11 @@ export function ResumeEditorActions({
         description: "Your resume has been updated successfully.",
       });
     } catch (error) {
+      posthog?.capture(AnalyticsEvents.ResumeEditorActionFailed, sanitizeAnalyticsProperties({
+        action: 'save',
+        error_code: 'save_failed',
+        capture_source: 'browser',
+      }));
       toast({
         title: "Save failed",
         description: error instanceof Error ? error.message : "Unable to save your changes. Please try again.",
@@ -110,6 +118,8 @@ export function ResumeEditorActions({
           <Tooltip>
             <TooltipTrigger asChild>
               <Button 
+                aria-label="Download resume and cover letter"
+                data-analytics-id="editor-action-download"
                 onClick={async () => {
                   try {
                     // Download Resume if selected
@@ -164,6 +174,11 @@ export function ResumeEditorActions({
                       description: "Your documents are being downloaded.",
                     });
                   } catch (error) {
+                    posthog?.capture(AnalyticsEvents.ResumeEditorActionFailed, sanitizeAnalyticsProperties({
+                      action: 'download',
+                      error_code: 'download_failed',
+                      capture_source: 'browser',
+                    }));
                     console.error(error);
                     toast({
                       title: "Download failed",
@@ -226,6 +241,8 @@ export function ResumeEditorActions({
 
         {/* Save Button */}
         <Button 
+          aria-label={isSaving ? "Saving resume" : "Save resume"}
+          data-analytics-id="editor-action-save"
           onClick={handleSave} 
           disabled={isSaving}
           className={actionButtonClasses}

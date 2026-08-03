@@ -13,6 +13,13 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { AUTH_ERROR_CODES } from "@/lib/auth-intent";
+import { withUtmParameters } from "@/lib/analytics/attribution";
+
+const trackedSupportUrl = withUtmParameters("https://x.com/alexfromvan", {
+  utm_source: "resumelm",
+  utm_medium: "social",
+  utm_campaign: "auth-error",
+});
 
 interface ErrorDialogProps {
   isOpen: boolean;
@@ -92,7 +99,7 @@ export function ErrorDialog({ isOpen: initialIsOpen }: ErrorDialogProps) {
                 Try Logging In Again
               </Button>
             </Link>
-            <Link href="https://x.com/alexfromvan" target="_blank" rel="noopener noreferrer">
+            <Link href={trackedSupportUrl} target="_blank" rel="noopener noreferrer" data-analytics-id="outbound-support-x">
               <Button 
                 variant="outline" 
                 className="w-full"

@@ -20,7 +20,8 @@ export async function captureServerAnalyticsEvent(input: {
   insertId?: string;
   properties?: AnalyticsProperties;
 }) {
-  if (!posthogKey || !input.distinctId) return;
+  const distinctId = input.distinctId?.trim();
+  if (!posthogKey || !distinctId) return;
 
   try {
     const response = await fetch(getCaptureUrl(), {
@@ -31,10 +32,14 @@ export async function captureServerAnalyticsEvent(input: {
       body: JSON.stringify(
         buildAnalyticsPayload({
           apiKey: posthogKey,
-          distinctId: input.distinctId,
+          distinctId,
           event: input.event,
           insertId: input.insertId,
-          properties: input.properties,
+          properties: {
+            ...input.properties,
+            capture_source: "server",
+            identity_source: "supabase_user_id",
+          },
         })
       ),
       cache: "no-store",

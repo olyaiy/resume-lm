@@ -5,6 +5,13 @@ import { CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { SplitContent } from '../ui/split-content';
 import { AuthDialog } from "@/components/auth/auth-dialog";
+import { withUtmParameters } from "@/lib/analytics/attribution";
+
+const trackedGitHubUrl = withUtmParameters("https://github.com/olyaiy/resume-lm", {
+  utm_source: "resumelm",
+  utm_medium: "referral",
+  utm_campaign: "landing",
+});
 
 const FeatureHighlights = () => {
   // Enhanced features with metrics, testimonials, and benefit-focused language
@@ -250,7 +257,8 @@ const FeatureHighlights = () => {
               </button>
             </AuthDialog>
             <Link 
-              href="https://github.com/olyaiy/resume-lm" 
+              href={trackedGitHubUrl}
+              data-analytics-id="outbound-github-repo"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-lg bg-white/80 border border-purple-200/40 text-lg font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"

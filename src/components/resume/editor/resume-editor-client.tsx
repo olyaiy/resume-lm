@@ -10,6 +10,8 @@ import { EditorLayout } from "./layout/EditorLayout";
 import { EditorPanel } from './panels/editor-panel';
 import { PreviewPanel } from './panels/preview-panel';
 import { UnsavedChangesDialog } from './dialogs/unsaved-changes-dialog';
+import { usePostHog } from 'posthog-js/react';
+import { AnalyticsEvents, sanitizeAnalyticsProperties } from '@/lib/analytics/events';
 
 interface ResumeEditorClientProps {
   initialResume: Resume;
@@ -23,6 +25,7 @@ export function ResumeEditorClient({
   initialJob,
 }: ResumeEditorClientProps) {
   const router = useRouter();
+  const posthog = usePostHog();
   const [state, dispatch] = useReducer(resumeReducer, {
     resume: initialResume,
     isSaving: false,
@@ -34,6 +37,14 @@ export function ResumeEditorClient({
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
   const [job, setJob] = useState<Job | null>(initialJob ?? null);
   const [isLoadingJob, setIsLoadingJob] = useState(false);
+
+  useEffect(() => {
+    posthog?.capture(AnalyticsEvents.ResumeEditorViewed, sanitizeAnalyticsProperties({
+      resume_type: initialResume.is_base_resume ? 'base' : 'tailored',
+      has_job: Boolean(initialResume.job_id || initialJob),
+      capture_source: 'browser',
+    }));
+  }, [initialJob, initialResume.is_base_resume, initialResume.job_id, posthog]);
 
   // Single job fetching effect
   useEffect(() => {

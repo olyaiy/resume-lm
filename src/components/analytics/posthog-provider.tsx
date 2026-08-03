@@ -8,6 +8,7 @@ import { sanitizeAnalyticsProperties } from '@/lib/analytics/events';
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
 let hasInitialized = false;
+let activeIdentifiedUserId: string | null = null;
 
 interface AnalyticsUser {
   id: string;
@@ -40,15 +41,29 @@ export function PostHogProvider({
     if (!posthogKey || !hasInitialized) return;
 
     if (!user?.id) {
-      posthog.reset();
+      // Public and auth route groups mount separate providers. Do not reset
+      // the anonymous ID just because a provider remounted; that would break
+      // the landing-page -> sign-in journey. Reset only after an identified
+      // session actually leaves the app.
+      if (activeIdentifiedUserId) {
+        posthog.reset();
+        activeIdentifiedUserId = null;
+      }
       return;
     }
 
+    // Supabase user IDs are the canonical identity for both browser and
+    // server-side events. Keeping this call in the shared provider means the
+    // checkout/editor events cannot accidentally stay on an anonymous ID.
     posthog.identify(user.id, sanitizeAnalyticsProperties({
       subscription_plan: user.subscriptionPlan,
       subscription_status: user.subscriptionStatus,
       is_pro: user.isPro,
     }));
+    activeIdentifiedUserId = user.id;
+    posthog.register({
+      analytics_identity: user.id,
+    });
   }, [user?.id, user?.isPro, user?.subscriptionPlan, user?.subscriptionStatus]);
 
   return (

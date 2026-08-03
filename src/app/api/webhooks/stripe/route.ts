@@ -456,7 +456,11 @@ export async function POST(req: Request) {
             await captureServerAnalyticsEvent({
               distinctId: subscriptionData.user_id,
               event: AnalyticsEvents.CheckoutCompleted,
-              properties: getSubscriptionEventProperties(subscriptionData, event.type),
+              insertId: `${event.id}:checkout_completed`,
+              properties: {
+                ...getSubscriptionEventProperties(subscriptionData, event.type),
+                stripe_checkout_session_id: session.id,
+              },
             });
           }
         }
