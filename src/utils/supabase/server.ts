@@ -1,14 +1,25 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
-export async function createClient() {
+type ServerClientOptions = {
+  appendPkceFlowIdToRedirects?: boolean
+}
+
+export async function createClient(options: ServerClientOptions = {}) {
   const cookieStore = await cookies()
 
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
-      
+      auth: options.appendPkceFlowIdToRedirects
+        ? {
+            flowType: 'pkce',
+            experimental: {
+              appendPkceFlowIdToRedirects: true,
+            },
+          }
+        : undefined,
       cookies: {
         getAll() {
           return cookieStore.getAll()
