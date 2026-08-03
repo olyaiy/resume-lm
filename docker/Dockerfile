@@ -87,12 +87,13 @@ COPY src ./src
 COPY public ./public
 COPY content ./content
 
-# Build with placeholder values - replaced at runtime by entrypoint.sh
+# Build with valid placeholder values - replaced at runtime by entrypoint.sh.
+# NEXT_PUBLIC_SITE_URL must remain a valid URL while Next.js collects metadata.
 # Base path uses placeholder in next.config.ts: /__NEXT_BASEPATH_PLACEHOLDER__
 # This allows a single image to work across all environments
 ENV NEXT_PUBLIC_SUPABASE_URL="__NEXT_PUBLIC_SUPABASE_URL__" \
     NEXT_PUBLIC_SUPABASE_ANON_KEY="__NEXT_PUBLIC_SUPABASE_ANON_KEY__" \
-    NEXT_PUBLIC_SITE_URL="__NEXT_PUBLIC_SITE_URL__" \
+    NEXT_PUBLIC_SITE_URL="https://__NEXT_PUBLIC_SITE_URL__.invalid" \
     NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="__NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY__" \
     NEXT_PUBLIC_STRIPE_PRO_PRICE_ID="__NEXT_PUBLIC_STRIPE_PRO_PRICE_ID__" \
     NEXT_PUBLIC_BASE_PATH="/__NEXT_BASEPATH_PLACEHOLDER__" \
