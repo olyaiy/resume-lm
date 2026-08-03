@@ -104,17 +104,25 @@ export function getAuthRedirectPath(intent?: AuthIntent | null, fallback = "/"):
 
 export function classifyOAuthError(params: {
   providerError?: string | null;
+  providerErrorCode?: string | null;
+  providerErrorDescription?: string | null;
   message?: string | null;
 }): AuthErrorCode {
   const providerError = params.providerError?.toLowerCase();
+  const providerErrorCode = params.providerErrorCode?.toLowerCase();
+  const providerErrorDescription = params.providerErrorDescription?.toLowerCase();
   const message = params.message?.toLowerCase() ?? "";
+
+  const stateSignals = [providerErrorCode, providerErrorDescription, message].filter(
+    (value): value is string => Boolean(value),
+  );
+
+  if (stateSignals.some((value) => value.includes("state") || value.includes("flow_state"))) {
+    return AUTH_ERROR_CODES.oauthStateMismatch;
+  }
 
   if (providerError === "access_denied") {
     return AUTH_ERROR_CODES.oauthProviderDenied;
-  }
-
-  if (message.includes("state") || message.includes("flow_state")) {
-    return AUTH_ERROR_CODES.oauthStateMismatch;
   }
 
   if (providerError) {
