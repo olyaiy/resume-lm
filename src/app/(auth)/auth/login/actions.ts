@@ -234,7 +234,7 @@ export async function resetPasswordForEmail(formData: FormData): Promise<AuthRes
 
 // Google Sign In
 export async function signInWithGoogle(intent?: AuthIntent): Promise<OAuthAuthResult> {
-  const supabase = await createClient();
+  const supabase = await createClient({ appendPkceFlowIdToRedirects: true });
 
   try {
     const { data, error } = await supabase.auth.signInWithOAuth({
