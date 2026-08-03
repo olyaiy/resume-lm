@@ -16,16 +16,28 @@ type PendingCookie = {
   options: CookieOptions
 }
 
+type PendingHeaders = Record<string, string>
+
+const AUTH_RESPONSE_HEADERS = {
+  'Cache-Control': 'private, no-cache, no-store, must-revalidate, max-age=0',
+  Expires: '0',
+  Pragma: 'no-cache',
+} as const
+
 function redirectToLogin(
   requestUrl: URL,
   intent: AuthIntent,
   errorCode: string,
   pendingCookies: PendingCookie[] = [],
+  pendingHeaders: PendingHeaders = {},
 ) {
   const errorUrl = new URL('/auth/login', requestUrl.origin)
   errorUrl.searchParams.set('error', errorCode)
   addAuthIntentToUrl(errorUrl, intent)
   const response = NextResponse.redirect(errorUrl)
+  Object.entries({ ...AUTH_RESPONSE_HEADERS, ...pendingHeaders }).forEach(([name, value]) =>
+    response.headers.set(name, value)
+  )
   pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
   return response
 }
@@ -43,7 +55,11 @@ export async function GET(request: NextRequest) {
   const code = requestUrl.searchParams.get('code')
 
   if (providerError) {
-    const errorCode = classifyOAuthError({ providerError })
+    const errorCode = classifyOAuthError({
+      providerError,
+      providerErrorCode,
+      providerErrorDescription,
+    })
     logCallbackFailure({
       errorCode,
       providerError,
@@ -65,6 +81,8 @@ export async function GET(request: NextRequest) {
   }
 
   const pendingCookies: PendingCookie[] = []
+  const pendingHeaders: PendingHeaders = {}
+  const flowId = requestUrl.searchParams.get('sb_flow_id') || undefined
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -73,32 +91,61 @@ export async function GET(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet) {
+        setAll(cookiesToSet, headers) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           pendingCookies.push(...cookiesToSet)
+          Object.assign(pendingHeaders, headers)
         },
       },
     }
   )
 
-  const { error } = await supabase.auth.exchangeCodeForSession(code)
+  let exchangeResult: Awaited<ReturnType<typeof supabase.auth.exchangeCodeForSession>>
+
+  try {
+    exchangeResult = await supabase.auth.exchangeCodeForSession(
+      code,
+      flowId ? { flowId } : undefined,
+    )
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'OAuth code exchange failed unexpectedly'
+    const errorCode = classifyOAuthError({ message })
+    logCallbackFailure({
+      errorCode,
+      message,
+      name: error instanceof Error ? error.name : null,
+      hasFlowId: Boolean(flowId),
+      next: intent.next ?? null,
+      plan: intent.plan ?? null,
+    })
+    return redirectToLogin(requestUrl, intent, errorCode, pendingCookies, pendingHeaders)
+  }
+
+  const { error } = exchangeResult
 
   if (error) {
-    const errorCode = classifyOAuthError({ message: error.message })
+    const errorCode = classifyOAuthError({
+      message: error.message,
+      providerErrorCode: error.code,
+    })
     logCallbackFailure({
       errorCode,
       supabaseCode: error.code ?? null,
       message: error.message,
       status: error.status ?? null,
       name: error.name,
+      hasFlowId: Boolean(flowId),
       next: intent.next ?? null,
       plan: intent.plan ?? null,
     })
-    return redirectToLogin(requestUrl, intent, errorCode, pendingCookies)
+    return redirectToLogin(requestUrl, intent, errorCode, pendingCookies, pendingHeaders)
   }
 
   const redirectPath = getAuthRedirectPath(intent)
   const response = NextResponse.redirect(new URL(redirectPath, requestUrl.origin))
+  Object.entries({ ...AUTH_RESPONSE_HEADERS, ...pendingHeaders }).forEach(([name, value]) =>
+    response.headers.set(name, value)
+  )
   pendingCookies.forEach(({ name, value, options }) => response.cookies.set(name, value, options))
 
   return response

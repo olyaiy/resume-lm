@@ -54,6 +54,18 @@ test("classifies provider, state, and exchange failures separately", () => {
     AUTH_ERROR_CODES.oauthStateMismatch,
   );
   assert.equal(
+    classifyOAuthError({ providerErrorCode: "bad_oauth_state" }),
+    AUTH_ERROR_CODES.oauthStateMismatch,
+  );
+  assert.equal(
+    classifyOAuthError({
+      providerError: "invalid_request",
+      providerErrorCode: "flow_state_already_used",
+      providerErrorDescription: "State has already been used",
+    }),
+    AUTH_ERROR_CODES.oauthStateMismatch,
+  );
+  assert.equal(
     classifyOAuthError({ message: "invalid authorization code" }),
     AUTH_ERROR_CODES.oauthExchangeFailed,
   );
