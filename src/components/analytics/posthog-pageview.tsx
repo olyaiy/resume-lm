@@ -3,6 +3,13 @@
 import { useEffect } from 'react';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { usePostHog } from 'posthog-js/react';
+import {
+  getAttributionProperties,
+  getBrowserStorage,
+  getUtmParameters,
+  persistFirstTouchAttribution,
+  sanitizeAnalyticsUrl,
+} from '@/lib/analytics/attribution';
 
 export function PostHogPageView() {
   const pathname = usePathname();
@@ -18,8 +25,23 @@ export function PostHogPageView() {
         ? `${window.location.origin}${pathname}?${search}`
         : `${window.location.origin}${pathname}`;
 
+    const currentAttribution = getUtmParameters(searchParams);
+    const firstTouchAttribution = persistFirstTouchAttribution(
+      currentAttribution,
+      getBrowserStorage(),
+    );
+    const attribution = getAttributionProperties(
+      currentAttribution,
+      firstTouchAttribution,
+    );
+
+    if (Object.keys(attribution).length > 0) {
+      posthog.register(attribution);
+    }
+
     posthog.capture('$pageview', {
-      $current_url: currentUrl,
+      $current_url: sanitizeAnalyticsUrl(currentUrl),
+      ...attribution,
     });
   }, [pathname, posthog, searchParams]);
 

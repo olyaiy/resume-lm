@@ -23,7 +23,6 @@ import { type SortOption, type SortDirection } from "@/components/resume/managem
 import type { ResumeSummary } from "@/lib/types";
 import { ResumesSection } from "@/components/dashboard/resumes-section";
 import { getDashboardData } from "@/utils/actions";
-import { checkSubscriptionPlan } from "@/utils/actions/stripe/actions";
 import { FREE_PLAN_RESUME_LIMITS } from "@/lib/resume-limits";
 
 
@@ -44,22 +43,9 @@ export default async function Home({
   const isNewSignup = params?.type === 'signup' && params?.token_hash;
 
   // Fetch dashboard data and handle authentication
-  const fallbackSubscription = {
-    plan: '',
-    status: '',
-    currentPeriodEnd: '',
-    trialEnd: '',
-    isTrialing: false,
-    hasProAccess: false,
-  };
-
   let data;
-  let subscription: Awaited<ReturnType<typeof checkSubscriptionPlan>> = fallbackSubscription;
   try {
-    [data, subscription] = await Promise.all([
-      getDashboardData(),
-      checkSubscriptionPlan().catch(() => fallbackSubscription)
-    ]);
+    data = await getDashboardData();
     if (!data.profile) {
       redirect("/");
     }
@@ -68,7 +54,12 @@ export default async function Home({
     redirect("/");
   }
 
-  const { profile, baseResumes: unsortedBaseResumes, tailoredResumes: unsortedTailoredResumes } = data;
+  const {
+    profile,
+    subscription,
+    baseResumes: unsortedBaseResumes,
+    tailoredResumes: unsortedTailoredResumes,
+  } = data;
   const baseResumesCount = unsortedBaseResumes.length;
   const tailoredResumesCount = unsortedTailoredResumes.length;
 

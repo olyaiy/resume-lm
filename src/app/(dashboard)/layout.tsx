@@ -6,6 +6,7 @@ import Link from "next/link";
 import { AppHeader } from "@/components/layout/app-header";
 import { Footer } from "@/components/layout/footer";
 import { PostHogPageView } from "@/components/analytics/posthog-pageview";
+import { PagePerformance } from "@/components/analytics/page-performance";
 import { PostHogProvider } from "@/components/analytics/posthog-provider";
 import {
   IMPERSONATION_STATE_COOKIE_NAME,
@@ -72,6 +73,7 @@ export default async function DashboardLayout({
     >
       <Suspense fallback={null}>
         <PostHogPageView />
+        <PagePerformance />
       </Suspense>
       {impersonationState && (
         <div className="bg-amber-500 py-2 text-center text-sm text-white">

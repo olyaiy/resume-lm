@@ -21,6 +21,8 @@ import {
   LazyResumeScorePanel,
   LazyTailoredJobAccordion,
 } from "./lazy-editor-features";
+import { usePostHog } from "posthog-js/react";
+import { AnalyticsEvents, sanitizeAnalyticsProperties } from "@/lib/analytics/events";
 
 
 
@@ -40,6 +42,7 @@ export function EditorPanel({
   onResumeChange,
 }: EditorPanelProps) {
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const posthog = usePostHog();
 
   return (
     <div className="flex flex-col sm:mr-4 relative h-full max-h-full  ">
@@ -68,7 +71,16 @@ export function EditorPanel({
             />
 
             {/* Tabs */}  
-            <Tabs defaultValue="basic" className="mb-4">
+            <Tabs
+              defaultValue="basic"
+              className="mb-4"
+              onValueChange={(tab) => {
+                posthog?.capture(AnalyticsEvents.ResumeEditorTabChanged, sanitizeAnalyticsProperties({
+                  tab,
+                  capture_source: 'browser',
+                }));
+              }}
+            >
               <ResumeEditorTabs />
 
               {/* Basic Info Form */}

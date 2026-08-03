@@ -16,8 +16,15 @@ describe("AnalyticsEvents", () => {
     assert.equal(AnalyticsEvents.AIRequestStarted, "ai_request_started");
     assert.equal(AnalyticsEvents.AIRequestSucceeded, "ai_request_succeeded");
     assert.equal(AnalyticsEvents.AIRequestFailed, "ai_request_failed");
+    assert.equal(AnalyticsEvents.CheckoutViewed, "checkout_viewed");
     assert.equal(AnalyticsEvents.CheckoutStarted, "checkout_started");
+    assert.equal(AnalyticsEvents.CheckoutError, "checkout_error");
     assert.equal(AnalyticsEvents.CheckoutCompleted, "checkout_completed");
+    assert.equal(AnalyticsEvents.PagePerformance, "page_performance");
+    assert.equal(AnalyticsEvents.ResumeEditorViewed, "resume_editor_viewed");
+    assert.equal(AnalyticsEvents.ResumeEditorTabChanged, "resume_editor_tab_changed");
+    assert.equal(AnalyticsEvents.ResumeEditorActionFailed, "resume_editor_action_failed");
+    assert.equal(AnalyticsEvents.OutboundLinkClicked, "outbound_link_clicked");
     assert.equal(AnalyticsEvents.TrialStarted, "trial_started");
     assert.equal(AnalyticsEvents.FirstInvoicePaid, "first_invoice_paid");
     assert.equal(AnalyticsEvents.InvoicePaymentFailed, "invoice_payment_failed");

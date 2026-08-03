@@ -13,6 +13,8 @@ export function ResumeEditorTabs() {
           {/* Resume Score */}
           <TabsTrigger 
             value="resume-score" 
+            aria-label="Open resume score"
+            data-analytics-id="editor-tab-resume-score"
             className="group flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium relative transition-all duration-300
               data-[state=active]:bg-gradient-to-r data-[state=active]:from-emerald-500/10 data-[state=active]:to-teal-500/10
               data-[state=active]:border-emerald-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -33,6 +35,8 @@ export function ResumeEditorTabs() {
           {/* Cover Letter */}
           <TabsTrigger 
             value="cover-letter" 
+            aria-label="Open cover letter"
+            data-analytics-id="editor-tab-cover-letter"
             className="group flex items-center gap-1.5 px-3 py-1.5 rounded-md font-medium relative transition-all duration-300
               data-[state=active]:bg-gradient-to-r data-[state=active]:from-amber-500/10 data-[state=active]:to-orange-500/10
               data-[state=active]:border-amber-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -59,6 +63,8 @@ export function ResumeEditorTabs() {
         {/* Basic Info Tab */}
         <TabsTrigger 
           value="basic" 
+          aria-label="Open basic information"
+          data-analytics-id="editor-tab-basic"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-teal-500/10 data-[state=active]:to-cyan-500/10
             data-[state=active]:border-teal-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -76,6 +82,8 @@ export function ResumeEditorTabs() {
         {/* Work Tab */}
         <TabsTrigger 
           value="work" 
+          aria-label="Open work experience"
+          data-analytics-id="editor-tab-work"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-cyan-500/10 data-[state=active]:to-blue-500/10
             data-[state=active]:border-cyan-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -93,6 +101,8 @@ export function ResumeEditorTabs() {
         {/* Projects Tab */}
         <TabsTrigger 
           value="projects" 
+          aria-label="Open projects"
+          data-analytics-id="editor-tab-projects"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-violet-500/10 data-[state=active]:to-purple-500/10
             data-[state=active]:border-violet-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -110,6 +120,8 @@ export function ResumeEditorTabs() {
         {/* Education Tab */}
         <TabsTrigger 
           value="education" 
+          aria-label="Open education"
+          data-analytics-id="editor-tab-education"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500/10 data-[state=active]:to-blue-500/10
             data-[state=active]:border-indigo-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -127,6 +139,8 @@ export function ResumeEditorTabs() {
         {/* Skills Tab */}
         <TabsTrigger 
           value="skills" 
+          aria-label="Open skills"
+          data-analytics-id="editor-tab-skills"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-rose-500/10 data-[state=active]:to-pink-500/10
             data-[state=active]:border-rose-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -144,6 +158,8 @@ export function ResumeEditorTabs() {
         {/* Settings Tab */}
         <TabsTrigger 
           value="settings" 
+          aria-label="Open layout settings"
+          data-analytics-id="editor-tab-settings"
           className="group flex items-center gap-1.5 px-2 py-1 rounded-md font-medium relative transition-all duration-300
             data-[state=active]:bg-gradient-to-r data-[state=active]:from-gray-500/10 data-[state=active]:to-slate-500/10
             data-[state=active]:border-gray-500/20 data-[state=active]:shadow-md hover:bg-white/60
@@ -162,4 +178,4 @@ export function ResumeEditorTabs() {
     
     </>
   );
-} 
+}

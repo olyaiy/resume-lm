@@ -1,5 +1,12 @@
 import Link from "next/link";
 import { AuthDialog } from "@/components/auth/auth-dialog";
+import { withUtmParameters } from "@/lib/analytics/attribution";
+
+const trackedGitHubUrl = withUtmParameters("https://github.com/olyaiy/resume-lm", {
+  utm_source: "resumelm",
+  utm_medium: "referral",
+  utm_campaign: "landing",
+});
 
 export function Hero() {
   return (
@@ -32,7 +39,8 @@ export function Hero() {
             </button>
           </AuthDialog>
           <Link 
-            href="https://github.com/olyaiy/resume-lm" 
+            href={trackedGitHubUrl}
+            data-analytics-id="outbound-github-repo"
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 rounded-lg bg-white/40 border border-gray-200 font-medium transition-all duration-300 hover:-translate-y-1"

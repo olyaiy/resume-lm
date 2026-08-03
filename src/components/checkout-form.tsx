@@ -8,6 +8,12 @@ import { usePostHog } from "posthog-js/react";
 
 import { postStripeSession } from "@/app/(dashboard)/subscription/stripe-session";
 import { AnalyticsEvents, sanitizeAnalyticsProperties } from "@/lib/analytics/events";
+import {
+    getAttributionProperties,
+    getBrowserStorage,
+    getUtmParameters,
+    persistFirstTouchAttribution,
+} from "@/lib/analytics/attribution";
 
 const stripePromise = loadStripe(
     process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY as string,
@@ -16,15 +22,52 @@ const stripePromise = loadStripe(
 export function CheckoutForm() {
     const searchParams = useSearchParams()
     const posthog = usePostHog()
-    const priceId = searchParams.get('price_id')!
+    const priceId = searchParams.get('price_id')
     const includeTrial = searchParams.get('trial') === 'true'
     const [clientSecret, setClientSecret] = React.useState<string | null>(null);
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+
+    const captureCheckoutEvent = React.useCallback((
+        event: typeof AnalyticsEvents.CheckoutViewed | typeof AnalyticsEvents.CheckoutError | typeof AnalyticsEvents.CheckoutStarted,
+        properties: Record<string, string | number | boolean | null | undefined> = {},
+    ) => {
+        if (!posthog) return;
+
+        const currentAttribution = getUtmParameters(window.location.search);
+        const firstTouchAttribution = persistFirstTouchAttribution(
+            currentAttribution,
+            getBrowserStorage(),
+        );
+
+        posthog.capture(event, sanitizeAnalyticsProperties({
+            ...properties,
+            price_id: priceId,
+            include_trial: includeTrial,
+            $geoip_disable: true,
+            capture_source: "browser",
+            ...getAttributionProperties(currentAttribution, firstTouchAttribution),
+        }));
+    }, [includeTrial, posthog, priceId]);
+
+    React.useEffect(() => {
+        captureCheckoutEvent(AnalyticsEvents.CheckoutViewed, {
+            checkout_surface: "subscription_checkout",
+        });
+    }, [captureCheckoutEvent]);
 
     React.useEffect(() => {
         let isMounted = true;
 
         async function createCheckoutSession() {
+            if (!priceId) {
+                const message = "This checkout link is missing a plan. Please restart checkout from the subscription page.";
+                setErrorMessage(message);
+                captureCheckoutEvent(AnalyticsEvents.CheckoutError, {
+                    error_code: "missing_price_id",
+                });
+                return;
+            }
+
             try {
                 const stripeResponse = await postStripeSession({ priceId, includeTrial });
 
@@ -37,15 +80,16 @@ export function CheckoutForm() {
 
                 if (stripeResponse.kind === "error") {
                     setErrorMessage(stripeResponse.message);
+                    captureCheckoutEvent(AnalyticsEvents.CheckoutError, {
+                        error_code: "invalid_checkout_link",
+                    });
                     return;
                 }
 
                 setClientSecret(stripeResponse.clientSecret);
-                posthog?.capture(AnalyticsEvents.CheckoutStarted, sanitizeAnalyticsProperties({
-                    $geoip_disable: true,
-                    price_id: priceId,
-                    include_trial: includeTrial,
-                }));
+                captureCheckoutEvent(AnalyticsEvents.CheckoutStarted, {
+                    checkout_surface: "embedded",
+                });
             } catch (error) {
                 if (!isMounted) return;
 
@@ -54,6 +98,9 @@ export function CheckoutForm() {
                         ? error.message
                         : "Unable to start checkout. Please try again."
                 );
+                captureCheckoutEvent(AnalyticsEvents.CheckoutError, {
+                    error_code: "session_creation_failed",
+                });
             }
         }
 
@@ -62,7 +109,7 @@ export function CheckoutForm() {
         return () => {
             isMounted = false;
         };
-    }, [priceId, includeTrial, posthog]);
+    }, [captureCheckoutEvent, includeTrial, posthog, priceId]);
 
     if (errorMessage) {
         return (
@@ -84,7 +131,7 @@ export function CheckoutForm() {
 
     return (
         <div className="space-y-8">
-            <div id="checkout">
+            <div id="checkout" data-analytics-id="stripe-embedded-checkout">
                 <EmbeddedCheckoutProvider stripe={stripePromise} options={options}>
                     <EmbeddedCheckout />
                 </EmbeddedCheckoutProvider>

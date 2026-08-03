@@ -1,12 +1,29 @@
 import Link from "next/link";
 import { Github, Linkedin, Twitter, Mail } from "lucide-react";
 import { CREATOR_LINKEDIN_URL, CREATOR_X_URL, SUPPORT_EMAIL } from "@/lib/site-config";
+import { withUtmParameters } from "@/lib/analytics/attribution";
 
 interface FooterProps {
   variant?: 'fixed' | 'static';
 }
 
 export function Footer({ variant = 'fixed' }: FooterProps) {
+  const trackedCreatorXUrl = withUtmParameters(CREATOR_X_URL, {
+    utm_source: "resumelm",
+    utm_medium: "social",
+    utm_campaign: "footer",
+  });
+  const trackedCreatorLinkedInUrl = withUtmParameters(CREATOR_LINKEDIN_URL, {
+    utm_source: "resumelm",
+    utm_medium: "social",
+    utm_campaign: "footer",
+  });
+  const trackedCreatorGitHubUrl = withUtmParameters("https://github.com/olyaiy", {
+    utm_source: "resumelm",
+    utm_medium: "referral",
+    utm_campaign: "footer",
+  });
+
   return (
     <footer className={`h-auto md:h-14 w-full border-t border-black/30 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 ${variant === 'fixed' ? 'fixed bottom-0 left-0 right-0' : 'static'}`}>
       <div className="container py-4 md:py-0 flex flex-col md:flex-row h-auto md:h-14 items-center justify-between gap-4 md:gap-0">
@@ -28,7 +45,8 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
           </Link>
           <div className="flex items-center gap-6">
             <Link
-              href={CREATOR_X_URL}
+              href={trackedCreatorXUrl}
+              data-analytics-id="outbound-creator-x"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -36,7 +54,8 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
               <Twitter className="h-5 w-5 md:h-4 md:w-4" />
             </Link>
             <Link
-              href={CREATOR_LINKEDIN_URL}
+              href={trackedCreatorLinkedInUrl}
+              data-analytics-id="outbound-creator-linkedin"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -44,7 +63,8 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
               <Linkedin className="h-5 w-5 md:h-4 md:w-4" />
             </Link>
             <Link
-              href="https://github.com/olyaiy"
+              href={trackedCreatorGitHubUrl}
+              data-analytics-id="outbound-creator-github"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
