@@ -94,6 +94,7 @@ export function CreatorStory() {
                   <motion.a 
                     href={trackedCreatorXUrl}
                     data-analytics-id="outbound-creator-x"
+                    data-analytics-placement="landing_creator_story"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-700 transition-all duration-300 hover:-translate-y-1"
@@ -108,6 +109,7 @@ export function CreatorStory() {
                   <motion.a 
                     href={trackedCreatorGitHubUrl}
                     data-analytics-id="outbound-creator-github"
+                    data-analytics-placement="landing_creator_story"
                     target="_blank" 
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 px-4 py-2 rounded-lg bg-teal-50 border border-teal-200 text-teal-700 transition-all duration-300 hover:-translate-y-1"

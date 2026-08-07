@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PostHogReactProvider } from 'posthog-js/react';
 import { sanitizeAnalyticsProperties } from '@/lib/analytics/events';
+import { OutboundLinkTracker } from './outbound-link-tracker';
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? 'https://us.i.posthog.com';
@@ -68,6 +69,7 @@ export function PostHogProvider({
 
   return (
     <PostHogReactProvider client={posthog}>
+      <OutboundLinkTracker />
       {children}
     </PostHogReactProvider>
   );

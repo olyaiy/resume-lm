@@ -13,7 +13,10 @@ import {
   parseImpersonationStateCookieValue,
 } from "@/lib/impersonation";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
-import { createClient } from "@/utils/supabase/server";
+import {
+  getAuthenticatedUser,
+  getDashboardSubscription,
+} from "@/utils/actions";
 
 const isVercel = process.env.VERCEL === "1";
 
@@ -22,10 +25,7 @@ export const dynamic = "force-dynamic";
 export default async function DashboardLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
 
   if (!user) {
     redirect("/");
@@ -43,13 +43,7 @@ export default async function DashboardLayout({
   let upgradeButtonVariant: "trial" | "upgrade" = "upgrade";
 
   try {
-    const { data: subscription } = await supabase
-      .from("subscriptions")
-      .select(
-        "subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id",
-      )
-      .eq("user_id", user.id)
-      .maybeSingle();
+    const { data: subscription } = await getDashboardSubscription(user.id);
 
     const subscriptionState = getSubscriptionAccessState(subscription);
     isProPlan = subscriptionState.hasProAccess;

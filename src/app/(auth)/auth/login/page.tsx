@@ -107,6 +107,7 @@ export default async function LoginPage({
                   <a
                     href={trackedGitHubUrl}
                     data-analytics-id="outbound-github-repo"
+                    data-analytics-placement="auth_login"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full 
