@@ -77,7 +77,7 @@ export interface ResumeScoreMetrics {
     };
   };
 
-  miscellaneous: {
+  miscellaneous?: {
     [key: string]: {
       score: number;
       reason: string;
