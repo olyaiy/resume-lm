@@ -41,6 +41,7 @@ export function Hero() {
           <Link 
             href={trackedGitHubUrl}
             data-analytics-id="outbound-github-repo"
+            data-analytics-placement="landing_hero"
             target="_blank"
             rel="noopener noreferrer"
             className="px-6 py-3 rounded-lg bg-white/40 border border-gray-200 font-medium transition-all duration-300 hover:-translate-y-1"

@@ -47,6 +47,7 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
             <Link
               href={trackedCreatorXUrl}
               data-analytics-id="outbound-creator-x"
+              data-analytics-placement="footer"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -56,6 +57,7 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
             <Link
               href={trackedCreatorLinkedInUrl}
               data-analytics-id="outbound-creator-linkedin"
+              data-analytics-placement="footer"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"
@@ -65,6 +67,7 @@ export function Footer({ variant = 'fixed' }: FooterProps) {
             <Link
               href={trackedCreatorGitHubUrl}
               data-analytics-id="outbound-creator-github"
+              data-analytics-placement="footer"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors p-1"

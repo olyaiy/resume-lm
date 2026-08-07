@@ -21,15 +21,22 @@ export function ActionButtons() {
         {/* <WaitlistDialog /> */}
       </div>
       
-      <Button 
-        size="sm" 
-        variant="ghost" 
+      <Button
+        asChild
+        size="sm"
+        variant="ghost"
         className="text-xs text-muted-foreground hover:text-foreground border-none px-4 py-2 transition-colors duration-300 self-start"
-        onClick={() => window.open(trackedRepoUrl, '_blank', 'noopener,noreferrer')}
-        data-analytics-id="outbound-github-repo"
       >
-        <Github className="mr-2 w-3.5 h-3.5" />
-        Source Code on GitHub
+        <a
+          href={trackedRepoUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          data-analytics-id="outbound-github-repo"
+          data-analytics-placement="landing_action_buttons"
+        >
+          <Github className="mr-2 w-3.5 h-3.5" />
+          Source Code on GitHub
+        </a>
       </Button>
     </div>
   );

@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { Profile, ResumeSummary } from "@/lib/types";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
+import { cache } from "react";
 
 interface DashboardData {
   profile: Profile | null;
@@ -27,13 +28,37 @@ const FALLBACK_SUBSCRIPTION: DashboardData["subscription"] = {
   hasProAccess: false,
 };
 
-export async function getDashboardData(): Promise<DashboardData> {
+// React request memoization lets the dashboard layout and page share the
+// authenticated user and subscription reads instead of repeating them in a
+// single server render.
+export const getAuthenticatedUser = cache(async () => {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
-  
-  if (error || !user) {
+  const {
+    data: { user },
+    error,
+  } = await supabase.auth.getUser();
+
+  if (error || !user) return null;
+  return user;
+});
+
+export const getDashboardSubscription = cache(async (userId: string) => {
+  const supabase = await createClient();
+  return supabase
+    .from('subscriptions')
+    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
+    .eq('user_id', userId)
+    .maybeSingle();
+});
+
+export async function getDashboardData(): Promise<DashboardData> {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
     throw new Error('User not authenticated');
   }
+
+  const supabase = await createClient();
 
   try {
     // These reads are independent. Running them together removes a full
@@ -48,11 +73,7 @@ export async function getDashboardData(): Promise<DashboardData> {
         .from('resumes')
         .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at')
         .eq('user_id', user.id),
-      supabase
-        .from('subscriptions')
-        .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
-        .eq('user_id', user.id)
-        .maybeSingle(),
+      getDashboardSubscription(user.id),
     ]);
 
     const { data, error: profileError } = profileResult;
@@ -137,5 +158,4 @@ export async function getDashboardData(): Promise<DashboardData> {
     throw error;
   }
 }
-
 

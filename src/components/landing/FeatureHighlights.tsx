@@ -259,6 +259,7 @@ const FeatureHighlights = () => {
             <Link 
               href={trackedGitHubUrl}
               data-analytics-id="outbound-github-repo"
+              data-analytics-placement="landing_feature_highlights"
               target="_blank"
               rel="noopener noreferrer"
               className="px-8 py-4 rounded-lg bg-white/80 border border-purple-200/40 text-lg font-medium transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
