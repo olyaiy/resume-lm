@@ -16,8 +16,8 @@ import {User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ProfileRow } from "@/components/dashboard/profile-row";
+import { Greeting } from "@/components/dashboard/greeting";
 import { WelcomeDialog } from "@/components/dashboard/welcome-dialog";
-import { getGreeting } from "@/lib/utils";
 import { ApiKeyAlert } from "@/components/dashboard/api-key-alert";
 import { type SortOption, type SortDirection } from "@/components/resume/management/resume-sort-controls";
 import type { ResumeSummary } from "@/lib/types";
@@ -150,9 +150,7 @@ export default async function Home({
             {/* Greeting & Edit Button */}
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-2xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-                  {getGreeting()}, {profile.first_name}
-                </h1>
+                <Greeting firstName={profile.first_name} />
                 <p className="text-sm text-muted-foreground mt-0.5">
                   Welcome to your resume dashboard
                 </p>
