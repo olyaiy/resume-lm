@@ -321,11 +321,14 @@ export const resumeScoreSchema = z.object({
       suggestions: z.array(z.string()).optional()
     })
   }).optional(),
+  // One predictable shape (matching the documented prompt format and the
+  // resume-score-panel consumer type) instead of a number|object union, which
+  // small models satisfy inconsistently and trips schema validation.
   miscellaneous: z.record(
-    z.union([z.number(), z.object({
-      score: z.number().min(0).max(100).optional(),
-      reason: z.string().optional()
-    })]).optional()
+    z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    })
   ).optional(),
   overallImprovements: z.array(z.string()).optional(),
   // Job-specific improvements for tailored resumes
