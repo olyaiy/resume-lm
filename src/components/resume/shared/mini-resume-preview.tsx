@@ -22,6 +22,7 @@ export function MiniResumePreview({
     if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('en-US', {
+      timeZone: 'UTC',
       month: '2-digit',
       day: '2-digit',
       year: 'numeric'
@@ -154,4 +155,4 @@ export function MiniResumePreview({
       )} />
     </div>
   );
-} 
+}
