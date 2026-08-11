@@ -1,3 +1,5 @@
+import { getBillingState, type BillingState } from "@/lib/billing/state";
+
 export interface SubscriptionSnapshot {
   subscription_plan?: string | null;
   subscription_status?: string | null;
@@ -10,6 +12,7 @@ export interface SubscriptionSnapshot {
 }
 
 export interface SubscriptionAccessState {
+  billingState: BillingState;
   isTrialing: boolean;
   isPastDue: boolean;
   isWithinAccessWindow: boolean;
@@ -66,26 +69,29 @@ export function getSubscriptionAccessState(
   const isPastDue = status === "past_due";
   const hasStripeSubscription = Boolean(subscription?.stripe_subscription_id);
   const isWithinAccessWindow = isFutureDate(currentPeriodEnd, now);
-
-  const hasManualProAccess = plan === "pro" && status === "active";
-  const hasTrialingProAccess = plan === "pro" && isTrialing;
-  const hasPastDueProAccess = plan === "pro" && isPastDue && isWithinAccessWindow;
-  const hasCancelingProAccess = plan === "pro" && status === "canceled" && isWithinAccessWindow;
-
-  const hasProAccess =
-    hasManualProAccess || hasTrialingProAccess || hasPastDueProAccess || hasCancelingProAccess;
+  const billingState = getBillingState(
+    {
+      plan,
+      status,
+      currentPeriodEnd,
+      trialEnd,
+    },
+    now,
+  );
+  const hasProAccess = billingState !== "free";
 
   const hadPaidAccess = plan === "pro";
-  const isCanceling = status === "canceled" && isWithinAccessWindow;
+  const isCanceling = billingState === "canceling";
   const isExpiredProAccess =
-    (status === "canceled" || status === "past_due") &&
-    !isWithinAccessWindow &&
-    hadPaidAccess;
+    hadPaidAccess &&
+    !hasProAccess &&
+    ["active", "canceled", "past_due"].includes(status);
 
   const hasSubscriptionRecord = Boolean(subscription);
   const effectivePlan = hasSubscriptionRecord ? (hasProAccess ? "pro" : "free") : "";
 
   return {
+    billingState,
     isTrialing,
     isPastDue,
     isWithinAccessWindow,

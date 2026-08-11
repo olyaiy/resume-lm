@@ -30,6 +30,7 @@ describe("AnalyticsEvents", () => {
     assert.equal(AnalyticsEvents.FirstInvoicePaid, "first_invoice_paid");
     assert.equal(AnalyticsEvents.InvoicePaymentFailed, "invoice_payment_failed");
     assert.equal(AnalyticsEvents.SubscriptionCanceled, "subscription_canceled");
+    assert.equal(AnalyticsEvents.BillingAlertTriggered, "billing_alert_triggered");
     assert.equal(Object.hasOwn(AnalyticsEvents, "SubscriptionActivated"), false);
   });
 });
