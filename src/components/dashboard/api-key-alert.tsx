@@ -111,7 +111,7 @@ export function ApiKeyAlert({ variant = 'upgrade' }: { variant?: ApiKeyAlertVari
                       OpenAI <ArrowRight className="w-3 h-3" />
                     </a>
                   </div>
-                  <Link href="/settings">
+                  <Link href="/settings" prefetch={false}>
                     <Button
                       size="sm"
                       variant="ghost"

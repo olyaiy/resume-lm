@@ -15,7 +15,7 @@ export function ProfileRow({ profile }: ProfileRowProps) {
     <div className="group relative">
       {/* Animated background gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-100/20 via-rose-100/20 to-teal-100/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700 rounded-xl" />
-      
+
       <div className="relative rounded-xl bg-gradient-to-br from-white/60 to-white/30 hover:from-white/70 hover:to-white/40 backdrop-blur-xl border border-white/40 shadow-lg transition-all duration-500 group-hover:shadow-xl group-hover:-translate-y-0.5">
         <div className="px-4 sm:px-6 py-3">
           {/* Main container - stack on mobile, row on desktop */}
@@ -40,9 +40,9 @@ export function ProfileRow({ profile }: ProfileRowProps) {
               {/* Stats Row - hidden on mobile, visible on sm and up */}
               <div className="hidden sm:flex items-center gap-3">
                 {[
-                  { 
-                    icon: Briefcase, 
-                    label: "Experience", 
+                  {
+                    icon: Briefcase,
+                    label: "Experience",
                     count: profile.work_experience.length,
                     colors: {
                       bg: "from-cyan-50/50 to-cyan-100/50",
@@ -51,9 +51,9 @@ export function ProfileRow({ profile }: ProfileRowProps) {
                       border: "border-cyan-200"
                     }
                   },
-                  { 
-                    icon: GraduationCap, 
-                    label: "Education", 
+                  {
+                    icon: GraduationCap,
+                    label: "Education",
                     count: profile.education.length,
                     colors: {
                       bg: "from-indigo-50/50 to-indigo-100/50",
@@ -62,9 +62,9 @@ export function ProfileRow({ profile }: ProfileRowProps) {
                       border: "border-indigo-200"
                     }
                   },
-                  { 
-                    icon: Code, 
-                    label: "Projects", 
+                  {
+                    icon: Code,
+                    label: "Projects",
                     count: profile.projects.length,
                     colors: {
                       bg: "from-violet-50/50 to-violet-100/50",
@@ -74,8 +74,8 @@ export function ProfileRow({ profile }: ProfileRowProps) {
                     }
                   },
                 ].map((stat) => (
-                  <div 
-                    key={stat.label} 
+                  <div
+                    key={stat.label}
                     className={cn(
                       "flex items-center gap-2 px-2.5 py-1 rounded-full",
                       "bg-gradient-to-r border backdrop-blur-sm",
@@ -102,11 +102,11 @@ export function ProfileRow({ profile }: ProfileRowProps) {
             </div>
 
             {/* Edit Button with enhanced styling */}
-            <Link href="/profile" className="shrink-0">  
+            <Link href="/profile" prefetch={false} className="shrink-0">
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full sm:w-auto bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-300 text-teal-700 
+                className="w-full sm:w-auto bg-gradient-to-r from-teal-50 to-cyan-50 border-teal-200 hover:border-teal-300 text-teal-700
                            hover:bg-gradient-to-r hover:from-teal-100 hover:to-cyan-100
                            transition-all duration-500 hover:-translate-y-0.5 hover:shadow-md shadow-sm"
               >
@@ -119,4 +119,4 @@ export function ProfileRow({ profile }: ProfileRowProps) {
       </div>
     </div>
   );
-} 
+}

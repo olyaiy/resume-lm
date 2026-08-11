@@ -3,20 +3,15 @@
 "use server"
 
 import { SettingsContent } from '@/components/settings/settings-content'
-import { createClient } from '@/utils/supabase/server'
 import { getSubscriptionAccessState } from '@/lib/subscription-access';
+import { getAuthenticatedUser, getDashboardSubscription } from '@/utils/actions';
 
 
 export default async function SettingsPage() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
 
   const { data: subscription } = user
-    ? await supabase
-        .from('subscriptions')
-        .select('subscription_plan, subscription_status, current_period_end, trial_end, stripe_subscription_id, payment_failure_count, last_payment_failed_at, next_payment_attempt_at')
-        .eq('user_id', user.id)
-        .maybeSingle()
+    ? await getDashboardSubscription(user.id)
     : { data: null };
 
   const subscriptionState = getSubscriptionAccessState(subscription);

@@ -17,6 +17,7 @@ export function SettingsButton({ className, onAllowedNavigation }: SettingsButto
   return (
     <Link 
       href="/settings" 
+      prefetch={false}
       onClick={handleClick}
       className={cn(
         "flex items-center gap-1.5 px-3 py-1",

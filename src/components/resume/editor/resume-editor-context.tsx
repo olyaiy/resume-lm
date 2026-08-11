@@ -8,11 +8,11 @@ interface ResumeState {
   hasUnsavedChanges: boolean;
 }
 
-type ResumeAction = 
+type ResumeAction =
   | { type: 'UPDATE_FIELD'; field: keyof Resume; value: Resume[keyof Resume] }
   | { type: 'SET_SAVING'; value: boolean }
   | { type: 'SET_DELETING'; value: boolean }
-  | { type: 'SET_HAS_CHANGES'; value: boolean };
+  | { type: 'MARK_SAVED' };
 
 const ResumeContext = createContext<{
   state: ResumeState;
@@ -27,21 +27,21 @@ function resumeReducer(state: ResumeState, action: ResumeAction): ResumeState {
         resume: {
           ...state.resume,
           [action.field]: action.value
-        }
+        },
+        hasUnsavedChanges: true,
       };
       return newState;
 
 
-      
+
     case 'SET_SAVING':
       // console.log('Resume Editor Context - Saving State:', action.value);
       return { ...state, isSaving: action.value };
     case 'SET_DELETING':
       // console.log('Resume Editor Context - Deleting State:', action.value);
       return { ...state, isDeleting: action.value };
-    case 'SET_HAS_CHANGES':
-      // console.log('Resume Editor Context - Unsaved Changes:', action.value);
-      return { ...state, hasUnsavedChanges: action.value };
+    case 'MARK_SAVED':
+      return { ...state, hasUnsavedChanges: false };
     default:
       return state;
   }
@@ -55,4 +55,4 @@ export function useResumeContext() {
   return context;
 }
 
-export { ResumeContext, resumeReducer }; 
+export { ResumeContext, resumeReducer };

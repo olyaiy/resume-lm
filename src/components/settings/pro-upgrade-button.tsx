@@ -19,12 +19,13 @@ export function ProUpgradeButton({ className }: ProUpgradeButtonProps) {
     >
       {/* Outer glow effect */}
       <div className="absolute -inset-[3px] bg-gradient-to-r from-amber-500/0 via-orange-500/0 to-red-500/0 rounded-lg opacity-75 blur-md group-hover:from-amber-500/50 group-hover:via-orange-500/50 group-hover:to-red-500/50 transition-all duration-300 ease-in-out" />
-      
+
       {/* Inner gradient */}
       <div className="absolute inset-0 bg-gradient-to-r from-amber-400/0 via-orange-400/0 to-red-400/0 rounded-lg opacity-100 group-hover:via-orange-400/10 transition-all duration-300 ease-in-out" />
-      
-      <Link 
-        href="/subscription" 
+
+      <Link
+        href="/subscription"
+        prefetch={false}
         className={cn(
           "relative flex items-center gap-1.5 px-4 py-1.5",
           "bg-gradient-to-r from-amber-500 to-orange-500",
@@ -41,4 +42,4 @@ export function ProUpgradeButton({ className }: ProUpgradeButtonProps) {
       </Link>
     </motion.div>
   );
-} 
+}

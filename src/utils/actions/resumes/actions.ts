@@ -1,6 +1,7 @@
 'use server'
 
 import { createClient } from "@/utils/supabase/server";
+import { getAuthenticatedUser } from "@/utils/actions";
 import { Profile, Resume, WorkExperience, Education, Skill, Project, Job } from "@/lib/types";
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
@@ -96,9 +97,9 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
 //  SUPABASE ACTIONS
 export async function getResumeById(resumeId: string): Promise<{ resume: Resume; profile: Profile; job: Job | null }> {
   const supabase = await createClient();
-  const { data: { user }, error } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
   
-  if (error || !user) {
+  if (!user) {
     throw new Error('User not authenticated');
   }
 

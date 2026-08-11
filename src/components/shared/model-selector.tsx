@@ -32,7 +32,7 @@ interface ModelSelectorProps {
 function UnavailableModelPopover({ children, model }: { children: React.ReactNode; model: AIModel }) {
   const [open, setOpen] = useState(false)
   const provider = getProviderById(model.provider)
-  
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -44,9 +44,9 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
           {children}
         </div>
       </PopoverTrigger>
-      <PopoverContent 
-        className="w-80 z-50" 
-        side="right" 
+      <PopoverContent
+        className="w-80 z-50"
+        side="right"
         align="start"
         onMouseEnter={() => setOpen(true)}
         onMouseLeave={() => setOpen(false)}
@@ -60,7 +60,7 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
               To use this model, you need either a Pro subscription or a {provider?.name} API key.
             </p>
           </div>
-          
+
           <div className="space-y-2">
             {/* Pro Option */}
             <div className="p-3 rounded-lg border border-purple-200/50 bg-gradient-to-br from-purple-50/50 to-purple-100/30">
@@ -74,7 +74,7 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
               <p className="text-xs text-purple-700 mb-2">
                 Get unlimited access to all AI models without managing API keys
               </p>
-              <Link href="/subscription">
+              <Link href="/subscription" prefetch={false}>
                 <Button size="sm" className="w-full bg-purple-600 hover:bg-purple-700 h-7 text-xs">
                   Upgrade to Pro
                 </Button>
@@ -90,7 +90,7 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
                 Add your own {provider?.name} API key to use this model
               </p>
               <div className="flex gap-2">
-                <Link href="/settings" className="flex-1">
+                <Link href="/settings" prefetch={false} className="flex-1">
                   <Button size="sm" variant="outline" className="w-full h-7 text-xs">
                     Configure API Key
                   </Button>
@@ -111,16 +111,16 @@ function UnavailableModelPopover({ children, model }: { children: React.ReactNod
   )
 }
 
-export function ModelSelector({ 
-  value, 
-  onValueChange, 
-  apiKeys, 
-  isProPlan, 
+export function ModelSelector({
+  value,
+  onValueChange,
+  apiKeys,
+  isProPlan,
   className,
   placeholder = "Select an AI model",
   showToast = true
 }: ModelSelectorProps) {
-  
+
   const isModelSelectable = (modelId: string) => {
     return isModelAvailable(modelId, isProPlan, apiKeys)
   }
@@ -176,10 +176,10 @@ export function ModelSelector({
               {group.models.map((model) => {
                 const provider = getProviderById(model.provider)
                 const isSelectable = isModelSelectable(model.id)
-                
+
                 const selectItem = (
-                  <SelectItem 
-                    key={model.id} 
+                  <SelectItem
+                    key={model.id}
                     value={model.id}
                     disabled={!isSelectable}
                     className={cn(
@@ -245,4 +245,4 @@ export function ModelSelector({
 }
 
 // Re-export types from centralized location
-export type { AIModel, ApiKey } from '@/lib/ai-models' 
+export type { AIModel, ApiKey } from '@/lib/ai-models'

@@ -256,6 +256,7 @@ export function ResumesSection({
   const LimitReachedCard = () => (
     <Link 
       href="/subscription"
+      prefetch={false}
       className={cn(
         "group/limit block",
         "cursor-pointer",
@@ -364,7 +365,7 @@ export function ResumesSection({
               </div>
             ) : (
               // Normal clickable resume
-              <Link href={`/resumes/${resume.id}`}>
+              <Link href={`/resumes/${resume.id}`} prefetch={false}>
                 <MiniResumePreview
                   name={resume.name}
                   type={type}
@@ -459,7 +460,7 @@ export function ResumesSection({
                       <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
                         <AlertDialogAction asChild>
-                          <Link href="/subscription" className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700">
+                          <Link href="/subscription" prefetch={false} className="bg-gradient-to-r from-teal-600 to-cyan-600 text-white hover:from-teal-700 hover:to-cyan-700">
                             Upgrade to Pro
                           </Link>
                         </AlertDialogAction>

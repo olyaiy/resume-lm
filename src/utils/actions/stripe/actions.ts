@@ -1,9 +1,10 @@
 'use server';
 
 import { Stripe } from "stripe";
-import { createClient, createServiceClient } from '@/utils/supabase/server';
+import { createServiceClient } from '@/utils/supabase/server';
 import { Subscription } from '@/lib/types';
 import { getSubscriptionAccessState } from '@/lib/subscription-access';
+import { getAuthenticatedUser, getDashboardSubscription } from '@/utils/actions';
 import {
   mapStripeSubscriptionToAppSubscription,
   shouldSkipStaleInactiveSubscriptionUpdate,
@@ -305,57 +306,37 @@ export async function deleteCustomerAndData(uuid: string) {
 
 // Helper to get subscription status
 export async function getSubscriptionStatus() {
-  const supabase = await createClient();
+  const user = await getAuthenticatedUser();
 
-  const { data: { user }, error: userError } = await supabase.auth.getUser();
-  
-  if (userError || !user) {
+  if (!user) {
     throw new Error('User not authenticated');
   }
 
-  console.log(' looking for user ', user.id);
+  const { data: subscription, error: subscriptionError } =
+    await getDashboardSubscription(user.id);
 
-  const { data: subscription, error: subscriptionError } = await supabase
-    .from('subscriptions')
-    .select(`
-      subscription_plan,
-      subscription_status,
-      current_period_end,
-      trial_end,
-      stripe_customer_id,
-      stripe_subscription_id,
-      payment_failure_count,
-      last_payment_failed_at,
-      next_payment_attempt_at
-    `)
-    .eq('user_id', user.id)
-    .single();
-
-  if (subscriptionError) {
+  if (subscriptionError || !subscription) {
     // If no subscription found, return a default free plan instead of throwing
     void subscriptionError
-    if (subscriptionError.code === 'PGRST116') {
-      return {
-        subscription_plan: 'Free',
-        subscription_status: 'active',
-        current_period_end: null,
-        trial_end: null,
-        stripe_customer_id: null,
-        stripe_subscription_id: null,
-        payment_failure_count: 0,
-        last_payment_failed_at: null,
-        next_payment_attempt_at: null
-      };
-    }
-    throw new Error('Failed to fetch subscription status');
+    if (subscriptionError) throw new Error('Failed to fetch subscription status');
+    return {
+      subscription_plan: 'Free',
+      subscription_status: 'active',
+      current_period_end: null,
+      trial_end: null,
+      stripe_customer_id: null,
+      stripe_subscription_id: null,
+      payment_failure_count: 0,
+      last_payment_failed_at: null,
+      next_payment_attempt_at: null
+    };
   }
 
   return subscription;
 }
 
 export async function checkSubscriptionPlan() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
   
   if (!user) {
     return {
@@ -368,27 +349,11 @@ export async function checkSubscriptionPlan() {
     };
   }
 
-  const { data } = await supabase
-    .from('subscriptions')
-    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data } = await getDashboardSubscription(user.id);
 
   const subscriptionState = getSubscriptionAccessState(data);
   const effectivePlan = data ? subscriptionState.effectivePlan : '';
 
-  console.log('🧮 checkSubscriptionPlan', {
-    userId: user.id,
-    subscription_plan: data?.subscription_plan,
-    subscription_status: data?.subscription_status,
-    stripe_subscription_id: data?.stripe_subscription_id,
-    current_period_end: data?.current_period_end,
-    trial_end: data?.trial_end,
-    isTrialing: subscriptionState.isTrialing,
-    hasProAccess: subscriptionState.hasProAccess,
-    effectivePlan,
-  });
-  
   return {
     plan: effectivePlan,
     status: data?.subscription_status || '',
@@ -420,19 +385,14 @@ export async function hasActiveSubscriptionOrTrial(userId: string): Promise<bool
 export async function getSubscriptionPlan(returnId: true): Promise<{ plan: string; id: string }>;
 export async function getSubscriptionPlan(returnId?: boolean): Promise<string | { plan: string; id: string }>;
 export async function getSubscriptionPlan(returnId?: boolean) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = await getAuthenticatedUser();
   
   if (!user) {
     if (returnId) return { plan: '', id: '' };
     return '';
   }
 
-  const { data } = await supabase
-    .from('subscriptions')
-    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
-    .eq('user_id', user.id)
-    .maybeSingle();
+  const { data } = await getDashboardSubscription(user.id);
 
   const subscriptionState = getSubscriptionAccessState(data);
   const effectivePlan = data ? subscriptionState.effectivePlan : '';

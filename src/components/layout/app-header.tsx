@@ -112,6 +112,7 @@ export function AppHeader({
                 <div className="flex items-center px-2 lg:px-3 py-1">
                   <Link 
                     href="/profile" 
+                    prefetch={false}
                     onClick={handleProfileClick}
                     className={cn(
                       "flex items-center gap-1.5 px-2 lg:px-3 py-1",
@@ -163,6 +164,7 @@ export function AppHeader({
                     
                     <Link
                       href="/profile"
+                      prefetch={false}
                       onClick={handleProfileClick}
                       className={cn(
                         "flex items-center gap-2 px-4 py-2 rounded-md",

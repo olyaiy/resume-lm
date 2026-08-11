@@ -36,6 +36,7 @@ export function ResumeEditorActions({
     try {
       dispatch({ type: 'SET_SAVING', value: true });
       await updateResume(state.resume.id, state.resume);
+      dispatch({ type: 'MARK_SAVED' });
       toast({
         title: "Changes saved",
         description: "Your resume has been updated successfully.",
