@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import Stripe from 'stripe'
 import { manageSubscriptionStatusChange } from '@/utils/actions/stripe/actions'
 import { createServiceClient } from '@/utils/supabase/server'
+import { reportBillingAlert } from '@/lib/billing/alerts'
 import { AnalyticsEvents } from '@/lib/analytics/events'
 import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
 import {
@@ -87,15 +88,17 @@ async function reserveWebhookEvent(
   supabase: ServiceSupabaseClient,
   event: Stripe.Event
 ): Promise<'process' | 'skip'> {
+  const now = new Date();
+  const staleProcessingCutoff = now.getTime() - 5 * 60 * 1000;
   const { data: existingEvent, error: existingEventError } = await supabase
     .from('stripe_webhook_events')
-    .select('event_id, processed_at')
+    .select('event_id, processed_at, status, attempt_count, last_attempt_at')
     .eq('event_id', event.id)
     .maybeSingle();
 
   if (existingEventError) throw existingEventError;
 
-  if (existingEvent?.processed_at) {
+  if (existingEvent?.processed_at || existingEvent?.status === 'processed') {
     return 'skip';
   }
 
@@ -105,6 +108,10 @@ async function reserveWebhookEvent(
       .insert({
         event_id: event.id,
         event_type: event.type,
+        status: 'processing',
+        attempt_count: 1,
+        last_attempt_at: now.toISOString(),
+        event_created_at: new Date(event.created * 1000).toISOString(),
       });
 
     if (insertError) {
@@ -113,15 +120,52 @@ async function reserveWebhookEvent(
 
       const { data: duplicateEvent, error: duplicateEventError } = await supabase
         .from('stripe_webhook_events')
-        .select('event_id, processed_at')
+        .select('event_id, processed_at, status, attempt_count, last_attempt_at')
         .eq('event_id', event.id)
         .maybeSingle();
 
       if (duplicateEventError) throw duplicateEventError;
-      if (duplicateEvent?.processed_at) {
+      if (duplicateEvent?.processed_at || duplicateEvent?.status === 'processed') {
         return 'skip';
       }
+      if (
+        duplicateEvent?.status === 'processing' &&
+        duplicateEvent.last_attempt_at &&
+        Date.parse(duplicateEvent.last_attempt_at) > staleProcessingCutoff
+      ) {
+        return 'skip';
+      }
+      if (duplicateEvent) {
+        const { error: claimError } = await supabase
+          .from('stripe_webhook_events')
+          .update({
+            status: 'processing',
+            attempt_count: (duplicateEvent.attempt_count ?? 1) + 1,
+            last_attempt_at: now.toISOString(),
+            last_error: null,
+          })
+          .eq('event_id', event.id);
+        if (claimError) throw claimError;
+      }
     }
+  } else {
+    if (
+      existingEvent.status === 'processing' &&
+      existingEvent.last_attempt_at &&
+      Date.parse(existingEvent.last_attempt_at) > staleProcessingCutoff
+    ) {
+      return 'skip';
+    }
+    const { error: claimError } = await supabase
+      .from('stripe_webhook_events')
+      .update({
+        status: 'processing',
+        attempt_count: (existingEvent.attempt_count ?? 1) + 1,
+        last_attempt_at: now.toISOString(),
+        last_error: null,
+      })
+      .eq('event_id', event.id);
+    if (claimError) throw claimError;
   }
 
   return 'process';
@@ -133,13 +177,40 @@ async function markWebhookEventProcessed(
 ): Promise<void> {
   const { error } = await supabase
     .from('stripe_webhook_events')
-    .update({ processed_at: new Date().toISOString() })
+    .update({
+      status: 'processed',
+      processed_at: new Date().toISOString(),
+      last_error: null,
+    })
     .eq('event_id', eventId);
 
   if (error) throw error;
 }
 
+async function markWebhookEventFailed(
+  supabase: ServiceSupabaseClient,
+  eventId: string,
+  error: Error,
+): Promise<void> {
+  const { error: updateError } = await supabase
+    .from('stripe_webhook_events')
+    .update({
+      status: 'failed',
+      last_attempt_at: new Date().toISOString(),
+      last_error: error.message.slice(0, 2000),
+    })
+    .eq('event_id', eventId);
+
+  if (updateError) {
+    console.error('Unable to persist Stripe webhook failure state', {
+      eventId,
+      error: updateError,
+    });
+  }
+}
+
 async function handleSubscriptionChange(
+  supabase: ServiceSupabaseClient,
   stripeCustomerId: string,
   subscriptionId: string
 ): Promise<Partial<Subscription>> {
@@ -157,6 +228,22 @@ async function handleSubscriptionChange(
       subscriptionId,
       stripeCustomerId
     );
+
+    if (!subscriptionData.user_id) {
+      await reportBillingAlert(supabase, {
+        type: 'mapping_missing',
+        severity: 'critical',
+        alertKey: `mapping-missing:${subscriptionId}`,
+        message: `Stripe subscription ${subscriptionId.slice(-8)} has no Supabase user mapping.`,
+        stripeSubscriptionId: subscriptionId,
+        stripeCustomerId,
+        details: {
+          stripe_subscription_id: subscriptionId,
+          stripe_customer_id: stripeCustomerId,
+          subscription_status: subscriptionData.subscription_status ?? null,
+        },
+      });
+    }
     
     console.log('✨ Final Subscription State:', {
       result: 'success',
@@ -302,6 +389,22 @@ async function captureInvoicePaymentFailedEvent(input: {
     throw recoveryUpdateError;
   }
 
+  await reportBillingAlert(input.supabase, {
+    type: 'payment_failed',
+    severity: 'warning',
+    alertKey: `payment-failed:${input.invoice.id}`,
+    message: `A Stripe invoice payment failed for subscription ${input.subscriptionData.stripe_subscription_id?.slice(-8) ?? 'unknown'}.`,
+    stripeSubscriptionId: input.subscriptionData.stripe_subscription_id,
+    details: {
+      stripe_invoice_id: input.invoice.id,
+      amount_due: input.invoice.amount_due,
+      amount_remaining: input.invoice.amount_remaining,
+      currency: input.invoice.currency,
+      attempt_count: input.invoice.attempt_count,
+      next_payment_attempt: recoveryFields.next_payment_attempt_at,
+    },
+  });
+
   await captureServerAnalyticsEvent({
     distinctId: userId,
     event: AnalyticsEvents.InvoicePaymentFailed,
@@ -408,6 +511,8 @@ async function captureFirstInvoicePaidEvent(input: {
 }
 
 export async function POST(req: Request) {
+  let supabase: ServiceSupabaseClient | null = null;
+  let event: Stripe.Event | null = null;
   try {
     console.log('🌐 Incoming Webhook Request:', {
       method: req.method,
@@ -434,7 +539,6 @@ export async function POST(req: Request) {
       console.log('🔑 Processing webhook with idempotency key:', idempotencyKey);
     }
 
-    let event: Stripe.Event
     try {
       console.log('🔍 Verifying webhook signature...');
       event = getStripe().webhooks.constructEvent(body, signature, webhookSecret)
@@ -455,6 +559,10 @@ export async function POST(req: Request) {
       )
     }
 
+    if (!event) {
+      throw new Error('Stripe webhook event was not constructed');
+    }
+
     console.log('📨 Received Stripe Event:', {
       type: event.type,
       id: event.id,
@@ -472,7 +580,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const supabase = await createServiceClient();
+    supabase = await createServiceClient();
     const webhookEventAction = await reserveWebhookEvent(supabase, event);
     if (webhookEventAction === 'skip') {
       console.log('↩️ Duplicate webhook event already processed, skipping:', event.id);
@@ -493,6 +601,7 @@ export async function POST(req: Request) {
         
         if (session.mode === 'subscription' && subscriptionId) {
           const subscriptionData = await handleSubscriptionChange(
+            supabase,
             getCustomerId(session.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
@@ -518,6 +627,7 @@ export async function POST(req: Request) {
         
         if (subscriptionId) {
           const subscriptionData = await handleSubscriptionChange(
+            supabase,
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
@@ -537,6 +647,7 @@ export async function POST(req: Request) {
 
         if (subscriptionId) {
           const subscriptionData = await handleSubscriptionChange(
+            supabase,
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
@@ -563,6 +674,7 @@ export async function POST(req: Request) {
           invoice.next_payment_attempt
         ) {
           const subscriptionData = await handleSubscriptionChange(
+            supabase,
             getCustomerId(invoice.customer as string | Stripe.Customer | Stripe.DeletedCustomer | null),
             subscriptionId
           );
@@ -607,6 +719,7 @@ export async function POST(req: Request) {
         }
         
         const subscriptionData = await handleSubscriptionChange(
+          supabase,
           getCustomerId(subscription.customer),
           subscription.id
         );
@@ -631,6 +744,7 @@ export async function POST(req: Request) {
         });
         
         const subscriptionData = await handleSubscriptionChange(
+          supabase,
           getCustomerId(subscription.customer),
           subscription.id
         );
@@ -686,6 +800,20 @@ export async function POST(req: Request) {
     )
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
+    if (supabase && event) {
+      await markWebhookEventFailed(supabase, event.id, error);
+      await reportBillingAlert(supabase, {
+        type: 'webhook_processing_failed',
+        severity: 'critical',
+        alertKey: `webhook-failed:${event.id}`,
+        message: `Stripe webhook ${event.type} failed and will be retried by Stripe.`,
+        details: {
+          event_type: event.type,
+          event_id: event.id,
+          error: error.message,
+        },
+      });
+    }
     console.error('🔥 Webhook handler failed:', {
       error: error.message,
       stack: error.stack,

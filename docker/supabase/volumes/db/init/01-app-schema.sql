@@ -52,6 +52,19 @@ CREATE TRIGGER update_subscriptions_updated_at BEFORE
 UPDATE ON subscriptions FOR EACH ROW
 EXECUTE FUNCTION update_updated_at_column();
 
+ALTER TABLE public.subscriptions
+  ADD COLUMN IF NOT EXISTS payment_failure_count integer NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS last_payment_failed_at timestamp with time zone,
+  ADD COLUMN IF NOT EXISTS next_payment_attempt_at timestamp with time zone;
+
+ALTER TABLE public.subscriptions
+  DROP CONSTRAINT IF EXISTS subscriptions_subscription_status_check;
+ALTER TABLE public.subscriptions
+  ADD CONSTRAINT subscriptions_subscription_status_check CHECK (
+    (subscription_status IS NULL) OR
+    (subscription_status = ANY (ARRAY['active'::text, 'past_due'::text, 'canceled'::text]))
+  );
+
 -- Stripe webhook idempotency table
 CREATE TABLE IF NOT EXISTS public.stripe_webhook_events (
   event_id text NOT NULL,
@@ -70,6 +83,45 @@ EXECUTE FUNCTION update_updated_at_column();
 ALTER TABLE public.stripe_webhook_events ENABLE ROW LEVEL SECURITY;
 REVOKE ALL ON TABLE public.stripe_webhook_events FROM anon, authenticated;
 GRANT ALL ON TABLE public.stripe_webhook_events TO service_role;
+
+ALTER TABLE public.stripe_webhook_events
+  ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'processing',
+  ADD COLUMN IF NOT EXISTS attempt_count integer NOT NULL DEFAULT 1,
+  ADD COLUMN IF NOT EXISTS last_attempt_at timestamp with time zone,
+  ADD COLUMN IF NOT EXISTS last_error text,
+  ADD COLUMN IF NOT EXISTS event_created_at timestamp with time zone;
+
+UPDATE public.stripe_webhook_events
+SET status = CASE WHEN processed_at IS NULL THEN 'failed' ELSE 'processed' END,
+    last_attempt_at = COALESCE(last_attempt_at, updated_at),
+    event_created_at = COALESCE(event_created_at, created_at)
+WHERE status = 'processing';
+
+CREATE TABLE IF NOT EXISTS public.billing_alerts (
+  alert_key text NOT NULL PRIMARY KEY,
+  alert_type text NOT NULL,
+  severity text NOT NULL,
+  stripe_subscription_id text NULL,
+  stripe_customer_id text NULL,
+  details jsonb NOT NULL DEFAULT '{}'::jsonb,
+  occurrence_count integer NOT NULL DEFAULT 1,
+  first_seen_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  last_seen_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  last_notified_at timestamp with time zone NULL,
+  resolved_at timestamp with time zone NULL,
+  updated_at timestamp with time zone NOT NULL DEFAULT timezone('utc'::text, now()),
+  CONSTRAINT billing_alerts_type_check CHECK (alert_type = ANY (ARRAY['payment_failed'::text, 'billing_state_mismatch'::text, 'mapping_missing'::text, 'webhook_processing_failed'::text])),
+  CONSTRAINT billing_alerts_severity_check CHECK (severity = ANY (ARRAY['warning'::text, 'critical'::text])),
+  CONSTRAINT billing_alerts_occurrence_count_positive CHECK (occurrence_count > 0)
+);
+
+DROP TRIGGER IF EXISTS update_billing_alerts_updated_at ON public.billing_alerts;
+CREATE TRIGGER update_billing_alerts_updated_at BEFORE UPDATE ON public.billing_alerts
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE INDEX IF NOT EXISTS billing_alerts_open_idx ON public.billing_alerts (resolved_at, severity, last_seen_at);
+ALTER TABLE public.billing_alerts ENABLE ROW LEVEL SECURITY;
+REVOKE ALL ON TABLE public.billing_alerts FROM anon, authenticated;
+GRANT ALL ON TABLE public.billing_alerts TO service_role;
 
 -- Jobs table
 CREATE TABLE IF NOT EXISTS public.jobs (
