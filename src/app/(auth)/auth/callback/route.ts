@@ -1,5 +1,7 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextRequest, NextResponse } from 'next/server'
+import { AnalyticsEvents } from '@/lib/analytics/events'
+import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
 
 import {
   AUTH_ERROR_CODES,
@@ -44,6 +46,22 @@ function redirectToLogin(
 
 function logCallbackFailure(details: Record<string, unknown>) {
   console.error('Google OAuth callback failed:', details)
+}
+
+function isNewOAuthUser(user: {
+  created_at?: string
+  last_sign_in_at?: string | null
+}) {
+  const createdAt = Date.parse(user.created_at ?? '')
+  const lastSignInAt = Date.parse(user.last_sign_in_at ?? '')
+  const now = Date.now()
+
+  return (
+    Number.isFinite(createdAt) &&
+    Number.isFinite(lastSignInAt) &&
+    now - createdAt <= 15 * 60 * 1000 &&
+    Math.abs(lastSignInAt - createdAt) <= 2 * 60 * 1000
+  )
 }
 
 export async function GET(request: NextRequest) {
@@ -139,6 +157,17 @@ export async function GET(request: NextRequest) {
       plan: intent.plan ?? null,
     })
     return redirectToLogin(requestUrl, intent, errorCode, pendingCookies, pendingHeaders)
+  }
+
+  const oauthUser = exchangeResult.data.session?.user
+  if (oauthUser && isNewOAuthUser(oauthUser)) {
+    await captureServerAnalyticsEvent({
+      distinctId: oauthUser.id,
+      event: AnalyticsEvents.SignupCompleted,
+      properties: {
+        signup_provider: 'google',
+      },
+    })
   }
 
   const redirectPath = getAuthRedirectPath(intent)

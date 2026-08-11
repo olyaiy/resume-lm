@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import posthog from 'posthog-js';
 import { PostHogProvider as PostHogReactProvider } from 'posthog-js/react';
 import { sanitizeAnalyticsProperties } from '@/lib/analytics/events';
+import { readBrowserAnalyticsAnonymousId } from '@/lib/analytics/attribution';
 import { OutboundLinkTracker } from './outbound-link-tracker';
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
@@ -56,14 +57,19 @@ export function PostHogProvider({
     // Supabase user IDs are the canonical identity for both browser and
     // server-side events. Keeping this call in the shared provider means the
     // checkout/editor events cannot accidentally stay on an anonymous ID.
+    const anonymousId = readBrowserAnalyticsAnonymousId();
     posthog.identify(user.id, sanitizeAnalyticsProperties({
       subscription_plan: user.subscriptionPlan,
       subscription_status: user.subscriptionStatus,
       is_pro: user.isPro,
+      analytics_anonymous_id: anonymousId,
+      analytics_user_id: user.id,
     }));
     activeIdentifiedUserId = user.id;
     posthog.register({
       analytics_identity: user.id,
+      analytics_user_id: user.id,
+      ...(anonymousId ? { analytics_anonymous_id: anonymousId } : {}),
     });
   }, [user?.id, user?.isPro, user?.subscriptionPlan, user?.subscriptionStatus]);
 

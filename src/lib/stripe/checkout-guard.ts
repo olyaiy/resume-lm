@@ -1,4 +1,8 @@
 import type Stripe from "stripe";
+import {
+  getAnalyticsContextProperties,
+  type AnalyticsAttributionContext,
+} from "@/lib/analytics/attribution";
 
 const CHECKOUT_SOURCE = "resumelm_checkout";
 
@@ -6,9 +10,10 @@ export interface CheckoutGuardInput {
   userId: string;
   priceId: string;
   includeTrial: boolean;
+  analyticsContext?: AnalyticsAttributionContext;
 }
 
-export type CheckoutSessionMetadata = {
+export type CheckoutSessionMetadata = Record<string, string> & {
   supabaseUUID: string;
   price_id: string;
   include_trial: "true" | "false";
@@ -31,12 +36,16 @@ export function buildCheckoutSessionMetadata({
   userId,
   priceId,
   includeTrial,
+  analyticsContext,
 }: CheckoutGuardInput): CheckoutSessionMetadata {
   return {
     supabaseUUID: userId,
     price_id: priceId,
     include_trial: includeTrial ? "true" : "false",
     source: CHECKOUT_SOURCE,
+    ...(analyticsContext
+      ? getAnalyticsContextProperties(analyticsContext)
+      : {}),
   };
 }
 

@@ -2,6 +2,7 @@
 
 import { Stripe } from "stripe";
 import { checkAuth } from "@/app/(auth)/auth/login/actions";
+import { getServerAnalyticsContext } from "@/lib/analytics/server";
 import { createOrRetrieveCustomer } from "@/utils/actions/stripe/actions";
 import {
     buildCheckoutIdempotencyKey,
@@ -91,10 +92,12 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
             };
         }
 
+        const analyticsContext = await getServerAnalyticsContext();
         const checkoutMetadata = buildCheckoutSessionMetadata({
             userId: user.id,
             priceId,
             includeTrial,
+            analyticsContext,
         });
 
         const openSessions = await stripe.checkout.sessions.list({
@@ -152,6 +155,7 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
                     userId: user.id,
                     priceId,
                     includeTrial,
+                    analyticsContext,
                 }),
                 ...(includeTrial && {
                     trial_period_days: 7,

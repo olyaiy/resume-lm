@@ -7,17 +7,20 @@ import {
   getAttributionProperties,
   getBrowserStorage,
   getUtmParameters,
+  getAnalyticsContextProperties,
+  persistBrowserAnalyticsContext,
   persistFirstTouchAttribution,
+  readBrowserAnalyticsAnonymousId,
   sanitizeAnalyticsUrl,
 } from '@/lib/analytics/attribution';
 
-export function PostHogPageView() {
+export function PostHogPageView({ userId }: { userId?: string | null }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const posthog = usePostHog();
 
   useEffect(() => {
-    if (!posthog || !pathname) return;
+    if (!pathname) return;
 
     const search = searchParams.toString();
     const currentUrl =
@@ -34,16 +37,30 @@ export function PostHogPageView() {
       currentAttribution,
       firstTouchAttribution,
     );
+    const anonymousId =
+      readBrowserAnalyticsAnonymousId() ??
+      (!userId ? posthog?.get_distinct_id?.() : undefined);
+    const analyticsContext = {
+      anonymousId,
+      currentAttribution,
+      firstTouchAttribution,
+    };
+    const contextProperties = getAnalyticsContextProperties(analyticsContext);
 
-    if (Object.keys(attribution).length > 0) {
-      posthog.register(attribution);
+    persistBrowserAnalyticsContext(analyticsContext);
+
+    if (!posthog) return;
+
+    if (Object.keys(contextProperties).length > 0) {
+      posthog.register(contextProperties);
     }
 
     posthog.capture('$pageview', {
       $current_url: sanitizeAnalyticsUrl(currentUrl),
       ...attribution,
+      ...contextProperties,
     });
-  }, [pathname, posthog, searchParams]);
+  }, [pathname, posthog, searchParams, userId]);
 
   return null;
 }

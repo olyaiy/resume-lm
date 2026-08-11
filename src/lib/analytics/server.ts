@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { cookies } from "next/headers";
 
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import {
@@ -6,6 +7,15 @@ import {
   type AnalyticsEventName,
   type AnalyticsProperties,
 } from "./events";
+import {
+  ANALYTICS_ANONYMOUS_ID_COOKIE,
+  ATTRIBUTION_COOKIE,
+  getAnalyticsContextProperties,
+  LATEST_ATTRIBUTION_COOKIE,
+  normalizeAnalyticsAnonymousId,
+  parseStoredAttributionValue,
+  type AnalyticsAttributionContext,
+} from "./attribution";
 
 const posthogKey = process.env.NEXT_PUBLIC_POSTHOG_KEY;
 const posthogHost = process.env.NEXT_PUBLIC_POSTHOG_HOST ?? "https://us.i.posthog.com";
@@ -14,16 +24,46 @@ function getCaptureUrl() {
   return `${posthogHost.replace(/\/$/, "")}/capture/`;
 }
 
+export async function getServerAnalyticsContext(): Promise<AnalyticsAttributionContext> {
+  try {
+    const cookieStore = await cookies();
+    return {
+      anonymousId: normalizeAnalyticsAnonymousId(
+        cookieStore.get(ANALYTICS_ANONYMOUS_ID_COOKIE)?.value,
+      ),
+      currentAttribution: parseStoredAttributionValue(
+        cookieStore.get(LATEST_ATTRIBUTION_COOKIE)?.value,
+      ),
+      firstTouchAttribution: parseStoredAttributionValue(
+        cookieStore.get(ATTRIBUTION_COOKIE)?.value,
+      ),
+    };
+  } catch {
+    // Webhooks and non-request server contexts have no browser cookies.
+    return { currentAttribution: {}, firstTouchAttribution: {} };
+  }
+}
+
 export async function captureServerAnalyticsEvent(input: {
   distinctId: string | null | undefined;
   event: AnalyticsEventName;
   insertId?: string;
   properties?: AnalyticsProperties;
+  context?: Partial<AnalyticsAttributionContext>;
 }) {
   const distinctId = input.distinctId?.trim();
   if (!posthogKey || !distinctId) return;
 
   try {
+    const cookieContext = await getServerAnalyticsContext();
+    const context: AnalyticsAttributionContext = {
+      anonymousId: input.context?.anonymousId ?? cookieContext.anonymousId,
+      currentAttribution:
+        input.context?.currentAttribution ?? cookieContext.currentAttribution,
+      firstTouchAttribution:
+        input.context?.firstTouchAttribution ?? cookieContext.firstTouchAttribution,
+    };
+
     const response = await fetch(getCaptureUrl(), {
       method: "POST",
       headers: {
@@ -37,6 +77,8 @@ export async function captureServerAnalyticsEvent(input: {
           insertId: input.insertId,
           properties: {
             ...input.properties,
+            ...getAnalyticsContextProperties(context),
+            analytics_user_id: distinctId,
             capture_source: "server",
             identity_source: "supabase_user_id",
           },

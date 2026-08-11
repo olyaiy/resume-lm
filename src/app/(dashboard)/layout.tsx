@@ -66,7 +66,7 @@ export default async function DashboardLayout({
       }}
     >
       <Suspense fallback={null}>
-        <PostHogPageView />
+        <PostHogPageView userId={user.id} />
         <PagePerformance />
       </Suspense>
       {impersonationState && (
