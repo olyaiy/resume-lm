@@ -6,7 +6,19 @@ import Stripe from "stripe";
 
 
 const apiKey = process.env.STRIPE_SECRET_KEY as string;
-const stripe = new Stripe(apiKey);
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripe) {
+    if (!apiKey) {
+      throw new Error('STRIPE_SECRET_KEY is not configured. Stripe features are disabled.');
+    }
+
+    stripe = new Stripe(apiKey);
+  }
+
+  return stripe;
+}
 
 export const GET = async (request: NextRequest) => {
   const { searchParams } = new URL(request.url);
@@ -17,7 +29,7 @@ export const GET = async (request: NextRequest) => {
   if (!stripeSessionId?.length)
     return redirect("/home");
 
-  const session = await stripe.checkout.sessions.retrieve(stripeSessionId);
+  const session = await getStripe().checkout.sessions.retrieve(stripeSessionId);
 
   if (session.status === "complete") {
     return redirect(`/subscription/checkout/success?session_id=${stripeSessionId}`);

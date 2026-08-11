@@ -10,6 +10,16 @@ export type UtmParameterName = (typeof UTM_PARAMETER_NAMES)[number];
 export type UtmParameters = Partial<Record<UtmParameterName, string>>;
 
 export const ATTRIBUTION_STORAGE_KEY = "resumelm:attribution";
+export const ANALYTICS_ANONYMOUS_ID_COOKIE = "resumelm:analytics-anonymous-id";
+export const ATTRIBUTION_COOKIE = "resumelm:attribution";
+export const LATEST_ATTRIBUTION_COOKIE = "resumelm:attribution-latest";
+export const ANALYTICS_COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 180;
+
+export interface AnalyticsAttributionContext {
+  anonymousId?: string;
+  currentAttribution: UtmParameters;
+  firstTouchAttribution: UtmParameters;
+}
 
 const MAX_VALUE_LENGTH = 120;
 const SENSITIVE_QUERY_PARAMETERS = new Set([
@@ -37,6 +47,36 @@ function normalizeValue(value: string | null): string | undefined {
   return normalized ? normalized.slice(0, MAX_VALUE_LENGTH) : undefined;
 }
 
+export function normalizeAnalyticsAnonymousId(value: string | null | undefined): string | undefined {
+  const normalized = value?.trim();
+  if (!normalized || normalized.length > MAX_VALUE_LENGTH) return undefined;
+
+  return /^[a-zA-Z0-9._:-]+$/.test(normalized) ? normalized : undefined;
+}
+
+export function parseStoredAttributionValue(value: string | null | undefined): UtmParameters {
+  if (!value) return {};
+
+  try {
+    let decoded = value;
+    try {
+      decoded = decodeURIComponent(value);
+    } catch {
+      // Cookie stores may already return a decoded value.
+    }
+    const parsed = JSON.parse(decoded) as Record<string, unknown>;
+    return Object.fromEntries(
+      UTM_PARAMETER_NAMES.flatMap((name) => {
+        const candidate = typeof parsed[name] === "string" ? parsed[name] : null;
+        const normalized = normalizeValue(candidate);
+        return normalized ? [[name, normalized]] : [];
+      }),
+    ) as UtmParameters;
+  } catch {
+    return {};
+  }
+}
+
 export function getUtmParameters(input: URLSearchParams | URL | string): UtmParameters {
   const searchParams =
     input instanceof URLSearchParams
@@ -58,14 +98,7 @@ export function readStoredAttribution(storage: Pick<Storage, "getItem"> | null):
     const value = storage.getItem(ATTRIBUTION_STORAGE_KEY);
     if (!value) return {};
 
-    const parsed = JSON.parse(value) as Record<string, unknown>;
-    return Object.fromEntries(
-      UTM_PARAMETER_NAMES.flatMap((name) => {
-        const candidate = typeof parsed[name] === "string" ? parsed[name] : null;
-        const normalized = normalizeValue(candidate);
-        return normalized ? [[name, normalized]] : [];
-      }),
-    ) as UtmParameters;
+    return parseStoredAttributionValue(value);
   } catch {
     return {};
   }
@@ -104,6 +137,72 @@ export function getAttributionProperties(
   }
 
   return properties;
+}
+
+export function getAnalyticsContextProperties(
+  context: AnalyticsAttributionContext,
+): Record<string, string> {
+  return {
+    ...(context.anonymousId
+      ? { analytics_anonymous_id: context.anonymousId }
+      : {}),
+    ...getAttributionProperties(
+      context.currentAttribution,
+      context.firstTouchAttribution,
+    ),
+  };
+}
+
+function setBrowserCookie(name: string, value: string): void {
+  if (typeof document === "undefined") return;
+
+  const secure = window.location.protocol === "https:" ? "; Secure" : "";
+  document.cookie = `${name}=${encodeURIComponent(value)}; Max-Age=${ANALYTICS_COOKIE_MAX_AGE_SECONDS}; Path=/; SameSite=Lax${secure}`;
+}
+
+export function persistBrowserAnalyticsContext(
+  context: AnalyticsAttributionContext,
+): void {
+  if (typeof document === "undefined") return;
+
+  if (context.anonymousId) {
+    setBrowserCookie(ANALYTICS_ANONYMOUS_ID_COOKIE, context.anonymousId);
+  }
+
+  if (Object.keys(context.firstTouchAttribution).length > 0) {
+    setBrowserCookie(
+      ATTRIBUTION_COOKIE,
+      JSON.stringify(context.firstTouchAttribution),
+    );
+  }
+
+  if (Object.keys(context.currentAttribution).length > 0) {
+    setBrowserCookie(
+      LATEST_ATTRIBUTION_COOKIE,
+      JSON.stringify(context.currentAttribution),
+    );
+  }
+}
+
+export function readBrowserAnalyticsAnonymousId(): string | undefined {
+  if (typeof document === "undefined") return undefined;
+
+  const cookie = document.cookie
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${ANALYTICS_ANONYMOUS_ID_COOKIE}=`));
+
+  try {
+    return normalizeAnalyticsAnonymousId(
+      cookie
+        ? decodeURIComponent(
+            cookie.slice(ANALYTICS_ANONYMOUS_ID_COOKIE.length + 1),
+          )
+        : undefined,
+    );
+  } catch {
+    return undefined;
+  }
 }
 
 export function withUtmParameters(

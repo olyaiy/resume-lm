@@ -41,7 +41,7 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   if (!isProfileComplete(currentProfile) && isProfileComplete(profile)) {
     await captureServerAnalyticsEvent({
       distinctId: user.id,
-      event: AnalyticsEvents.ProfileCreated,
+      event: AnalyticsEvents.OnboardingCompleted,
       properties: await getSubscriptionAnalyticsProperties(supabase, user.id),
     });
   }
@@ -120,6 +120,14 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
 
   if (error) {
     throw new Error(`Failed to update profile: ${error.message}`);
+  }
+
+  if (!isProfileComplete(currentProfile) && isProfileComplete(profile)) {
+    await captureServerAnalyticsEvent({
+      distinctId: user.id,
+      event: AnalyticsEvents.OnboardingCompleted,
+      properties: await getSubscriptionAnalyticsProperties(supabase, user.id),
+    });
   }
 
   // Revalidate all routes that might display profile data

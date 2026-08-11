@@ -7,6 +7,11 @@ import { createServiceClient } from '@/utils/supabase/server'
 import { AnalyticsEvents } from '@/lib/analytics/events'
 import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
 import {
+  normalizeAnalyticsAnonymousId,
+  UTM_PARAMETER_NAMES,
+  type AnalyticsAttributionContext,
+} from '@/lib/analytics/attribution'
+import {
   getPaymentFailureRecoveryFields,
   getPaymentRecoveryClearedFields,
   getInvoiceSubscriptionId,
@@ -15,9 +20,21 @@ import {
 } from '@/lib/stripe/billing-events'
 import type { Subscription } from '@/lib/types'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-04-30.basil'
-})
+let stripe: Stripe | null = null;
+
+function getStripe(): Stripe {
+  if (!stripe) {
+    if (!process.env.STRIPE_SECRET_KEY) {
+      throw new Error('STRIPE_SECRET_KEY is not configured. Stripe features are disabled.');
+    }
+
+    stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
+      apiVersion: '2025-04-30.basil'
+    });
+  }
+
+  return stripe;
+}
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!
 
@@ -173,6 +190,31 @@ function getSubscriptionEventProperties(
   };
 }
 
+function getStripeAnalyticsContext(
+  metadata: Stripe.Metadata | null | undefined,
+): AnalyticsAttributionContext {
+  const currentAttribution = Object.fromEntries(
+    UTM_PARAMETER_NAMES.flatMap((name) => {
+      const value = metadata?.[name];
+      return value ? [[name, value]] : [];
+    }),
+  );
+  const firstTouchAttribution = Object.fromEntries(
+    UTM_PARAMETER_NAMES.flatMap((name) => {
+      const value = metadata?.[`initial_${name}`];
+      return value ? [[name, value]] : [];
+    }),
+  );
+
+  return {
+    anonymousId: normalizeAnalyticsAnonymousId(
+      metadata?.analytics_anonymous_id,
+    ),
+    currentAttribution,
+    firstTouchAttribution,
+  };
+}
+
 async function captureTrialStartedEvent(input: {
   eventType: string;
   subscription: Stripe.Subscription;
@@ -196,6 +238,7 @@ async function captureTrialStartedEvent(input: {
     distinctId: userId,
     event: AnalyticsEvents.TrialStarted,
     insertId: `${input.subscription.id}:trial_started`,
+    context: getStripeAnalyticsContext(input.subscription.metadata),
     properties: {
       ...getSubscriptionEventProperties(input.subscriptionData, input.eventType),
       trial_start: input.subscription.trial_start
@@ -222,6 +265,7 @@ async function captureSubscriptionCanceledEvent(input: {
     distinctId: userId,
     event: AnalyticsEvents.SubscriptionCanceled,
     insertId: `${input.subscription.id}:subscription_canceled`,
+    context: getStripeAnalyticsContext(input.subscription.metadata),
     properties: {
       ...getSubscriptionEventProperties(input.subscriptionData, input.eventType),
       canceled_at: input.subscription.canceled_at
@@ -322,7 +366,7 @@ async function captureFirstInvoicePaidEvent(input: {
 
   let paidSubscriptionInvoices: Stripe.Invoice[];
   try {
-    const invoices = await stripe.invoices.list({
+    const invoices = await getStripe().invoices.list({
       subscription: input.subscriptionId,
       status: 'paid',
       limit: 100,
@@ -393,7 +437,7 @@ export async function POST(req: Request) {
     let event: Stripe.Event
     try {
       console.log('🔍 Verifying webhook signature...');
-      event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+      event = getStripe().webhooks.constructEvent(body, signature, webhookSecret)
       console.log('✅ Webhook signature verified successfully');
     } catch (err: unknown) {
       const error = err as Error
@@ -457,6 +501,7 @@ export async function POST(req: Request) {
               distinctId: subscriptionData.user_id,
               event: AnalyticsEvents.CheckoutCompleted,
               insertId: `${event.id}:checkout_completed`,
+              context: getStripeAnalyticsContext(session.metadata),
               properties: {
                 ...getSubscriptionEventProperties(subscriptionData, event.type),
                 stripe_checkout_session_id: session.id,

@@ -38,6 +38,29 @@ describe("buildCheckoutSessionMetadata", () => {
       source: "resumelm_checkout",
     });
   });
+
+  it("carries analytics identity and attribution into Stripe metadata", () => {
+    const metadata = buildCheckoutSessionMetadata({
+      userId: "user_123",
+      priceId: "price_pro",
+      includeTrial: true,
+      analyticsContext: {
+        anonymousId: "ph_anon-123",
+        currentAttribution: {
+          utm_source: "resumelm",
+          utm_medium: "referral",
+        },
+        firstTouchAttribution: {
+          utm_source: "github",
+          utm_medium: "referral",
+        },
+      },
+    });
+
+    assert.equal(metadata.analytics_anonymous_id, "ph_anon-123");
+    assert.equal(metadata.utm_source, "resumelm");
+    assert.equal(metadata.initial_utm_source, "github");
+  });
 });
 
 describe("buildSubscriptionMetadata", () => {

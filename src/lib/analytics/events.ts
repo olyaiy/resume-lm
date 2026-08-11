@@ -1,5 +1,6 @@
 export const AnalyticsEvents = {
   SignupCompleted: "signup_completed",
+  OnboardingCompleted: "onboarding_completed",
   ProfileCreated: "profile_created",
   ResumeCreated: "resume_created",
   ResumeTailored: "resume_tailored",

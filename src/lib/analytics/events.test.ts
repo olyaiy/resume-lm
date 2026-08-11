@@ -10,6 +10,7 @@ import {
 describe("AnalyticsEvents", () => {
   it("defines the operational lifecycle events used by product and billing analytics", () => {
     assert.equal(AnalyticsEvents.SignupCompleted, "signup_completed");
+    assert.equal(AnalyticsEvents.OnboardingCompleted, "onboarding_completed");
     assert.equal(AnalyticsEvents.ProfileCreated, "profile_created");
     assert.equal(AnalyticsEvents.ResumeCreated, "resume_created");
     assert.equal(AnalyticsEvents.ResumeTailored, "resume_tailored");
