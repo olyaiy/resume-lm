@@ -25,6 +25,7 @@ export function TrialStartButton({ className }: TrialStartButtonProps) {
 
       <Link
         href={href}
+        prefetch={false}
         className={cn(
           'relative flex items-center gap-1.5 px-4 py-1.5',
           'bg-gradient-to-r from-purple-600 to-indigo-600',
@@ -44,4 +45,3 @@ export function TrialStartButton({ className }: TrialStartButtonProps) {
     </motion.div>
   );
 }
-

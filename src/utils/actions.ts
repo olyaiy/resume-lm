@@ -5,7 +5,7 @@ import { Profile, ResumeSummary } from "@/lib/types";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
 import { cache } from "react";
 
-interface DashboardData {
+export interface DashboardData {
   profile: Profile | null;
   baseResumes: ResumeSummary[];
   tailoredResumes: ResumeSummary[];
@@ -46,10 +46,38 @@ export const getDashboardSubscription = cache(async (userId: string) => {
   const supabase = await createClient();
   return supabase
     .from('subscriptions')
-    .select('subscription_plan, subscription_status, stripe_subscription_id, current_period_end, trial_end')
+    .select('subscription_plan, subscription_status, stripe_customer_id, stripe_subscription_id, current_period_end, trial_end, payment_failure_count, last_payment_failed_at, next_payment_attempt_at')
     .eq('user_id', userId)
     .maybeSingle();
 });
+
+// Keep profile reads request-scoped and share them between route loaders.
+// This deliberately uses a projection because profile rows contain large JSON
+// arrays that should not be fetched by routes that only need identity data.
+export const getProfileForUser = cache(async (userId: string) => {
+  const supabase = await createClient();
+  return supabase
+    .from('profiles')
+    .select('user_id, first_name, last_name, email, phone_number, location, website, linkedin_url, github_url, is_admin, work_experience, education, skills, projects, certifications, created_at, updated_at')
+    .eq('user_id', userId)
+    .maybeSingle();
+});
+
+export async function getProfilePageData() {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return { user: null, profile: null };
+  }
+
+  const { data, error } = await getProfileForUser(user.id);
+  if (error) {
+    throw new Error('Error fetching profile data');
+  }
+
+  const profile = data ? ({ ...data, id: data.user_id } as Profile) : null;
+  return { user, profile };
+}
 
 export async function getDashboardData(): Promise<DashboardData> {
   const user = await getAuthenticatedUser();
@@ -64,11 +92,7 @@ export async function getDashboardData(): Promise<DashboardData> {
     // These reads are independent. Running them together removes a full
     // database round-trip from the dashboard critical path.
     const [profileResult, resumesResult, subscriptionResult] = await Promise.all([
-      supabase
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single(),
+      getProfileForUser(user.id),
       supabase
         .from('resumes')
         .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at')
@@ -77,10 +101,12 @@ export async function getDashboardData(): Promise<DashboardData> {
     ]);
 
     const { data, error: profileError } = profileResult;
-    let profile = data;
+    let profile: Profile | null = data
+      ? ({ ...data, id: data.user_id } as Profile)
+      : null;
 
     // If profile doesn't exist, create one
-    if (profileError?.code === 'PGRST116') {
+    if (!profile && !profileError) {
       const { data: newProfile, error: createError } = await supabase
         .from('profiles')
         .insert([{
@@ -106,7 +132,9 @@ export async function getDashboardData(): Promise<DashboardData> {
         throw new Error('Error creating user profile');
       }
 
-      profile = newProfile;
+      profile = newProfile
+        ? ({ ...newProfile, id: newProfile.user_id } as Profile)
+        : null;
     } else if (profileError) {
       console.error('Error fetching profile:', profileError);
       throw new Error('Error fetching dashboard data');
@@ -159,3 +187,58 @@ export async function getDashboardData(): Promise<DashboardData> {
   }
 }
 
+export interface ResumePageData {
+  resumes: ResumeSummary[];
+  totalCount: number;
+}
+
+const RESUME_SORT_COLUMNS = {
+  name: "name",
+  jobTitle: "target_role",
+  createdAt: "created_at",
+} as const;
+
+export async function getResumesPageData({
+  page,
+  pageSize,
+  sort,
+  direction,
+}: {
+  page: number;
+  pageSize: number;
+  sort: keyof typeof RESUME_SORT_COLUMNS;
+  direction: "asc" | "desc";
+}): Promise<ResumePageData> {
+  const user = await getAuthenticatedUser();
+  if (!user) {
+    throw new Error("User not authenticated");
+  }
+
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(Math.max(1, pageSize), 100);
+  const from = (safePage - 1) * safePageSize;
+  const to = from + safePageSize - 1;
+  const supabase = await createClient();
+
+  const { data, count, error } = await supabase
+    .from("resumes")
+    .select('id, user_id, name, target_role, is_base_resume, job_id, created_at, updated_at', { count: "exact" })
+    .eq("user_id", user.id)
+    .order(RESUME_SORT_COLUMNS[sort], {
+      ascending: direction === "asc",
+      nullsFirst: false,
+    })
+    .range(from, to);
+
+  if (error) {
+    throw new Error("Error fetching resumes");
+  }
+
+  return {
+    resumes: (data ?? []).map((resume) => ({
+      ...resume,
+      target_role: resume.target_role || "",
+    })),
+    totalCount: count ?? 0,
+  };
+}

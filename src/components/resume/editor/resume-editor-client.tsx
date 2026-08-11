@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Resume, Profile, Job } from "@/lib/types";
-import { useState, useEffect, useReducer } from "react";
+import { useState, useEffect, useReducer, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { ResumeContext, resumeReducer } from './resume-editor-context';
 import { createClient } from "@/utils/supabase/client";
@@ -99,7 +99,7 @@ export function ResumeEditorClient({
     };
   }, [state.resume.job_id, job?.id]);
 
-  const updateField = <K extends keyof Resume>(field: K, value: Resume[K]) => {
+  const updateField = useCallback(<K extends keyof Resume>(field: K, value: Resume[K]) => {
     
     if (field === 'document_settings') {
       // Ensure we're passing a valid DocumentSettings object
@@ -111,13 +111,7 @@ export function ResumeEditorClient({
     } else {
       dispatch({ type: 'UPDATE_FIELD', field, value });
     }
-  };
-
-  // Track changes
-  useEffect(() => {
-    const hasChanges = JSON.stringify(state.resume) !== JSON.stringify(initialResume);
-    dispatch({ type: 'SET_HAS_CHANGES', value: hasChanges });
-  }, [state.resume, initialResume]);
+  }, [dispatch]);
 
   // Handle beforeunload event
   useEffect(() => {

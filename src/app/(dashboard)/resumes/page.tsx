@@ -1,4 +1,4 @@
-import { getDashboardData } from "@/utils/actions";
+import { getResumesPageData } from "@/utils/actions";
 import { Suspense } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
@@ -19,34 +19,18 @@ export default async function ResumesPage({
 }) {
   const params = await searchParams;
   
-  const { baseResumes, tailoredResumes } = await getDashboardData();
-  
-  // Combine and sort resumes
-  const allResumes = [...baseResumes, ...tailoredResumes];
   const currentPage = Number(params.page) || 1;
-  const sort = (params.sort as SortOption) || 'createdAt';
-  const direction = (params.direction as SortDirection) || 'desc';
-
-  // Sort resumes
-  const sortedResumes = allResumes.sort((a, b) => {
-    const modifier = direction === 'asc' ? 1 : -1;
-    switch (sort) {
-      case 'name':
-        return modifier * a.name.localeCompare(b.name);
-      case 'jobTitle':
-        return modifier * (a.target_role?.localeCompare(b.target_role || '') || 0);
-      case 'createdAt':
-      default:
-        return modifier * (new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    }
+  const sort: SortOption = params.sort === 'name' || params.sort === 'jobTitle' || params.sort === 'createdAt'
+    ? params.sort
+    : 'createdAt';
+  const direction: SortDirection = params.direction === 'asc' ? 'asc' : 'desc';
+  const { resumes, totalCount } = await getResumesPageData({
+    page: currentPage,
+    pageSize: RESUMES_PER_PAGE,
+    sort,
+    direction,
   });
-
-  // Paginate resumes
-  const totalPages = Math.ceil(sortedResumes.length / RESUMES_PER_PAGE);
-  const paginatedResumes = sortedResumes.slice(
-    (currentPage - 1) * RESUMES_PER_PAGE,
-    currentPage * RESUMES_PER_PAGE
-  );
+  const totalPages = Math.ceil(totalCount / RESUMES_PER_PAGE);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50/50 via-sky-50/50 to-violet-50/50">
@@ -70,6 +54,7 @@ export default async function ResumesPage({
             </Suspense>
             <Link
               href="/resumes/new"
+              prefetch={false}
               className={cn(
                 "inline-flex items-center justify-center",
                 "rounded-full text-sm font-medium",
@@ -89,8 +74,8 @@ export default async function ResumesPage({
         <div className="relative rounded-2xl overflow-hidden backdrop-blur-xl bg-white/40 border border-purple-200/50 shadow-xl">
           <Suspense fallback={<ResumesLoadingSkeleton />}>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
-              {paginatedResumes.map((resume) => (
-                <Link href={`/resumes/${resume.id}`} key={resume.id}>
+              {resumes.map((resume) => (
+                <Link href={`/resumes/${resume.id}`} prefetch={false} key={resume.id}>
                   <MiniResumePreview
                     name={resume.name}
                     type={resume.is_base_resume ? 'base' : 'tailored'}
@@ -111,6 +96,7 @@ export default async function ResumesPage({
               <Link
                 key={i}
                 href={`?page=${i + 1}&sort=${sort}&direction=${direction}`}
+                prefetch={false}
                 className={cn(
                   "px-4 py-2 rounded-lg transition-colors",
                   currentPage === i + 1

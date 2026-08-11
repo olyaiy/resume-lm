@@ -9,6 +9,7 @@ import { ResumeContextMenu } from "../preview/resume-context-menu";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { LoadingFallback } from "../shared/LoadingFallback";
+import { useDeferredValue } from "react";
 
 const LazyCoverLetter = dynamic(() => import("@/components/cover-letter/cover-letter"), {
   ssr: false,
@@ -27,6 +28,10 @@ export function PreviewPanel({
   onResumeChange,
   width
 }: PreviewPanelProps) {
+  // Keep form updates immediate while allowing the heavier HTML preview to
+  // yield briefly during rapid typing in larger resumes.
+  const previewResume = useDeferredValue(resume);
+
   return (
     <ScrollArea className={cn(
       "z-50 h-full",
@@ -36,7 +41,7 @@ export function PreviewPanel({
     )}>
       <div className="">
       <ResumeContextMenu resume={resume}>
-          <ResumePreview resume={resume} containerWidth={width} />
+          <ResumePreview resume={previewResume} containerWidth={width} />
         </ResumeContextMenu>
       </div>
 

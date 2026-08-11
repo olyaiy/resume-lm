@@ -22,8 +22,8 @@ export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
   }, [initialIsOpen]);
 
   return (
-    <Dialog 
-      open={isOpen} 
+    <Dialog
+      open={isOpen}
       onOpenChange={setIsOpen}
     >
       <DialogContent className="sm:max-w-md">
@@ -32,7 +32,7 @@ export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
             Welcome to ResumeLM! 🎉
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="pt-4 space-y-6">
           <h3 className="font-medium text-foreground">Here&apos;s how to get started:</h3>
           <div className="space-y-4">
@@ -62,13 +62,13 @@ export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
             </div>
           </div>
           <div className="pt-2 space-y-2">
-            <Link href="/profile">
+            <Link href="/profile" prefetch={false}>
               <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
                 Start by Filling Your Profile
               </Button>
             </Link>
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="w-full"
               onClick={() => setIsOpen(false)}
             >
@@ -79,4 +79,4 @@ export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getDashboardData } from "@/utils/actions";
+import { getProfilePageData } from "@/utils/actions";
 import { ProfileEditForm } from "@/components/profile/profile-edit-form";
 import { Suspense } from "react";
 
@@ -8,16 +8,15 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export default async function EditProfilePage() {
-  // Fetch profile data and handle authentication
-  let data;
+  // Fetch only the profile required by this route. The dashboard layout's
+  // request-scoped auth cache prevents a second Supabase auth lookup.
+  let profile;
   try {
-    data = await getDashboardData();
+    ({ profile } = await getProfilePageData());
   } catch (error: unknown) {
     void error
     redirect("/");
   }
-
-  const { profile } = data;
 
   // Display a friendly message if no profile exists
   if (!profile) {
@@ -42,4 +41,4 @@ export default async function EditProfilePage() {
       </div>
     </main>
   );
-} 
+}
