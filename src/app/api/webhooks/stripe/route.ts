@@ -56,6 +56,29 @@ type InvoiceWithSubscription = Stripe.Invoice & {
   subscription?: string | Stripe.Subscription | null;
 };
 
+async function repairProcessedWebhookState(
+  supabase: ServiceSupabaseClient,
+  eventId: string,
+  processedAt: string | null | undefined,
+  status: string | null | undefined,
+): Promise<void> {
+  if (!processedAt || status === 'processed') {
+    return;
+  }
+
+  const { error } = await supabase
+    .from('stripe_webhook_events')
+    .update({
+      status: 'processed',
+      last_attempt_at: processedAt,
+      last_error: null,
+    })
+    .eq('event_id', eventId)
+    .neq('status', 'processed');
+
+  if (error) throw error;
+}
+
 function getCustomerId(
   customer: string | Stripe.Customer | Stripe.DeletedCustomer | null
 ): string {
@@ -98,7 +121,17 @@ async function reserveWebhookEvent(
 
   if (existingEventError) throw existingEventError;
 
-  if (existingEvent?.processed_at || existingEvent?.status === 'processed') {
+  if (existingEvent?.processed_at) {
+    await repairProcessedWebhookState(
+      supabase,
+      event.id,
+      existingEvent.processed_at,
+      existingEvent.status,
+    );
+    return 'skip';
+  }
+
+  if (existingEvent?.status === 'processed') {
     return 'skip';
   }
 
@@ -125,7 +158,17 @@ async function reserveWebhookEvent(
         .maybeSingle();
 
       if (duplicateEventError) throw duplicateEventError;
-      if (duplicateEvent?.processed_at || duplicateEvent?.status === 'processed') {
+      if (duplicateEvent?.processed_at) {
+        await repairProcessedWebhookState(
+          supabase,
+          event.id,
+          duplicateEvent.processed_at,
+          duplicateEvent.status,
+        );
+        return 'skip';
+      }
+
+      if (duplicateEvent?.status === 'processed') {
         return 'skip';
       }
       if (
