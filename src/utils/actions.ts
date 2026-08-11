@@ -58,7 +58,7 @@ export const getProfileForUser = cache(async (userId: string) => {
   const supabase = await createClient();
   return supabase
     .from('profiles')
-    .select('user_id, first_name, last_name, email, phone_number, location, website, linkedin_url, github_url, is_admin, work_experience, education, skills, projects, certifications, created_at, updated_at')
+    .select('user_id, first_name, last_name, email, phone_number, location, website, linkedin_url, github_url, work_experience, education, skills, projects, certifications, created_at, updated_at')
     .eq('user_id', userId)
     .maybeSingle();
 });
