@@ -10,6 +10,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
+import { usePostHog } from "posthog-js/react";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { AuthIntent } from "@/lib/auth-intent";
 
@@ -40,12 +42,25 @@ function TabButton({ value, children }: { value: AuthTab; children: React.ReactN
   );
 }
 
-function SocialAuth({ showDivider = true, intent }: { showDivider?: boolean; intent?: AuthIntent }) {
+function SocialAuth({
+  showDivider = true,
+  intent,
+  authFlow,
+}: {
+  showDivider?: boolean;
+  intent?: AuthIntent;
+  authFlow: AuthTab;
+}) {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string>();
+  const posthog = usePostHog();
 
   const handleGoogleSignIn = async () => {
     setErrorMessage(undefined);
+    posthog?.capture(AnalyticsEvents.AuthStarted, {
+      auth_method: "google",
+      auth_flow: authFlow,
+    });
 
     try {
       setIsLoading(true);
@@ -205,7 +220,7 @@ export function AuthDialogProvider({
                     next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
                     plan={intent?.plan}
                   />
-                  <SocialAuth intent={intent} />
+                  <SocialAuth intent={intent} authFlow="login" />
                 </TabsContent>
 
                 <TabsContent value="signup" className="mt-0 space-y-4">
@@ -218,7 +233,7 @@ export function AuthDialogProvider({
                     next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
                     plan={intent?.plan}
                   />
-                  <SocialAuth intent={intent} />
+                  <SocialAuth intent={intent} authFlow="signup" />
                 </TabsContent>
               </div>
             </Tabs>

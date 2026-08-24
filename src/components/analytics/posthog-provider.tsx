@@ -59,11 +59,11 @@ export function PostHogProvider({
     // checkout/editor events cannot accidentally stay on an anonymous ID.
     const anonymousId = readBrowserAnalyticsAnonymousId();
     posthog.identify(user.id, sanitizeAnalyticsProperties({
+      analytics_user_id: user.id,
       subscription_plan: user.subscriptionPlan,
       subscription_status: user.subscriptionStatus,
       is_pro: user.isPro,
       analytics_anonymous_id: anonymousId,
-      analytics_user_id: user.id,
     }));
     activeIdentifiedUserId = user.id;
     posthog.register({

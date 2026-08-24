@@ -28,7 +28,7 @@ export function CheckoutForm() {
     const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
 
     const captureCheckoutEvent = React.useCallback((
-        event: typeof AnalyticsEvents.CheckoutViewed | typeof AnalyticsEvents.CheckoutError | typeof AnalyticsEvents.CheckoutStarted,
+        event: typeof AnalyticsEvents.CheckoutViewed | typeof AnalyticsEvents.CheckoutError,
         properties: Record<string, string | number | boolean | null | undefined> = {},
     ) => {
         if (!posthog) return;
@@ -80,16 +80,10 @@ export function CheckoutForm() {
 
                 if (stripeResponse.kind === "error") {
                     setErrorMessage(stripeResponse.message);
-                    captureCheckoutEvent(AnalyticsEvents.CheckoutError, {
-                        error_code: "invalid_checkout_link",
-                    });
                     return;
                 }
 
                 setClientSecret(stripeResponse.clientSecret);
-                captureCheckoutEvent(AnalyticsEvents.CheckoutStarted, {
-                    checkout_surface: "embedded",
-                });
             } catch (error) {
                 if (!isMounted) return;
 
@@ -98,9 +92,6 @@ export function CheckoutForm() {
                         ? error.message
                         : "Unable to start checkout. Please try again."
                 );
-                captureCheckoutEvent(AnalyticsEvents.CheckoutError, {
-                    error_code: "session_creation_failed",
-                });
             }
         }
 

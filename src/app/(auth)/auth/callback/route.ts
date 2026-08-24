@@ -164,10 +164,34 @@ export async function GET(request: NextRequest) {
     await captureServerAnalyticsEvent({
       distinctId: oauthUser.id,
       event: AnalyticsEvents.SignupCompleted,
+      insertId: `${oauthUser.id}:${AnalyticsEvents.SignupCompleted}`,
       properties: {
         signup_provider: 'google',
       },
     })
+  }
+
+  const { data: userData } = await supabase.auth.getUser()
+  if (userData.user) {
+    await Promise.all([
+      captureServerAnalyticsEvent({
+        distinctId: userData.user.id,
+        event: AnalyticsEvents.AuthSucceeded,
+        insertId: `${userData.user.id}:auth_succeeded:oauth`,
+        properties: {
+          auth_method: "google",
+          auth_flow: "oauth",
+        },
+      }),
+      captureServerAnalyticsEvent({
+        distinctId: userData.user.id,
+        event: AnalyticsEvents.OAuthCompleted,
+        insertId: `${userData.user.id}:oauth_completed`,
+        properties: {
+          oauth_provider: "google",
+        },
+      }),
+    ])
   }
 
   const redirectPath = getAuthRedirectPath(intent)

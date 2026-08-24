@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { usePostHog } from "posthog-js/react";
 import { CheckCircle2, Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { signupWithState } from "@/app/(auth)/auth/login/actions";
@@ -10,6 +11,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 interface SignupFormProps {
   onSuccess?: () => void;
@@ -42,6 +44,7 @@ export function SignupForm({ onSuccess, next, plan }: SignupFormProps) {
   const [state, formAction] = useActionState(signupWithState, initialAuthFormState);
   const [showPassword, setShowPassword] = useState(false);
   const hasHandledSuccess = useRef(false);
+  const posthog = usePostHog();
 
   useEffect(() => {
     if (!onSuccess || state.status !== "success" || hasHandledSuccess.current) return;
@@ -72,7 +75,16 @@ export function SignupForm({ onSuccess, next, plan }: SignupFormProps) {
   }
 
   return (
-    <form action={formAction} className="space-y-4">
+    <form
+      action={formAction}
+      className="space-y-4"
+      onSubmit={() => {
+        posthog?.capture(AnalyticsEvents.AuthStarted, {
+          auth_method: "email",
+          auth_flow: "signup",
+        });
+      }}
+    >
       {next && <input type="hidden" name="next" value={next} />}
       {plan && <input type="hidden" name="plan" value={plan} />}
       <div className="space-y-2">

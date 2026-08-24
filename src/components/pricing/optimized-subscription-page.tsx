@@ -71,7 +71,7 @@ export function OptimizedSubscriptionPage({ initialProfile }: OptimizedSubscript
       // Handle checkout for free users
       const priceId = process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID;
       if (priceId) {
-        router.push(`/subscription/checkout?price_id=${priceId}`);
+        router.push(`/subscription/checkout?price_id=${priceId}&trial=true`);
       }
     }
   };
