@@ -1,11 +1,18 @@
 export const AnalyticsEvents = {
+  AuthStarted: "auth_started",
+  AuthSucceeded: "auth_succeeded",
+  EmailConfirmationCompleted: "email_confirmation_completed",
+  OAuthCompleted: "oauth_completed",
   SignupCompleted: "signup_completed",
   OnboardingCompleted: "onboarding_completed",
   ProfileCreated: "profile_created",
+  ProfileCompleted: "profile_completed",
   ResumeCreated: "resume_created",
+  FirstResumeSaved: "first_resume_saved",
   ResumeTailored: "resume_tailored",
   AIRequestStarted: "ai_request_started",
   AIRequestSucceeded: "ai_request_succeeded",
+  FirstAIRequestSucceeded: "first_ai_request_succeeded",
   AIRequestFailed: "ai_request_failed",
   CheckoutViewed: "checkout_viewed",
   CheckoutStarted: "checkout_started",
@@ -18,6 +25,7 @@ export const AnalyticsEvents = {
   OutboundLinkClicked: "outbound_link_clicked",
   TrialStarted: "trial_started",
   FirstInvoicePaid: "first_invoice_paid",
+  EntitlementActivated: "entitlement_activated",
   InvoicePaymentFailed: "invoice_payment_failed",
   SubscriptionCanceled: "subscription_canceled",
   BillingAlertTriggered: "billing_alert_triggered",
@@ -70,8 +78,13 @@ export function buildAnalyticsPayload(input: {
     event: input.event,
     properties: {
       ...sanitizeAnalyticsProperties(input.properties),
+      analytics_user_id: input.distinctId,
       $geoip_disable: true,
       ...(input.insertId ? { $insert_id: input.insertId } : {}),
     },
   };
+}
+
+export function buildAnalyticsInsertId(userId: string, event: AnalyticsEventName) {
+  return `${userId}:${event}`;
 }

@@ -13,6 +13,31 @@ function isProfileComplete(profile: Partial<Profile> | null | undefined) {
   return Boolean(profile?.first_name && profile?.last_name && profile?.email);
 }
 
+async function captureProfileCompletionIfNeeded(input: {
+  supabase: Awaited<ReturnType<typeof createClient>>;
+  userId: string;
+  previousProfile: Partial<Profile> | null | undefined;
+  profile: Partial<Profile> | null | undefined;
+}) {
+  if (isProfileComplete(input.previousProfile) || !isProfileComplete(input.profile)) {
+    return;
+  }
+
+  const properties = await getSubscriptionAnalyticsProperties(input.supabase, input.userId);
+  await captureServerAnalyticsEvent({
+    distinctId: input.userId,
+    event: AnalyticsEvents.OnboardingCompleted,
+    insertId: `${input.userId}:${AnalyticsEvents.OnboardingCompleted}`,
+    properties,
+  });
+  await captureServerAnalyticsEvent({
+    distinctId: input.userId,
+    event: AnalyticsEvents.ProfileCompleted,
+    insertId: `${input.userId}:${AnalyticsEvents.ProfileCompleted}`,
+    properties,
+  });
+}
+
 export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
   const supabase = await createClient();
   const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -38,13 +63,12 @@ export async function updateProfile(data: Partial<Profile>): Promise<Profile> {
     throw new Error(`Failed to update profile: ${error.message}`);
   }
 
-  if (!isProfileComplete(currentProfile) && isProfileComplete(profile)) {
-    await captureServerAnalyticsEvent({
-      distinctId: user.id,
-      event: AnalyticsEvents.OnboardingCompleted,
-      properties: await getSubscriptionAnalyticsProperties(supabase, user.id),
-    });
-  }
+  await captureProfileCompletionIfNeeded({
+    supabase,
+    userId: user.id,
+    previousProfile: currentProfile,
+    profile,
+  });
 
   // Revalidate all routes that might display profile data
   revalidatePath('/', 'layout');
@@ -122,13 +146,12 @@ export async function importResume(data: Partial<Profile>): Promise<Profile> {
     throw new Error(`Failed to update profile: ${error.message}`);
   }
 
-  if (!isProfileComplete(currentProfile) && isProfileComplete(profile)) {
-    await captureServerAnalyticsEvent({
-      distinctId: user.id,
-      event: AnalyticsEvents.OnboardingCompleted,
-      properties: await getSubscriptionAnalyticsProperties(supabase, user.id),
-    });
-  }
+  await captureProfileCompletionIfNeeded({
+    supabase,
+    userId: user.id,
+    previousProfile: currentProfile,
+    profile,
+  });
 
   // Revalidate all routes that might display profile data
   revalidatePath('/', 'layout');

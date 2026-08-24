@@ -3,6 +3,7 @@ import { afterEach, describe, it } from "node:test";
 
 import type { ResolvedAIRequest } from "./access-control";
 import { buildPostHogAITelemetry } from "./posthog-telemetry";
+import { getAIErrorCategory } from "./usage-ledger";
 
 const ORIGINAL_ENV = {
   NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
@@ -74,7 +75,7 @@ describe("buildPostHogAITelemetry", () => {
     );
   });
 
-  it("enables full input and output capture with ResumeLM metadata", () => {
+  it("keeps AI metadata while disabling input and output capture", () => {
     process.env.NEXT_PUBLIC_POSTHOG_KEY = "phc_test";
     delete process.env.POSTHOG_LLM_ANALYTICS_DISABLED;
 
@@ -88,8 +89,8 @@ describe("buildPostHogAITelemetry", () => {
     });
 
     assert.equal(telemetry.isEnabled, true);
-    assert.equal(telemetry.recordInputs, true);
-    assert.equal(telemetry.recordOutputs, true);
+    assert.equal(telemetry.recordInputs, false);
+    assert.equal(telemetry.recordOutputs, false);
     assert.equal(telemetry.functionId, "actions.resumes.generateResumeScore");
     assert.deepEqual(telemetry.metadata, {
       posthog_distinct_id: "user_123",
@@ -97,10 +98,6 @@ describe("buildPostHogAITelemetry", () => {
       resumelm_route: "actions.resumes.generateResumeScore",
       resumelm_provider: "openai",
       resumelm_model: "gpt-5.4-mini",
-      resumelm_is_pro: true,
-      resumelm_used_server_key: true,
-      resumelm_requires_rate_limit: true,
-      resumelm_environment: "test",
     });
   });
 
@@ -121,5 +118,15 @@ describe("buildPostHogAITelemetry", () => {
     assert.equal("apiKey" in telemetry.metadata, false);
     assert.equal("api_key" in telemetry.metadata, false);
     assert.equal("provider-secret" in telemetry.metadata, false);
+  });
+});
+
+describe("getAIErrorCategory", () => {
+  it("maps provider failures to bounded categories without retaining raw messages", () => {
+    assert.equal(getAIErrorCategory("You exceeded your current quota"), "provider_billing");
+    assert.equal(getAIErrorCategory("OpenAI API key not found in user configuration"), "provider_authentication");
+    assert.equal(getAIErrorCategory("No object generated: response did not match schema"), "invalid_model_output");
+    assert.equal(getAIErrorCategory("Unexpected provider failure"), "provider_error");
+    assert.equal(getAIErrorCategory(undefined), null);
   });
 });

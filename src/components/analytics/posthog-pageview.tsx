@@ -22,6 +22,12 @@ export function PostHogPageView({ userId }: { userId?: string | null }) {
   useEffect(() => {
     if (!pathname) return;
 
+    // Identify before capturing the first authenticated pageview so browser
+    // events and server-side lifecycle events share the Supabase user UUID.
+    if (userId) {
+      posthog.identify(userId);
+    }
+
     const search = searchParams.toString();
     const currentUrl =
       search.length > 0

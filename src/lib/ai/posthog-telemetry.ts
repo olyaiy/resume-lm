@@ -41,8 +41,8 @@ export function buildPostHogAITelemetry(input: {
 
   return {
     isEnabled: true,
-    recordInputs: true,
-    recordOutputs: true,
+    recordInputs: false,
+    recordOutputs: false,
     functionId: input.route,
     metadata: {
       posthog_distinct_id: input.userId,
@@ -50,10 +50,6 @@ export function buildPostHogAITelemetry(input: {
       resumelm_route: input.route,
       resumelm_provider: input.resolved.providerId,
       resumelm_model: input.resolved.modelId,
-      resumelm_is_pro: input.isPro,
-      resumelm_used_server_key: input.resolved.usedServerKey,
-      resumelm_requires_rate_limit: input.resolved.requiresRateLimit,
-      resumelm_environment: input.environment ?? process.env.NODE_ENV ?? "development",
     },
   };
 }

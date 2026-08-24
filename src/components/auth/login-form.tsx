@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { usePostHog } from "posthog-js/react";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 
 import { loginWithState } from "@/app/(auth)/auth/login/actions";
@@ -11,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 function SubmitButton() {
   const { pending } = useFormStatus();
@@ -36,12 +38,22 @@ function SubmitButton() {
 export function LoginForm({ next, plan }: { next?: string; plan?: "free" | "pro" }) {
   const [state, formAction] = useActionState(loginWithState, initialAuthFormState);
   const [showPassword, setShowPassword] = useState(false);
+  const posthog = usePostHog();
 
   const emailError = state.fieldErrors?.email?.[0];
   const passwordError = state.fieldErrors?.password?.[0];
 
   return (
-    <form action={formAction} className="space-y-5">
+    <form
+      action={formAction}
+      className="space-y-5"
+      onSubmit={() => {
+        posthog?.capture(AnalyticsEvents.AuthStarted, {
+          auth_method: "email",
+          auth_flow: "login",
+        });
+      }}
+    >
       {next && <input type="hidden" name="next" value={next} />}
       {plan && <input type="hidden" name="plan" value={plan} />}
       <div className="space-y-2">

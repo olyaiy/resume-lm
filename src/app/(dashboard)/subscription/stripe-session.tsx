@@ -4,6 +4,8 @@ import { Stripe } from "stripe";
 import { checkAuth } from "@/app/(auth)/auth/login/actions";
 import { getServerAnalyticsContext } from "@/lib/analytics/server";
 import { createOrRetrieveCustomer } from "@/utils/actions/stripe/actions";
+import { AnalyticsEvents } from "@/lib/analytics/events";
+import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 import {
     buildCheckoutIdempotencyKey,
     buildCheckoutSessionMetadata,
@@ -12,10 +14,18 @@ import {
     isMatchingOpenCheckoutSession,
 } from "@/lib/stripe/checkout-guard";
 
-const apiKey = process.env.STRIPE_SECRET_KEY as string;
-const stripe = new Stripe(apiKey, {
-    apiVersion: "2025-04-30.basil",
-});
+let stripeClient: Stripe | null = null;
+
+function getStripeClient() {
+    if (!stripeClient) {
+        const apiKey = process.env.STRIPE_SECRET_KEY;
+        if (!apiKey) throw new Error("STRIPE_SECRET_KEY is not configured");
+        stripeClient = new Stripe(apiKey, {
+            apiVersion: "2025-04-30.basil",
+        });
+    }
+    return stripeClient;
+}
 
 interface NewSessionOptions {
     priceId: string;
@@ -27,10 +37,39 @@ export type StripeSessionResult =
     | { kind: "portal"; url: string; reason: "existing_subscription" }
     | { kind: "error"; message: string };
 
+function getCheckoutErrorCategory(error: unknown): string {
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
+    if (message.includes("price") || message.includes("valid")) return "invalid_checkout_configuration";
+    if (message.includes("customer")) return "customer_lookup_failed";
+    if (message.includes("stripe")) return "stripe_session_creation_failed";
+    return "checkout_session_creation_failed";
+}
+
+async function captureCheckoutStarted(input: {
+    userId: string;
+    sessionId: string;
+    priceId: string;
+    includeTrial: boolean;
+    context: Awaited<ReturnType<typeof getServerAnalyticsContext>>;
+}) {
+    await captureServerAnalyticsEvent({
+        distinctId: input.userId,
+        event: AnalyticsEvents.CheckoutStarted,
+        insertId: `${input.sessionId}:${AnalyticsEvents.CheckoutStarted}`,
+        context: input.context,
+        properties: {
+            price_id: input.priceId,
+            include_trial: input.includeTrial,
+            checkout_surface: "embedded",
+            stripe_checkout_session_id: input.sessionId,
+        },
+    });
+}
+
 async function createBillingPortalSession(customerId: string) {
     const returnUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/subscription`;
 
-    return stripe.billingPortal.sessions.create({
+    return getStripeClient().billingPortal.sessions.create({
         customer: customerId,
         return_url: returnUrl,
     });
@@ -52,6 +91,15 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
         }
 
         if (priceId !== proPriceId) {
+            await captureServerAnalyticsEvent({
+                distinctId: user.id,
+                event: AnalyticsEvents.CheckoutError,
+                properties: {
+                    price_id: priceId,
+                    include_trial: includeTrial,
+                    error_category: "invalid_checkout_configuration",
+                },
+            });
             return {
                 kind: "error",
                 message: "This checkout link is no longer valid. Please restart checkout from the subscription page.",
@@ -64,7 +112,7 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
             email: user.email
         });
 
-        const existingSubscriptions = await stripe.subscriptions.list({
+        const existingSubscriptions = await getStripeClient().subscriptions.list({
             customer: customerId,
             price: priceId,
             status: "all",
@@ -100,7 +148,7 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
             analyticsContext,
         });
 
-        const openSessions = await stripe.checkout.sessions.list({
+        const openSessions = await getStripeClient().checkout.sessions.list({
             customer: customerId,
             status: "open",
             limit: 10,
@@ -117,6 +165,15 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
                 sessionId: reusableSession.id,
                 priceId,
                 includeTrial,
+                context: analyticsContext,
+            });
+
+            await captureCheckoutStarted({
+                userId: user.id,
+                sessionId: reusableSession.id,
+                priceId,
+                includeTrial,
+                context: analyticsContext,
             });
 
             return {
@@ -134,7 +191,7 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
             returnUrl
         });
 
-        const session = await stripe.checkout.sessions.create({
+        const session = await getStripeClient().checkout.sessions.create({
             customer: customerId,
             ui_mode: "embedded",
             line_items: [
@@ -173,11 +230,28 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
             throw new Error('Failed to create Stripe session');
         }
 
+        await captureCheckoutStarted({
+            userId: user.id,
+            sessionId: session.id,
+            priceId,
+            includeTrial,
+            context: analyticsContext,
+        });
+
         return {
             kind: "checkout",
             clientSecret: session.client_secret
         };
     } catch (error) {
+        await captureServerAnalyticsEvent({
+            distinctId: user.id,
+            event: AnalyticsEvents.CheckoutError,
+            properties: {
+                price_id: priceId,
+                include_trial: includeTrial,
+                error_category: getCheckoutErrorCategory(error),
+            },
+        });
         console.error('Error creating checkout session:', error);
         throw new Error(error instanceof Error ? error.message : 'Failed to create checkout session');
     }

@@ -21,6 +21,31 @@ import { createServiceClient } from "@/utils/supabase/server";
 
 type AIUsageStatus = "succeeded" | "failed" | "rate_limited" | "blocked";
 
+export function getAIErrorCategory(errorCode?: string | null): string | null {
+  if (!errorCode) return null;
+
+  const normalized = errorCode.toLowerCase();
+  if (normalized.includes("quota") || normalized.includes("credit") || normalized.includes("payment")) {
+    return "provider_billing";
+  }
+  if (normalized.includes("api key") || normalized.includes("key not found") || normalized.includes("authentication")) {
+    return "provider_authentication";
+  }
+  if (normalized.includes("rate limit") || normalized.includes("too many requests")) {
+    return "rate_limited";
+  }
+  if (normalized.includes("schema") || normalized.includes("parse") || normalized.includes("tool")) {
+    return "invalid_model_output";
+  }
+  if (normalized.includes("timeout") || normalized.includes("timed out")) {
+    return "timeout";
+  }
+  if (normalized.includes("unavailable") || normalized.includes("network") || normalized.includes("fetch")) {
+    return "provider_unavailable";
+  }
+  return "provider_error";
+}
+
 export class AIUsageError extends Error {
   constructor(
     message: string,
@@ -67,8 +92,7 @@ export async function recordAIUsageStarted(input: {
       route: input.route,
       provider: input.provider,
       model: input.model,
-      is_pro: input.isPro,
-      used_server_key: input.usedServerKey,
+      status: "started",
     },
   });
 
@@ -94,31 +118,59 @@ export async function recordAIUsageFinished(input: {
       total_tokens: input.totalTokens ?? null,
     })
     .eq("id", input.id)
-    .select("user_id, route, provider, model, is_pro, used_server_key, status, input_tokens, output_tokens, total_tokens, error_code")
+    .select("user_id, route, provider, model, status, input_tokens, output_tokens, total_tokens, error_code, created_at")
     .single();
 
   if (error) {
     throw error;
   }
 
+  const durationMs = data.created_at
+    ? Math.max(0, Date.now() - Date.parse(data.created_at))
+    : null;
+  const analyticsProperties = {
+    route: data.route,
+    provider: data.provider,
+    model: data.model,
+    status: data.status,
+    duration_ms: durationMs,
+    input_tokens: data.input_tokens,
+    output_tokens: data.output_tokens,
+    total_tokens: data.total_tokens,
+    error_category: getAIErrorCategory(data.error_code),
+  };
+
   await captureServerAnalyticsEvent({
     distinctId: data.user_id,
     event: input.status === "succeeded"
       ? AnalyticsEvents.AIRequestSucceeded
       : AnalyticsEvents.AIRequestFailed,
-    properties: {
-      route: data.route,
-      provider: data.provider,
-      model: data.model,
-      is_pro: data.is_pro,
-      used_server_key: data.used_server_key,
-      status: data.status,
-      input_tokens: data.input_tokens,
-      output_tokens: data.output_tokens,
-      total_tokens: data.total_tokens,
-      error_code: data.error_code,
-    },
+    properties: analyticsProperties,
   });
+
+  if (input.status === "succeeded") {
+    try {
+      const { count } = await supabase
+        .from("ai_usage_events")
+        .select("id", { count: "exact", head: true })
+        .eq("user_id", data.user_id)
+        .eq("status", "succeeded");
+
+      if (count === 1) {
+        await captureServerAnalyticsEvent({
+          distinctId: data.user_id,
+          event: AnalyticsEvents.FirstAIRequestSucceeded,
+          insertId: `${data.user_id}:${AnalyticsEvents.FirstAIRequestSucceeded}`,
+          properties: analyticsProperties,
+        });
+      }
+    } catch (analyticsError) {
+      console.warn("Unable to determine first successful AI request", {
+        userId: data.user_id,
+        error: analyticsError instanceof Error ? analyticsError.message : "Unknown error",
+      });
+    }
+  }
 }
 
 export function usageFromLanguageModelUsage(usage?: LanguageModelUsage) {

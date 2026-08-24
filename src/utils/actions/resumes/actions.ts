@@ -257,6 +257,12 @@ export async function createBaseResume(
 
   await assertResumeQuota(supabase, user.id, 'base');
 
+  const { count: existingResumeCount } = await supabase
+    .from('resumes')
+    .select('id', { count: 'exact', head: true })
+    .eq('user_id', user.id);
+  const isFirstResume = existingResumeCount === 0;
+
   let profile = null;
   if (importOption !== 'fresh') {
     const { data, error: profileError } = await supabase
@@ -360,12 +366,25 @@ export async function createBaseResume(
   await captureServerAnalyticsEvent({
     distinctId: user.id,
     event: AnalyticsEvents.ResumeCreated,
+    insertId: `${user.id}:${resume.id}:${AnalyticsEvents.ResumeCreated}`,
     properties: {
       ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
       resume_type: "base",
       has_job: false,
     },
   });
+
+  if (isFirstResume) {
+    await captureServerAnalyticsEvent({
+      distinctId: user.id,
+      event: AnalyticsEvents.FirstResumeSaved,
+      insertId: `${user.id}:${AnalyticsEvents.FirstResumeSaved}`,
+      properties: {
+        resume_type: "base",
+        import_option: importOption,
+      },
+    });
+  }
 
   return resume;
 }

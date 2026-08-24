@@ -287,6 +287,19 @@ async function handleSubscriptionChange(
         },
       });
     }
+
+    if (
+      subscriptionData.user_id &&
+      subscriptionData.subscription_plan === 'pro' &&
+      subscriptionData.subscription_status === 'active'
+    ) {
+      await captureServerAnalyticsEvent({
+        distinctId: subscriptionData.user_id,
+        event: AnalyticsEvents.EntitlementActivated,
+        insertId: `${subscriptionId}:${AnalyticsEvents.EntitlementActivated}`,
+        properties: getSubscriptionEventProperties(subscriptionData, 'entitlement.activated'),
+      });
+    }
     
     console.log('✨ Final Subscription State:', {
       result: 'success',

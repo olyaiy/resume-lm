@@ -6,7 +6,7 @@ import { getAuthenticatedClient, getServiceClient } from "@/utils/actions/utils/
 import { deleteCustomerAndData } from "@/utils/actions/stripe/actions";
 import { loginSchema, signupSchema } from "@/lib/auth-schemas";
 import type { AuthFormState } from "@/components/auth/auth-form-state";
-import { AnalyticsEvents } from "@/lib/analytics/events";
+import { AnalyticsEvents, buildAnalyticsInsertId } from "@/lib/analytics/events";
 import { captureServerAnalyticsEvent } from "@/lib/analytics/server";
 import { getEmailSignupBlockedMessage, isEmailSignupAllowed } from "@/lib/auth-policy";
 import {
@@ -58,7 +58,7 @@ export async function login(formData: FormData): Promise<AuthResult> {
     password: formData.get('password') as string,
   }
 
-  const { error } = await supabase.auth.signInWithPassword(data)
+  const { data: signInData, error } = await supabase.auth.signInWithPassword(data)
 
   if (error) {
     console.error('Password sign-in failed:', {
@@ -68,6 +68,18 @@ export async function login(formData: FormData): Promise<AuthResult> {
       name: error.name,
     });
     return { success: false, error: mapLoginErrorMessage(error.message), errorCode: error.code };
+  }
+
+  if (signInData.user) {
+    await captureServerAnalyticsEvent({
+      distinctId: signInData.user.id,
+      event: AnalyticsEvents.AuthSucceeded,
+      insertId: `${signInData.user.id}:auth_succeeded:login`,
+      properties: {
+        auth_method: "email",
+        auth_flow: "login",
+      },
+    });
   }
 
   const next = getAuthRedirectPath(getAuthIntentFromParams({
@@ -133,8 +145,18 @@ export async function signup(formData: FormData): Promise<AuthResult> {
     await captureServerAnalyticsEvent({
       distinctId: signupData.user.id,
       event: AnalyticsEvents.SignupCompleted,
+      insertId: buildAnalyticsInsertId(signupData.user.id, AnalyticsEvents.SignupCompleted),
       properties: {
         signup_provider: "email",
+      },
+    });
+    await captureServerAnalyticsEvent({
+      distinctId: signupData.user.id,
+      event: AnalyticsEvents.AuthSucceeded,
+      insertId: `${signupData.user.id}:auth_succeeded:signup`,
+      properties: {
+        auth_method: "email",
+        auth_flow: "signup",
       },
     });
   }
