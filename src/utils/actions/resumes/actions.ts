@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 import { simplifiedResumeSchema, Job as ZodJob } from "@/lib/zod-schemas";
 import { AIConfig } from "@/utils/ai-tools";
-import { generateObject, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
+import { generateObject, NoObjectGeneratedError, type LanguageModelUsage, type LanguageModelV1, type TelemetrySettings } from "ai";
 import { resumeScoreSchema } from "@/lib/zod-schemas";
 import { getSubscriptionPlan } from "../stripe/actions";
 import { getSubscriptionAccessState } from "@/lib/subscription-access";
@@ -646,13 +646,27 @@ export async function generateResumeScore(
       maxRetries: 0,
       experimental_telemetry: telemetry,
       schema: resumeScoreSchema,
+      // The scoring schema is large; the default 4096-token cap truncates the
+      // JSON for verbose (tailored) resumes, producing NoObjectGeneratedError.
+      maxTokens: 8192,
       prompt
     }));
 
     // console.log("THE OUTPUTTED object", object);
     return object
   } catch (error) {
-    console.error('Error SCORING resume:', error);
+    if (NoObjectGeneratedError.isInstance(error)) {
+      // Surface what the model actually produced so schema-mismatch vs.
+      // truncation is diagnosable instead of an opaque overlay error.
+      console.error('Error SCORING resume: model output did not match resumeScoreSchema', {
+        finishReason: error.finishReason,
+        usage: error.usage,
+        cause: error.cause,
+        text: error.text,
+      });
+    } else {
+      console.error('Error SCORING resume:', error);
+    }
     throw error;
   }
 }
