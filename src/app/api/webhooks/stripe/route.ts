@@ -7,6 +7,7 @@ import { createServiceClient } from '@/utils/supabase/server'
 import { reportBillingAlert } from '@/lib/billing/alerts'
 import { AnalyticsEvents } from '@/lib/analytics/events'
 import { captureServerAnalyticsEvent } from '@/lib/analytics/server'
+import { shouldCaptureEntitlementActivation } from '@/lib/billing/entitlement-activation'
 import {
   normalizeAnalyticsAnonymousId,
   UTM_PARAMETER_NAMES,
@@ -266,6 +267,16 @@ async function handleSubscriptionChange(
       subscriptionId,
     });
 
+    const { data: previousSubscription, error: previousSubscriptionError } = await supabase
+      .from('subscriptions')
+      .select('subscription_plan, subscription_status, current_period_end, trial_end')
+      .eq('stripe_subscription_id', subscriptionId)
+      .maybeSingle();
+
+    if (previousSubscriptionError) {
+      throw previousSubscriptionError;
+    }
+
     // Update subscription in database
     const subscriptionData = await manageSubscriptionStatusChange(
       subscriptionId,
@@ -290,15 +301,33 @@ async function handleSubscriptionChange(
 
     if (
       subscriptionData.user_id &&
+      subscriptionData.stripe_subscription_id === subscriptionId &&
       subscriptionData.subscription_plan === 'pro' &&
-      subscriptionData.subscription_status === 'active'
+      subscriptionData.subscription_status === 'active' &&
+      shouldCaptureEntitlementActivation(previousSubscription, subscriptionData)
     ) {
-      await captureServerAnalyticsEvent({
-        distinctId: subscriptionData.user_id,
-        event: AnalyticsEvents.EntitlementActivated,
-        insertId: `${subscriptionId}:${AnalyticsEvents.EntitlementActivated}`,
-        properties: getSubscriptionEventProperties(subscriptionData, 'entitlement.activated'),
-      });
+      const { error: activationClaimError } = await supabase
+        .from('stripe_entitlement_activations')
+        .insert({
+          stripe_subscription_id: subscriptionId,
+          user_id: subscriptionData.user_id,
+        });
+
+      const isDuplicateActivation =
+        (activationClaimError as { code?: string } | null)?.code === '23505';
+
+      if (activationClaimError && !isDuplicateActivation) {
+        throw activationClaimError;
+      }
+
+      if (!activationClaimError) {
+        await captureServerAnalyticsEvent({
+          distinctId: subscriptionData.user_id,
+          event: AnalyticsEvents.EntitlementActivated,
+          insertId: `${subscriptionId}:${AnalyticsEvents.EntitlementActivated}`,
+          properties: getSubscriptionEventProperties(subscriptionData, 'entitlement.activated'),
+        });
+      }
     }
     
     console.log('✨ Final Subscription State:', {
