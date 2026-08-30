@@ -322,10 +322,10 @@ export const resumeScoreSchema = z.object({
     })
   }).optional(),
   miscellaneous: z.record(
-    z.union([z.number(), z.object({
-      score: z.number().min(0).max(100).optional(),
-      reason: z.string().optional()
-    })]).optional()
+    z.object({
+      score: z.number().min(0).max(100),
+      reason: z.string()
+    })
   ).optional(),
   overallImprovements: z.array(z.string()).optional(),
   // Job-specific improvements for tailored resumes
@@ -333,4 +333,4 @@ export const resumeScoreSchema = z.object({
   isTailoredResume: z.boolean().optional()
 });
 
-export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>; 
+export type ResumeScoreMetrics = z.infer<typeof resumeScoreSchema>;  
