@@ -36,7 +36,11 @@ export interface ReconciliationMismatch {
   expectedStatus: "active" | "past_due" | "canceled";
 }
 
-function expectedAppState(input: StripeReconciliationSnapshot, proPriceId: string) {
+function expectedAppState(
+  input: StripeReconciliationSnapshot,
+  proPriceId: string,
+  now: Date,
+) {
   const isKnownProPrice = input.priceId === proPriceId;
   const isActiveLike = input.status === "active" || input.status === "trialing";
   const isPastDue = input.status === "past_due";
@@ -51,14 +55,17 @@ function expectedAppState(input: StripeReconciliationSnapshot, proPriceId: strin
   return {
     expectedPlan,
     expectedStatus,
-    expectedState: getBillingState({
-      plan: expectedPlan,
-      status: expectedStatus,
-      stripeStatus: input.status,
-      currentPeriodEnd: input.currentPeriodEnd,
-      trialEnd: input.trialEnd,
-      cancelAtPeriodEnd: input.cancelAtPeriodEnd,
-    }),
+    expectedState: getBillingState(
+      {
+        plan: expectedPlan,
+        status: expectedStatus,
+        stripeStatus: input.status,
+        currentPeriodEnd: input.currentPeriodEnd,
+        trialEnd: input.trialEnd,
+        cancelAtPeriodEnd: input.cancelAtPeriodEnd,
+      },
+      now,
+    ),
   } as const;
 }
 
@@ -69,7 +76,7 @@ export function compareStripeAndSupabaseState(input: {
   now?: Date;
 }): ReconciliationMismatch | null {
   const now = input.now ?? new Date();
-  const expected = expectedAppState(input.stripe, input.proPriceId);
+  const expected = expectedAppState(input.stripe, input.proPriceId, now);
 
   // Historical canceled subscriptions do not need a user mapping. Current or
   // recoverable entitlements do, because missing mappings can strand paid access.
@@ -126,5 +133,5 @@ export function compareStripeAndSupabaseState(input: {
 }
 
 export function getExpectedStripeState(input: StripeReconciliationSnapshot, proPriceId: string) {
-  return expectedAppState(input, proPriceId);
+  return expectedAppState(input, proPriceId, new Date());
 }
