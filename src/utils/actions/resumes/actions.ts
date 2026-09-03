@@ -88,6 +88,7 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
       usageEventId,
       status: 'failed',
       errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+      error,
     });
     throw error;
   }
@@ -441,6 +442,7 @@ export async function createTailoredResume(
   await captureServerAnalyticsEvent({
     distinctId: user.id,
     event: AnalyticsEvents.ResumeTailored,
+    insertId: `${user.id}:${data.id}:${AnalyticsEvents.ResumeTailored}`,
     properties: {
       ...(await getSubscriptionAnalyticsProperties(supabase, user.id)),
       resume_type: "tailored",
@@ -580,7 +582,10 @@ export async function generateResumeScore(
 
   try {
     let prompt = `
-    Generate a comprehensive score for this resume: ${JSON.stringify(resumeForScoring)}
+    Generate a concise, actionable score for this resume: ${JSON.stringify(resumeForScoring)}
+
+    Return compact JSON. Keep every reason to one sentence of 20 words or fewer.
+    Limit overallImprovements and jobSpecificImprovements to five items each.
     
     MUST include a 'miscellaneous' field with 2-3 metrics following this format:
     {
@@ -636,7 +641,7 @@ export async function generateResumeScore(
       `;
     }
 
-    const { object } = await runTrackedAIRequest({
+      const { object } = await runTrackedAIRequest({
       route: 'actions.resumes.generateResumeScore',
       userId: id,
       isPro,
@@ -646,6 +651,7 @@ export async function generateResumeScore(
       maxRetries: 0,
       experimental_telemetry: telemetry,
       schema: resumeScoreSchema,
+      maxTokens: 2200,
       prompt
     }));
 

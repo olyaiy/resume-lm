@@ -159,6 +159,7 @@ export async function POST(req: Request) {
           usageEventId,
           status: 'failed',
           errorCode: error instanceof Error ? error.message : 'stream_error',
+          error,
         });
       },
     });

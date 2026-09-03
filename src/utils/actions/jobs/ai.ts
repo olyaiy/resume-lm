@@ -40,6 +40,7 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
       usageEventId,
       status: 'failed',
       errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+      error,
     });
     throw error;
   }
@@ -53,6 +54,22 @@ export async function tailorResumeToJob(
   const { plan, id } = await getSubscriptionPlan(true);
   const isPro = plan === 'pro';
   const selectedConfig = withTaskModel({ task: "jobTailoring", isPro, config });
+  const resumeForTailoring = {
+    target_role: resume.target_role,
+    work_experience: resume.work_experience,
+    education: resume.education,
+    skills: resume.skills,
+    projects: resume.projects,
+  };
+  const jobForTailoring = {
+    company_name: jobListing.company_name,
+    position_title: jobListing.position_title,
+    description: jobListing.description,
+    location: jobListing.location,
+    keywords: jobListing.keywords,
+    work_location: jobListing.work_location,
+    employment_type: jobListing.employment_type,
+  };
   const start = Date.now();
   console.log(
     `[TAILOR][TRY] ${selectedConfig.model} | STEP: Tailoring resume content | Subscription: ${isPro ? 'PRO' : 'FREE'}`
@@ -73,13 +90,13 @@ export async function tailorResumeToJob(
         maxRetries: 0,
         system: `
 
-You are ResumeLM, an advanced AI resume transformer. Rewrite the resume so it is ATS-friendly and tightly aligned to the job description—without adding new facts or inventing experience.
+You are ResumeLM. Rewrite the resume so it is ATS-friendly and tightly aligned to the job description—without adding new facts or inventing experience.
 
 Guidelines:
 - Integrate job-specific terminology and reorder content to surface the most relevant experience first. Mirror the job's vocabulary when it is factual.
-- Use STAR reasoning internally but write each bullet as a single, natural resume bullet. NEVER include labels like "Situation", "Task", "Action", "Result", "Context", or "Outcome" in the output.
+- Write each bullet as one natural, concise resume bullet. Never include reasoning labels or commentary in the output.
 - Lead bullets with strong action verbs, keep them concise, and anchor claims with concrete, job-relevant metrics.
-- Enrich tech details with versions/frameworks when present in the source; do not fabricate tools or versions.
+- Preserve factual technologies and versions when present; do not fabricate them.
 - Preserve chronology and factual accuracy; if something is missing in the resume, do not invent it—map to the closest truthful concept instead.
 - Remove any internal notes/annotations; final output should be clean, professional resume content only.
 
@@ -88,10 +105,10 @@ Your task: produce a polished, tailored resume that meets the schema exactly and
         `,
         prompt: `
     This is the Resume:
-    ${JSON.stringify(resume, null, 2)}
+    ${JSON.stringify(resumeForTailoring)}
     
     This is the Job Description:
-    ${JSON.stringify(jobListing, null, 2)}
+    ${JSON.stringify(jobForTailoring)}
     `,
       }));
 

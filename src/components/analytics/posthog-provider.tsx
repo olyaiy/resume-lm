@@ -34,6 +34,11 @@ export function PostHogProvider({
       defaults: '2026-01-30',
       capture_pageview: false,
       capture_pageleave: true,
+      capture_exceptions: {
+        capture_unhandled_errors: true,
+        capture_unhandled_rejections: true,
+        capture_console_errors: false,
+      },
     });
 
     hasInitialized = true;

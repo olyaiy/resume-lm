@@ -29,6 +29,7 @@ export const AnalyticsEvents = {
   InvoicePaymentFailed: "invoice_payment_failed",
   SubscriptionCanceled: "subscription_canceled",
   BillingAlertTriggered: "billing_alert_triggered",
+  ExceptionCaptured: "$exception",
 } as const;
 
 export type AnalyticsEventName =

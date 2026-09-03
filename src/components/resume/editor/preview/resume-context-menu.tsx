@@ -187,7 +187,11 @@ export function ResumeContextMenu({ children, resume }: ResumeContextMenuProps) 
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="w-full h-full">
+      <ContextMenuTrigger
+        className="w-full h-full"
+        data-analytics-id="resume-preview"
+        aria-label="Resume preview"
+      >
         {children}
       </ContextMenuTrigger>
       <ContextMenuContent className="w-64">

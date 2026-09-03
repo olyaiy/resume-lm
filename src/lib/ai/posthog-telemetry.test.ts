@@ -3,7 +3,7 @@ import { afterEach, describe, it } from "node:test";
 
 import type { ResolvedAIRequest } from "./access-control";
 import { buildPostHogAITelemetry } from "./posthog-telemetry";
-import { getAIErrorCategory } from "./usage-ledger";
+import { getAIErrorCategory, getAIRequestFailureProperties } from "./usage-ledger";
 
 const ORIGINAL_ENV = {
   NEXT_PUBLIC_POSTHOG_KEY: process.env.NEXT_PUBLIC_POSTHOG_KEY,
@@ -128,5 +128,21 @@ describe("getAIErrorCategory", () => {
     assert.equal(getAIErrorCategory("No object generated: response did not match schema"), "invalid_model_output");
     assert.equal(getAIErrorCategory("Unexpected provider failure"), "provider_error");
     assert.equal(getAIErrorCategory(undefined), null);
+  });
+});
+
+describe("getAIRequestFailureProperties", () => {
+  it("emits bounded structured fields without the provider's raw error", () => {
+    assert.deepEqual(
+      getAIRequestFailureProperties({
+        errorCode: "You exceeded your current quota",
+      }),
+      {
+        error_code: "provider_billing",
+        error_category: "provider_billing",
+        error_status_code: null,
+        error_retryable: null,
+      },
+    );
   });
 });

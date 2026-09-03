@@ -49,6 +49,7 @@ async function runTrackedAIRequest<T extends { usage?: LanguageModelUsage }>(
       usageEventId,
       status: 'failed',
       errorCode: error instanceof Error ? error.message : 'ai_request_failed',
+      error,
     });
     throw error;
   }
