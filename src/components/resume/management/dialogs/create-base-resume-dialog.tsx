@@ -19,18 +19,30 @@ import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/
 import { Textarea } from "@/components/ui/textarea";
 import { convertTextToResume } from "@/utils/actions/resumes/ai";
 import { ApiErrorDialog } from "@/components/ui/api-error-dialog";
-import { getStoredModelSelection } from "@/lib/ai-models";
+import { getStoredModelSelection, MODEL_DESIGNATIONS } from "@/lib/ai-models";
+
+export type ResumeImportOption = 'import-profile' | 'scratch' | 'import-resume';
 
 interface CreateBaseResumeDialogProps {
-  children: React.ReactNode;
+  children?: React.ReactNode;
   profile: Profile;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  initialImportOption?: ResumeImportOption;
 }
 
-export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDialogProps) {
-  const [open, setOpen] = useState(false);
+export function CreateBaseResumeDialog({
+  children,
+  profile,
+  open,
+  onOpenChange,
+  initialImportOption = 'import-profile',
+}: CreateBaseResumeDialogProps) {
+  const [internalOpen, setInternalOpen] = useState(false);
+  const dialogOpen = open ?? internalOpen;
   const [targetRole, setTargetRole] = useState('');
   const [isCreating, setIsCreating] = useState(false);
-  const [importOption, setImportOption] = useState<'import-profile' | 'scratch' | 'import-resume'>('import-profile');
+  const [importOption, setImportOption] = useState<ResumeImportOption>(initialImportOption);
   const [isTargetRoleInvalid, setIsTargetRoleInvalid] = useState(false);
   const [currentStep, setCurrentStep] = useState<1 | 2>(1);
   const [selectedItems, setSelectedItems] = useState<{
@@ -120,6 +132,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
     setCurrentStep(1);
   };
 
+  const closeDialog = () => {
+    if (open === undefined) setInternalOpen(false);
+    onOpenChange?.(false);
+  };
+
   const handleCreate = async () => {
     if (!targetRole.trim()) {
       setIsTargetRoleInvalid(true);
@@ -137,6 +154,11 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
 
       if (importOption === 'import-resume') {
         if (!resumeText.trim()) {
+          toast({
+            title: "Resume content missing",
+            description: "Paste your resume text or choose a PDF before creating your resume.",
+            variant: "destructive",
+          });
           return;
         }
 
@@ -161,7 +183,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
 
         // Get model and API key from local storage
         const LOCAL_STORAGE_KEY = 'resumelm-api-keys';
-        const selectedModel = getStoredModelSelection();
+        const selectedModel = getStoredModelSelection(MODEL_DESIGNATIONS.DEFAULT_FREE);
         const storedKeys = localStorage.getItem(LOCAL_STORAGE_KEY);
         let apiKeys = [];
         try {
@@ -208,7 +230,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           });
 
           router.push(`/resumes/${resume.id}`);
-          setOpen(false);
+          closeDialog();
           return;
         } catch (error: Error | unknown) {
           if (error instanceof Error && error.message.includes('Free plan limit reached')) {
@@ -273,7 +295,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
       });
 
       router.push(`/resumes/${resume.id}`);
-      setOpen(false);
+      closeDialog();
     } catch (error) {
       console.error('Create resume error:', error);
       if (error instanceof Error && error.message.includes('Free plan limit reached')) {
@@ -309,16 +331,18 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       // Move focus back to the trigger when closing
-      const trigger = document.querySelector('[data-state="open"]');
-      if (trigger) {
+      const trigger = children && document.querySelector('[data-state="open"]');
+      if (trigger && trigger instanceof HTMLElement) {
         (trigger as HTMLElement).focus();
       }
     }
-    setOpen(newOpen);
+    if (open === undefined) setInternalOpen(newOpen);
+    onOpenChange?.(newOpen);
     if (newOpen) {
       setTargetRole('');
       setCurrentStep(1);
-      setImportOption('import-profile');
+      setImportOption(initialImportOption);
+      setResumeText('');
       initializeSelectedItems();
     }
   };
@@ -374,14 +398,18 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
           variant: "destructive",
         });
       }
+    } else if (file) {
+      toast({
+        title: "Invalid File",
+        description: "Please choose a PDF file.",
+        variant: "destructive",
+      });
     }
   };
 
   return (
-    <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        {children}
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
+      {children ? <DialogTrigger asChild>{children}</DialogTrigger> : null}
       <DialogContent className={cn(
         "sm:max-w-[700px] p-0 max-h-[85vh] overflow-y-auto",
         "bg-white border border-gray-200 shadow-lg rounded-lg"
@@ -674,7 +702,7 @@ export function CreateBaseResumeDialog({ children, profile }: CreateBaseResumeDi
               )}
             </div>
             <div className="flex gap-2">
-              <Button variant="outline" onClick={() => setOpen(false)} size="sm">
+              <Button variant="outline" onClick={closeDialog} size="sm">
                 Cancel
               </Button>
               {currentStep === 1 && (

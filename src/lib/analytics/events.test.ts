@@ -16,6 +16,7 @@ describe("AnalyticsEvents", () => {
     assert.equal(AnalyticsEvents.OAuthCompleted, "oauth_completed");
     assert.equal(AnalyticsEvents.SignupCompleted, "signup_completed");
     assert.equal(AnalyticsEvents.OnboardingCompleted, "onboarding_completed");
+    assert.equal(AnalyticsEvents.ResumeStartModeSelected, "resume_start_mode_selected");
     assert.equal(AnalyticsEvents.ProfileCreated, "profile_created");
     assert.equal(AnalyticsEvents.ProfileCompleted, "profile_completed");
     assert.equal(AnalyticsEvents.ResumeCreated, "resume_created");

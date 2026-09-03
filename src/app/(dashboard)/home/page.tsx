@@ -38,9 +38,9 @@ export default async function Home({
 }: {
   searchParams: Promise<{ [key: string]: string | undefined }>;
 }) {
-  // Check if user is coming from confirmation
+  // Signup entry points explicitly preserve this onboarding destination.
   const params = await searchParams;
-  const isNewSignup = params?.type === 'signup' && params?.token_hash;
+  const isNewSignup = params?.onboarding === 'resume';
 
   // Fetch dashboard data and handle authentication
   let data;
@@ -124,8 +124,8 @@ export default async function Home({
   return (
     <main className="min-h-screen relative sm:pb-12 pb-40">
 
-      {/* Welcome Dialog for New Signups */}
-      <WelcomeDialog isOpen={!!isNewSignup} />
+      {/* Resume-first onboarding for new signups */}
+      <WelcomeDialog isOpen={!!isNewSignup} profile={profile} />
       
       {/* Gradient Background */}
       <div className="fixed inset-0 z-0">

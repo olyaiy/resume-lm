@@ -13,12 +13,13 @@ import { Separator } from "@/components/ui/separator";
 import { usePostHog } from "posthog-js/react";
 import { AnalyticsEvents } from "@/lib/analytics/events";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import type { AuthIntent } from "@/lib/auth-intent";
+import { RESUME_ONBOARDING_PATH, type AuthIntent } from "@/lib/auth-intent";
 
 export type AuthTab = "login" | "signup";
+type AuthDialogIntent = AuthIntent & { signupNext?: string };
 
 interface AuthDialogContextValue {
-  openDialog: (tab?: AuthTab, intent?: AuthIntent) => void;
+  openDialog: (tab?: AuthTab, intent?: AuthDialogIntent) => void;
 }
 
 const AuthDialogContext = createContext<AuthDialogContextValue | undefined>(undefined);
@@ -48,7 +49,7 @@ function SocialAuth({
   authFlow,
 }: {
   showDivider?: boolean;
-  intent?: AuthIntent;
+  intent?: AuthDialogIntent;
   authFlow: AuthTab;
 }) {
   const [isLoading, setIsLoading] = useState(false);
@@ -64,7 +65,17 @@ function SocialAuth({
 
     try {
       setIsLoading(true);
-      const result = await signInWithGoogle(intent);
+      const fallbackNext = intent?.plan === "pro"
+        ? "/subscription"
+        : authFlow === "signup"
+          ? RESUME_ONBOARDING_PATH
+          : "/home";
+      const next = authFlow === "signup"
+        ? intent?.signupNext || intent?.next || fallbackNext
+        : intent?.next || fallbackNext;
+      const result = await signInWithGoogle(
+        { ...intent, next },
+      );
 
       if (!result.success) {
         const message = result.error || "Failed to sign in with Google.";
@@ -144,7 +155,7 @@ export function AuthDialogProvider({
   const [open, setOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<AuthTab>("signup");
   const [formVersion, setFormVersion] = useState(0);
-  const [intent, setIntent] = useState<AuthIntent | undefined>(initialIntent);
+  const [intent, setIntent] = useState<AuthDialogIntent | undefined>(initialIntent);
 
   const resetDialog = useCallback(() => {
     setActiveTab("signup");
@@ -157,7 +168,7 @@ export function AuthDialogProvider({
     resetDialog();
   }, [resetDialog]);
 
-  const openDialog = useCallback((tab: AuthTab = "signup", nextIntent?: AuthIntent) => {
+  const openDialog = useCallback((tab: AuthTab = "signup", nextIntent?: AuthDialogIntent) => {
     setActiveTab(tab);
     setIntent(nextIntent ?? initialIntent);
     setOpen(true);
@@ -217,7 +228,7 @@ export function AuthDialogProvider({
                   </div>
                   <LoginForm
                     key={`login-${formVersion}`}
-                    next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
+                    next={intent?.next || (intent?.plan === "pro" ? "/subscription" : "/home")}
                     plan={intent?.plan}
                   />
                   <SocialAuth intent={intent} authFlow="login" />
@@ -230,7 +241,7 @@ export function AuthDialogProvider({
                   </div>
                   <SignupForm
                     key={`signup-${formVersion}`}
-                    next={intent?.next ?? (intent?.plan === "pro" ? "/subscription" : undefined)}
+                    next={intent?.signupNext || intent?.next || (intent?.plan === "pro" ? "/subscription" : RESUME_ONBOARDING_PATH)}
                     plan={intent?.plan}
                   />
                   <SocialAuth intent={intent} authFlow="signup" />

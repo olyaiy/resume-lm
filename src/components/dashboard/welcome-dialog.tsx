@@ -1,82 +1,126 @@
 'use client';
 
+import { useEffect, useState } from "react";
+import { usePostHog } from "posthog-js/react";
+import { Upload, Wand2 } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import Link from "next/link";
-import { useState, useEffect } from "react";
+import {
+  CreateBaseResumeDialog,
+  type ResumeImportOption,
+} from "@/components/resume/management/dialogs/create-base-resume-dialog";
+import type { Profile } from "@/lib/types";
+import { AnalyticsEvents } from "@/lib/analytics/events";
 
 interface WelcomeDialogProps {
   isOpen: boolean;
+  profile: Profile;
 }
 
-export function WelcomeDialog({ isOpen: initialIsOpen }: WelcomeDialogProps) {
-  const [isOpen, setIsOpen] = useState(false);
+function clearOnboardingIntent() {
+  if (typeof window === "undefined") return;
+
+  const url = new URL(window.location.href);
+  url.searchParams.delete("onboarding");
+  window.history.replaceState(window.history.state, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+export function WelcomeDialog({ isOpen: initialIsOpen, profile }: WelcomeDialogProps) {
+  const posthog = usePostHog();
+  const [welcomeOpen, setWelcomeOpen] = useState(false);
+  const [resumeDialogOpen, setResumeDialogOpen] = useState(false);
+  const [importOption, setImportOption] = useState<ResumeImportOption>("scratch");
 
   useEffect(() => {
-    setIsOpen(initialIsOpen);
+    setWelcomeOpen(initialIsOpen);
   }, [initialIsOpen]);
 
-  return (
-    <Dialog
-      open={isOpen}
-      onOpenChange={setIsOpen}
-    >
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
-            Welcome to ResumeLM! 🎉
-          </DialogTitle>
-        </DialogHeader>
+  const handleDismiss = () => {
+    setWelcomeOpen(false);
+    clearOnboardingIntent();
+  };
 
-        <div className="pt-4 space-y-6">
-          <h3 className="font-medium text-foreground">Here&apos;s how to get started:</h3>
-          <div className="space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-teal-100 to-cyan-100 flex items-center justify-center">
-                <span className="text-sm font-semibold bg-gradient-to-br from-teal-600 to-cyan-600 bg-clip-text text-transparent">1</span>
-              </div>
-              <div className="flex-1 pt-1">
-                <p className="text-muted-foreground">Fill out your profile with your work experience, education, and skills</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-purple-100 to-indigo-100 flex items-center justify-center">
-                <span className="text-sm font-semibold bg-gradient-to-br from-purple-600 to-indigo-600 bg-clip-text text-transparent">2</span>
-              </div>
-              <div className="flex-1 pt-1">
-                <p className="text-muted-foreground">Create base resumes for different types of roles you&apos;re interested in</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-pink-100 to-rose-100 flex items-center justify-center">
-                <span className="text-sm font-semibold bg-gradient-to-br from-pink-600 to-rose-600 bg-clip-text text-transparent">3</span>
-              </div>
-              <div className="flex-1 pt-1">
-                <p className="text-muted-foreground">Use your base resumes to create tailored versions for specific job applications</p>
-              </div>
-            </div>
-          </div>
-          <div className="pt-2 space-y-2">
-            <Link href="/profile" prefetch={false}>
-              <Button className="w-full bg-gradient-to-r from-teal-600 to-cyan-600 text-white">
-                Start by Filling Your Profile
-              </Button>
-            </Link>
+  const handleStart = (mode: Extract<ResumeImportOption, "import-resume" | "scratch">) => {
+    setImportOption(mode);
+    setWelcomeOpen(false);
+    setResumeDialogOpen(true);
+    clearOnboardingIntent();
+    posthog?.capture(AnalyticsEvents.ResumeStartModeSelected, {
+      mode: mode === "import-resume" ? "import_resume" : "scratch",
+      source: "new_user_onboarding",
+    });
+  };
+
+  return (
+    <>
+      <Dialog
+        open={welcomeOpen}
+        onOpenChange={(nextOpen) => {
+          if (!nextOpen) handleDismiss();
+        }}
+      >
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 bg-clip-text text-transparent">
+              How do you want to start?
+            </DialogTitle>
+            <DialogDescription>
+              Get an editable resume first. You can fill out your profile later.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-3 pt-4 sm:grid-cols-2">
             <Button
+              type="button"
               variant="outline"
-              className="w-full"
-              onClick={() => setIsOpen(false)}
+              className="h-auto min-h-32 flex-col items-start justify-between gap-3 border-purple-200 p-4 text-left hover:border-purple-400 hover:bg-purple-50"
+              onClick={() => handleStart("import-resume")}
             >
-              I&apos;ll do this later
+              <Upload className="h-6 w-6 text-purple-600" />
+              <span>
+                <span className="block font-semibold text-gray-900">Import a resume</span>
+                <span className="mt-1 block text-xs font-normal text-gray-600">
+                  Upload a PDF or paste your resume text.
+                </span>
+              </span>
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              className="h-auto min-h-32 flex-col items-start justify-between gap-3 border-teal-200 p-4 text-left hover:border-teal-400 hover:bg-teal-50"
+              onClick={() => handleStart("scratch")}
+            >
+              <Wand2 className="h-6 w-6 text-teal-600" />
+              <span>
+                <span className="block font-semibold text-gray-900">Start from scratch</span>
+                <span className="mt-1 block text-xs font-normal text-gray-600">
+                  Choose a target role and build an empty resume.
+                </span>
+              </span>
             </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+
+          <Button type="button" variant="ghost" className="mt-2 w-full" onClick={handleDismiss}>
+            I&apos;ll do this later
+          </Button>
+        </DialogContent>
+      </Dialog>
+
+      <CreateBaseResumeDialog
+        key={importOption}
+        profile={profile}
+        open={resumeDialogOpen}
+        onOpenChange={setResumeDialogOpen}
+        initialImportOption={importOption}
+      />
+    </>
   );
 }

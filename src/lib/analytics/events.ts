@@ -5,6 +5,7 @@ export const AnalyticsEvents = {
   OAuthCompleted: "oauth_completed",
   SignupCompleted: "signup_completed",
   OnboardingCompleted: "onboarding_completed",
+  ResumeStartModeSelected: "resume_start_mode_selected",
   ProfileCreated: "profile_created",
   ProfileCompleted: "profile_completed",
   ResumeCreated: "resume_created",

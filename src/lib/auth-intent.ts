@@ -1,4 +1,5 @@
 export type AuthPlan = "free" | "pro";
+export const RESUME_ONBOARDING_PATH = "/home?onboarding=resume";
 
 export interface AuthIntent {
   next?: string;

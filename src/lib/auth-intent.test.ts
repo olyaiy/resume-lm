@@ -9,10 +9,12 @@ import {
   getAuthIntentFromSearchParams,
   getAuthRedirectPath,
   getSafeRedirectPath,
+  RESUME_ONBOARDING_PATH,
 } from "./auth-intent";
 
 test("only allows same-origin relative redirect paths", () => {
   assert.equal(getSafeRedirectPath("/subscription"), "/subscription");
+  assert.equal(getSafeRedirectPath(RESUME_ONBOARDING_PATH), RESUME_ONBOARDING_PATH);
   assert.equal(getSafeRedirectPath("/subscription?plan=pro"), "/subscription?plan=pro");
   assert.equal(getSafeRedirectPath("https://evil.example"), "/");
   assert.equal(getSafeRedirectPath("//evil.example"), "/");
