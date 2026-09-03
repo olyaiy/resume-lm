@@ -128,6 +128,7 @@ export async function generate(input: string, config?: AIConfig) {
            usageEventId,
            status: 'failed',
            errorCode: error instanceof Error ? error.message : 'stream_error',
+           error,
          });
        },
  

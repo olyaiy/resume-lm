@@ -287,6 +287,7 @@ export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps)
               <Button
                 onClick={handleRecalculate}
                 disabled={isCalculating}
+                data-analytics-id="editor-score-generate"
                 className="w-full sm:w-auto"
               >
                 <RefreshCw 
@@ -315,6 +316,7 @@ export default function ResumeScorePanel({ resume, job }: ResumeScorePanelProps)
         <Button
           onClick={handleRecalculate}
           disabled={isCalculating}
+          data-analytics-id="editor-score-recalculate"
           variant="outline"
           size="sm"
         >

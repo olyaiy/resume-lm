@@ -45,7 +45,7 @@ export function EditorPanel({
   const posthog = usePostHog();
 
   return (
-    <div className="flex flex-col sm:mr-4 relative h-full max-h-full  ">
+    <div className="flex flex-col sm:mr-4 relative h-full max-h-full" data-analytics-id="resume-editor-panel">
       <div className="flex-1 flex flex-col overflow-scroll">
         <ScrollArea className="flex-1 sm:pr-2" ref={scrollAreaRef}>
           <div className="relative pb-12">

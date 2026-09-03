@@ -8,6 +8,7 @@ import {
   AIProviderError,
   MODEL_UNAVAILABLE_MESSAGE,
   assertProviderCircuitClosed,
+  classifyAIError,
 } from "@/lib/ai/reliability";
 import { getDefaultModel } from "@/lib/ai-models";
 import { buildPostHogAITelemetry } from "@/lib/ai/posthog-telemetry";
@@ -44,6 +45,22 @@ export function getAIErrorCategory(errorCode?: string | null): string | null {
     return "provider_unavailable";
   }
   return "provider_error";
+}
+
+export function getAIRequestFailureProperties(input: {
+  errorCode?: string | null;
+  error?: unknown;
+}) {
+  const classification = input.error ? classifyAIError(input.error) : null;
+  const category =
+    classification?.kind ?? getAIErrorCategory(input.errorCode) ?? "provider_error";
+
+  return {
+    error_code: category,
+    error_category: category,
+    error_status_code: classification?.statusCode ?? null,
+    error_retryable: classification?.retryable ?? null,
+  } as const;
 }
 
 export class AIUsageError extends Error {
@@ -85,7 +102,7 @@ export async function recordAIUsageStarted(input: {
     throw error;
   }
 
-  await captureServerAnalyticsEvent({
+  void captureServerAnalyticsEvent({
     distinctId: input.userId,
     event: AnalyticsEvents.AIRequestStarted,
     properties: {
@@ -103,6 +120,7 @@ export async function recordAIUsageFinished(input: {
   id: string;
   status: AIUsageStatus;
   errorCode?: string;
+  error?: unknown;
   inputTokens?: number;
   outputTokens?: number;
   totalTokens?: number;
@@ -137,10 +155,15 @@ export async function recordAIUsageFinished(input: {
     input_tokens: data.input_tokens,
     output_tokens: data.output_tokens,
     total_tokens: data.total_tokens,
-    error_category: getAIErrorCategory(data.error_code),
+    ...(input.status === "succeeded"
+      ? {}
+      : getAIRequestFailureProperties({
+          errorCode: data.error_code,
+          error: input.error,
+        })),
   };
 
-  await captureServerAnalyticsEvent({
+  const analyticsCapture = captureServerAnalyticsEvent({
     distinctId: data.user_id,
     event: input.status === "succeeded"
       ? AnalyticsEvents.AIRequestSucceeded
@@ -148,28 +171,41 @@ export async function recordAIUsageFinished(input: {
     properties: analyticsProperties,
   });
 
+  // Successful requests should not wait for analytics delivery. Failure
+  // telemetry stays awaited because it is the diagnostic signal for the user
+  // experience that just failed.
   if (input.status === "succeeded") {
-    try {
-      const { count } = await supabase
-        .from("ai_usage_events")
-        .select("id", { count: "exact", head: true })
-        .eq("user_id", data.user_id)
-        .eq("status", "succeeded");
+    void analyticsCapture;
+  } else {
+    await analyticsCapture;
+  }
 
-      if (count === 1) {
-        await captureServerAnalyticsEvent({
-          distinctId: data.user_id,
-          event: AnalyticsEvents.FirstAIRequestSucceeded,
-          insertId: `${data.user_id}:${AnalyticsEvents.FirstAIRequestSucceeded}`,
-          properties: analyticsProperties,
+  if (input.status === "succeeded") {
+    // This secondary milestone must never add another database round trip to
+    // the user's AI response. It is best-effort analytics, not access control.
+    void (async () => {
+      try {
+        const { count } = await supabase
+          .from("ai_usage_events")
+          .select("id", { count: "exact", head: true })
+          .eq("user_id", data.user_id)
+          .eq("status", "succeeded");
+
+        if (count === 1) {
+          await captureServerAnalyticsEvent({
+            distinctId: data.user_id,
+            event: AnalyticsEvents.FirstAIRequestSucceeded,
+            insertId: `${data.user_id}:${AnalyticsEvents.FirstAIRequestSucceeded}`,
+            properties: analyticsProperties,
+          });
+        }
+      } catch (analyticsError) {
+        console.warn("Unable to determine first successful AI request", {
+          userId: data.user_id,
+          error: analyticsError instanceof Error ? analyticsError.message : "Unknown error",
         });
       }
-    } catch (analyticsError) {
-      console.warn("Unable to determine first successful AI request", {
-        userId: data.user_id,
-        error: analyticsError instanceof Error ? analyticsError.message : "Unknown error",
-      });
-    }
+    })();
   }
 }
 
@@ -190,11 +226,13 @@ export async function finishAIUsageRequest(input: {
   status: AIUsageStatus;
   usage?: LanguageModelUsage;
   errorCode?: string;
+  error?: unknown;
 }) {
   await recordAIUsageFinished({
     id: input.usageEventId,
     status: input.status,
     errorCode: input.errorCode,
+    error: input.error,
     ...usageFromLanguageModelUsage(input.usage),
   });
 }
@@ -234,6 +272,7 @@ export async function startAIUsageRequest(input: {
       id: usageEventId,
       status: "blocked",
       errorCode: error instanceof Error ? error.message : "access_denied",
+      error,
     });
 
     throw new AIUsageError(
@@ -267,6 +306,7 @@ export async function startAIUsageRequest(input: {
       id: usageEventId,
       status: "blocked",
       errorCode: error instanceof Error ? error.message : "provider_circuit_open",
+      error,
     });
 
     throw new AIUsageError(
@@ -294,6 +334,7 @@ export async function startAIUsageRequest(input: {
         id: usageEventId,
         status: "rate_limited",
         errorCode: error instanceof Error ? error.message : "rate_limit_exceeded",
+        error,
       });
 
       throw new AIUsageError(

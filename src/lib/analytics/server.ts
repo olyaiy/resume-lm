@@ -50,6 +50,7 @@ export async function captureServerAnalyticsEvent(input: {
   insertId?: string;
   properties?: AnalyticsProperties;
   context?: Partial<AnalyticsAttributionContext>;
+  identitySource?: string;
 }) {
   const distinctId = input.distinctId?.trim();
   if (!posthogKey || !distinctId) return;
@@ -80,7 +81,7 @@ export async function captureServerAnalyticsEvent(input: {
             ...getAnalyticsContextProperties(context),
             analytics_user_id: distinctId,
             capture_source: "server",
-            identity_source: "supabase_user_id",
+            identity_source: input.identitySource ?? "supabase_user_id",
           },
         })
       ),
