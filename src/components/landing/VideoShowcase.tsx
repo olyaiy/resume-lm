@@ -21,6 +21,7 @@ export function VideoShowcase() {
   const toggleFullscreen = () => {
     if (videoRef.current) {
       if (!document.fullscreenElement) {
+        if (typeof videoRef.current.requestFullscreen !== "function") return
         videoRef.current.requestFullscreen().catch(err => {
           console.error(`Error attempting to enable fullscreen: ${err.message}`)
         })
@@ -135,4 +136,4 @@ export function VideoShowcase() {
       </div>
     </section>
   )
-} 
+}
