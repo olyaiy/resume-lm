@@ -13,6 +13,7 @@ import {
     isBlockingCheckoutSubscription,
     isMatchingOpenCheckoutSession,
 } from "@/lib/stripe/checkout-guard";
+import { NEW_CHECKOUTS_ENABLED, SUNSET_CHECKOUT_MESSAGE } from "@/lib/sunset";
 
 let stripeClient: Stripe | null = null;
 
@@ -82,6 +83,10 @@ export const postStripeSession = async ({ priceId, includeTrial = false }: NewSe
     
     if (!authenticated || !user?.id || !user?.email) {
         throw new Error('User must be authenticated to create a checkout session');
+    }
+
+    if (!NEW_CHECKOUTS_ENABLED) {
+        return { kind: "error", message: SUNSET_CHECKOUT_MESSAGE };
     }
 
     try {

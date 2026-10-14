@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata } from "next";
 import { Toaster } from "sonner";
 import { SITE_URL } from "@/lib/site-config";
+import { SunsetBanner } from "@/components/shared/sunset-banner";
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
@@ -66,6 +67,7 @@ export default function RootLayout({
     <html lang="en">
       <body className="font-sans">
         {children}
+        <SunsetBanner />
         <Toaster
           richColors
           position="top-right"
