@@ -9,6 +9,9 @@ Run the complete ResumeLM stack locally using Docker Compose.
 cp .env.example .env.local
 # Edit .env.local and add OPENROUTER_API_KEY for ResumeLM's default models
 
+# Generate a unique JWT secret and matching Supabase keys (required)
+node scripts/generate-supabase-keys.mjs .env.local
+
 # 2. Start Docker services
 cd docker
 docker compose --env-file ../.env.local up
