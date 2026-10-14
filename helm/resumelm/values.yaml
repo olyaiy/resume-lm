@@ -25,14 +25,15 @@ global:
 # Secrets Configuration
 # =============================================================================
 secrets:
-  # JWT secret - must be at least 32 characters
-  jwtSecret: "your-super-secret-jwt-token-with-at-least-32-characters-long"
+  # REQUIRED: unique JWT secret (at least 32 characters). Generate with:
+  #   node scripts/generate-supabase-keys.mjs
+  # The chart refuses to render without it. Never reuse a published value.
+  jwtSecret: ""
   # Database password
   postgresPassword: "postgres-dev-password"
-  # Supabase API Keys (generated from JWT secret)
-  # These are the default demo keys - replace in production
-  anonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJhbm9uIiwKICAgICJpc3MiOiAic3VwYWJhc2UtZGVtbyIsCiAgICAiaWF0IjogMTY0MTc2OTIwMCwKICAgICJleHAiOiAxNzk5NTM1NjAwCn0.dc_X5iR_VP_qT0zsiyj_I_OZ2T9FtRU2BBNWN8Bu4GE"
-  serviceRoleKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyAgCiAgICAicm9sZSI6ICJzZXJ2aWNlX3JvbGUiLAogICAgImlzcyI6ICJzdXBhYmFzZS1kZW1vIiwKICAgICJpYXQiOiAxNjQxNzY5MjAwLAogICAgImV4cCI6IDE3OTk1MzU2MDAKfQ.DaYlNEoUrrEn2Ig7tqibS-PHK5vgusbcbo7X36XVt4Q"
+  # REQUIRED: Supabase API keys signed with jwtSecret (same script prints them)
+  anonKey: ""
+  serviceRoleKey: ""
   # Dashboard password for Supabase Studio
   dashboardPassword: "supabase"
   # Logflare API key
