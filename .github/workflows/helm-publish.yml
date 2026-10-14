@@ -32,8 +32,10 @@ jobs:
           version: 'v3.14.0'
       - name: Lint and template
         run: |
-          helm lint ${{ env.CHART_PATH }} --strict
-          helm template test ${{ env.CHART_PATH }} \
+          # Secrets are required by the chart; CI renders with throwaway placeholders.
+          CI_SECRETS="--set secrets.jwtSecret=ci-placeholder-not-a-real-secret-0000000000 --set secrets.anonKey=ci-placeholder --set secrets.serviceRoleKey=ci-placeholder"
+          helm lint ${{ env.CHART_PATH }} --strict $CI_SECRETS
+          helm template test ${{ env.CHART_PATH }} $CI_SECRETS \
             --set studio.enabled=true \
             --set meta.enabled=true \
             --set inbucket.enabled=true \
