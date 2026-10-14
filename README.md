@@ -6,16 +6,29 @@
 
 **🚀 An open-source AI resume builder for tech job applications**
 
-[![Live Demo](https://img.shields.io/badge/🌐_Live_Demo-resumelm.ca-blue?style=for-the-badge)](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)
+![Status: Sunset October 2026](https://img.shields.io/badge/Status-Sunset_Oct_2026-orange?style=for-the-badge)
 [![GitHub Stars](https://img.shields.io/github/stars/olyaiy/resume-lm?style=for-the-badge)](https://github.com/olyaiy/resume-lm/stargazers)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg?style=for-the-badge)](https://www.gnu.org/licenses/agpl-3.0)
 [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
 
 </div>
 
+> [!IMPORTANT]
+> **ResumeLM was sunset in October 2026.**
+>
+> - The hosted app at resumelm.ca shuts down on **October 31, 2026**. If you have an account, download any resumes you want to keep before then.
+> - Paid plans are closed and nobody will be charged again.
+> - The code stays here under AGPL-3.0. You are welcome to fork it, self-host it, and build on it (see [Installation & Setup](#-installation--setup)).
+> - This repository is archived and read-only, so there will be no further updates, and issues and pull requests are closed.
+>
+> Thank you to everyone who used ResumeLM, starred the repo, and contributed. 🙏
+
+> [!WARNING]
+> **Self-hosting with Docker or Helm?** Earlier versions shipped Supabase's public demo `JWT_SECRET`, `ANON_KEY`, and `SERVICE_ROLE_KEY` as fallbacks ([#90](https://github.com/olyaiy/resume-lm/issues/90)). Anyone who knows those values can forge admin tokens against your Supabase API. The fallbacks are removed and the stack now refuses to start without your own keys. If you deployed with the defaults, generate new ones with `node scripts/generate-supabase-keys.mjs` and rotate all three.
+
 ## 📊 Product facts
 
-ResumeLM is open source, self-hostable, and has a free plan that supports your own AI provider keys. Pro is $20/month and provides app-funded premium model access.
+ResumeLM is open source and self-hostable, and supports your own AI provider keys. The hosted version at resumelm.ca and its Pro plan were sunset in October 2026.
 
 ## 🎯 Why Choose ResumeLM?
 
@@ -57,11 +70,9 @@ ResumeLM is open source, self-hostable, and has a free plan that supports your o
 - Highlights your relevant achievements
 - Personalized for each opportunity
 
-## 🚀 Live Demo & Getting Started
+## 🚀 Getting Started
 
-**[Try ResumeLM](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)**
-
-Free plan available • Pro is $20/month • A payment method is required for the optional trial
+The hosted demo is being retired on October 31, 2026. To keep using ResumeLM, self-host it with the steps below.
 
 ## 🛠️ Complete Tech Stack
 
@@ -179,6 +190,9 @@ Run the complete stack locally with Docker Compose - includes Supabase, PostgreS
 cp .env.example .env.local
 # Edit .env.local and add OPENROUTER_API_KEY for ResumeLM's default models
 
+# Generate a unique JWT secret and matching Supabase keys (required)
+node scripts/generate-supabase-keys.mjs .env.local
+
 # 2. Start Docker services
 cd docker
 docker compose --env-file ../.env.local up -d
@@ -241,7 +255,7 @@ pnpm dev
 - ✅ **Modern Stack** - Latest technologies and best practices
 - ✅ **Extensible** - Easy to customize and extend
 - ✅ **Well Documented** - Comprehensive documentation
-- ✅ **Active Community** - Regular updates and support
+- ✅ **Forkable** - Archived, but free to fork and self-host under AGPL-3.0
 
 ## 🎯 SEO Keywords & Use Cases
 
@@ -261,51 +275,13 @@ pnpm dev
 - The free plan stores entered provider keys in the browser's local storage.
 - ATS behavior and interview outcomes vary by employer; the product does not guarantee a hiring result.
 
-## 🔮 Roadmap & Future Features
+## 🔮 Roadmap
 
-### Short Term (Q1 2025)
-- [ ] Enhanced AI tailoring algorithms
-- [ ] Additional resume templates and themes
-- [ ] Advanced PDF customization options
-- [ ] Job application tracking system
-
-### Long Term (2025)
-- [ ] LinkedIn integration and sync
-- [ ] Interview preparation tools
-- [ ] Salary negotiation guidance
-- [ ] Career path recommendations
-- [ ] Mobile app development
+ResumeLM is no longer in active development. Ideas that were on the list (LinkedIn sync, interview prep, more templates, a job tracker) are fair game for forks.
 
 ## 🤝 Contributing
 
-We welcome contributions from developers of all skill levels! Here's how you can help:
-
-### Ways to Contribute
-- 🐛 **Bug Reports** - Help us identify and fix issues
-- 💡 **Feature Requests** - Suggest new functionality
-- 🔧 **Code Contributions** - Submit pull requests
-- 📚 **Documentation** - Improve our guides and docs
-- 🎨 **Design** - Enhance UI/UX elements
-
-### Development Process
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-## 📞 Support & Community
-
-### Get Help
-- 📧 **Email Support** - Contact us for technical issues
-- 💬 **GitHub Discussions** - Community Q&A and feature requests
-- 🐛 **Issue Tracker** - Report bugs and technical problems
-- 📖 **Documentation** - Comprehensive guides and tutorials
-
-### Stay Updated
-- ⭐ **Star this repo** - Get notified of new releases
-- 👀 **Watch releases** - Stay informed about updates
-- 🐦 **Follow on social media** - Latest news and tips
+This repository is archived, so it no longer accepts issues or pull requests. To keep building on ResumeLM, fork it and take it wherever you like.
 
 ## 📄 License & Legal
 
@@ -329,9 +305,8 @@ For businesses requiring proprietary licenses or commercial support, please cont
 
 <div align="center">
 
-**Ready to land your dream job?**
+**Fork it, self-host it, make it yours.**
 
-[![Get Started](https://img.shields.io/badge/🚀_Get_Started-resumelm.ca-blue?style=for-the-badge&color=6366f1)](https://resumelm.ca/?utm_source=github&utm_medium=referral&utm_campaign=readme)
 [![View Source Code](https://img.shields.io/badge/📚_View_Source-GitHub-black?style=for-the-badge&logo=github)](https://github.com/olyaiy/resume-lm)
 
 **Built with ❤️ using Next.js**
